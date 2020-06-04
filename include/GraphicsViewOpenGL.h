@@ -7,16 +7,12 @@
 
 
 #include <QtWidgets/QOpenGLWidget>
-#include <QtGui/QOpenGLFunctions>
-
 #include <QWidget>
-
 #include <QGLWidget>
 #include <QtOpenGL>
-
 #include <QMatrix4x4>
 
-class GraphicsViewOpenGL: public QGLWidget{
+class GraphicsViewOpenGL: public QOpenGLWidget{
 public:
 
     GraphicsViewOpenGL();
@@ -26,7 +22,6 @@ public:
     bn_vlist * vp =0;
 
 protected:
-    void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
 

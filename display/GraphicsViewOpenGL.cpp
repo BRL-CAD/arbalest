@@ -16,57 +16,17 @@
 #include "GraphicsViewOpenGL.h"
 using namespace std;
 
-
-
-
-
-GraphicsViewOpenGL::GraphicsViewOpenGL() : QGLWidget() {
-
-}
-
-
-void GraphicsViewOpenGL::initializeGL() {
-
-}
+GraphicsViewOpenGL::GraphicsViewOpenGL() : QOpenGLWidget() {}
 
 
 void GraphicsViewOpenGL::resizeGL(int w, int h) {
-    /*
 
-    int WIDTH = 500;
-    int HEIGHT = 1024;
-    int width = w, height = h;
-    const float ar_origin = (float) WIDTH / (float) HEIGHT;
-    const float ar_new = (float) width / (float) height;
-
-    float scale_w = (float) width / (float) WIDTH;
-    float scale_h = (float) height / (float) HEIGHT;
-    if (ar_new > ar_origin) {
-        scale_w = scale_h;
-    } else {
-        scale_h = scale_w;
-    }
-
-    float margin_x = (width - WIDTH * scale_w) / 2;
-    float margin_y = (height - HEIGHT * scale_h) / 2;
-
-    glViewport(margin_x, margin_y, WIDTH * scale_w, HEIGHT * scale_h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, WIDTH / ar_origin, 0, HEIGHT / ar_origin, 0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;*/
 
 
     GLint mm;
 
     static double xlim_view = 1.0;    /* args for glOrtho*/
     static double ylim_view = 1.0;
-
-    //dmp->dm_aspect = (fastf_t) dmp->dm_width / (fastf_t) dmp->dm_height;
-
-
 
     glViewport(0, 0, w, h);
 
@@ -78,8 +38,6 @@ void GraphicsViewOpenGL::resizeGL(int w, int h) {
     glGetIntegerv(GL_MATRIX_MODE, &mm);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    //glOrtho(-w, w, -h, h, 0, 100000);
-    //glFrustum(-w, w, -h, h, 100, 2000);
     gluPerspective(30, 1.0, 20, 10000);
 
 
@@ -97,8 +55,6 @@ int h=0;
 void GraphicsViewOpenGL::ogl_drawVList() {
 
     if(vp==0)return;
-    //
-    //printf("%d\n", onn);
     struct bn_vlist *tvp;
     register int first;
     register int mflag = 1;
@@ -109,14 +65,10 @@ void GraphicsViewOpenGL::ogl_drawVList() {
     glGetFloatv(GL_POINT_SIZE, &originalPointSize);
     glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
 
-    //if (dmp->dm_debugLevel == 1)
-
-    /* Viewing region is from -1.0 to +1.0 */
     first = 1;
     int onn = 0;
     for (BU_LIST_FOR(tvp, bn_vlist, &vp->l)) {
         onn++;
-        //if(onn==1)continue;
         int i;
         int nused = tvp->nused;
         int *cmd = tvp->cmd;
@@ -124,9 +76,6 @@ void GraphicsViewOpenGL::ogl_drawVList() {
         for (i = 0; i < nused; i++, cmd++, pt++) {
             GLdouble dpt[3];
             VMOVE(dpt, *pt);
-/*
-	    if (dmp->dm_debugLevel > 2)
-		bu_log(" %d (%g %g %g)\n", *cmd, V3ARGS(dpt));*/
 
             switch (*cmd) {
                 case BN_VLIST_LINE_MOVE:
@@ -246,8 +195,6 @@ void  GraphicsViewOpenGL::setVlist(struct bn_vlist *vp){
 
 void GraphicsViewOpenGL::paintGL() {
 
-
-
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_COLOR_BUFFER_BIT);
 
@@ -269,11 +216,6 @@ void GraphicsViewOpenGL::paintGL() {
     glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
     glLineWidth((GLfloat) 3);
-    //glColor3f (1.0, 0.0, 0.0);
-
-
-
-
     glFlush();
 }
 

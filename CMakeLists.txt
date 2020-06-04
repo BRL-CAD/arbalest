@@ -2,27 +2,37 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(arbalest)
 
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(arbalest_Include_Dirs
+        "mainwindow"
+        "include"
+        ${BRLCAD_INCLUDE_DIRS})
 
-
-include_directories("mainwindow" "include"  ${CMAKE_BINARY_DIR} ${BRLCAD_INCLUDE_DIRS} ${BRLCAD_INCLUDE_DIR} ${RT3_SOURCE_DIR}/include/brlcad)
-
-find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
-
-add_executable(arbalest
+set(arbalest_Sources
         mainwindow/MainWindow.ui
         mainwindow/MainWindow.cpp
         main.cpp
         display/GraphicsViewOpenGL.cpp
         Globals.cpp
-        DatabaseManager.cpp
-        )
+        DatabaseManager.cpp)
 
+set(arbalest_Link_Libraries
+        coreinterface
+        Qt5::Widgets
+        Qt5::OpenGL
+        ${BRLCAD_NMG_LIBRARY}
+        ${BRLCAD_WDB_LIBRARY}
+        ${BRLCAD_RT_LIBRARY}
+        ${BRLCAD_BN_LIBRARY}
+        ${BRLCAD_BU_LIBRARY})
 
-qt5_use_modules(arbalest OpenGL)
+find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
-target_link_libraries(arbalest coreinterface  ${BRLCAD_NMG_LIBRARY} ${BRLCAD_WDB_LIBRARY} ${BRLCAD_RT_LIBRARY} ${BRLCAD_BN_LIBRARY} ${BRLCAD_BU_LIBRARY} ${OPENGL_LIBRARIES})
+file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
+qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
 
+include_directories(${arbalest_Include_Dirs})
+add_executable(arbalest ${arbalest_Sources} ${arbalest_PROCESSED_MOCS})
+target_link_libraries(arbalest ${arbalest_Link_Libraries})

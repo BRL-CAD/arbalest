@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include "../include/Globals.h"
 #include "ui_mainwindow.h"
-#include "../display/GraphicsViewOpenGL.h"
+#include "GraphicsViewOpenGL.h"
 #include "../display/DisplayService.cpp"
 
 
@@ -35,7 +35,7 @@ void MainWindow::openFile()
     gv->vp=DisplayService::getVList(Globals::databaseManager.getDatabase(currentDatabaseIndex));
     gv->update();
 
-    for(std::string item :Globals::databaseManager.getObjectsList(currentDatabaseIndex)){
+    for(const std::string& item :Globals::databaseManager.getObjectsList(currentDatabaseIndex)){
         ui->objectsTree->addItem( QString::fromStdString(item));
     }
 }
