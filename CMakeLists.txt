@@ -15,6 +15,7 @@ set(arbalest_Sources
         mainwindow/MainWindow.cpp
         main.cpp
         display/GraphicsViewOpenGL.cpp
+        GeometryOperationsManager.cpp
         Globals.cpp
         DatabaseManager.cpp)
 

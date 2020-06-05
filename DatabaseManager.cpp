@@ -6,11 +6,15 @@ int DatabaseManager::addNewDatabase(const char *filePath) {
     auto  database =  new BRLCAD::MemoryDatabase();
     database->Load(filePath);
     databases[++lastDatabaseIndex] = database;
+    geometryOperationsManagers[lastDatabaseIndex] = new GeometryOperationsManager(database);
     return lastDatabaseIndex;
 }
 
 BRLCAD::MemoryDatabase *DatabaseManager::getDatabase(int index) {
     return databases[index];
+}
+GeometryOperationsManager *DatabaseManager::getGeometryOperationsManager(int index) {
+    return geometryOperationsManagers[index];
 }
 
 std::vector<std::string> DatabaseManager::getObjectsList(int index) {

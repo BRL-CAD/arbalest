@@ -18,7 +18,6 @@ public:
     GraphicsViewOpenGL();
     void  setVlist(struct bn_vlist *vp);
     void ogl_drawVList();
-
     bn_vlist * vp =0;
 
 protected:

@@ -194,7 +194,6 @@ void  GraphicsViewOpenGL::setVlist(struct bn_vlist *vp){
 }
 
 void GraphicsViewOpenGL::paintGL() {
-
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_COLOR_BUFFER_BIT);
 
@@ -224,6 +223,7 @@ void GraphicsViewOpenGL::paintGL() {
 void GraphicsViewOpenGL::keyPressEvent( QKeyEvent *k )
 {
 
+    makeCurrent();
 
     if(vp==0)return;
     GLfloat matrix[16];
@@ -244,56 +244,45 @@ void GraphicsViewOpenGL::keyPressEvent( QKeyEvent *k )
     switch ( k->key() )
     {
         case Qt::Key_Up:
-
-            qDebug() << "UP";
-
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(0,-am,0);
 
 
             break;
         case Qt::Key_Down:
-            qDebug() << "DOWN";
-
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(0,am,0);
             break;
         case Qt::Key_Left:
-            qDebug() << "LEFT";
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(am,0,0);
             break;
         case Qt::Key_Right:
-            qDebug() << "RIGHT";
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(-am,0,0);
             break;
 
 
         case Qt::Key_A:
-            qDebug() << "LEFT";
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(DOF[0]*am*0,DOF[1]*am*0,DOF[2]*am);
             break;
         case Qt::Key_Z:
-            qDebug() << "RIGHT";
+            qDebug() << "Z";
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(-DOF[0]*am*0,-DOF[1]*am*0,-DOF[2]*am);
             break;
 
         case Qt::Key_Q:
-            qDebug() << "RIGHT";
             glMatrixMode(GL_PROJECTION);
             glRotatef(-3, 0,1,0);
             break;
 
         case Qt::Key_E:
-            qDebug() << "RIGHT";
             glMatrixMode(GL_PROJECTION);
             glRotatef(3, 0,1,0);
             break;
         default:
-            qDebug() << k->key() << endl;
             break;
     }
 

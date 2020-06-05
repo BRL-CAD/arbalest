@@ -1,3 +1,3 @@
-#include "include/Globals.h"
+#include <ArbalestGlobals.h>
 
-DatabaseManager Globals::databaseManager;
+DatabaseManager ArbalestGlobals::databaseManager;

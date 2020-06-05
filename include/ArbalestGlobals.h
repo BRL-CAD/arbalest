@@ -3,7 +3,7 @@
 
 #include <DatabaseManager.h>
 
-class Globals{
+class ArbalestGlobals{
 public:
     static DatabaseManager databaseManager;
 };

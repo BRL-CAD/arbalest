@@ -1,6 +1,6 @@
 #include <QtWidgets/QFileDialog>
 #include "MainWindow.h"
-#include "../include/Globals.h"
+#include <ArbalestGlobals.h>
 #include "ui_mainwindow.h"
 #include "GraphicsViewOpenGL.h"
 #include "../display/DisplayService.cpp"
@@ -30,17 +30,20 @@ MainWindow::~MainWindow()
 void MainWindow::openFile()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    currentDatabaseIndex = Globals::databaseManager.addNewDatabase(filePath.toUtf8().data());
-
-    gv->vp=DisplayService::getVList(Globals::databaseManager.getDatabase(currentDatabaseIndex));
+    currentDatabaseIndex = ArbalestGlobals::databaseManager.addNewDatabase(filePath.toUtf8().data());
+    auto gom = ArbalestGlobals::databaseManager.getGeometryOperationsManager(currentDatabaseIndex);
+    printf("s");
+    gom->createSphere();
+    printf("g");
+    gv->vp=DisplayService::getVList(ArbalestGlobals::databaseManager.getDatabase(currentDatabaseIndex));
     gv->update();
 
-    for(const std::string& item :Globals::databaseManager.getObjectsList(currentDatabaseIndex)){
+    for(const std::string& item :ArbalestGlobals::databaseManager.getObjectsList(currentDatabaseIndex)){
         ui->objectsTree->addItem( QString::fromStdString(item));
     }
 }
 
 void MainWindow::saveAsFile(){
     QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    Globals::databaseManager.getDatabase(0)->Save(filePath.toUtf8().data());
+    ArbalestGlobals::databaseManager.getDatabase(0)->Save(filePath.toUtf8().data());
 }
