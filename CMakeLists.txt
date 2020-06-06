@@ -16,7 +16,7 @@ set(arbalest_Sources
         main.cpp
         display/GraphicsViewOpenGL.cpp
         GeometryOperationsManager.cpp
-        Globals.cpp
+        ArbalestGlobals.cpp
         DatabaseManager.cpp)
 
 set(arbalest_Link_Libraries
