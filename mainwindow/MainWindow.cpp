@@ -1,7 +1,7 @@
 #include <QtWidgets/QFileDialog>
 #include "MainWindow.h"
 #include <ArbalestGlobals.h>
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "GraphicsViewOpenGL.h"
 #include "../display/DisplayService.cpp"
 
