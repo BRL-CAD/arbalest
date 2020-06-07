@@ -27,9 +27,12 @@ set(arbalest_Link_Libraries
         ${BRLCAD_WDB_LIBRARY}
         ${BRLCAD_RT_LIBRARY}
         ${BRLCAD_BN_LIBRARY}
-        ${BRLCAD_BU_LIBRARY})
+        ${BRLCAD_BU_LIBRARY}
+        OpenGL::GL
+        OpenGL::GLU)
 
 find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+find_package(OpenGL REQUIRED)
 
 file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
 qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
