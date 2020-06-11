@@ -1,3 +1,4 @@
 #include <ArbalestGlobals.h>
+#include <Document.h>
 
-DatabaseManager ArbalestGlobals::databaseManager;
+std::vector<Document*> ArbalestGlobals::documents;

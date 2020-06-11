@@ -1,11 +1,11 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include <DatabaseManager.h>
+#include "Document.h"
 
 class ArbalestGlobals{
 public:
-    static DatabaseManager databaseManager;
+    static std::vector<Document*> documents;
 };
 
 

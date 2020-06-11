@@ -11,5 +11,11 @@ void GeometryOperationsManager::createSphere(){
     ellipsoid.SetName("Newly created sphere 42");
     m_database->Add(ellipsoid);
 
+
+    Ellipsoid ellipsoid2;
+    ellipsoid2.SetSphere(Vector3D(0,0,0),300);
+    ellipsoid2.SetName("Newly created sphere 42");
+    m_database->Add(ellipsoid2);
+
 }
 

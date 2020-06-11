@@ -8,28 +8,32 @@ set(CMAKE_AUTOUIC ON)
 set(arbalest_Include_Dirs
         "mainwindow"
         "include"
+        "dependancies/glm/"
         ${BRLCAD_INCLUDE_DIRS})
 
 set(arbalest_Sources
         mainwindow/MainWindow.ui
         mainwindow/MainWindow.cpp
         main.cpp
+        Document.cpp
+        Display/Camera.cpp
+        Display/Display.cpp
         display/GraphicsViewOpenGL.cpp
         GeometryOperationsManager.cpp
-        ArbalestGlobals.cpp
-        DatabaseManager.cpp)
+        ArbalestGlobals.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface
         Qt5::Widgets
         Qt5::OpenGL
+        Qt5::Gui
         ${BRLCAD_NMG_LIBRARY}
         ${BRLCAD_WDB_LIBRARY}
         ${BRLCAD_RT_LIBRARY}
         ${BRLCAD_BN_LIBRARY}
         ${BRLCAD_BU_LIBRARY})
 
-find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Gui OpenGL REQUIRED)
 
 file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
 qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)

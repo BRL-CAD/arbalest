@@ -12,7 +12,6 @@
 #include <iostream>
 #include <vmath.h>
 #include <bn.h>
-#include <thread>
 #include "GraphicsViewOpenGL.h"
 using namespace std;
 
@@ -20,44 +19,24 @@ GraphicsViewOpenGL::GraphicsViewOpenGL() : QOpenGLWidget() {}
 
 
 void GraphicsViewOpenGL::resizeGL(int w, int h) {
-
-
-
     GLint mm;
-
     static double xlim_view = 1.0;    /* args for glOrtho*/
     static double ylim_view = 1.0;
-
     glViewport(0, 0, w, h);
-
     glClearColor(0.0,0.0,0.0, 0.0);
-
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glGetIntegerv(GL_MATRIX_MODE, &mm);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(30, 1.0, 20, 10000);
-
-
     glTranslatef(-59*100*0,0,0);
-
-
-    if(vp==0)return;
-
-
 }
-
-int h=0;
-
 
 void GraphicsViewOpenGL::ogl_drawVList() {
 
     if(vp==0)return;
     struct bn_vlist *tvp;
-    register int first;
-    register int mflag = 1;
+    int first;
     static float black[4] = {0.0, 0.0, 0.0, 0.0};
     GLfloat originalPointSize, originalLineWidth;
     GLfloat m[16];
@@ -85,7 +64,6 @@ void GraphicsViewOpenGL::ogl_drawVList() {
                     first = 0;
 
                     if (true) {
-                        mflag = 0;
                         float wireColor[4]={.5,.2,.7,.5};
                         glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, wireColor);
                         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
@@ -133,8 +111,8 @@ void GraphicsViewOpenGL::ogl_drawVList() {
                 case BN_VLIST_LINE_DRAW:
                 case BN_VLIST_POLY_MOVE:
                 case BN_VLIST_POLY_DRAW:
-                case BN_VLIST_TRI_MOVE:
-                case BN_VLIST_TRI_DRAW:
+                case BN_VLIST_TRI_MOVE :
+                case BN_VLIST_TRI_DRAW :
                     glVertex3dv(dpt);
                     break;
                 case BN_VLIST_POLY_END:
@@ -184,21 +162,14 @@ void GraphicsViewOpenGL::ogl_drawVList() {
     glPointSize(originalPointSize);
     glLineWidth(originalLineWidth);
 
-
-    cout<<onn<<endl;
 }
 
-void  GraphicsViewOpenGL::setVlist(struct bn_vlist *vp){
-
-
-}
 
 void GraphicsViewOpenGL::paintGL() {
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_COLOR_BUFFER_BIT);
 
     if(vp==0)return;
-
     glMatrixMode(GL_MODELVIEW);
     int z=-0, y= -0;
     glTranslatef(0,y,z);
@@ -268,7 +239,6 @@ void GraphicsViewOpenGL::keyPressEvent( QKeyEvent *k )
             glTranslatef(DOF[0]*am*0,DOF[1]*am*0,DOF[2]*am);
             break;
         case Qt::Key_Z:
-            qDebug() << "Z";
             glMatrixMode(GL_MODELVIEW);
             glTranslatef(-DOF[0]*am*0,-DOF[1]*am*0,-DOF[2]*am);
             break;
