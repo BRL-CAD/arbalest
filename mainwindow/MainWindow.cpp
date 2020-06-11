@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include <ArbalestGlobals.h>
 #include <Display.h>
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "GraphicsViewOpenGL.h"
 #include "../display/DisplayService.cpp"
 
@@ -53,5 +53,5 @@ void MainWindow::openFile()
 
 void MainWindow::saveAsFile(){
     QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-
+    //ArbalestGlobals::databaseManager.getDatabase(0)->Save(filePath.toUtf8().data());
 }
