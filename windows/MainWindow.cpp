@@ -4,7 +4,6 @@
 #include <Display.h>
 #include "ui_MainWindow.h"
 #include "GraphicsViewOpenGL.h"
-#include "../display/DisplayService.cpp"
 
 using namespace BRLCAD;
 
@@ -26,7 +25,9 @@ MainWindow::~MainWindow()
 void MainWindow::openFile()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-
+//    for(const std::string& item :ArbalestGlobals::databaseManager.getObjectsList(currentDatabaseIndex)){
+//        ui->objectsTree->addItem( QString::fromStdString(item));
+//    }
     auto doc = Document(filePath.toUtf8().data());
 
     ui->documentArea->addSubWindow(doc.getDisplay());
