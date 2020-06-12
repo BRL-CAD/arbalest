@@ -1,8 +1,0 @@
-Updating '.':
-G    include\brlcad\ConstDatabase.h
-A    include\brlcad\VectorList.h
-U    src\coreInterface\CMakeLists.txt
-U    src\coreInterface\ConstDatabase.cpp
-A    src\coreInterface\VectorList.cpp
-U    tests\coreInterface\pipe.cpp
-Updated to revision 76038.

@@ -31,23 +31,6 @@ void MainWindow::openFile()
 
     ui->documentArea->addSubWindow(doc.getDisplay());
 
-//    currentDatabaseIndex = ArbalestGlobals::databaseManager.addNewDatabase(filePath.toUtf8().data());
-//    auto gom = ArbalestGlobals::databaseManager.getGeometryOperationsManager(currentDatabaseIndex);
-//    gom->createSphere();
-//    //gv->vp=DisplayService::getVList(ArbalestGlobals::databaseManager.getDatabase(currentDatabaseIndex));
-//    gv->update();
-//
-//    for(const std::string& item :ArbalestGlobals::databaseManager.getObjectsList(currentDatabaseIndex)){
-//        ui->objectsTree->addItem( QString::fromStdString(item));
-//    }
-//
-//    auto h = ArbalestGlobals::databaseManager.getVectorLists(currentDatabaseIndex);
-//    std::string g = "sph";
-//    auto m = h[g];
-//    auto j = m[3];
-//    int t;
-//    t++;
-
 }
 
 
