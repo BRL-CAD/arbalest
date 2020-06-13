@@ -17,7 +17,7 @@ public:
         perspective
     };
 
-    Projection projection = perspective;
+    Projection projection = orthographic;
 
     Camera();
 
@@ -28,11 +28,11 @@ public:
     glm::vec3 eyePosition = glm::vec3(0,-10,-10); // Camera coordinates
     float angleAroundY = 0, angleAroundX = 45; // Camera direction in degrees
 
-    float nearPlane = .01f, farPlane = 2000000.0f; // For perspective projection
+    float nearPlane = .01f, farPlane = 2000000.0f;
 
     float fov=60; // Field of view (angle from Display bottom to top) in degrees
 
-    float zoom=60; // Field of view (angle from Display bottom to top) in degrees
+    float zoom=600; // zoom level for orthographic
 
     float eyeMovementPerWheelAngle = .1f; // move forward/backward when wheel rotate
     float eyeMovementPerMouseMove = .025f; // move right/left and up/down (relative to current rotation) when mouse drag

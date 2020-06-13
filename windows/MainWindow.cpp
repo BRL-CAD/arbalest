@@ -40,6 +40,8 @@ void MainWindow::openFile()
 
     subWindow->setWidget(doc.getDisplay());
 
+    doc.getDisplay()->focusWidget();
+
 }
 
 

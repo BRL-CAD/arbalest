@@ -21,13 +21,13 @@
        <bool>false</bool>
       </property>
       <property name="viewMode">
-       <enum>QMdiArea::TabbedView</enum>
+       <enum>QMdiArea::SubWindowView</enum>
       </property>
       <property name="documentMode">
        <bool>false</bool>
       </property>
       <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
+       <enum>QTabWidget::Triangular</enum>
       </property>
      </widget>
     </item>

@@ -16,9 +16,25 @@
 #define BLUE 0.0, 0.0, 1.0
 #define BG_COLOR .2,.2,.2,1
 #define GRID_COLOR .5,.5,.5
+#define GRID_LINE_LENGTH 100000
 
 void GridRenderer::render() {
 
+    glBegin(GL_LINES);
+    glColor3f(0,1,0);
+    glVertex3f(0, GRID_LINE_LENGTH, 0);
+    glVertex3f(0, -GRID_LINE_LENGTH, 0);
+
+    glColor3f(0,0,1);
+    glVertex3f(0, 0, GRID_LINE_LENGTH);
+    glVertex3f(0, 0, -GRID_LINE_LENGTH);
+
+    glColor3f(1,0,0);
+    glVertex3f( GRID_LINE_LENGTH, 0,0);
+    glVertex3f( -GRID_LINE_LENGTH, 0,0);
+    glEnd();
+
+    return;
     glLineWidth(DEFAULT_LINE_WIDTH);
     glColor3f(GRID_COLOR);
 //glEnable(GL_LINE_SMOOTH);
@@ -40,8 +56,5 @@ void GridRenderer::render() {
         glEnd();
     }
 
-    glBegin(GL_LINES);
-    glVertex3f(0, 1000, 0);
-    glVertex3f(0, -1000, 0);
-    glEnd();
+
 }
