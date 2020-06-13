@@ -109,9 +109,7 @@ void Display::paintGL() {
 //
 //    glEnd(); // of the color cube
 
-    cout<<endl<<"Rendering----------------------------------------------------"<<endl;
     for(auto vl: vectorLists){
-        cout<<"vl"<<endl;
         VectorListRenderer::render(vl,this);
     }
 }

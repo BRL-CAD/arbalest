@@ -76,6 +76,17 @@ void VectorListRenderer::render(BRLCAD::VectorList *vectorList, Display * displa
 
     lol = 0;
     vectorList->Iterate(elementOpenGL);
+
+    if (first == 0)
+        glEnd();
+
+    if (dm_light && dm_transparency)
+        glDisable(GL_BLEND);
+
+    glPointSize(originalPointSize);
+    glLineWidth(originalLineWidth);
+
+    //glEnd();
     //std::cout<<lol<<std::endl;
 
     bn_vlist* chunk;
@@ -91,13 +102,8 @@ void VectorListRenderer::render(BRLCAD::VectorList *vectorList, Display * displa
 
 
 bool VectorListRenderer::Callback::operator()(BRLCAD::VectorList::Element *element) {
-    //if (!element) return true;
-    assert(element);
-    lol++;
-    //return true;
-    std::cout<<element->Type()<<std::endl;
-    int loli = lol;
-    int k = element->Type();
+    if (!element) return true;
+
     switch (element->Type()) {
 
         case BRLCAD::VectorList::Element::LineDraw:{
