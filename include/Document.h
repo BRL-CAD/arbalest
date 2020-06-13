@@ -20,7 +20,7 @@ public:
     Display *getDisplay() const;
     explicit Document(const char *filePath);
     std::vector<std::string> getObjectsList();
-    std::map<std::string, std::vector<BRLCAD::VectorList::Element *>> getVectorLists();
+    void buildVectorList();
 };
 
 

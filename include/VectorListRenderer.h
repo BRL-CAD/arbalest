@@ -10,10 +10,10 @@
 
 class VectorListRenderer {
 public:
-    static void render(BRLCAD::VectorList * vectorList);
+    static void render(BRLCAD::VectorList * vectorList,Display* display);
 
 private:
-    class Callback : public BRLCAD::VectorList::ConstElementCallback {
+    class Callback : public BRLCAD::VectorList::ElementCallback {
         bool operator()(BRLCAD::VectorList::Element* element) override ;
     };
 };

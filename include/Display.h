@@ -8,6 +8,7 @@
 #include <QtWidgets/QOpenGLWidget>
 #include "Camera.h"
 #include <QMouseEvent>
+#include <brlcad/VectorList.h>
 
 class Display : public QOpenGLWidget{
 
@@ -15,6 +16,9 @@ public:
     Display();
     Camera *camera;
     void refresh();
+    int getW() const;
+    int getH() const;
+    std::vector<BRLCAD::VectorList *> &getVectorLists();
 
 protected:
     void resizeGL(int w, int h) override;
@@ -26,10 +30,13 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *k) override ;
 
+
 private:
+    int w,h;
     int prevMouseX = -1,  prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
+    std::vector<BRLCAD::VectorList *> vectorLists;
 
 };
 

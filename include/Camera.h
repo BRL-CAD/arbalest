@@ -20,8 +20,8 @@ public:
     void setWH(float w, float h);
 
 
-    glm::vec3 eyePosition = glm::vec3(0,-50,-50); // Camera coordinates
-    float angleAroundY = 0, angleAroundX = 0; // Camera direction in degrees
+    glm::vec3 eyePosition = glm::vec3(0,-10,-10); // Camera coordinates
+    float angleAroundY = 0, angleAroundX = 45; // Camera direction in degrees
 
     float nearPlane = .01, farPlane = 2000000.0f; // For perspective projection
 

@@ -5,6 +5,7 @@
 #include "Display.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <QCursor>
+#include "VectorListRenderer.h"
 #define DEFAULT_LINE_WIDTH 0.1
 #define RED 1.0, 0.0, 0.0
 #define GREEN 0.0, 1.0, 0.0
@@ -21,6 +22,8 @@ Display::Display() {
 
 void Display::resizeGL(int w, int h) {
     camera->setWH(w,h);
+    this->w = w;
+    this->h = h;
 }
 
 void Display::paintGL() {
@@ -53,54 +56,64 @@ void Display::paintGL() {
         glEnd();
     }
 
+    glBegin(GL_LINES);
+    glVertex3f(0, 1000, 0);
+    glVertex3f(0, -1000, 0);
+    glEnd();
 
+//
+//
+//    glBegin(GL_QUADS); // of the color cube
+//
+//    // Top-face
+//    glColor3f(0.0f, 1.0f, 0.0f); // green
+//    glVertex3f(1.0f, 1.0f, -1.0f);
+//    glVertex3f(-1.0f, 1.0f, -1.0f);
+//    glVertex3f(-1.0f, 1.0f, 1.0f);
+//    glVertex3f(1.0f, 1.0f, 1.0f);
+//
+//    // Bottom-face
+//    glColor3f(1.0f, 0.5f, 0.0f); // orange
+//    glVertex3f(1.0f, -1.0f, 1.0f);
+//    glVertex3f(-1.0f, -1.0f, 1.0f);
+//    glVertex3f(-1.0f, -1.0f, -1.0f);
+//    glVertex3f(1.0f, -1.0f, -1.0f);
+//
+//    // Front-face
+//    glColor3f(1.0f, 0.0f, 0.0f); // red
+//    glVertex3f(1.0f, 1.0f, 1.0f);
+//    glVertex3f(-1.0f, 1.0f, 1.0f);
+//    glVertex3f(-1.0f, -1.0f, 1.0f);
+//    glVertex3f(1.0f, -1.0f, 1.0f);
+//
+//    // Back-face
+//    glColor3f(1.0f, 1.0f, 0.0f); // yellow
+//    glVertex3f(1.0f, -1.0f, -1.0f);
+//    glVertex3f(-1.0f, -1.0f, -1.0f);
+//    glVertex3f(-1.0f, 1.0f, -1.0f);
+//    glVertex3f(1.0f, 1.0f, -1.0f);
+//
+//    // Left-face
+//    glColor3f(0.0f, 0.0f, 1.0f); // blue
+//    glVertex3f(-1.0f, 1.0f, 1.0f);
+//    glVertex3f(-1.0f, 1.0f, -1.0f);
+//    glVertex3f(-1.0f, -1.0f, -1.0f);
+//    glVertex3f(-1.0f, -1.0f, 1.0f);
+//
+//    // Right-face
+//    glColor3f(1.0f, 0.0f, 1.0f); // magenta
+//    glVertex3f(1.0f, 1.0f, -1.0f);
+//    glVertex3f(1.0f, 1.0f, 1.0f);
+//    glVertex3f(1.0f, -1.0f, 1.0f);
+//    glVertex3f(1.0f, -1.0f, -1.0f);
+//
+//    glEnd(); // of the color cube
 
-    glBegin(GL_QUADS); // of the color cube
-
-    // Top-face
-    glColor3f(0.0f, 1.0f, 0.0f); // green
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-
-    // Bottom-face
-    glColor3f(1.0f, 0.5f, 0.0f); // orange
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    // Front-face
-    glColor3f(1.0f, 0.0f, 0.0f); // red
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-
-    // Back-face
-    glColor3f(1.0f, 1.0f, 0.0f); // yellow
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-
-    // Left-face
-    glColor3f(0.0f, 0.0f, 1.0f); // blue
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-
-    // Right-face
-    glColor3f(1.0f, 0.0f, 1.0f); // magenta
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    glEnd(); // of the color cube
-
+    cout<<endl<<"Rendering----------------------------------------------------"<<endl;
+    for(auto vl: vectorLists){
+        cout<<"vl"<<endl;
+        VectorListRenderer::render(vl,this);
+    }
 }
 
 void Display::refresh() {
@@ -206,3 +219,14 @@ void Display::keyPressEvent( QKeyEvent *k ) {
     }
 }
 
+int Display::getW() const {
+    return w;
+}
+
+int Display::getH() const {
+    return h;
+}
+
+std::vector<BRLCAD::VectorList *> &Display::getVectorLists() {
+    return vectorLists;
+}

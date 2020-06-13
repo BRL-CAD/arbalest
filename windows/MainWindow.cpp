@@ -24,10 +24,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::openFile()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    //QString filePath = QFileDialog::getOpenFileName(this, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    QString filePath = "C:/summer/rt3/cmake-build-debug-visual-studio/bin/sph.g";
 //    for(const std::string& item :ArbalestGlobals::databaseManager.getObjectsList(currentDatabaseIndex)){
 //        ui->objectsTree->addItem( QString::fromStdString(item));
 //    }
+
     auto doc = Document(filePath.toUtf8().data());
 
     ui->documentArea->addSubWindow(doc.getDisplay());

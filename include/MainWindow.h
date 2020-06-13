@@ -17,8 +17,6 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    int currentDatabaseIndex=-1;
-
     void openFile();
     void saveAsFile();
 };

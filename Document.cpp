@@ -4,6 +4,12 @@
 
 #include <Document.h>
 #include <ArbalestGlobals.h>
+//#include <VectorListRenderer.h>
+#include "rt/vlist.h"
+#include <brlcad/cicommon.h>
+#include <brlcad/Object.h>
+#include <iostream>
+#include <brlcad/bn/vlist.h>
 
 Document::Document(const char *filePath) {
     database =  new BRLCAD::MemoryDatabase();
@@ -13,6 +19,10 @@ Document::Document(const char *filePath) {
     geometryOperationsManager = new GeometryOperationsManager(database);
 
     ArbalestGlobals::documents.push_back(this);
+
+    buildVectorList();
+
+    display->refresh();
 }
 
 
@@ -27,28 +37,16 @@ std::vector<std::string> Document::getObjectsList() {
     return list;
 }
 
-std::vector<BRLCAD::VectorList::Element*> list;
-std::map<std::string,std::vector<BRLCAD::VectorList::Element*>> Document::getVectorLists(){
-    std::map<std::string,std::vector<BRLCAD::VectorList::Element*>> lists;
-
+void Document::buildVectorList(){
+    display->getVectorLists().clear();
     for (const auto& objectName: getObjectsList()) {
-        VectorList vl;
-        database->Plot(objectName.c_str(), vl);
+        VectorList * vl = new VectorList();
+        database->Plot(objectName.c_str(), *vl);
+        display->getVectorLists().push_back(vl);
 
-        class Callback : public BRLCAD::VectorList::ElementCallback {
-            bool operator()(BRLCAD::VectorList::Element *element) override {
-                list.push_back(element);
-                return true;
-            }
-        };
 
-        Callback b;
-
-        list.clear();
-        vl.Iterate(b);
-        lists[objectName] = list;
     }
-    return lists;
+
 }
 
 GeometryOperationsManager *Document::getGeometryOperationsManager() const {
