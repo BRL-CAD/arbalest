@@ -6,51 +6,21 @@
 #endif
 
 #include <gl/GL.h>
-#include <Display.h>
 #include <brlcad/bn/vlist.h>
 #include "VectorListRenderer.h"
 #include "vmath.h"
-#include <iostream>
 using namespace std;
 
-int dm_light = 0;			/**< @brief !0 means lighting on */
-bool dm_transparency = false;		/**< @brief !0 means transparency on */
+void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
 
-
-
-int	first;
-int mflag = 1;
-GLfloat originalPointSize, originalLineWidth;
-GLdouble m[16];
-GLdouble mt[16];
-GLdouble tlate[3];
-//GLdouble glpt[3];
-
-float black[4] = {0.0, 0.0, 0.0, 0.0};
-
-float wireColor[4] = {.9,.5,.8,1};
-float diffuseColor[4];
-float  ambientColor[4];
-float  specularColor[4];
-float  backDiffuseColorDark[4];
-float backDiffuseColorLight[4];
-
-
-Display *activeDisplay;
-
-
-int lol;
-void VectorListRenderer::render(BRLCAD::VectorList *vectorList, Display * display) {
-
-    activeDisplay = display;
-    //display->makeCurrent();
+    this->w = w;
+    this->h = h;
 
     mflag = 1;
-    memset(black, 0.0f, sizeof(black));
-    glGetFloatv(GL_POINT_SIZE, &originalPointSize);
-    glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
     first = 1;
 
+    glGetFloatv(GL_POINT_SIZE, &originalPointSize);
+    glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
 
     diffuseColor[0] = wireColor[0] * 0.6;
     diffuseColor[1] = wireColor[1] * 0.6;
@@ -72,36 +42,17 @@ void VectorListRenderer::render(BRLCAD::VectorList *vectorList, Display * displa
     backDiffuseColorDark[2] = wireColor[2] * 0.9;
     backDiffuseColorDark[3] = wireColor[3];
 
-    Callback elementOpenGL;
+    vectorList->Iterate(*this);
 
-    lol = 0;
-    vectorList->Iterate(elementOpenGL);
-
-    if (first == 0)
-        glEnd();
-
-    if (dm_light && dm_transparency)
-        glDisable(GL_BLEND);
-
+    if (first == 0) glEnd();
+    if (dm_light && dm_transparency)  glDisable(GL_BLEND);
     glPointSize(originalPointSize);
     glLineWidth(originalLineWidth);
-
-    //glEnd();
-    //std::cout<<lol<<std::endl;
-
-    bn_vlist* chunk;
-    int l = 0;
-    for (BU_LIST_FOR(chunk, bn_vlist, vectorList->m_vlist))
-        for (size_t i = 0; i < chunk->nused; ++i)
-            //std::cout<<(chunk->nused)<<std::endl;
-            l++;
-    //std::cout<<l<<std::endl;
-
 }
 
 
 
-bool VectorListRenderer::Callback::operator()(BRLCAD::VectorList::Element *element) {
+bool VectorListRenderer::operator()(BRLCAD::VectorList::Element *element) {
     if (!element) return true;
 
     switch (element->Type()) {
@@ -152,8 +103,8 @@ bool VectorListRenderer::Callback::operator()(BRLCAD::VectorList::Element *eleme
             glLoadIdentity();
             glTranslated(tlate[0], tlate[1], tlate[2]);
             /* 96 dpi = 3.78 pixel/mm hardcoded */
-            glScaled(2. * 3.78 / activeDisplay->getW(),
-                     2. * 3.78 / activeDisplay->getH(),
+            glScaled(2. * 3.78 / w,
+                     2. * 3.78 / h,
                      1.);
             break;
         }

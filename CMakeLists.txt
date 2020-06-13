@@ -20,8 +20,9 @@ set(arbalest_Sources
         Display/Camera.cpp
         Display/Display.cpp
         display/GraphicsViewOpenGL.cpp
+        display/GridRenderer.cpp
         GeometryOperationsManager.cpp
-        ArbalestGlobals.cpp)
+        ArbalestGlobals.cpp )
 
 set(arbalest_Link_Libraries
         coreinterface

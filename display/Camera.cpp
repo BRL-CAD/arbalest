@@ -26,8 +26,12 @@ glm::mat4x4 Camera::modelViewMatrix() const {
 }
 
 glm::mat4 Camera::projectionMatrix() const {
-    glm::mat4 view = glm::perspective(glm::radians(fov),w/h,nearPlane,farPlane);
-    return view;
+    if(projection == perspective) {
+        return glm::perspective(glm::radians(fov),w/h,nearPlane,farPlane);
+    }
+    else {
+        return glm::ortho(zoom*-w/h, zoom*w/h, zoom*1.0f, zoom*-1.0f, 10.0f, 100000000.0f);
+    }
 }
 
 void Camera::setWH(float w, float h) {

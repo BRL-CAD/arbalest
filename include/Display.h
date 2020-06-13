@@ -7,6 +7,8 @@
 
 #include <QtWidgets/QOpenGLWidget>
 #include "Camera.h"
+#include "VectorListRenderer.h"
+#include "GridRenderer.h"
 #include <QMouseEvent>
 #include <brlcad/VectorList.h>
 
@@ -16,8 +18,6 @@ public:
     Display();
     Camera *camera;
     void refresh();
-    int getW() const;
-    int getH() const;
     std::vector<BRLCAD::VectorList *> &getVectorLists();
 
 protected:
@@ -37,7 +37,8 @@ private:
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     std::vector<BRLCAD::VectorList *> vectorLists;
-
+    VectorListRenderer *vectorListRenderer;
+    GridRenderer *gridRenderer;
 };
 
 
