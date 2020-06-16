@@ -26,7 +26,7 @@ public:
 
 
     glm::vec3 eyePosition = glm::vec3(0,-10,-10); // Camera coordinates
-    float angleAroundY = 0, angleAroundX = 45; // Camera direction in degrees
+    float angleAroundY = 0, angleAroundX = 45, angleAroundZ = 0; // Camera direction in degrees
 
     float nearPlane = .01f, farPlane = 2000000.0f;
 

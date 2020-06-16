@@ -3,11 +3,11 @@
 //
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <gl/GL.h>
+#include <gl/GLU.h>
 #include <GL/glut.h>
 #include <iostream>
 #include <vmath.h>

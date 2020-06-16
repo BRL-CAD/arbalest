@@ -5,7 +5,7 @@
 
 class ArbalestGlobals{
 public:
-    static std::vector<Document*> documents;
+    //static std::vector<Document*> documents;
 };
 
 

@@ -6,23 +6,27 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(arbalest_Include_Dirs
-        "windows"
+        "src/windows"
         "include"
         "dependancies/glm/"
         ${BRLCAD_INCLUDE_DIRS})
 
 set(arbalest_Sources
-        windows/MainWindow.ui
-        windows/MainWindow.cpp
-        main.cpp
-        Document.cpp
-        Display/VectorListRenderer.cpp
-        Display/Camera.cpp
-        Display/Display.cpp
-        display/GraphicsViewOpenGL.cpp
-        display/GridRenderer.cpp
-        GeometryOperationsManager.cpp
-        ArbalestGlobals.cpp )
+
+        src/experiment/
+
+        src/windows/MainWindow.ui
+        src/windows/MainWindow.cpp
+        src/main.cpp
+        src/Document.cpp
+        src/ObjectsTreeView.cpp
+        src/display/VectorListRenderer.cpp
+        src/display/Camera.cpp
+        src/display/Display.cpp
+        src/display/GraphicsViewOpenGL.cpp
+        src/display/GridRenderer.cpp
+        src/GeometryOperationsManager.cpp
+        src/ArbalestGlobals.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

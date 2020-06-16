@@ -10,6 +10,8 @@
 #include <brlcad/Object.h>
 #include <iostream>
 #include <brlcad/bn/vlist.h>
+#include <ObjectsTreeView.h>
+#include <QtOpenGL/QtOpenGL>
 
 Document::Document(const char *filePath) {
     database =  new BRLCAD::MemoryDatabase();
@@ -17,12 +19,17 @@ Document::Document(const char *filePath) {
 
     display = new Display();
     geometryOperationsManager = new GeometryOperationsManager(database);
+    objectsTree = new ObjectsTreeView(*database);
+    window = new QMdiSubWindow;
 
-    ArbalestGlobals::documents.push_back(this);
+    window->setWidget(display);
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setMinimumSize(windowMinimumWidth, windowMinimumHeight);
+    window->setWindowTitle(filePath);
 
-    buildVectorList();
-
+    buildVectorListInDisplay();
     display->refresh();
+    objectsTree->Rebuild();
 }
 
 
@@ -37,16 +44,13 @@ std::vector<std::string> Document::getObjectsList() {
     return list;
 }
 
-void Document::buildVectorList(){
+void Document::buildVectorListInDisplay(){
     display->getVectorLists().clear();
     for (const auto& objectName: getObjectsList()) {
-        VectorList * vl = new VectorList();
+        auto * vl = new VectorList();
         database->Plot(objectName.c_str(), *vl);
         display->getVectorLists().push_back(vl);
-
-
     }
-
 }
 
 GeometryOperationsManager *Document::getGeometryOperationsManager() const {
@@ -55,4 +59,12 @@ GeometryOperationsManager *Document::getGeometryOperationsManager() const {
 
 Display *Document::getDisplay() const {
     return display;
+}
+
+ObjectsTreeView *Document::getObjectsTree() const {
+    return objectsTree;
+}
+
+QMdiSubWindow *Document::getWindow() const {
+    return window;
 }

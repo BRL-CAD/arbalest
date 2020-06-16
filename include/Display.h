@@ -32,7 +32,7 @@ protected:
 
 
 private:
-    int w,h;
+    int w = 400, h =400;
     int prevMouseX = -1,  prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;

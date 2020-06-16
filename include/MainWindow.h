@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtWidgets/QMdiArea>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,7 +18,14 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    void openFile();
+    QMdiArea * documentArea;
+
+    void openFileDialog();
     void saveAsFile();
+
+    void openFile(const QString& filePath);
+
+protected:
+
 };
 #endif // MAINWINDOW_H

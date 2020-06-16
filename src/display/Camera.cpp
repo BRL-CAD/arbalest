@@ -5,8 +5,7 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <QtWidgets/QApplication>
 
 
 #include<iostream>
@@ -17,6 +16,9 @@ Camera::Camera() {
         eyePosition *= 0;
         angleAroundY = 0;
         angleAroundX = 0;
+        angleAroundZ = 0;
+    }else{
+
     }
 };
 
@@ -26,7 +28,8 @@ glm::mat4x4 Camera::modelViewMatrix() const {
 
     auto rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundY), axisY);
     auto rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundX), axisX);
-    auto rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY;
+    auto rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundZ), axisZ);
+    auto rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY*rotationMatrixAroundZ;
 
     return glm::translate(rotationMatrix,eyePosition);
 }
@@ -36,7 +39,7 @@ glm::mat4 Camera::projectionMatrix() const {
         return glm::perspective(glm::radians(fov),w/h,nearPlane,farPlane);
     }
     else {
-        return glm::ortho(1.32f*zoom*-w/h, 1.32f*zoom*w/h, zoom*1.0f, zoom*-1.0f, -10000000.0f, 100000000.0f);
+        return glm::ortho(zoom*-w/h, zoom*w/h, zoom*1.0f, zoom*-1.0f, -10000000.0f, 100000000.0f);
     }
 }
 
@@ -49,7 +52,12 @@ void Camera::processMouseDrag(int deltaX, int deltaY, bool rotate) {
     if (rotate) {
         float deltaAngleX = float(deltaX) * fov / h;
         float deltaAngleY = float(deltaY) * fov / h;
-        angleAroundY += deltaAngleX;
+        if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier)) {
+            angleAroundZ += deltaAngleX;
+        }
+        else {
+            angleAroundY += deltaAngleX;
+        }
         angleAroundX += deltaAngleY;
     }
     else{

@@ -152,3 +152,4 @@ void Display::keyPressEvent( QKeyEvent *k ) {
 std::vector<BRLCAD::VectorList *> &Display::getVectorLists() {
     return vectorLists;
 }
+
