@@ -15,9 +15,7 @@ The project aims to create a geometry editor for BRL-CAD. The project should ide
 ## What has been implemented and how to use it
 You can keep multiple .g files open. Opened files will be displayed as tabs.
 
-Top objects are displayed in the right pane. (needs to be replaced by a tree viewer so I can display all)
-
-Grid looks ugly. Needs to make it gradually dissapear the further it is from camera.
+Top objects are displayed in the right pane.
 
 Rotate camera by dragging with mouse middle pressed.
 
@@ -25,4 +23,3 @@ Move camera by dragging with mouse right pressed.
 
 Use mouse wheel to go forward backward.
 
-Displaying the model and objects list aren't working since I'm in the middle of some stuff. They should be working if you try an earlier commit.
