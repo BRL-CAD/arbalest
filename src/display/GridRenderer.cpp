@@ -23,15 +23,15 @@ void GridRenderer::render() {
     glBegin(GL_LINES);
     glColor3f(0,1,0);
     glVertex3f(0, GRID_LINE_LENGTH, 0);
-    glVertex3f(0, -GRID_LINE_LENGTH, 0);
+    glVertex3f(0, -0, 0);
 
     glColor3f(0,0,1);
     glVertex3f(0, 0, GRID_LINE_LENGTH);
-    glVertex3f(0, 0, -GRID_LINE_LENGTH);
+    glVertex3f(0, 0, -0);
 
     glColor3f(1,0,0);
     glVertex3f( GRID_LINE_LENGTH, 0,0);
-    glVertex3f( -GRID_LINE_LENGTH, 0,0);
+    glVertex3f( -0, 0,0);
     glEnd();
 
     return;

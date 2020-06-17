@@ -18,8 +18,6 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    QMdiArea * documentArea;
-
     void openFileDialog();
     void saveAsFile();
 
@@ -27,5 +25,6 @@ private:
 
 protected:
 
+    void setTheme();
 };
 #endif // MAINWINDOW_H

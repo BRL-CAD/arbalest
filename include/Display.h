@@ -9,7 +9,9 @@
 #include "Camera.h"
 #include "VectorListRenderer.h"
 #include "GridRenderer.h"
+#include "VListRenderer.h"
 #include <QMouseEvent>
+#include <brlcad/cicommon.h>
 #include <brlcad/VectorList.h>
 
 class Display : public QOpenGLWidget{
@@ -38,6 +40,7 @@ private:
     float keyPressSimulatedMouseMoveDistance = 8;
     std::vector<BRLCAD::VectorList *> vectorLists;
     VectorListRenderer *vectorListRenderer;
+    VListRenderer *vListRenderer;
     GridRenderer *gridRenderer;
 };
 

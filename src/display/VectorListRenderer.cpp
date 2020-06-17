@@ -12,7 +12,6 @@
 using namespace std;
 
 void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
-
     this->w = w;
     this->h = h;
 
@@ -49,8 +48,6 @@ void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
     glPointSize(originalPointSize);
     glLineWidth(originalLineWidth);
 }
-
-
 
 bool VectorListRenderer::operator()(BRLCAD::VectorList::Element *element) {
     if (!element) return true;

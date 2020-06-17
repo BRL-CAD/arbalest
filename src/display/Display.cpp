@@ -5,7 +5,11 @@
 #include "Display.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <QCursor>
+#include <QtWidgets/QApplication>
 #include <GridRenderer.h>
+#include <OrthographicCamera.h>
+#include <PerspectiveCamera.h>
+#include <ArbalestSettings.h>
 #include "VectorListRenderer.h"
 #define DEFAULT_LINE_WIDTH 0.1
 #define RED 1.0, 0.0, 0.0
@@ -17,8 +21,10 @@
 using namespace std;
 
 Display::Display() {
-    camera = new Camera();
+    //camera = new PerspectiveCamera();
+    camera = new OrthographicCamera();
     vectorListRenderer = new VectorListRenderer();
+    vListRenderer = new VListRenderer();
     gridRenderer = new GridRenderer();
 };
 
@@ -38,8 +44,15 @@ void Display::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glColor3f(1,.3,.3);
-    for(auto vl: vectorLists){
-        vectorListRenderer->render(vl,w,h);
+    if (ArbalestSettings::useLegacyVlists){
+        for(auto vl: vectorLists){
+            vListRenderer->render(((struct bn_vlist *)vl->m_vlist),w,h);
+        }
+    }
+    else{
+        for(auto vl: vectorLists){
+            vectorListRenderer->render(vl,w,h);
+        }
     }
 
     gridRenderer->render();
@@ -59,18 +72,19 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
 
     bool resetX = false, resetY = false;
 
-    if(prevMouseX != -1 && prevMouseY != -1 && (event->buttons() & (Qt::MiddleButton|Qt::RightButton))) {
-        if (skipNextMouseMoveEvent){
+    if(prevMouseX != -1 && prevMouseY != -1 && (event->buttons() & (Qt::LeftButton|Qt::RightButton))) {
+        if (skipNextMouseMoveEvent) {
             skipNextMouseMoveEvent = false;
             return;
         }
+        if(event->buttons() & (Qt::LeftButton)) {
+            bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+            camera->processRotateRequest(x- prevMouseX, y - prevMouseY,rotateThirdAxis);
+        }
+        if(event->buttons() & (Qt::RightButton)){
+            camera->processMoveRequest(x- prevMouseX, y - prevMouseY);
+        }
 
-        if(event->buttons() & (Qt::MiddleButton)){
-            camera->processMouseDrag(x- prevMouseX, y - prevMouseY, true);
-        }
-        else{
-            camera->processMouseDrag(x- prevMouseX, y - prevMouseY, false);
-        }
         refresh();
 
         auto topLeft = mapToGlobal(QPoint(0,0));
@@ -123,7 +137,7 @@ void Display::mouseReleaseEvent(QMouseEvent *event) {
 void Display::wheelEvent(QWheelEvent *event) {
 
     if (event->phase() == Qt::NoScrollPhase || event->phase() == Qt::ScrollUpdate || event->phase() == Qt::ScrollMomentum) {
-        camera->processMouseWheel(event->angleDelta().y() / 8);
+        camera->processZoomRequest(event->angleDelta().y() / 8);
         refresh();
     }
 }
@@ -131,19 +145,19 @@ void Display::wheelEvent(QWheelEvent *event) {
 void Display::keyPressEvent( QKeyEvent *k ) {
     switch (k->key()) {
         case Qt::Key_Up:
-            camera->processMouseDrag(0, keyPressSimulatedMouseMoveDistance, false);
+            camera->processMoveRequest(0, keyPressSimulatedMouseMoveDistance);
             refresh();
             break;
         case Qt::Key_Down:
-            camera->processMouseDrag(0, -keyPressSimulatedMouseMoveDistance, false);
+            camera->processMoveRequest(0, -keyPressSimulatedMouseMoveDistance);
             refresh();
             break;
         case Qt::Key_Left:
-            camera->processMouseDrag(keyPressSimulatedMouseMoveDistance, 0, false);
+            camera->processMoveRequest(keyPressSimulatedMouseMoveDistance, 0);
             refresh();
             break;
         case Qt::Key_Right:
-            camera->processMouseDrag(-keyPressSimulatedMouseMoveDistance, 0, false);
+            camera->processMoveRequest(-keyPressSimulatedMouseMoveDistance, 0);
             refresh();
             break;
     }
@@ -152,4 +166,3 @@ void Display::keyPressEvent( QKeyEvent *k ) {
 std::vector<BRLCAD::VectorList *> &Display::getVectorLists() {
     return vectorLists;
 }
-
