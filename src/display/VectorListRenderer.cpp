@@ -21,14 +21,14 @@ void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
     glGetFloatv(GL_POINT_SIZE, &originalPointSize);
     glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
 
-    diffuseColor[0] = wireColor[0] * 0.6;
-    diffuseColor[1] = wireColor[1] * 0.6;
-    diffuseColor[2] = wireColor[2] * 0.6;
+    diffuseColor[0] = wireColor[0] * 0.6f;
+    diffuseColor[1] = wireColor[1] * 0.6f;
+    diffuseColor[2] = wireColor[2] * 0.6f;
     diffuseColor[3] = wireColor[3];
 
-    ambientColor[0] = wireColor[0] * 0.2;
-    ambientColor[1] = wireColor[1] * 0.2;
-    ambientColor[2] = wireColor[2] * 0.2;
+    ambientColor[0] = wireColor[0] * 0.2f;
+    ambientColor[1] = wireColor[1] * 0.2f;
+    ambientColor[2] = wireColor[2] * 0.2f;
     ambientColor[3] = wireColor[3];
 
     specularColor[0] = ambientColor[0];
@@ -36,10 +36,15 @@ void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
     specularColor[2] = ambientColor[2];
     specularColor[3] = ambientColor[3];
 
-    backDiffuseColorDark[0] = wireColor[0] * 0.9;
-    backDiffuseColorDark[1] = wireColor[1] * 0.9;
-    backDiffuseColorDark[2] = wireColor[2] * 0.9;
+    backDiffuseColorDark[0] = wireColor[0] * 0.3f;
+    backDiffuseColorDark[1] = wireColor[1] * 0.3f;
+    backDiffuseColorDark[2] = wireColor[2] * 0.3f;
     backDiffuseColorDark[3] = wireColor[3];
+
+    backDiffuseColorLight[0] = wireColor[0] * 0.9f;
+    backDiffuseColorLight[1] = wireColor[1] * 0.9f;
+    backDiffuseColorLight[2] = wireColor[2] * 0.9f;
+    backDiffuseColorLight[3] = wireColor[3];
 
     vectorList->Iterate(*this);
 

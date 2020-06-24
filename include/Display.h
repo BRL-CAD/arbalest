@@ -22,6 +22,7 @@ public:
     void refresh();
     std::vector<BRLCAD::VectorList *> &getVectorLists();
 
+
 protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
