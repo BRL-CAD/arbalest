@@ -21,7 +21,6 @@ set(arbalest_Sources
         src/Document.cpp
         src/ObjectsTreeView.cpp
         src/display/GeometryRenderer.cpp
-        src/display/VListRenderer.cpp
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp
         src/display/Display.cpp

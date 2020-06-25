@@ -20,20 +20,17 @@ private:
     QMdiSubWindow * window;
     const int windowMinimumHeight = 500;
     const int windowMinimumWidth = 700;
-public:
 
+public:
     explicit Document(const char *filePath);
+    void refreshGeometry();
 
     // getters
-    void refreshGeometry();
     GeometryOperationsManager *getGeometryOperationsManager() const;
     Display *getDisplay() const;
     ObjectsTreeView *getObjectsTree() const;
-
     QMdiSubWindow *getWindow() const;
-
     std::vector<std::string> getObjectsList();
-    void buildVectorListInDisplay();
 };
 
 

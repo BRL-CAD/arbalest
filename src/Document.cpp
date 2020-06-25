@@ -4,7 +4,6 @@
 
 #include <Document.h>
 #include <ArbalestSettings.h>
-#include <VListRenderer.h>
 #include "rt/vlist.h"
 #include <brlcad/cicommon.h>
 #include <brlcad/Object.h>
@@ -13,7 +12,6 @@
 #include <QtOpenGL/QtOpenGL>
 
 #include <gl/GL.h>
-#include "VListRenderer.h"
 #include "vmath.h"
 #include <bn.h>
 #include "raytrace.h"
@@ -50,28 +48,6 @@ std::vector<std::string> Document::getObjectsList() {
         ++it;
     }
     return list;
-}
-
-
-
-void Document::buildVectorListInDisplay(){
-    if (ArbalestSettings::useLegacyVlists){
-        //display->setVlist(reinterpret_cast<bn_vlist *>(Plot(database, "Goliath.c")));
-        display->getVectorLists().clear();
-        for (const auto &objectName: getObjectsList()) {
-            auto *vl = new VectorList();
-            database->Plot(objectName.c_str(), *vl);
-            display->getVectorLists().push_back(vl);
-        }
-    }
-    else {
-        display->getVectorLists().clear();
-        for (const auto &objectName: getObjectsList()) {
-            auto *vl = new VectorList();
-            database->Plot(objectName.c_str(), *vl);
-            display->getVectorLists().push_back(vl);
-        }
-    }
 }
 
 GeometryOperationsManager *Document::getGeometryOperationsManager() const {

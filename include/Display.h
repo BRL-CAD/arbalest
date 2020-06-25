@@ -8,10 +8,10 @@
 #include <QtWidgets/QOpenGLWidget>
 #include "Camera.h"
 #include "GridRenderer.h"
-#include "VListRenderer.h"
 #include <QMouseEvent>
 #include <brlcad/cicommon.h>
 #include <brlcad/VectorList.h>
+#include <brlcad/MemoryDatabase.h>
 
 class GeometryRenderer;
 
@@ -22,7 +22,6 @@ public:
     explicit Display(const BRLCAD::MemoryDatabase *database);
 
     Camera *camera;
-    std::vector<BRLCAD::VectorList *> &getVectorLists();
     void refreshGeometry();
     void refresh();
 
@@ -47,9 +46,7 @@ private:
     int prevMouseX = -1,  prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
-    std::vector<BRLCAD::VectorList *> vectorLists;
     GeometryRenderer *geometryRenderer;
-    VListRenderer *vListRenderer;
     GridRenderer *gridRenderer;
     const BRLCAD::MemoryDatabase *database;
 };

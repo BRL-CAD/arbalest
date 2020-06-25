@@ -24,7 +24,6 @@ Display::Display(const BRLCAD::MemoryDatabase *database): database(database){
     //camera = new PerspectiveCamera();
     camera = new OrthographicCamera();
     geometryRenderer = new GeometryRenderer(this);
-    vListRenderer = new VListRenderer();
     gridRenderer = new GridRenderer();
 };
 
@@ -154,10 +153,6 @@ void Display::keyPressEvent( QKeyEvent *k ) {
             refresh();
             break;
     }
-}
-
-std::vector<BRLCAD::VectorList *> &Display::getVectorLists() {
-    return vectorLists;
 }
 
 void Display::refreshGeometry() {

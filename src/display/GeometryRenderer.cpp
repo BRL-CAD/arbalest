@@ -20,7 +20,7 @@ void GeometryRenderer::drawVList(BRLCAD::VectorList * vectorList) {
     vectorList->Iterate(*this);
 
     if (first == 0) glEnd();
-    if (dm_light && dm_transparency)  glDisable(GL_BLEND);
+    if (dmLight && dmTransparency)  glDisable(GL_BLEND);
     glPointSize(originalPointSize);
     glLineWidth(originalLineWidth);
 }
@@ -40,14 +40,14 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
             if (first == 0) glEnd();
             first = 0;
 
-            if (dm_light && mflag) {
+            if (dmLight && mflag) {
                 mflag = 0;
                 glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, wireColor);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
 
-                if (dm_transparency) glDisable(GL_BLEND);
+                if (dmTransparency) glDisable(GL_BLEND);
             }
 
             glBegin(GL_LINE_STRIP);
@@ -84,14 +84,14 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
         }
         case BRLCAD::VectorList::Element::PolygonStart:{
             auto *e = dynamic_cast<BRLCAD::VectorList::PolygonStart *> (element);
-            if (dm_light && mflag) {
+            if (dmLight && mflag) {
                 mflag = 0;
                 glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambientColor);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularColor);
                 glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseColor);
 
-                switch (dm_light) {
+                switch (dmLight) {
                     case 1:
                         break;
                     case 2:
@@ -105,7 +105,7 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
                         break;
                 }
 
-                if (dm_transparency)
+                if (dmTransparency)
                     glEnable(GL_BLEND);
             }
 
@@ -119,14 +119,14 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
         }
         case BRLCAD::VectorList::Element::TriangleStart: {
             auto *e = dynamic_cast<BRLCAD::VectorList::TriangleStart *> (element);
-            if (dm_light && mflag) {
+            if (dmLight && mflag) {
                 mflag = 0;
                 glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambientColor);
                 glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularColor);
                 glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseColor);
 
-                switch (dm_light) {
+                switch (dmLight) {
                     case 1:
                         break;
                     case 2:
@@ -140,7 +140,7 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
                         break;
                 }
 
-                if (dm_transparency)
+                if (dmTransparency)
                     glEnable(GL_BLEND);
             }
 
@@ -319,11 +319,13 @@ void GeometryRenderer::setFGColor( float r, float g, float b, float transparency
 }
 
 void GeometryRenderer::render() {
+    GLboolean currentLightingStatus;
+    glGetBooleanv(GL_LIGHTING,&currentLightingStatus);
     glEnable(GL_LIGHTING);
     for(auto i:solids){
         drawDList(i.dlist);
     }
-    glDisable(GL_LIGHTING);
+    if(!currentLightingStatus)glDisable(GL_LIGHTING);
 }
 
 void GeometryRenderer::drawDList(unsigned int list)

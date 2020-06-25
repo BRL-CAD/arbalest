@@ -39,8 +39,8 @@ public:
 
 private:
     Display *display;
-    int dm_light = 1;
-    bool dm_transparency = 0;
+    int dmLight = 1;
+    bool dmTransparency = 0;
     int	first;
     int mflag = 1;
     GLfloat originalPointSize, originalLineWidth;

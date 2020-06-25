@@ -3,7 +3,6 @@
 
 class ArbalestSettings{
 public:
-    static bool useLegacyVlists;
 };
 
 
