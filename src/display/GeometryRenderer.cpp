@@ -1,50 +1,21 @@
 //
 // Created by Sadeep on 12-Jun.
 //
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+#include "GeometryRenderer.h"
 
-#include <gl/GL.h>
-#include <brlcad/bn/vlist.h>
-#include "VectorListRenderer.h"
-#include "vmath.h"
 using namespace std;
 
-void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
-    this->w = w;
-    this->h = h;
+GeometryRenderer::GeometryRenderer(Display *display) :display(display){
+    setFGColor(defaultWireColor[0],defaultWireColor[1],defaultWireColor[2],1);
+}
+
+void GeometryRenderer::drawVList(BRLCAD::VectorList * vectorList) {
 
     mflag = 1;
     first = 1;
 
     glGetFloatv(GL_POINT_SIZE, &originalPointSize);
     glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
-
-    diffuseColor[0] = wireColor[0] * 0.6f;
-    diffuseColor[1] = wireColor[1] * 0.6f;
-    diffuseColor[2] = wireColor[2] * 0.6f;
-    diffuseColor[3] = wireColor[3];
-
-    ambientColor[0] = wireColor[0] * 0.2f;
-    ambientColor[1] = wireColor[1] * 0.2f;
-    ambientColor[2] = wireColor[2] * 0.2f;
-    ambientColor[3] = wireColor[3];
-
-    specularColor[0] = ambientColor[0];
-    specularColor[1] = ambientColor[1];
-    specularColor[2] = ambientColor[2];
-    specularColor[3] = ambientColor[3];
-
-    backDiffuseColorDark[0] = wireColor[0] * 0.3f;
-    backDiffuseColorDark[1] = wireColor[1] * 0.3f;
-    backDiffuseColorDark[2] = wireColor[2] * 0.3f;
-    backDiffuseColorDark[3] = wireColor[3];
-
-    backDiffuseColorLight[0] = wireColor[0] * 0.9f;
-    backDiffuseColorLight[1] = wireColor[1] * 0.9f;
-    backDiffuseColorLight[2] = wireColor[2] * 0.9f;
-    backDiffuseColorLight[3] = wireColor[3];
 
     vectorList->Iterate(*this);
 
@@ -54,7 +25,7 @@ void VectorListRenderer::render(BRLCAD::VectorList * vectorList,int w, int h) {
     glLineWidth(originalLineWidth);
 }
 
-bool VectorListRenderer::operator()(BRLCAD::VectorList::Element *element) {
+bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
     if (!element) return true;
 
     switch (element->Type()) {
@@ -101,12 +72,13 @@ bool VectorListRenderer::operator()(BRLCAD::VectorList::Element *element) {
             MAT_TRANSPOSE(mt, m);
             MAT4X3PNT(tlate, mt, e->ReferencePoint().coordinates);
 
+            class Display;
             glPushMatrix();
             glLoadIdentity();
             glTranslated(tlate[0], tlate[1], tlate[2]);
             /* 96 dpi = 3.78 pixel/mm hardcoded */
-            glScaled(2. * 3.78 / w,
-                     2. * 3.78 / h,
+            glScaled(2. * 3.78 / display->getW(),
+                     2. * 3.78 / display->getH(),
                      1.);
             break;
         }
@@ -247,4 +219,122 @@ bool VectorListRenderer::operator()(BRLCAD::VectorList::Element *element) {
         }
     }
     return true;
+}
+
+
+tree* GeometryRenderer::buildAndDrawSolids
+        (
+                db_tree_state*      tsp,
+                const db_full_path* pathp,
+                rt_db_internal*     ip,
+                void*               clientData
+        ) {
+    tree*    ret   = TREE_NULL;
+
+    BRLCAD::VectorList vectorList;
+    auto * gr = static_cast<GeometryRenderer *>(clientData);
+
+    if (ip->idb_meth->ft_plot != 0) {
+        if (ip->idb_meth->ft_plot(vectorList.m_vlist, ip, tsp->ts_ttol, tsp->ts_tol, 0) == 0) {
+            BU_GET(ret, tree);
+            RT_TREE_INIT(ret);
+            ret->tr_op = OP_NOP;
+        }
+    }
+
+    GLuint dlist = glGenLists(1);
+    glNewList(dlist, GL_COMPILE);
+    gr->setFGColor(tsp->ts_mater.ma_color[0],tsp->ts_mater.ma_color[1],tsp->ts_mater.ma_color[2],1);
+    gr->drawVList(&vectorList);
+    glEndList();
+
+    Solid solid{};
+    solid.dlist = dlist;
+    solid.color[0] = tsp->ts_mater.ma_color[0];
+    solid.color[1] = tsp->ts_mater.ma_color[1];
+    solid.color[2] = tsp->ts_mater.ma_color[2];
+    gr->solids.push_back(solid);
+
+    return ret;
+}
+
+void GeometryRenderer::refreshGeometry() {
+    const char * Goliathc = "Goliath.c";
+
+    db_tree_state initState;
+    db_init_db_tree_state(&initState, display->getDatabase()->m_rtip->rti_dbip, display->getDatabase()->m_resp);
+    initState.ts_ttol = &display->getDatabase()->m_rtip->rti_ttol;
+    initState.ts_tol  = &display->getDatabase()->m_rtip->rti_tol;
+
+    display->makeCurrent();
+    solids.clear();
+
+    db_walk_tree(display->getDatabase()->m_rtip->rti_dbip,
+                 1,
+                 &Goliathc,
+                 1,
+                 &initState,
+                 0,
+                 0,
+                 GeometryRenderer::buildAndDrawSolids,
+                 this);
+
+}
+
+void GeometryRenderer::setFGColor( float r, float g, float b, float transparency){
+
+    wireColor[0] = r;
+    wireColor[1] = g;
+    wireColor[2] = b;
+    wireColor[3] = transparency;
+
+    diffuseColor[0] = wireColor[0] * 0.6f;
+    diffuseColor[1] = wireColor[1] * 0.6f;
+    diffuseColor[2] = wireColor[2] * 0.6f;
+    diffuseColor[3] = wireColor[3];
+
+    ambientColor[0] = wireColor[0] * 0.2f;
+    ambientColor[1] = wireColor[1] * 0.2f;
+    ambientColor[2] = wireColor[2] * 0.2f;
+    ambientColor[3] = wireColor[3];
+
+    specularColor[0] = ambientColor[0];
+    specularColor[1] = ambientColor[1];
+    specularColor[2] = ambientColor[2];
+    specularColor[3] = ambientColor[3];
+
+    backDiffuseColorDark[0] = wireColor[0] * 0.3f;
+    backDiffuseColorDark[1] = wireColor[1] * 0.3f;
+    backDiffuseColorDark[2] = wireColor[2] * 0.3f;
+    backDiffuseColorDark[3] = wireColor[3];
+
+    backDiffuseColorLight[0] = wireColor[0] * 0.9f;
+    backDiffuseColorLight[1] = wireColor[1] * 0.9f;
+    backDiffuseColorLight[2] = wireColor[2] * 0.9f;
+    backDiffuseColorLight[3] = wireColor[3];
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambientColor);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularColor);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseColor);
+}
+
+void GeometryRenderer::render() {
+    glEnable(GL_LIGHTING);
+    for(auto i:solids){
+        drawDList(i.dlist);
+    }
+    glDisable(GL_LIGHTING);
+}
+
+void GeometryRenderer::drawDList(unsigned int list)
+{
+    glCallList((GLuint)list);
+}
+
+void GeometryRenderer::initialize() {
+    if (initialized){
+        return;
+    }
+    initialized = true;
+    refreshGeometry();
 }

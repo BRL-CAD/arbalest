@@ -20,7 +20,7 @@ set(arbalest_Sources
         src/main.cpp
         src/Document.cpp
         src/ObjectsTreeView.cpp
-        src/display/VectorListRenderer.cpp
+        src/display/GeometryRenderer.cpp
         src/display/VListRenderer.cpp
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp

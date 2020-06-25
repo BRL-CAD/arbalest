@@ -1,4 +1,4 @@
 #include <ArbalestSettings.h>
 
 
-bool ArbalestSettings::useLegacyVlists = true;
+bool ArbalestSettings::useLegacyVlists = false;

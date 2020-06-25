@@ -25,6 +25,7 @@ public:
     explicit Document(const char *filePath);
 
     // getters
+    void refreshGeometry();
     GeometryOperationsManager *getGeometryOperationsManager() const;
     Display *getDisplay() const;
     ObjectsTreeView *getObjectsTree() const;

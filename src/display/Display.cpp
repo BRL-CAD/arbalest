@@ -10,7 +10,7 @@
 #include <OrthographicCamera.h>
 #include <PerspectiveCamera.h>
 #include <ArbalestSettings.h>
-#include "VectorListRenderer.h"
+#include "GeometryRenderer.h"
 #define DEFAULT_LINE_WIDTH 0.1
 #define RED 1.0, 0.0, 0.0
 #define GREEN 0.0, 1.0, 0.0
@@ -20,10 +20,10 @@
 
 using namespace std;
 
-Display::Display() {
+Display::Display(const BRLCAD::MemoryDatabase *database): database(database){
     //camera = new PerspectiveCamera();
     camera = new OrthographicCamera();
-    vectorListRenderer = new VectorListRenderer();
+    geometryRenderer = new GeometryRenderer(this);
     vListRenderer = new VListRenderer();
     gridRenderer = new GridRenderer();
 };
@@ -43,17 +43,10 @@ void Display::paintGL() {
     glClearColor(BG_COLOR);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(1,.3,.3);
-    if (ArbalestSettings::useLegacyVlists){
-        for(auto vl: vectorLists){
-            vListRenderer->render(((struct bn_vlist *)vl->m_vlist),w,h);
-        }
-    }
-    else{
-        for(auto vl: vectorLists){
-            vectorListRenderer->render(vl,w,h);
-        }
-    }
+    glColor3f(1,.3,1);
+
+    geometryRenderer->initialize();
+    geometryRenderer->render();
 
     gridRenderer->render();
 }
@@ -166,3 +159,20 @@ void Display::keyPressEvent( QKeyEvent *k ) {
 std::vector<BRLCAD::VectorList *> &Display::getVectorLists() {
     return vectorLists;
 }
+
+void Display::refreshGeometry() {
+    geometryRenderer->refreshGeometry();
+}
+
+int Display::getW() const {
+    return w;
+}
+
+int Display::getH() const {
+    return h;
+}
+
+const BRLCAD::MemoryDatabase *Display::getDatabase() const {
+    return database;
+}
+

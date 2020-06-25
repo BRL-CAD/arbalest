@@ -25,7 +25,7 @@ Document::Document(const char *filePath) {
     database =  new BRLCAD::MemoryDatabase();
     database->Load(filePath);
 
-    display = new Display();
+    display = new Display(database);
     geometryOperationsManager = new GeometryOperationsManager(database);
     objectsTree = new ObjectsTreeView(*database);
     window = new QMdiSubWindow;
@@ -36,7 +36,6 @@ Document::Document(const char *filePath) {
     window->setMinimumSize(windowMinimumWidth, windowMinimumHeight);
     window->setWindowTitle(filePath);
 
-    buildVectorListInDisplay();
     display->refresh();
     objectsTree->Rebuild();
 }
@@ -89,4 +88,8 @@ ObjectsTreeView *Document::getObjectsTree() const {
 
 QMdiSubWindow *Document::getWindow() const {
     return window;
+}
+
+void Document::refreshGeometry() {
+    display->refreshGeometry();
 }
