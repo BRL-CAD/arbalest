@@ -3,26 +3,23 @@
 //
 #include "GeometryRenderer.h"
 
-using namespace std;
 
-GeometryRenderer::GeometryRenderer(Display *display) :display(display){
-    setFGColor(defaultWireColor[0],defaultWireColor[1],defaultWireColor[2],1);
+#define DM_SOLID_LINE 0
+#define DM_DASHED_LINE 1
+
+GeometryRenderer::GeometryRenderer(Display *display) : display(display) {
+    setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
 }
 
-void GeometryRenderer::drawVList(BRLCAD::VectorList * vectorList) {
+void GeometryRenderer::drawVList(BRLCAD::VectorList *vectorList) {
 
     mflag = 1;
     first = 1;
 
-    glGetFloatv(GL_POINT_SIZE, &originalPointSize);
-    glGetFloatv(GL_LINE_WIDTH, &originalLineWidth);
-
     vectorList->Iterate(*this);
 
     if (first == 0) glEnd();
-    if (dmLight && dmTransparency)  glDisable(GL_BLEND);
-    glPointSize(originalPointSize);
-    glLineWidth(originalLineWidth);
+    if (dmLight && dmTransparency) glDisable(GL_BLEND);
 }
 
 bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
@@ -30,7 +27,7 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
 
     switch (element->Type()) {
 
-        case BRLCAD::VectorList::Element::LineDraw:{
+        case BRLCAD::VectorList::Element::LineDraw: {
             auto *e = dynamic_cast<BRLCAD::VectorList::LineDraw *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
@@ -82,7 +79,7 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
                      1.);
             break;
         }
-        case BRLCAD::VectorList::Element::PolygonStart:{
+        case BRLCAD::VectorList::Element::PolygonStart: {
             auto *e = dynamic_cast<BRLCAD::VectorList::PolygonStart *> (element);
             if (dmLight && mflag) {
                 mflag = 0;
@@ -153,17 +150,17 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
             first = 0;
             break;
         }
-        case BRLCAD::VectorList::Element::PolygonMove:{
+        case BRLCAD::VectorList::Element::PolygonMove: {
             auto *e = dynamic_cast<BRLCAD::VectorList::PolygonMove *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
-        case BRLCAD::VectorList::Element::PolygonDraw:{
+        case BRLCAD::VectorList::Element::PolygonDraw: {
             auto *e = dynamic_cast<BRLCAD::VectorList::PolygonDraw *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
-        case BRLCAD::VectorList::Element::TriangleMove:{
+        case BRLCAD::VectorList::Element::TriangleMove: {
             auto *e = dynamic_cast<BRLCAD::VectorList::TriangleMove *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
@@ -222,17 +219,17 @@ bool GeometryRenderer::operator()(BRLCAD::VectorList::Element *element) {
 }
 
 
-tree* GeometryRenderer::buildAndDrawSolids
+tree *GeometryRenderer::drawSolid
         (
-                db_tree_state*      tsp,
-                const db_full_path* pathp,
-                rt_db_internal*     ip,
-                void*               clientData
+                db_tree_state *tsp,
+                const db_full_path *pathp,
+                rt_db_internal *ip,
+                void *clientData
         ) {
-    tree*    ret   = TREE_NULL;
+    tree *ret = TREE_NULL;
 
     BRLCAD::VectorList vectorList;
-    auto * gr = static_cast<GeometryRenderer *>(clientData);
+    auto *gr = static_cast<GeometryRenderer *>(clientData);
 
     if (ip->idb_meth->ft_plot != 0) {
         if (ip->idb_meth->ft_plot(vectorList.m_vlist, ip, tsp->ts_ttol, tsp->ts_tol, 0) == 0) {
@@ -244,44 +241,61 @@ tree* GeometryRenderer::buildAndDrawSolids
 
     GLuint dlist = glGenLists(1);
     glNewList(dlist, GL_COMPILE);
-    gr->setFGColor(tsp->ts_mater.ma_color[0],tsp->ts_mater.ma_color[1],tsp->ts_mater.ma_color[2],1);
+
+    if (tsp->ts_mater.ma_color_valid) {
+        gr->setFGColor(tsp->ts_mater.ma_color[0], tsp->ts_mater.ma_color[1], tsp->ts_mater.ma_color[2], 1);
+    }
+    else {
+        gr->setFGColor(gr->defaultWireColor[0], gr->defaultWireColor[1], gr->defaultWireColor[2], 1);
+    }
+
+    gr->setLineAttr(-1,tsp->ts_sofar & (TS_SOFAR_MINUS|TS_SOFAR_INTER));
     gr->drawVList(&vectorList);
     glEndList();
 
     Solid solid{};
     solid.dlist = dlist;
-    solid.color[0] = tsp->ts_mater.ma_color[0];
-    solid.color[1] = tsp->ts_mater.ma_color[1];
-    solid.color[2] = tsp->ts_mater.ma_color[2];
     gr->solids.push_back(solid);
 
     return ret;
 }
 
 void GeometryRenderer::refreshGeometry() {
-    const char * Goliathc = "Goliath.c";
 
     db_tree_state initState;
     db_init_db_tree_state(&initState, display->getDatabase()->m_rtip->rti_dbip, display->getDatabase()->m_resp);
     initState.ts_ttol = &display->getDatabase()->m_rtip->rti_ttol;
-    initState.ts_tol  = &display->getDatabase()->m_rtip->rti_tol;
+    initState.ts_tol = &display->getDatabase()->m_rtip->rti_tol;
 
     display->makeCurrent();
     solids.clear();
 
-    db_walk_tree(display->getDatabase()->m_rtip->rti_dbip,
-                 1,
-                 &Goliathc,
-                 1,
-                 &initState,
-                 0,
-                 0,
-                 GeometryRenderer::buildAndDrawSolids,
-                 this);
+    glLineStipple(1, 0xCF33);
+    GLfloat currentLineWidth;
+    GLboolean currentLightingStatus;
+    GLboolean currentLineStippleStatus;
+    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+    glGetBooleanv(GL_LIGHTING, &currentLightingStatus);
+    glGetBooleanv(GL_LINE_STIPPLE, &currentLineStippleStatus);
+    glEnable(GL_LIGHTING);
 
+    BRLCAD::ConstDatabase::TopObjectIterator it = display->getDatabase()->FirstTopObject();
+    while (it.Good()) {
+        const char *topObjectName = it.Name();
+        db_walk_tree(display->getDatabase()->m_rtip->rti_dbip, 1, &topObjectName, 1, &initState, 0, 0,
+                     GeometryRenderer::drawSolid, this);
+
+        ++it;
+    }
+
+    glLineWidth(currentLineWidth);
+    if (currentLightingStatus) glEnable(GL_LIGHTING);
+    else glDisable(GL_LIGHTING);
+    if (currentLineStippleStatus) glEnable(GL_LINE_STIPPLE);
+    else glDisable(GL_LINE_STIPPLE);
 }
 
-void GeometryRenderer::setFGColor( float r, float g, float b, float transparency){
+void GeometryRenderer::setFGColor(float r, float g, float b, float transparency) {
 
     wireColor[0] = r;
     wireColor[1] = g;
@@ -318,25 +332,44 @@ void GeometryRenderer::setFGColor( float r, float g, float b, float transparency
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseColor);
 }
 
+void GeometryRenderer::setLineAttr(int width, int style)
+{
+    if (width>0)
+        glLineWidth((GLfloat) width);
+
+    if (style == DM_DASHED_LINE)
+        glEnable(GL_LINE_STIPPLE);
+    else
+        glDisable(GL_LINE_STIPPLE);
+
+}
+
 void GeometryRenderer::render() {
+    if (!initialized) {
+        initialized = true;
+        refreshGeometry();
+    }
+
+    GLfloat currentLineWidth;
     GLboolean currentLightingStatus;
-    glGetBooleanv(GL_LIGHTING,&currentLightingStatus);
+    GLboolean currentLineStippleStatus;
+    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+    glGetBooleanv(GL_LIGHTING, &currentLightingStatus);
+    glGetBooleanv(GL_LINE_STIPPLE, &currentLineStippleStatus);
     glEnable(GL_LIGHTING);
-    for(auto i:solids){
+
+    for (auto i:solids) {
         drawDList(i.dlist);
     }
-    if(!currentLightingStatus)glDisable(GL_LIGHTING);
+
+    glLineWidth(currentLineWidth);
+    if (currentLightingStatus) glEnable(GL_LIGHTING);
+    else glDisable(GL_LIGHTING);
+    if (currentLineStippleStatus) glEnable(GL_LINE_STIPPLE);
+    else glDisable(GL_LINE_STIPPLE);
 }
 
-void GeometryRenderer::drawDList(unsigned int list)
-{
-    glCallList((GLuint)list);
+void GeometryRenderer::drawDList(unsigned int list) {
+    glCallList((GLuint) list);
 }
 
-void GeometryRenderer::initialize() {
-    if (initialized){
-        return;
-    }
-    initialized = true;
-    refreshGeometry();
-}

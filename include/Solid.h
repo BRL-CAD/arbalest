@@ -5,7 +5,6 @@
 
 
 struct Solid {
-    float color[3];
     unsigned int dlist;
 };
 

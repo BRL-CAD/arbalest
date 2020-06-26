@@ -39,7 +39,7 @@ Document::Document(const char *filePath) {
 }
 
 
-std::vector<std::string> Document::getObjectsList() {
+std::vector<std::string> Document::getTopObjectsList() {
     std::vector<std::string> list;
 
     BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();

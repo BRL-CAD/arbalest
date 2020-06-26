@@ -46,6 +46,7 @@ private:
     int prevMouseX = -1,  prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
+    float bgColor[3] = {0.0, 0.0, 0.125};
     GeometryRenderer *geometryRenderer;
     GridRenderer *gridRenderer;
     const BRLCAD::MemoryDatabase *database;

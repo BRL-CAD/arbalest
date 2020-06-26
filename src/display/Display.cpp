@@ -4,19 +4,10 @@
 
 #include "Display.h"
 #include <glm/gtc/type_ptr.hpp>
-#include <QCursor>
 #include <QtWidgets/QApplication>
 #include <GridRenderer.h>
 #include <OrthographicCamera.h>
-#include <PerspectiveCamera.h>
-#include <ArbalestSettings.h>
 #include "GeometryRenderer.h"
-#define DEFAULT_LINE_WIDTH 0.1
-#define RED 1.0, 0.0, 0.0
-#define GREEN 0.0, 1.0, 0.0
-#define BLUE 0.0, 0.0, 1.0
-#define BG_COLOR .2,.2,.2,1
-#define GRID_COLOR .5,.5,.5
 
 using namespace std;
 
@@ -39,14 +30,10 @@ void Display::paintGL() {
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf((const float*)glm::value_ptr(camera->projectionMatrix()));
 
-    glClearColor(BG_COLOR);
+    glClearColor(bgColor[0],bgColor[1],bgColor[2],1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(1,.3,1);
-
-    geometryRenderer->initialize();
     geometryRenderer->render();
-
     gridRenderer->render();
 }
 

@@ -35,8 +35,6 @@ public:
 
     void render();
 
-    void initialize();
-
 private:
     Display *display;
     int dmLight = 1;
@@ -48,7 +46,7 @@ private:
     GLdouble mt[16];
     GLdouble tlate[3];
     const  float black[4] = {0.0, 0.0, 0.0, 0.0};
-    const  unsigned char defaultWireColor[3] = {0,250,0};
+    float defaultWireColor[3] = {1,.1,.4};
     float wireColor[4] = {.9,.1,.1,1};
     float diffuseColor[4];
     float  ambientColor[4];
@@ -58,12 +56,13 @@ private:
 
     std::vector<Solid> solids;
 
-    static tree *buildAndDrawSolids(db_tree_state *tsp, const db_full_path *pathp, rt_db_internal *ip, void *clientData);
+    static tree *drawSolid(db_tree_state *tsp, const db_full_path *pathp, rt_db_internal *ip, void *clientData);
 
     void drawDList(unsigned int list);
 
     bool initialized = false;
 
+    void setLineAttr(int width, int style);
 };
 
 

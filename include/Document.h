@@ -30,7 +30,7 @@ public:
     Display *getDisplay() const;
     ObjectsTreeView *getObjectsTree() const;
     QMdiSubWindow *getWindow() const;
-    std::vector<std::string> getObjectsList();
+    std::vector<std::string> getTopObjectsList();
 };
 
 
