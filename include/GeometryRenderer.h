@@ -54,7 +54,7 @@ private:
     float defaultWireColor[3] = {1,.1,.4};
     bool databaseUpdated = false;
 
-    static bool GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData);
+    static void GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData);
     void drawDatabase();
     std::vector<int> solids; // contains the display list of each solid
 };

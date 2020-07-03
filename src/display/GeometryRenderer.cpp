@@ -52,11 +52,6 @@ void GeometryRenderer::onDatabaseUpdated() {
  * Clears existing display lists, iterate through each solid and generates display lists by calling drawSolid on each
  */
 void GeometryRenderer::drawDatabase() {
-    db_tree_state initState;
-    db_init_db_tree_state(&initState, database->m_rtip->rti_dbip, database->m_resp);
-    initState.ts_ttol = &database->m_rtip->rti_ttol;
-    initState.ts_tol = &database->m_rtip->rti_tol;
-
     for (auto i: solids){
         displayManager->freeDLists(i,1);
     }
@@ -75,8 +70,7 @@ void GeometryRenderer::drawDatabase() {
  * Set the color and line attribute to suit a given solid, creates a display list, plots and draws solid's vlist into the display list.
  * The created display list is added to GeometryRenderer::solids
  */
-bool GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData) {
-    tree *ret = TREE_NULL;
+void GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData) {
     auto *geometryRenderer = static_cast<GeometryRenderer *>(clientData);
     auto *displayManager = geometryRenderer->displayManager;
 
@@ -101,7 +95,6 @@ bool GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void
     //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
     displayManager->drawVList(&vectorList);
     displayManager->endDList();     // end display list --------------
-    return ret;
 }
 
 void GeometryRenderer::setDatabase(BRLCAD::MemoryDatabase *database) {
