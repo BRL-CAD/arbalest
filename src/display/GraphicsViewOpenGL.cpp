@@ -17,7 +17,6 @@ using namespace std;
 
 GraphicsViewOpenGL::GraphicsViewOpenGL() : QOpenGLWidget() {}
 
-
 void GraphicsViewOpenGL::resizeGL(int w, int h) {
     GLint mm;
     static double xlim_view = 1.0;    /* args for glOrtho*/

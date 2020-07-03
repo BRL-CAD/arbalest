@@ -1,6 +1,3 @@
-//
-// Created by Sadeep on 09-Jun.
-//
 
 #include "PerspectiveCamera.h"
 #include <glm/glm.hpp>

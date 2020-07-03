@@ -1,4 +1,4 @@
-/*                        C A M E R A . H
+/*                    R E N D E R A B L E . H
  * BRL-CAD
  *
  * Copyright (c) 2020 United States Government as represented by
@@ -17,30 +17,16 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file Camera.h */
-
-#ifndef RT3_CAMERABK_H
-#define RT3_CAMERABK_H
+/** @file Renderable.h */
 
 
-#include <glm/detail/type_mat4x4.hpp>
+#ifndef BRLCAD_RENDERABLE_H
+#define BRLCAD_RENDERABLE_H
 
-
-class Camera {
+class Renderable {
 public:
-    glm::vec3  axisX = glm::vec3(1.0f,0.0f,0.0f);
-    glm::vec3  axisY = glm::vec3(0.0f,1.0f,0.0f);
-    glm::vec3  axisZ = glm::vec3(0.0f,0.0f,1.0f);
-
-    virtual void setWH(float w, float h) = 0;
-    virtual void processMoveRequest(const int &deltaX, const int &deltaY) = 0;
-    virtual void processRotateRequest(const int & deltaX, const int & deltaY, const bool& thirdAxis) = 0;
-    virtual void processZoomRequest(const int & deltaWheelAngle) = 0;
-
-    virtual glm::mat4 modelViewMatrix() const = 0;
-    virtual glm::mat4 projectionMatrix() const = 0;
-
+    virtual void render() = 0;
+    virtual ~Renderable() {}
 };
 
-
-#endif //RT3_CAMERABK_H
+#endif //BRLCAD_RENDERABLE_H

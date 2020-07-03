@@ -1,22 +1,43 @@
-//
-// Created by Sadeep on 07-Jun.
-//
+/*                     D I S P L A Y . C P P
+ * BRL-CAD
+ *
+ * Copyright (c) 2020 United States Government as represented by
+ * the U.S. Army Research Laboratory.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * version 2.1 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this file; see the file named COPYING for more
+ * information.
+ */
+/** @file Display.cpp */
 
 #include "Display.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <QtWidgets/QApplication>
-#include <GridRenderer.h>
 #include <OrthographicCamera.h>
+#include <brlcad/MemoryDatabase.h>
+#include "DisplayManager.h"
 #include "GeometryRenderer.h"
 
 using namespace std;
 
-Display::Display(const BRLCAD::MemoryDatabase *database): database(database){
-    //camera = new PerspectiveCamera();
+Display::Display() {
     camera = new OrthographicCamera();
-    geometryRenderer = new GeometryRenderer(this);
-    gridRenderer = new GridRenderer();
-};
+    displayManager = new DisplayManager(this);
+    geometryRenderer = new GeometryRenderer(displayManager);
+    axesRenderer = new AxesRenderer();
+
+    renderers.push_back(geometryRenderer);
+    renderers.push_back(axesRenderer);
+}
 
 void Display::resizeGL(int w, int h) {
     camera->setWH(w,h);
@@ -25,16 +46,12 @@ void Display::resizeGL(int w, int h) {
 }
 
 void Display::paintGL() {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf((const float*)glm::value_ptr(camera->modelViewMatrix()));
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf((const float*)glm::value_ptr(camera->projectionMatrix()));
+    displayManager->drawBegin();
 
-    glClearColor(bgColor[0],bgColor[1],bgColor[2],1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
+    displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix()));
 
-    geometryRenderer->render();
-    gridRenderer->render();
+    for (auto i:renderers) i->render();
 }
 
 void Display::refresh() {
@@ -51,16 +68,16 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
 
     bool resetX = false, resetY = false;
 
-    if(prevMouseX != -1 && prevMouseY != -1 && (event->buttons() & (Qt::LeftButton|Qt::RightButton))) {
+    if(prevMouseX != -1 && prevMouseY != -1 && (event->buttons() & (rotateCameraMouseButton|moveCameraMouseButton))) {
         if (skipNextMouseMoveEvent) {
             skipNextMouseMoveEvent = false;
             return;
         }
-        if(event->buttons() & (Qt::LeftButton)) {
-            bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+        if(event->buttons() & (rotateCameraMouseButton)) {
+            bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
             camera->processRotateRequest(x- prevMouseX, y - prevMouseY,rotateThirdAxis);
         }
-        if(event->buttons() & (Qt::RightButton)){
+        if(event->buttons() & (moveCameraMouseButton)){
             camera->processMoveRequest(x- prevMouseX, y - prevMouseY);
         }
 
@@ -108,7 +125,7 @@ void Display::mousePressEvent(QMouseEvent *event) {
     prevMouseY = event->y();
 }
 
-void Display::mouseReleaseEvent(QMouseEvent *event) {
+void Display::mouseReleaseEvent(QMouseEvent *UNUSED(event)) {
     prevMouseX = -1;
     prevMouseY = -1;
 }
@@ -142,8 +159,8 @@ void Display::keyPressEvent( QKeyEvent *k ) {
     }
 }
 
-void Display::refreshGeometry() {
-    geometryRenderer->refreshGeometry();
+void Display::onDatabaseUpdated() {
+    geometryRenderer->onDatabaseUpdated();
 }
 
 int Display::getW() const {
@@ -154,7 +171,9 @@ int Display::getH() const {
     return h;
 }
 
-const BRLCAD::MemoryDatabase *Display::getDatabase() const {
-    return database;
+void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
+    makeCurrent();
+    geometryRenderer->setDatabase(database->m_wdbp);
+    onDatabaseUpdated();
+    update();
 }
-

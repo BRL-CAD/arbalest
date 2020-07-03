@@ -23,7 +23,7 @@ Document::Document(const char *filePath) {
     database =  new BRLCAD::MemoryDatabase();
     database->Load(filePath);
 
-    display = new Display(database);
+    display = new Display();
     geometryOperationsManager = new GeometryOperationsManager(database);
     objectsTree = new ObjectsTreeView(*database);
     window = new QMdiSubWindow;
@@ -34,6 +34,7 @@ Document::Document(const char *filePath) {
     window->setMinimumSize(windowMinimumWidth, windowMinimumHeight);
     window->setWindowTitle(filePath);
 
+    display->onDatabaseOpen(database);
     display->refresh();
     objectsTree->Rebuild();
 }
@@ -67,5 +68,5 @@ QMdiSubWindow *Document::getWindow() const {
 }
 
 void Document::refreshGeometry() {
-    display->refreshGeometry();
+    //display->onDatabaseOpen(database);
 }

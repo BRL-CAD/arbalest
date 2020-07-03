@@ -1,69 +1,64 @@
-//
-// Created by Sadeep on 12-Jun.
-//
+/*              G E O M E T R Y R E N D E R E R . H
+ * BRL-CAD
+ *
+ * Copyright (c) 2020 United States Government as represented by
+ * the U.S. Army Research Laboratory.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * version 2.1 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this file; see the file named COPYING for more
+ * information.
+ */
+/** @file GeometryRenderer.h */
 
-#ifndef RT3_GEOMETRYRENDERER_H
-#define RT3_GEOMETRYRENDERER_H
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+#ifndef BRLCAD_GEOMETRYRENDERER_H
+#define BRLCAD_GEOMETRYRENDERER_H
 
 
-#include <brlcad/MemoryDatabase.h>
-#include <brlcad/cicommon.h>
-#include <brlcad/Object.h>
-#include <gl/GL.h>
-#include <brlcad/bn/vlist.h>
-#include <brlcad/rt/tree.h>
-#include <brlcad/rt/rt_instance.h>
-#include <brlcad/rt/functab.h>
-#include <brlcad/rt/db_internal.h>
-#include "vmath.h"
-#include "Solid.h"
-#include "Display.h"
-
+#include <rt/wdb.h>
+#include <rt/tree.h>
+#include <rt/db_instance.h>
+#include <rt/functab.h>
+#include <raytrace.h>
+#include <rt/db_io.h>
+#include "DisplayManager.h"
+#include "Renderable.h"
+#include <rt/global.h>
 
 struct rt_i;
+struct bu_list;
+struct bn_vlist;
+struct db_tree_state;
+struct db_full_path;
+struct rt_db_internal;
+union tree;
 
-class GeometryRenderer : public BRLCAD::VectorList::ElementCallback {
+class GeometryRenderer:public Renderable {
 public:
-    explicit GeometryRenderer(Display *display);
-    void drawVList(BRLCAD::VectorList * vectorList) ;
-    bool operator()(BRLCAD::VectorList::Element* element) override ;
-    void refreshGeometry();
-    void setFGColor(float r, float g, float b, float transparency);
-
-    void render();
-
+    explicit GeometryRenderer(DisplayManager *displayManager);
+    rt_wdb * getDatabase();
+    void setDatabase(rt_wdb *database);
+    void onDatabaseUpdated();
+    void render() override;
 private:
-    Display *display;
-    int dmLight = 1;
-    bool dmTransparency = 0;
-    int	first;
-    int mflag = 1;
-    GLfloat originalPointSize, originalLineWidth;
-    GLdouble m[16];
-    GLdouble mt[16];
-    GLdouble tlate[3];
-    const  float black[4] = {0.0, 0.0, 0.0, 0.0};
+    rt_wdb *database = nullptr;
+    rt_i * r_database = nullptr;
+    DisplayManager *displayManager;
     float defaultWireColor[3] = {1,.1,.4};
-    float wireColor[4] = {.9,.1,.1,1};
-    float diffuseColor[4];
-    float  ambientColor[4];
-    float  specularColor[4];
-    float  backDiffuseColorDark[4];
-    float backDiffuseColorLight[4];
-
-    std::vector<Solid> solids;
+    bool databaseUpdated = false;
 
     static tree *drawSolid(db_tree_state *tsp, const db_full_path *pathp, rt_db_internal *ip, void *clientData);
-
-    void drawDList(unsigned int list);
-
-    bool initialized = false;
-
-    void setLineAttr(int width, int style);
+    void drawDatabase();
+    std::vector<int> solids; // contains the display list of each solid
 };
 
 
-#endif //RT3_GEOMETRYRENDERER_H
+#endif //BRLCAD_GEOMETRYRENDERER_H

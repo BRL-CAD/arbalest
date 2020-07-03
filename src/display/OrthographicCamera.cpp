@@ -1,15 +1,27 @@
-//
-// Created by Sadeep on 09-Jun.
-//
+/*          O R T H O G R A P H I C C A M E R A . C P P
+ * BRL-CAD
+ *
+ * Copyright (c) 2020 United States Government as represented by
+ * the U.S. Army Research Laboratory.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * version 2.1 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this file; see the file named COPYING for more
+ * information.
+ */
+/** @file OrthographicCamera.cpp */
 
 #include "OrthographicCamera.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-
-
-#include<iostream>
-
-using namespace std;
 
 OrthographicCamera::OrthographicCamera() = default;
 
@@ -45,7 +57,6 @@ void OrthographicCamera::processRotateRequest(const int &deltaX, const int &delt
     }
     angleAroundAxes.x += deltaAngleY * eyeRotationPerMouseDelta;
 
-    //cout << angleAroundAxes.x << " " << angleAroundAxes.y << " " << angleAroundAxes.z << endl;
 }
 
 void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY) {

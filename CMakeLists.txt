@@ -24,8 +24,9 @@ set(arbalest_Sources
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp
         src/display/Display.cpp
+        src/display/DisplayManager.cpp
+        src/display/AxesRenderer.cpp
         src/display/GraphicsViewOpenGL.cpp
-        src/display/GridRenderer.cpp
         src/GeometryOperationsManager.cpp
         src/ArbalestSettings.cpp)
 
