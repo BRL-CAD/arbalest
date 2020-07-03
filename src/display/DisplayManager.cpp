@@ -239,6 +239,7 @@ void DisplayManager::drawVList(BRLCAD::VectorList *vectorList)
 
     DrawVListElementCallback::DrawVlistVars vars;
     DrawVListElementCallback drawVListElementCallback(this, &vars);
+    if (dmLight) glEnable(GL_LIGHTING);
     vectorList->Iterate(drawVListElementCallback);
     
 

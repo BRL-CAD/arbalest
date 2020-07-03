@@ -173,7 +173,7 @@ int Display::getH() const {
 
 void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
     makeCurrent();
-    geometryRenderer->setDatabase(database->m_wdbp);
+    geometryRenderer->setDatabase(database);
     onDatabaseUpdated();
     update();
 }

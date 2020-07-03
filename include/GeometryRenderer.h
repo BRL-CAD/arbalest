@@ -44,18 +44,17 @@ union tree;
 class GeometryRenderer:public Renderable {
 public:
     explicit GeometryRenderer(DisplayManager *displayManager);
-    rt_wdb * getDatabase();
-    void setDatabase(rt_wdb *database);
+    void setDatabase(BRLCAD::MemoryDatabase *database);
     void onDatabaseUpdated();
     void render() override;
 private:
-    rt_wdb *database = nullptr;
-    rt_i * r_database = nullptr;
+    BRLCAD::MemoryDatabase *database = nullptr;
+    //rt_i * r_database = nullptr;
     DisplayManager *displayManager;
     float defaultWireColor[3] = {1,.1,.4};
     bool databaseUpdated = false;
 
-    static tree *drawSolid(db_tree_state *tsp, const db_full_path *pathp, rt_db_internal *ip, void *clientData);
+    static bool GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData);
     void drawDatabase();
     std::vector<int> solids; // contains the display list of each solid
 };

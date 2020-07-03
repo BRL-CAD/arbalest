@@ -27,7 +27,6 @@ GeometryRenderer::GeometryRenderer(DisplayManager *displayManager) : displayMana
 void GeometryRenderer::render() {
     if (database == nullptr) return;
     displayManager->saveState();
-    glEnable(GL_LIGHTING);
 
     // If database has been updated we need to redraw.
     // Also QOpenGLWidget sometimes looses saved display list after UI changes (dock / undock etc).
@@ -42,8 +41,10 @@ void GeometryRenderer::render() {
     displayManager->restoreState();
 }
 
+/*
+ * This method should be called database is changed (i.e. after changing this->database) or updated
+ */
 void GeometryRenderer::onDatabaseUpdated() {
-    r_database = rt_new_rti(database->dbip);
     databaseUpdated = true;
 }
 
@@ -52,22 +53,20 @@ void GeometryRenderer::onDatabaseUpdated() {
  */
 void GeometryRenderer::drawDatabase() {
     db_tree_state initState;
-    db_init_db_tree_state(&initState, r_database->rti_dbip, database->wdb_resp);
-    initState.ts_ttol = &r_database->rti_ttol;
-    initState.ts_tol = &r_database->rti_tol;
+    db_init_db_tree_state(&initState, database->m_rtip->rti_dbip, database->m_resp);
+    initState.ts_ttol = &database->m_rtip->rti_ttol;
+    initState.ts_tol = &database->m_rtip->rti_tol;
 
     for (auto i: solids){
         displayManager->freeDLists(i,1);
     }
     solids.clear();
 
-    struct directory **dbObjects = NULL;
-    int path_cnt = db_ls(database->dbip, DB_LS_TOPS, NULL, &dbObjects);
-    if (path_cnt) {
-        for (int i = 0; i < path_cnt; i++) {
-            const char *topObjectName = dbObjects[i]->d_namep;
-            db_walk_tree(r_database->rti_dbip, 1, &topObjectName, 1, &initState, 0, 0, drawSolid, this);
-        }
+    BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
+    while (it.Good()) {
+        const char * objectName = it.Name();
+        database->WalkTree(&objectName,drawSolid,this);
+        ++it;
     }
 }
 
@@ -76,47 +75,36 @@ void GeometryRenderer::drawDatabase() {
  * Set the color and line attribute to suit a given solid, creates a display list, plots and draws solid's vlist into the display list.
  * The created display list is added to GeometryRenderer::solids
  */
-tree *GeometryRenderer::drawSolid(db_tree_state *tsp, const db_full_path *UNUSED(pathp), rt_db_internal *ip, void *clientData) {
+bool GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData) {
     tree *ret = TREE_NULL;
     auto *geometryRenderer = static_cast<GeometryRenderer *>(clientData);
     auto *displayManager = geometryRenderer->displayManager;
 
     BRLCAD::VectorList vectorList;
-    auto vhead = vectorList.m_vlist;
-    BU_LIST_INIT(vhead);
+    treeLeaf->Plot(vectorList);
 
-    if (ip->idb_meth->ft_plot != 0) {
-        if (ip->idb_meth->ft_plot(vhead, ip, tsp->ts_ttol, tsp->ts_tol, 0) == 0) {
-            BU_GET(ret, tree);
-            RT_TREE_INIT(ret);
-            ret->tr_op = OP_NOP;
-        }
-    }
 
     GLuint dlist;
     dlist = displayManager->genDLists(1);
     displayManager->beginDList(dlist);  // begin display list --------------
     geometryRenderer->solids.push_back(dlist);
 
-    if (tsp->ts_mater.ma_color_valid) {
-        displayManager->setFGColor(tsp->ts_mater.ma_color[0], tsp->ts_mater.ma_color[1], tsp->ts_mater.ma_color[2], 1);
+    if (treeLeaf->IsMaterialColorValid()) {
+        auto color = treeLeaf->MaterialColor();
+        displayManager->setFGColor(color[0], color[1], color[2], 1);
     }
     else {
         displayManager->setFGColor(geometryRenderer->defaultWireColor[0], geometryRenderer->defaultWireColor[1],
                 geometryRenderer->defaultWireColor[2], 1);
     }
 
-    displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
+    //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
     displayManager->drawVList(&vectorList);
     displayManager->endDList();     // end display list --------------
     return ret;
 }
 
-rt_wdb *GeometryRenderer::getDatabase() {
-    return database;
-}
-
-void GeometryRenderer::setDatabase(rt_wdb *database) {
+void GeometryRenderer::setDatabase(BRLCAD::MemoryDatabase *database) {
     this->database = database;
     onDatabaseUpdated();
 }
