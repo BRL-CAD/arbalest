@@ -32,7 +32,7 @@ using namespace std;
 Display::Display() {
     camera = new OrthographicCamera();
     displayManager = new DisplayManager(this);
-    geometryRenderer = new GeometryRenderer(displayManager);
+    geometryRenderer = new GeometryRenderer(*displayManager);
     axesRenderer = new AxesRenderer();
 
     renderers.push_back(geometryRenderer);

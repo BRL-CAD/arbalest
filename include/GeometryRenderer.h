@@ -32,6 +32,7 @@
 #include "DisplayManager.h"
 #include "Renderable.h"
 #include <rt/global.h>
+#include <brlcad/Combination.h>
 
 struct rt_i;
 struct bu_list;
@@ -43,18 +44,49 @@ union tree;
 
 class GeometryRenderer:public Renderable {
 public:
-    explicit GeometryRenderer(DisplayManager *displayManager);
+    explicit GeometryRenderer(DisplayManager &displayManager);
+
     void setDatabase(BRLCAD::MemoryDatabase *database);
+
+    // This method should be called database is changed (i.e. after changing this->database) or updated
     void onDatabaseUpdated();
+
+    // this is called by Display to render a single frame
     void render() override;
+
+    // used to represent color as traversed through database
+    struct ColorInfo{
+        float red,green,blue;
+        bool hasColor;
+    };
+
+    // draw object and add its display list to solids
+    void drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo);
+
+    // traversing through the database
+    class DatabaseWalker: public BRLCAD::ConstDatabase::ObjectCallback{
+    public:
+        DatabaseWalker(BRLCAD::ConstDatabase &database, GeometryRenderer &geometryRenderer, std::string &path,
+                       ColorInfo colorInfo)
+                : database(database),
+                  geometryRenderer(geometryRenderer),
+                  path(path), colorInfo(colorInfo) {}
+        void operator()(const BRLCAD::Object& object) override;
+        void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node);
+
+    private:
+        ColorInfo colorInfo;
+        BRLCAD::ConstDatabase & database;
+        GeometryRenderer & geometryRenderer;
+        std::string& path;
+    };
+
 private:
     BRLCAD::MemoryDatabase *database = nullptr;
-    //rt_i * r_database = nullptr;
-    DisplayManager *displayManager;
-    float defaultWireColor[3] = {1,.1,.4};
+    DisplayManager &displayManager;
+    float defaultWireColor[3] = {1.0,.1,.4};
     bool databaseUpdated = false;
 
-    static void GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData);
     void drawDatabase();
     std::vector<int> solids; // contains the display list of each solid
 };

@@ -19,26 +19,27 @@
  */
 /** @file GeometryRenderer.cpp */
 
+#include <brlcad/Combination.h>
 #include "common.h"
 #include "GeometryRenderer.h"
 
-GeometryRenderer::GeometryRenderer(DisplayManager *displayManager) : displayManager(displayManager) {}
+GeometryRenderer::GeometryRenderer(DisplayManager &displayManager) : displayManager(displayManager) {}
 
 void GeometryRenderer::render() {
     if (database == nullptr) return;
-    displayManager->saveState();
+    displayManager.saveState();
 
     // If database has been updated we need to redraw.
     // Also QOpenGLWidget sometimes looses saved display list after UI changes (dock / undock etc).
     // Therefore we need to draw again if the dlists are not available
-    if (databaseUpdated || (!solids.empty() && !displayManager->isDListValid(solids[0]))) {
+    if (databaseUpdated || (!solids.empty() && !displayManager.isDListValid(solids[0]))) {
         drawDatabase();
         databaseUpdated = false;
     }
     for (auto i:solids) {
-        displayManager->drawDList(i);
+        displayManager.drawDList(i);
     }
-    displayManager->restoreState();
+    displayManager.restoreState();
 }
 
 /*
@@ -48,19 +49,61 @@ void GeometryRenderer::onDatabaseUpdated() {
     databaseUpdated = true;
 }
 
+
+void GeometryRenderer::DatabaseWalker::operator()(const BRLCAD::Object& object) {
+    const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
+    if (comb != 0) {
+        if(comb->HasColor()) {
+            colorInfo.red = comb->Red();
+            colorInfo.green = comb->Green();
+            colorInfo.blue = comb->Blue();
+            colorInfo.hasColor = true;
+        }
+        ListTreeNode(comb->Tree());
+    }
+    else{
+        geometryRenderer.drawSolid(path.c_str(), colorInfo);
+    }
+}
+
+void GeometryRenderer::DatabaseWalker::ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node){
+    switch (node.Operation()) {
+        case BRLCAD::Combination::ConstTreeNode::Union:
+        case BRLCAD::Combination::ConstTreeNode::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+            ListTreeNode(node.LeftOperand());
+            ListTreeNode(node.RightOperand());
+            break;
+
+        case BRLCAD::Combination::ConstTreeNode::Not:
+            ListTreeNode(node.Operand());
+            break;
+
+        case BRLCAD::Combination::ConstTreeNode::Leaf:
+            const char * leafName = node.Name();
+            std::string leafPath = path + "/" + std::string(leafName);
+            DatabaseWalker callback(database, geometryRenderer, leafPath, colorInfo);
+            database.Get(leafName, callback);
+    }
+}
+
 /*
  * Clears existing display lists, iterate through each solid and generates display lists by calling drawSolid on each
  */
 void GeometryRenderer::drawDatabase() {
     for (auto i: solids){
-        displayManager->freeDLists(i,1);
+        displayManager.freeDLists(i,1);
     }
     solids.clear();
 
     BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
     while (it.Good()) {
-        const char * objectName = it.Name();
-        database->WalkTree(&objectName,drawSolid,this);
+        auto objectName = std::string(it.Name());
+        ColorInfo colorInfo;
+        colorInfo.hasColor = false;
+        DatabaseWalker walker(*database, *this, objectName, colorInfo);
+        database->Get(it.Name(), walker);
         ++it;
     }
 }
@@ -70,34 +113,31 @@ void GeometryRenderer::drawDatabase() {
  * Set the color and line attribute to suit a given solid, creates a display list, plots and draws solid's vlist into the display list.
  * The created display list is added to GeometryRenderer::solids
  */
-void GeometryRenderer::drawSolid(BRLCAD::ConstDatabase::TreeLeaf *treeLeaf ,void *clientData) {
-    auto *geometryRenderer = static_cast<GeometryRenderer *>(clientData);
-    auto *displayManager = geometryRenderer->displayManager;
-
+void
+GeometryRenderer::drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo) {
     BRLCAD::VectorList vectorList;
-    treeLeaf->Plot(vectorList);
+    database->Plot(name,vectorList);
 
 
     GLuint dlist;
-    dlist = displayManager->genDLists(1);
-    displayManager->beginDList(dlist);  // begin display list --------------
-    geometryRenderer->solids.push_back(dlist);
+    dlist = displayManager.genDLists(1);
+    displayManager.beginDList(dlist);  // begin display list --------------
+    solids.push_back(dlist);
 
-    if (treeLeaf->IsMaterialColorValid()) {
-        auto color = treeLeaf->MaterialColor();
-        displayManager->setFGColor(color[0], color[1], color[2], 1);
+    if (colorInfo.hasColor) {
+        displayManager.setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
     }
     else {
-        displayManager->setFGColor(geometryRenderer->defaultWireColor[0], geometryRenderer->defaultWireColor[1],
-                geometryRenderer->defaultWireColor[2], 1);
+        displayManager.setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
     }
 
     //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
-    displayManager->drawVList(&vectorList);
-    displayManager->endDList();     // end display list --------------
+    displayManager.drawVList(&vectorList);
+    displayManager.endDList();     // end display list --------------
 }
 
 void GeometryRenderer::setDatabase(BRLCAD::MemoryDatabase *database) {
     this->database = database;
     onDatabaseUpdated();
 }
+
