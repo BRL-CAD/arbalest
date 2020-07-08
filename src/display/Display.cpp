@@ -31,7 +31,7 @@ using namespace std;
 
 Display::Display() {
     camera = new OrthographicCamera();
-    displayManager = new DisplayManager(this);
+    displayManager = new DisplayManager(*this);
     geometryRenderer = new GeometryRenderer(*displayManager);
     axesRenderer = new AxesRenderer();
 
@@ -39,6 +39,12 @@ Display::Display() {
     renderers.push_back(axesRenderer);
 }
 
+Display::~Display() {
+    delete camera;
+    delete displayManager;
+    delete geometryRenderer;
+    delete axesRenderer;
+}
 void Display::resizeGL(int w, int h) {
     camera->setWH(w,h);
     this->w = w;

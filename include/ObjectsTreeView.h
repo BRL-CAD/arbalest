@@ -24,7 +24,7 @@
  */
 /** @file ObjectsTreeView.h
  *
- *  aken from RT3/QtGUI:
+ *  taken from RT3/QtGUI:
  *      declaration of the objects' tree visualization
  */
 

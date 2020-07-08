@@ -30,7 +30,7 @@
 
 class DisplayManager{
 public:
-    explicit DisplayManager(Display *display);
+    explicit DisplayManager(Display &display);
 
     // most of the methods below correspond to a method with a similar name from libdm
     void drawVList(BRLCAD::VectorList *vp);
@@ -66,7 +66,7 @@ public:
     };
 
 private:
-    Display *display;
+    Display &display;
 
     int dmLight = 1;
     bool dmTransparency = false;

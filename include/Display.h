@@ -38,6 +38,7 @@ class Display : public QOpenGLWidget{
 
 public:
     Display();
+    virtual ~Display();
 
     Camera *camera;
     void onDatabaseUpdated();

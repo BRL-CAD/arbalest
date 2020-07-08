@@ -24,7 +24,7 @@
 #define DM_SOLID_LINE 0
 #define DM_DASHED_LINE 1
 
-DisplayManager::DisplayManager(Display *display) : display(display)
+DisplayManager::DisplayManager(Display &display) : display(display)
 {
     setFGColor(0,0,0, 1);
     glLineStipple(1, 0xCF33);
@@ -83,8 +83,8 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             glLoadIdentity();
             glTranslated(vars->tlate[0], vars->tlate[1], vars->tlate[2]);
             /* 96 dpi = 3.78 pixel/mm hardcoded */
-            glScaled(2. * 3.78 / displayManager->display->getW(),
-                     2. * 3.78 / displayManager->display->getH(),
+            glScaled(2. * 3.78 / displayManager->display.getW(),
+                     2. * 3.78 / displayManager->display.getH(),
                      1.);
             break;
         }

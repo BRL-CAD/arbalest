@@ -24,7 +24,7 @@ Document::Document(const char *filePath) {
     database->Load(filePath);
 
     display = new Display();
-    geometryOperationsManager = new GeometryOperationsManager(database);
+    geometryOperationsManager = new GeometryOperationsManager(*database);
     objectsTree = new ObjectsTreeView(*database);
     window = new QMdiSubWindow;
 
@@ -38,6 +38,15 @@ Document::Document(const char *filePath) {
     display->refresh();
     objectsTree->Rebuild();
 }
+
+
+Document::~Document() {
+    delete database;
+    delete display;
+    delete window;
+    std::cout<<"DEAD"<<std::endl;
+}
+
 
 
 std::vector<std::string> Document::getTopObjectsList() {
@@ -67,6 +76,6 @@ QMdiSubWindow *Document::getWindow() const {
     return window;
 }
 
-void Document::refreshGeometry() {
-    //display->onDatabaseOpen(database);
+void Document::onDatabaseUpdated() {
+    display->onDatabaseUpdated();
 }

@@ -23,7 +23,8 @@ private:
 
 public:
     explicit Document(const char *filePath);
-    void refreshGeometry();
+    virtual ~Document();
+    void onDatabaseUpdated();
 
     // getters
     GeometryOperationsManager *getGeometryOperationsManager() const;

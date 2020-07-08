@@ -8,9 +8,9 @@ using namespace BRLCAD;
 
 class GeometryOperationsManager{
 private:
-    MemoryDatabase * m_database;
+    MemoryDatabase & database;
 public:
-    GeometryOperationsManager(MemoryDatabase * m_database);
+    explicit GeometryOperationsManager(MemoryDatabase & m_database);
     void createSphere();
 };
 

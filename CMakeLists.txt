@@ -26,7 +26,6 @@ set(arbalest_Sources
         src/display/Display.cpp
         src/display/DisplayManager.cpp
         src/display/AxesRenderer.cpp
-        src/display/GraphicsViewOpenGL.cpp
         src/GeometryOperationsManager.cpp
         src/ArbalestSettings.cpp)
 
