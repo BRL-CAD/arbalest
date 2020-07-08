@@ -23,10 +23,10 @@
 #ifndef BRLCAD_RENDERABLE_H
 #define BRLCAD_RENDERABLE_H
 
-class Renderable {
+class Renderer {
 public:
     virtual void render() = 0;
-    virtual ~Renderable() {}
+    virtual ~Renderer() {}
 };
 
 #endif //BRLCAD_RENDERABLE_H

@@ -73,7 +73,7 @@ private:
     rt_wdb *database = nullptr;
     GeometryRenderer * geometryRenderer;
     AxesRenderer * axesRenderer;
-    std::vector<Renderable*> renderers;
+    std::vector<Renderer*> renderers;
 };
 
 

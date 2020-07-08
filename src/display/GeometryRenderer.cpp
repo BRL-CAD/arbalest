@@ -36,7 +36,7 @@ void GeometryRenderer::render() {
         drawDatabase();
         databaseUpdated = false;
     }
-    for (auto i:solids) {
+    for (int i:solids) {
         displayManager.drawDList(i);
     }
     displayManager.restoreState();
@@ -92,15 +92,15 @@ void GeometryRenderer::DatabaseWalker::ListTreeNode(const BRLCAD::Combination::C
  * Clears existing display lists, iterate through each solid and generates display lists by calling drawSolid on each
  */
 void GeometryRenderer::drawDatabase() {
-    for (auto i: solids){
+    for (int i: solids){
         displayManager.freeDLists(i,1);
     }
     solids.clear();
 
     BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
     while (it.Good()) {
-        auto objectName = std::string(it.Name());
-        ColorInfo colorInfo;
+        std::string objectName = std::string(it.Name());
+        ColorInfo colorInfo{};
         colorInfo.hasColor = false;
         DatabaseWalker walker(*database, *this, objectName, colorInfo);
         database->Get(it.Name(), walker);

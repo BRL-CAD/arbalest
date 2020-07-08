@@ -26,10 +26,10 @@
 OrthographicCamera::OrthographicCamera() = default;
 
 glm::mat4 OrthographicCamera::modelViewMatrix() const {
-    auto rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-    auto rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-    auto rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
-    auto rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
+    glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
 
     return glm::translate(rotationMatrix, eyePosition);
 }
@@ -64,10 +64,10 @@ void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY
         return;
     }
 
-    auto rotationMatrixAroundZ = glm::rotate(glm::radians(-angleAroundAxes.z), axisZ);
-    auto rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    auto rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    auto rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
+    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(-angleAroundAxes.z), axisZ);
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
 
     glm::vec3 cameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
     eyePosition += float(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * zoom;

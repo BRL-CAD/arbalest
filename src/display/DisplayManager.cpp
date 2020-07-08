@@ -37,12 +37,12 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
     switch (element->Type()) {
 
         case BRLCAD::VectorList::Element::LineDraw: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::LineDraw *> (element);
+            BRLCAD::VectorList::LineDraw *e = dynamic_cast<BRLCAD::VectorList::LineDraw *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::LineMove: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::LineMove *> (element);
+            BRLCAD::VectorList::LineMove *e = dynamic_cast<BRLCAD::VectorList::LineMove *> (element);
             if (vars->first == 0) glEnd();
             vars->first = 0;
 
@@ -71,7 +71,7 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::DisplaySpace: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::DisplaySpace *> (element);
+            BRLCAD::VectorList::DisplaySpace *e = dynamic_cast<BRLCAD::VectorList::DisplaySpace *> (element);
             glMatrixMode(GL_MODELVIEW);
             glGetDoublev(GL_MODELVIEW_MATRIX, vars->m);
 
@@ -89,7 +89,7 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::PolygonStart: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PolygonStart *> (element);
+            BRLCAD::VectorList::PolygonStart *e = dynamic_cast<BRLCAD::VectorList::PolygonStart *> (element);
             if (displayManager->dmLight && vars->mFlag) {
                 vars->mFlag = 0;
                 glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
@@ -124,7 +124,7 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::TriangleStart: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::TriangleStart *> (element);
+            BRLCAD::VectorList::TriangleStart *e = dynamic_cast<BRLCAD::VectorList::TriangleStart *> (element);
             if (displayManager->dmLight && vars->mFlag) {
                 vars->mFlag = 0;
                 glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, black);
@@ -160,27 +160,27 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::PolygonMove: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PolygonMove *> (element);
+            BRLCAD::VectorList::PolygonMove *e = dynamic_cast<BRLCAD::VectorList::PolygonMove *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::PolygonDraw: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PolygonDraw *> (element);
+            BRLCAD::VectorList::PolygonDraw *e = dynamic_cast<BRLCAD::VectorList::PolygonDraw *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::TriangleMove: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::TriangleMove *> (element);
+            BRLCAD::VectorList::TriangleMove *e = dynamic_cast<BRLCAD::VectorList::TriangleMove *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::TriangleDraw: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::TriangleDraw *> (element);
+            BRLCAD::VectorList::TriangleDraw *e = dynamic_cast<BRLCAD::VectorList::TriangleDraw *> (element);
             glVertex3dv(e->Point().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::PolygonEnd: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PolygonEnd *> (element);
+            BRLCAD::VectorList::PolygonEnd *e = dynamic_cast<BRLCAD::VectorList::PolygonEnd *> (element);
             glVertex3dv(e->Point().coordinates);
             glEnd();
             vars->first = 1;
@@ -190,17 +190,17 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::PolygonVertexNormal: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PolygonVertexNormal *> (element);
+            BRLCAD::VectorList::PolygonVertexNormal *e = dynamic_cast<BRLCAD::VectorList::PolygonVertexNormal *> (element);
             glNormal3dv(e->Normal().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::TriangleVertexNormal: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::TriangleVertexNormal *> (element);
+            BRLCAD::VectorList::TriangleVertexNormal *e = dynamic_cast<BRLCAD::VectorList::TriangleVertexNormal *> (element);
             glNormal3dv(e->Normal().coordinates);
             break;
         }
         case BRLCAD::VectorList::Element::PointDraw: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PointDraw *> (element);
+            BRLCAD::VectorList::PointDraw *e = dynamic_cast<BRLCAD::VectorList::PointDraw *> (element);
             if (vars->first == 0) glEnd();
             vars->first = 0;
             glBegin(GL_POINTS);
@@ -208,16 +208,16 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             break;
         }
         case BRLCAD::VectorList::Element::LineWidth: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::LineWidth *> (element);
-            auto lineWidth = static_cast<float>(e->Width());
+            BRLCAD::VectorList::LineWidth *e = dynamic_cast<BRLCAD::VectorList::LineWidth *> (element);
+            GLfloat lineWidth = static_cast<GLfloat>(e->Width());
             if (lineWidth > 0.0) {
                 glLineWidth(lineWidth);
             }
             break;
         }
         case BRLCAD::VectorList::Element::PointSize: {
-            auto *e = dynamic_cast<BRLCAD::VectorList::PointSize *> (element);
-            auto pointSize = static_cast<float>(e->Size());
+            BRLCAD::VectorList::PointSize *e = dynamic_cast<BRLCAD::VectorList::PointSize *> (element);
+            GLfloat pointSize = static_cast<GLfloat>(e->Size());
             if (pointSize > 0.0) {
                 glPointSize(pointSize);
             }

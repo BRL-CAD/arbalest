@@ -9,9 +9,9 @@ using namespace std;
 PerspectiveCamera::PerspectiveCamera() = default;
 
 glm::mat4 PerspectiveCamera::modelViewMatrix() const {
-    auto rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-    auto rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-    auto rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
     return glm::translate(rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ, eyePosition);
 }
 
@@ -46,9 +46,9 @@ void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & delta
         return;
     }
 
-    auto rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    auto rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    auto rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
     glm::vec3 PerspectiveCameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
     eyePosition += float(deltaX) * eyeMovementPerMouseDelta * PerspectiveCameraRightDirection;
@@ -58,9 +58,9 @@ void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & delta
 }
 
 void PerspectiveCamera::processZoomRequest(const int & deltaWheelAngle) {
-    auto rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    auto rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    auto rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
     glm::vec3 PerspectiveCameraForwardDirection(rotationMatrix * glm::vec4(-axisZ, 1.0));
 

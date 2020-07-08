@@ -51,7 +51,7 @@ void Display::paintGL() {
     displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
     displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix()));
 
-    for (auto i:renderers) i->render();
+    for (Renderer * i:renderers) i->render();
 }
 
 void Display::refresh() {
@@ -83,8 +83,8 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
 
         refresh();
 
-        auto topLeft = mapToGlobal(QPoint(0,0));
-        auto bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
+        QPoint topLeft = mapToGlobal(QPoint(0,0));
+        QPoint bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
 
         int newX = -1;
         int newY = -1;

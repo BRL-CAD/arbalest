@@ -30,7 +30,7 @@
 #include <raytrace.h>
 #include <rt/db_io.h>
 #include "DisplayManager.h"
-#include "Renderable.h"
+#include "Renderer.h"
 #include <rt/global.h>
 #include <brlcad/Combination.h>
 
@@ -42,7 +42,7 @@ struct db_full_path;
 struct rt_db_internal;
 union tree;
 
-class GeometryRenderer:public Renderable {
+class GeometryRenderer:public Renderer {
 public:
     explicit GeometryRenderer(DisplayManager &displayManager);
 

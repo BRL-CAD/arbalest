@@ -23,9 +23,9 @@
 #define BRLCAD_AXESRENDERER_H
 
 
-#include "Renderable.h"
+#include "Renderer.h"
 
-class AxesRenderer: public Renderable {
+class AxesRenderer: public Renderer {
     void render() override;
 };
 

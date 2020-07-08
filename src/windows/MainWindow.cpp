@@ -27,16 +27,16 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::openFile(const QString& filePath){
-    auto doc = Document(filePath.toUtf8().data());
+    Document document = Document(filePath.toUtf8().data());
 
-    ui->dockWidgetObjectsTree->setWidget(doc.getObjectsTree());
+    ui->dockWidgetObjectsTree->setWidget(document.getObjectsTree());
 
-    ui->documentArea->addSubWindow(doc.getWindow());
-    doc.getWindow()->show();
+    ui->documentArea->addSubWindow(document.getWindow());
+    document.getWindow()->show();
 }
 void MainWindow::openFileDialog()
 {
-    auto filePath = QFileDialog::getOpenFileName(ui->documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    QString filePath = QFileDialog::getOpenFileName(ui->documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     openFile(filePath);
 }
 
