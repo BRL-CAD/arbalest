@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include <Document.h>
 #include <SubWindow.h>
+#include <QtWidgets/QLabel>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -10,9 +11,10 @@ using namespace BRLCAD;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QApplication::setStyle("fusion");
-    showMaximized();
     setTheme();
+    showMaximized();
+
+    ui->dockWidgetObjectsTree->setWidget(new QTreeView()); //todo: free this
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
@@ -63,22 +65,26 @@ void MainWindow::saveFileDialog(){
 void MainWindow::setTheme() {
 
     // Hiden Window Title
-    //setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::FramelessWindowHint);
+    ui->documentArea->setBackground(QBrush(QColor("#FDFDFD")));
 
-    //setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    ui->documentArea->setDocumentMode(true);
 
-    //setWindowFlags(Qt::Popup);
+    QPushButton* menuTopRightButton = new QPushButton("X", menuBar());
+    QPixmap  pm = QPixmap (":/icons/archer.png").scaledToWidth(17);
+    QLabel * menuTopLeftButton = new QLabel;
+    menuTopLeftButton->setPixmap(pm);
+    menuTopLeftButton->setScaledContents(true);
 
-    this->setStyleSheet("background-color:#f2f2f2;");
-    //ui->documentArea->layout().setSpacing(0);
-    // Set widget on the top right corner
-    QPushButton* menuTopLeftButton = new QPushButton("TR", menuBar());
-    menuBar()->setCornerWidget(menuTopLeftButton, Qt::TopRightCorner);
-    //menuTopLeftButton->setFlat(true);
-    //menuTopLeftButton->setStyle();
+    menuBar()->setCornerWidget(menuTopLeftButton, Qt::TopLeftCorner);
+    menuBar()->setCornerWidget(menuTopRightButton, Qt::TopRightCorner);
 
+    centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
 
-//    QFile stylesheet_file(":qdarkstyle/qss/MaterialDark.qss");
-//    stylesheet_file.open(QIODevice::ReadOnly);
-//    this->setStyleSheet(QLatin1String(stylesheet_file.readAll()));
+    // Load an application style
+    QFile styleFile( ":styles/arbalest_light.qss" );
+    styleFile.open( QFile::ReadOnly );
+    QString style( styleFile.readAll() );
+    this->setStyleSheet( style );
+    styleFile.close();
 }

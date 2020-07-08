@@ -1,0 +1,26 @@
+
+QMainWindow::separator {
+    width: 1px;
+    height: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+
+QMainWindow {
+	background-color:#f2f2f2;
+}
+
+
+QLabel {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+QMenuBar {
+	background-color:#f2f2f2;
+	color: #000000;
+    min-height: 24px;
+	border-bottom-color: #CDCDCD;
+    border-bottom-width: 1px;
+    border-style: solid;
+}
