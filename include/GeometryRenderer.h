@@ -22,25 +22,9 @@
 #ifndef BRLCAD_GEOMETRYRENDERER_H
 #define BRLCAD_GEOMETRYRENDERER_H
 
-
-#include <rt/wdb.h>
-#include <rt/tree.h>
-#include <rt/db_instance.h>
-#include <rt/functab.h>
-#include <raytrace.h>
-#include <rt/db_io.h>
 #include "DisplayManager.h"
 #include "Renderer.h"
-#include <rt/global.h>
 #include <brlcad/Combination.h>
-
-struct rt_i;
-struct bu_list;
-struct bn_vlist;
-struct db_tree_state;
-struct db_full_path;
-struct rt_db_internal;
-union tree;
 
 class GeometryRenderer:public Renderer {
 public:

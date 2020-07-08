@@ -131,7 +131,7 @@ void Display::mousePressEvent(QMouseEvent *event) {
     prevMouseY = event->y();
 }
 
-void Display::mouseReleaseEvent(QMouseEvent *UNUSED(event)) {
+void Display::mouseReleaseEvent(QMouseEvent *event) {
     prevMouseX = -1;
     prevMouseY = -1;
 }

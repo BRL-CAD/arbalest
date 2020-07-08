@@ -3,9 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include<iostream>
-using namespace std;
-
 PerspectiveCamera::PerspectiveCamera() = default;
 
 glm::mat4 PerspectiveCamera::modelViewMatrix() const {
@@ -37,8 +34,6 @@ void PerspectiveCamera::processRotateRequest(const int &deltaX, const int &delta
         angleAroundAxes.z += deltaAngleX * eyeRotationPerMouseDelta;
     }
     angleAroundAxes.x += deltaAngleY * eyeRotationPerMouseDelta;
-
-    cout << angleAroundAxes.x << " " << angleAroundAxes.y << " " << angleAroundAxes.z << endl;
 }
 
 void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & deltaY){

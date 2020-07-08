@@ -1,13 +1,9 @@
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QPushButton>
 #include "MainWindow.h"
-#include <ArbalestSettings.h>
-#include <Display.h>
-#include <iostream>
 #include <Document.h>
 #include "ui_MainWindow.h"
-#include "GraphicsViewOpenGL.h"
 
-using namespace std;
 using namespace BRLCAD;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -18,11 +14,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setTheme();
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
-    connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveAsFile);
+    connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
 }
 
 MainWindow::~MainWindow()
 {
+    for (std::pair<const int, Document *> pair: documents){
+        Document * document = pair.second;
+        delete document;
+    }
+
     delete ui;
 }
 
@@ -33,6 +34,8 @@ void MainWindow::openFile(const QString& filePath){
 
     ui->documentArea->addSubWindow(document.getWindow());
     document.getWindow()->show();
+
+    documents[documentsCount++] = &document;
 }
 
 void MainWindow::openFileDialog()
@@ -41,7 +44,7 @@ void MainWindow::openFileDialog()
     openFile(filePath);
 }
 
-void MainWindow::saveAsFile(){
+void MainWindow::saveFileDialog(){
     QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     //database->Save(filePath.toUtf8().data());
 }

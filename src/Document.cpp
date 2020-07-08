@@ -3,20 +3,8 @@
 //
 
 #include <Document.h>
-#include <ArbalestSettings.h>
-#include "rt/vlist.h"
-#include <brlcad/cicommon.h>
-#include <brlcad/Object.h>
 #include <iostream>
 #include <ObjectsTreeView.h>
-#include <QtOpenGL/QtOpenGL>
-
-#include <gl/GL.h>
-#include "vmath.h"
-#include <bn.h>
-#include "raytrace.h"
-#include <brlcad/ConstDatabase.h>
-#include <brlcad/MemoryDatabase.h>
 
 
 Document::Document(const char *filePath) {
@@ -44,7 +32,6 @@ Document::~Document() {
     delete database;
     delete display;
     delete window;
-    std::cout<<"DEAD"<<std::endl;
 }
 
 

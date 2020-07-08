@@ -27,7 +27,6 @@
 #include "Camera.h"
 #include "AxesRenderer.h"
 #include <QMouseEvent>
-#include <rt/db_instance.h>
 #include <brlcad/MemoryDatabase.h>
 
 class DisplayManager;

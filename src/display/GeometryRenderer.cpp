@@ -20,7 +20,6 @@
 /** @file GeometryRenderer.cpp */
 
 #include <brlcad/Combination.h>
-#include "common.h"
 #include "GeometryRenderer.h"
 
 GeometryRenderer::GeometryRenderer(DisplayManager &displayManager) : displayManager(displayManager) {}

@@ -6,7 +6,7 @@
 #define RT3_DOCUMENT_H
 
 
-#include <QtOpenGL/QtOpenGL>
+#include <QtWidgets/QMdiSubWindow>
 #include "GeometryOperationsManager.h"
 #include "Display.h"
 #include "ObjectsTreeView.h"

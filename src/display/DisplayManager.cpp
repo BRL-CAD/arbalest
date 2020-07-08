@@ -19,6 +19,7 @@
  */
 /** @file DisplayManager.cpp */
 
+#include <brlcad/vmath.h>
 #include "DisplayManager.h"
 
 #define DM_SOLID_LINE 0
