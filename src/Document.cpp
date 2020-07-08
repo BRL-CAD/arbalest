@@ -5,16 +5,17 @@
 #include <Document.h>
 #include <iostream>
 #include <ObjectsTreeView.h>
+#include <SubWindow.h>
 
 
-Document::Document(const char *filePath) {
+Document::Document(const char *filePath, int documentId) : documentId(documentId) {
     database =  new BRLCAD::MemoryDatabase();
     database->Load(filePath);
 
     display = new Display();
     geometryOperationsManager = new GeometryOperationsManager(*database);
     objectsTree = new ObjectsTreeView(*database);
-    window = new QMdiSubWindow;
+    window = new SubWindow(documentId);
 
     window->setWidget(display);
     window->setAttribute(Qt::WA_DeleteOnClose);

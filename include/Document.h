@@ -20,9 +20,10 @@ private:
     QMdiSubWindow * window;
     const int windowMinimumHeight = 500;
     const int windowMinimumWidth = 700;
+    const int documentId;
 
 public:
-    explicit Document(const char *filePath);
+    explicit Document(const char *filePath, int documentId);
     virtual ~Document();
     void onDatabaseUpdated();
 

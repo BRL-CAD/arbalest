@@ -28,7 +28,7 @@ private:
     int documentsCount = 0;
 
     // The ID of the active document.
-    int activeDocument = -1;
+    int activeDocumentId = -1;
 
     void openFileDialog();
     void saveFileDialog();
@@ -37,5 +37,8 @@ private:
 protected:
 
     void setTheme();
+
+public slots:
+    void onActiveDocumentChanged(QMdiSubWindow *window);
 };
 #endif // MAINWINDOW_H

@@ -2,6 +2,7 @@
 #include <QtWidgets/QPushButton>
 #include "MainWindow.h"
 #include <Document.h>
+#include <SubWindow.h>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -15,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
+    connect(ui->documentArea, &QMdiArea::subWindowActivated, this, &MainWindow::onActiveDocumentChanged);
 }
 
 MainWindow::~MainWindow()
@@ -27,21 +29,30 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::openFile(const QString& filePath){
-    Document & document = * (new Document(filePath.toUtf8().data()));
+void MainWindow::onActiveDocumentChanged(QMdiSubWindow * window){
+    SubWindow * subWindow = dynamic_cast<SubWindow*>(window);
 
-    ui->dockWidgetObjectsTree->setWidget(document.getObjectsTree());
+    if (subWindow && subWindow->getDocumentId() != activeDocumentId){
+        activeDocumentId = subWindow->getDocumentId();
+        ui->dockWidgetObjectsTree->setWidget(documents[activeDocumentId]->getObjectsTree());
+    }
+}
+
+void MainWindow::openFile(const QString& filePath){
+    Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
+    documents[documentsCount++] = &document;
 
     ui->documentArea->addSubWindow(document.getWindow());
     document.getWindow()->show();
 
-    documents[documentsCount++] = &document;
 }
 
 void MainWindow::openFileDialog()
 {
     QString filePath = QFileDialog::getOpenFileName(ui->documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    openFile(filePath);
+    if (!filePath.isEmpty()){
+        openFile(filePath);
+    }
 }
 
 void MainWindow::saveFileDialog(){
