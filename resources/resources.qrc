@@ -11,6 +11,7 @@
   <qresource>
     <file>styles/arbalest_light.qss</file>
     <file>icons/archer.png</file>
+    <file>icons/close.png</file>
   </qresource>
 
 </RCC>

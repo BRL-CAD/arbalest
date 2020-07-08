@@ -6,14 +6,35 @@ QMainWindow::separator {
     padding: 0px;
 }
 
+QPushButton {
+    margin: 0px;
+    padding: 0px;
+    border-width: 0px;
+    border-style: solid;
+}
+
 QMainWindow {
 	background-color:#f2f2f2;
 }
 
+#closeButton{
+    padding: 7px;
+	background-color:transparent;
 
+}
+#closeButton:hover
+{
+    background-color:#E81123;
+}
+
+#closeButton:pressed
+{
+    background-color:#F1707A;
+}
 QLabel {
     padding-left: 8px;
     padding-right: 8px;
+    padding-bottom: 3px;
 }
 
 QMenuBar {
@@ -23,4 +44,6 @@ QMenuBar {
 	border-bottom-color: #CDCDCD;
     border-bottom-width: 1px;
     border-style: solid;
+    margin: 0px;
+    padding: 0px;
 }

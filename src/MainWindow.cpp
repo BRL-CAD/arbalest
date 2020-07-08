@@ -70,14 +70,18 @@ void MainWindow::setTheme() {
 
     ui->documentArea->setDocumentMode(true);
 
-    QPushButton* menuTopRightButton = new QPushButton("X", menuBar());
-    QPixmap  pm = QPixmap (":/icons/archer.png").scaledToWidth(17);
-    QLabel * menuTopLeftButton = new QLabel;
-    menuTopLeftButton->setPixmap(pm);
-    menuTopLeftButton->setScaledContents(true);
+    QLabel * applicationIcon = new QLabel;
+    applicationIcon->setPixmap(QPixmap (":/icons/archer.png").scaledToWidth(17));
+    applicationIcon->setScaledContents(true);
+    menuBar()->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
 
-    menuBar()->setCornerWidget(menuTopLeftButton, Qt::TopLeftCorner);
-    menuBar()->setCornerWidget(menuTopRightButton, Qt::TopRightCorner);
+
+    QPushButton* closeButton = new QPushButton( menuBar());
+    closeButton->setIcon(QIcon(":/icons/close.png"));
+    closeButton->setObjectName("closeButton");
+    connect(closeButton,  &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
+    menuBar()->setCornerWidget(closeButton, Qt::TopRightCorner);
+
 
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
 
@@ -87,4 +91,8 @@ void MainWindow::setTheme() {
     QString style( styleFile.readAll() );
     this->setStyleSheet( style );
     styleFile.close();
+}
+
+void MainWindow::closeButtonPressed(){
+    close();
 }

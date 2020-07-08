@@ -40,5 +40,6 @@ protected:
 
 public slots:
     void onActiveDocumentChanged(QMdiSubWindow *window);
+    void closeButtonPressed();
 };
 #endif // MAINWINDOW_H
