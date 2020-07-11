@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
     connect(ui->documentArea, &QMdiArea::subWindowActivated, this, &MainWindow::onActiveDocumentChanged);
+    ui->menubar->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -64,26 +65,42 @@ void MainWindow::saveFileDialog(){
 
 void MainWindow::setTheme() {
 
-    // Hiden Window Title
+    // Hide window title bar
     setWindowFlags(Qt::FramelessWindowHint);
     ui->documentArea->setBackground(QBrush(QColor("#FDFDFD")));
+    centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
 
-    ui->documentArea->setDocumentMode(true);
-
-    QLabel * applicationIcon = new QLabel;
-    applicationIcon->setPixmap(QPixmap (":/icons/archer.png").scaledToWidth(17));
-    applicationIcon->setScaledContents(true);
+    QPushButton* applicationIcon = new QPushButton( menuBar());
+    applicationIcon->setIcon(QIcon(":/icons/archer.png"));
+    applicationIcon->setObjectName("minimizeButton");
     menuBar()->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
 
+    QHBoxLayout *layoutTopRightWidget = new QHBoxLayout;
+    layoutTopRightWidget->setContentsMargins(0,0,0,0);
+    QWidget * topRightWidget = new QWidget;
+    topRightWidget->setLayout(layoutTopRightWidget);
+    menuBar()->setCornerWidget(topRightWidget, Qt::TopRightCorner);
+    layoutTopRightWidget->setSpacing(0);
 
-    QPushButton* closeButton = new QPushButton( menuBar());
+    QPushButton* minimizeButton = new QPushButton( topRightWidget);
+    minimizeButton->setIcon(QIcon(":/icons/minimize.png"));
+    minimizeButton->setObjectName("minimizeButton");
+    connect(minimizeButton,  &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
+    layoutTopRightWidget->addWidget(minimizeButton);
+
+    maximizeButton = new QPushButton( topRightWidget);
+    maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+    maximizeButton->setObjectName("maximizeButton");
+    connect(maximizeButton,  &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
+    layoutTopRightWidget->addWidget(maximizeButton);
+
+    QPushButton* closeButton = new QPushButton( topRightWidget);
     closeButton->setIcon(QIcon(":/icons/close.png"));
     closeButton->setObjectName("closeButton");
     connect(closeButton,  &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
-    menuBar()->setCornerWidget(closeButton, Qt::TopRightCorner);
+    layoutTopRightWidget->addWidget(closeButton);
 
-
-    centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->dockWidgetObjectsTree->setTitleBarWidget(new QWidget());
 
     // Load an application style
     QFile styleFile( ":styles/arbalest_light.qss" );
@@ -95,4 +112,54 @@ void MainWindow::setTheme() {
 
 void MainWindow::closeButtonPressed(){
     close();
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    static QPoint dragPosition{};
+    if (watched == ui->menubar)
+    {
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
+            if (mouse_event->button() == Qt::LeftButton)
+            {
+                dragPosition = mouse_event->globalPos() - frameGeometry().topLeft();
+                return false;
+            }
+        }
+        else if (event->type() == QEvent::MouseMove)
+        {
+            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
+            if (mouse_event->buttons() & Qt::LeftButton)
+            {
+                if(isMaximized()) return false;//showNormal();
+                //todo showNormal when dragged
+                move(mouse_event->globalPos() - dragPosition);
+                return false;
+            }
+        }
+
+
+    }
+    return false;
+}
+void MainWindow::changeEvent( QEvent* e ) {
+    if (e->type() == QEvent::WindowStateChange) {
+        if (this->windowState() == Qt::WindowMaximized) {
+            maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+        }
+        else{
+            maximizeButton->setIcon(QIcon(":/icons/maximize.png"));
+        }
+    }
+}
+
+void MainWindow::minimizeButtonPressed() {
+    showMinimized();
+}
+
+void MainWindow::maximizeButtonPressed() {
+    if(!isMaximized())showMaximized();
+    else showNormal();
 }

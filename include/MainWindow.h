@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 #include <QtWidgets/QMdiArea>
 #include <unordered_map>
 #include "Document.h"
@@ -34,9 +35,17 @@ private:
     void saveFileDialog();
     void openFile(const QString& filePath);
 
+
+    void minimizeButtonPressed();
+    void maximizeButtonPressed();
+
+    QPushButton * maximizeButton;
+
 protected:
 
     void setTheme();
+    void changeEvent(QEvent *e) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
     void onActiveDocumentChanged(QMdiSubWindow *window);

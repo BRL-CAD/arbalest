@@ -8,7 +8,8 @@ set(arbalest_Include_Dirs
         "src/windows"
         "include"
         "dependancies/glm/"
-        ${BRLCAD_INCLUDE_DIRS})
+        ${BRLCAD_INCLUDE_DIRS}
+        ${RT3_SOURCE_DIR}/include/brlcad)
 
 set(arbalest_Sources
         src/MainWindow.cpp
