@@ -291,6 +291,13 @@ void DisplayManager::setFGColor(float r, float g, float b, float transparency) {
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseColor);
 }
 
+
+void DisplayManager::setBGColor(float r, float g, float b) {
+    bgColor[0] = r;
+    bgColor[1] = g;
+    bgColor[2] = b;
+}
+
 /*
  * Set the style of the line
  *

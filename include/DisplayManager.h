@@ -35,6 +35,7 @@ public:
     // most of the methods below correspond to a method with a similar name from libdm
     void drawVList(BRLCAD::VectorList *vp);
     void setFGColor(float r, float g, float b, float transparency);
+    void setBGColor(float r, float g, float b);
     void setLineAttr(int width, int style);
     void setLineStyle(int style);
     void setLineWidth(int width);

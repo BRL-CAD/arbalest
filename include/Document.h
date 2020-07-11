@@ -17,10 +17,10 @@ private:
     GeometryOperationsManager *geometryOperationsManager;
     Display *display;
     ObjectsTreeView *objectsTree;
-    QMdiSubWindow * window;
     const int windowMinimumHeight = 500;
     const int windowMinimumWidth = 700;
     const int documentId;
+    const QString filePath;
 
 public:
     explicit Document(const char *filePath, int documentId);
@@ -31,8 +31,8 @@ public:
     GeometryOperationsManager *getGeometryOperationsManager() const;
     Display *getDisplay() const;
     ObjectsTreeView *getObjectsTree() const;
-    QMdiSubWindow *getWindow() const;
     std::vector<std::string> getTopObjectsList();
+    const QString &getFilePath() const;
 };
 
 

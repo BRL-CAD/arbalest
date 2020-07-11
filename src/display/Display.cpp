@@ -29,7 +29,7 @@
 
 using namespace std;
 
-Display::Display() {
+Display::Display(int documentId):documentId(documentId) {
     camera = new OrthographicCamera();
     displayManager = new DisplayManager(*this);
     geometryRenderer = new GeometryRenderer(*displayManager);
@@ -37,6 +37,8 @@ Display::Display() {
 
     renderers.push_back(geometryRenderer);
     renderers.push_back(axesRenderer);
+
+    displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
 }
 
 Display::~Display() {
@@ -182,4 +184,8 @@ void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
     geometryRenderer->setDatabase(database);
     onDatabaseUpdated();
     update();
+}
+
+const int Display::getDocumentId() const {
+    return documentId;
 }

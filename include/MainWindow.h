@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QtWidgets/QMdiArea>
 #include <unordered_map>
+#include <QtWidgets/QLabel>
 #include "Document.h"
 
 QT_BEGIN_NAMESPACE
@@ -40,6 +41,7 @@ private:
     void maximizeButtonPressed();
 
     QPushButton * maximizeButton;
+    QLabel *statusBarPathLabel;
 
 protected:
 
@@ -48,7 +50,8 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
-    void onActiveDocumentChanged(QMdiSubWindow *window);
+    void onActiveDocumentChanged(int newIndex);
     void closeButtonPressed();
+    void tabCloseRequested(int i);
 };
 #endif // MAINWINDOW_H

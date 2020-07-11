@@ -3,7 +3,7 @@ QMainWindow::separator { width: 1px; background-color: #CDCDCD; }
 
 QMainWindow { background-color:#f2f2f2; }
 
-QTreeView { border-style: solid;}
+QTreeView { border-style: solid; padding: 5px; background-color:#fafafa;}
 
 QMenuBar {
 	background-color:#f2f2f2;
@@ -13,11 +13,63 @@ QMenuBar {
     border-style: solid;
 }
 
+QStatusBar {
+	border-top-color: #CDCDCD;
+    border-top-width: 1px;
+    border-style: solid;
+    min-height: 21px;
+}
+
+#statusBarPathLabel {
+    color: #222222;
+    font-size: 11px;
+    padding-left: 8px;
+    padding-right: 20px;
+}
+
+#objectsTreeLabel {
+    color: black;
+    font-size: 11px;
+
+    background-color: #dddddd;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+	border-bottom-color: #CDCDCD;
+    border-bottom-width: 1px;
+    border-style: solid;
+}
+
+QTabWidget::pane {
+    background-color: #f2f2f2;
+    border-style: solid;
+}
+
+QTabBar::tab {
+    padding-left: 25px;
+    padding-right: 8px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: #f2f2f2;
+    font-size: 11px;
+}
+
+QTabBar::tab:selected {
+    background: #FFFFFF;
+	border-bottom-color: blue;
+    border-bottom-width: 2px;
+    border-style: solid;
+}
+QTabBar::close-button {
+    image: url(:/icons/close-smaller.png);
+    subcontrol-position: right;
+}
+
 /*
 Styling for the Minimize, Maximize and close buttons in the nemu bar. We have to do the styling manually since we do
 not use the system title bar
 */
-#minimizeButton, #maximizeButton, #closeButton{
+#applicationIcon, #minimizeButton, #maximizeButton, #closeButton{
     border-style: solid;
     padding: 7px;
 	background-color:transparent;
@@ -27,3 +79,4 @@ not use the system title bar
 #closeButton:hover                                  { background-color:#E81123; }
 #closeButton:pressed                                { background-color:#F1707A; }
 /* ------------------------------------------------------------------------------------------------------------- */
+

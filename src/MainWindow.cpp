@@ -2,7 +2,6 @@
 #include <QtWidgets/QPushButton>
 #include "MainWindow.h"
 #include <Document.h>
-#include <SubWindow.h>
 #include <QtWidgets/QLabel>
 #include "ui_MainWindow.h"
 
@@ -18,7 +17,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
-    connect(ui->documentArea, &QMdiArea::subWindowActivated, this, &MainWindow::onActiveDocumentChanged);
+    connect(ui->documentArea, &QTabWidget::currentChanged, this, &MainWindow::onActiveDocumentChanged);
+    connect(ui->documentArea, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
     ui->menubar->installEventFilter(this);
 }
 
@@ -32,22 +32,28 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onActiveDocumentChanged(QMdiSubWindow * window){
-    SubWindow * subWindow = dynamic_cast<SubWindow*>(window);
 
-    if (subWindow && subWindow->getDocumentId() != activeDocumentId){
-        activeDocumentId = subWindow->getDocumentId();
+void MainWindow::onActiveDocumentChanged(int newIndex){
+    Display * display = dynamic_cast<Display*>(ui->documentArea->widget(newIndex));
+    if (display == nullptr) return;
+    if (display->getDocumentId() != activeDocumentId){
+        activeDocumentId = display->getDocumentId();
         ui->dockWidgetObjectsTree->setWidget(documents[activeDocumentId]->getObjectsTree());
+        statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath());
     }
+}
+
+void MainWindow::tabCloseRequested(int i){
+    ui->documentArea->removeTab(i);
 }
 
 void MainWindow::openFile(const QString& filePath){
     Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
     documents[documentsCount++] = &document;
 
-    ui->documentArea->addSubWindow(document.getWindow());
-    document.getWindow()->show();
+    QString filename(QFileInfo(filePath).fileName());
 
+    ui->documentArea->addTab(document.getDisplay(),filename);
 }
 
 void MainWindow::openFileDialog()
@@ -67,12 +73,13 @@ void MainWindow::setTheme() {
 
     // Hide window title bar
     setWindowFlags(Qt::FramelessWindowHint);
-    ui->documentArea->setBackground(QBrush(QColor("#FDFDFD")));
+
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->documentArea->setContentsMargins(0,0,0,0);
 
     QPushButton* applicationIcon = new QPushButton( menuBar());
     applicationIcon->setIcon(QIcon(":/icons/archer.png"));
-    applicationIcon->setObjectName("minimizeButton");
+    applicationIcon->setObjectName("applicationIcon");
     menuBar()->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
 
     QHBoxLayout *layoutTopRightWidget = new QHBoxLayout;
@@ -81,6 +88,10 @@ void MainWindow::setTheme() {
     topRightWidget->setLayout(layoutTopRightWidget);
     menuBar()->setCornerWidget(topRightWidget, Qt::TopRightCorner);
     layoutTopRightWidget->setSpacing(0);
+
+    statusBarPathLabel = new QLabel("No document open");
+    statusBarPathLabel->setObjectName("statusBarPathLabel");
+    statusBar()->addWidget(statusBarPathLabel);
 
     QPushButton* minimizeButton = new QPushButton( topRightWidget);
     minimizeButton->setIcon(QIcon(":/icons/minimize.png"));
@@ -100,13 +111,15 @@ void MainWindow::setTheme() {
     connect(closeButton,  &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
     layoutTopRightWidget->addWidget(closeButton);
 
-    ui->dockWidgetObjectsTree->setTitleBarWidget(new QWidget());
+    QLabel * objectsTreeLabel = new QLabel("Objects");
+    objectsTreeLabel->setObjectName("objectsTreeLabel");
+    ui->dockWidgetObjectsTree->setTitleBarWidget(objectsTreeLabel);
 
     // Load an application style
     QFile styleFile( ":styles/arbalest_light.qss" );
     styleFile.open( QFile::ReadOnly );
     QString style( styleFile.readAll() );
-    this->setStyleSheet( style );
+    qApp->setStyleSheet( style );
     styleFile.close();
 }
 

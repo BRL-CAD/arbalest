@@ -36,7 +36,7 @@ class GeometryRenderer;
 class Display : public QOpenGLWidget{
 
 public:
-    Display();
+    Display(int documentId);
     virtual ~Display();
 
     Camera *camera;
@@ -46,6 +46,7 @@ public:
 
     int getW() const;
     int getH() const;
+    const int getDocumentId() const;
 
 protected:
     void resizeGL(int w, int h) override;
@@ -57,13 +58,16 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *k) override ;
 
+
 private:
+    const int documentId;
     int w = 400;
     int h = 400;
     int prevMouseX = -1;
     int prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
+    float bgColor[3] = {.2,.2,.4};
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;

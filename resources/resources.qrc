@@ -12,6 +12,7 @@
     <file>styles/arbalest_light.qss</file>
     <file>icons/archer.png</file>
     <file>icons/close.png</file>
+    <file>icons/close-smaller.png</file>
     <file>icons/minimize.png</file>
     <file>icons/maximize.png</file>
     <file>icons/restore_down.png</file>
