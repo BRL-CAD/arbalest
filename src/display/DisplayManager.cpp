@@ -19,7 +19,7 @@
  */
 /** @file DisplayManager.cpp */
 
-#include <brlcad/vmath.h>
+#include <QMatrix4x4>
 #include "DisplayManager.h"
 
 #define DM_SOLID_LINE 0
@@ -74,15 +74,16 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
         case BRLCAD::VectorList::Element::DisplaySpace: {
             BRLCAD::VectorList::DisplaySpace *e = dynamic_cast<BRLCAD::VectorList::DisplaySpace *> (element);
             glMatrixMode(GL_MODELVIEW);
-            glGetDoublev(GL_MODELVIEW_MATRIX, vars->m);
-
-            MAT_TRANSPOSE(vars->mt, vars->m);
-            MAT4X3PNT(vars->tlate, vars->mt, e->ReferencePoint().coordinates);
-
+            GLfloat _m[16];
+            glGetFloatv(GL_MODELVIEW_MATRIX, _m);
+            QMatrix4x4 m(_m);
+            QVector3D point(e->ReferencePoint().coordinates[0], e->ReferencePoint().coordinates[1], e->ReferencePoint().coordinates[2]);
+            QVector3D tlate = m.transposed() * point;
+            //todo changes to the last few lines are not yet tested.
             class Display;
             glPushMatrix();
             glLoadIdentity();
-            glTranslated(vars->tlate[0], vars->tlate[1], vars->tlate[2]);
+            glTranslated(tlate[0], tlate[1], tlate[2]);
             /* 96 dpi = 3.78 pixel/mm hardcoded */
             glScaled(2. * 3.78 / displayManager->display.getW(),
                      2. * 3.78 / displayManager->display.getH(),

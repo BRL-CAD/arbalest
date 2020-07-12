@@ -56,9 +56,6 @@ public:
         struct DrawVlistVars{
             int first = 1;
             int mFlag = 1;
-            GLdouble m[16]{};
-            GLdouble mt[16]{};
-            GLdouble tlate[3]{};
         };
         const DisplayManager * displayManager;
         DrawVlistVars * vars;

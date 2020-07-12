@@ -1,0 +1,1 @@
+This directory contains files that are not used in the building process. (ex: GIMP project files used to create graphics)

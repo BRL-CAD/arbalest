@@ -28,19 +28,19 @@ QStatusBar {
 }
 
 #objectsTreeLabel {
-    color: black;
+    color: white;
     font-size: 11px;
 
-    background-color: #dddddd;
+    background-color: #007ACC;
     padding-top: 2px;
     padding-bottom: 2px;
     padding-left: 8px;
 	border-bottom-color: #CDCDCD;
-    border-bottom-width: 1px;
+    border-bottom-width: 0px;
     border-style: solid;
 }
 
-QTabWidget::pane {
+#documentArea::pane {
     background-color: #f2f2f2;
     border-style: solid;
 }
