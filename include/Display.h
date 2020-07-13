@@ -67,7 +67,7 @@ private:
     int prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
-    float bgColor[3] = {.2,.2,.4};
+    float bgColor[3] = {.9,.9,.9};
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;

@@ -9,7 +9,11 @@
   </qresource>
 
   <qresource>
-    <file>styles/arbalest_light.qss</file>
+    <file>themes/arbalest_light.theme</file>
+  </qresource>
+
+  <qresource>
+    <file>styles/arbalest_simple.qss</file>
     <file>icons/archer.png</file>
     <file>icons/close.png</file>
     <file>icons/close-smaller.png</file>

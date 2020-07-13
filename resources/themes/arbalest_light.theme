@@ -1,0 +1,15 @@
+
+
+$Color-Main               : #F2F2F2;  // Used as the main background color. Used in main window, menu bar, status bar etc.
+$Color-Secondary          : #FAFAFA;  // Used as the background color for some main UI components like objects tree
+$Color-SeparatorLine      : #CDCDCD;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
+$Color-DockableHeader     : #007ACC;  // Titlebar color of all dockable widgets like objects tree
+$Color-DockableHeaderText : #FFFFFF;  // Titlebar text color of all dockable widgets like objects tree
+$Color-StatusBarText      : #222222;  // Text color for all text in status bar
+$Color-SelectedTab        : #FFFFFF;  // Background color for selected tab of the file switcher tab bar
+$Color-SelectedTabLine    : #0000FF;  // Bottom border color for selected tab of the file switcher tab bar
+
+$Color-MinMaxHover        : #DADADA;  // Minimize maximize buttons background color when hover
+$Color-MinMaxPressed      : #DFDFDF;  // Minimize maximize buttons background color when pressed
+$Color-CloseHover         : #E81123;  // Close button background color when hover
+$Color-ClosePressed       : #F1707A;  // Close button background color when pressed

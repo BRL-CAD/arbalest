@@ -17,8 +17,6 @@ private:
     GeometryOperationsManager *geometryOperationsManager;
     Display *display;
     ObjectsTreeView *objectsTree;
-    const int windowMinimumHeight = 500;
-    const int windowMinimumWidth = 700;
     const int documentId;
     const QString filePath;
 

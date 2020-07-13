@@ -1,0 +1,90 @@
+
+QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
+
+QMainWindow { background-color:"$Color-Main"; }
+
+QMenuBar {
+	background-color:"$Color-Main";
+    min-height: 24px;
+	border-bottom-color: "$Color-SeparatorLine";
+    border-bottom-width: 1px;
+    border-style: solid;
+}
+
+/* Status bar --------------------------------------------------------------------------------------------------------*/
+QStatusBar {
+	border-top-color: "$Color-SeparatorLine";
+    border-top-width: 1px;
+    border-style: solid;
+    min-height: 21px;
+}
+
+#statusBarPathLabel {
+    color: "$Color-StatusBarText";
+    font-size: 11px;
+    padding-left: 8px;
+    padding-right: 20px;
+}
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+
+/* Object tree -------------------------------------------------------------------------------------------------------*/
+#objectsTreeView { border-style: solid; padding: 5px; background-color:"$Color-Secondary";}
+
+#objectsTreeLabel {
+    color: "$Color-DockableHeaderText";
+    font-size: 11px;
+    background-color: "$Color-DockableHeader";
+    min-height: 17px;
+    padding-left: 8px;
+    border-bottom-width: 0px;
+    border-style: solid;
+}
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+/* Document area and its tab bar -------------------------------------------------------------------------------------*/
+#documentArea::pane {
+    background-color: "$Color-Main";
+    border-style: solid;
+}
+
+#documentAreaTabBar::tab {
+    padding-left: 25px;
+    padding-right: 8px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: "$Color-Main";
+    font-size: 11px;
+}
+
+#documentAreaTabBar::tab:selected {
+    background: "$Color-SelectedTab";
+	border-bottom-color: "$Color-SelectedTabLine";
+    border-bottom-width: 2px;
+    border-style: solid;
+}
+#documentAreaTabBar::close-button {
+    image: url(:/icons/close-smaller.png);
+    subcontrol-position: right;
+}
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+/*
+Styling for the Minimize, Maximize and close buttons in the nemu bar. We have to do the styling manually since we do
+not use the system title bar
+*/
+#applicationIcon, #minimizeButton, #maximizeButton, #closeButton{
+    border-style: solid;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 13px;
+    padding-right: 13px;
+	background-color:"$Color-Main";
+}
+#minimizeButton { padding-top: 3px; padding-bottom: 11px;}
+#minimizeButton:hover,   #maximizeButton:hover      { background-color:"$Color-MinMaxHover"; }
+#minimizeButton:pressed, #maximizeButton:pressed    { background-color:"$Color-MinMaxPressed"; }
+#closeButton:hover                                  { background-color:"$Color-CloseHover"; }
+#closeButton:pressed                                { background-color:"$Color-ClosePressed"; }
+/* ------------------------------------------------------------------------------------------------------------------ */
+

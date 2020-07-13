@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include <Document.h>
 #include <QtWidgets/QLabel>
+#include <include/QSSPreprocessor.h>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -13,7 +14,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setTheme();
     showMaximized();
 
-    ui->dockWidgetObjectsTree->setWidget(new QTreeView()); //todo: free this
+    QTreeView *emptyTreeView = new QTreeView(); //todo: free this
+    emptyTreeView->setObjectName("objectsTreeView");
+    ui->dockWidgetObjectsTree->setWidget(emptyTreeView);
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
@@ -76,6 +79,7 @@ void MainWindow::setTheme() {
 
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
     ui->documentArea->setContentsMargins(0,0,0,0);
+    ui->documentArea->tabBar()->setObjectName("documentAreaTabBar");
 
     QPushButton* applicationIcon = new QPushButton( menuBar());
     applicationIcon->setIcon(QIcon(":/icons/archer.png"));
@@ -116,11 +120,20 @@ void MainWindow::setTheme() {
     ui->dockWidgetObjectsTree->setTitleBarWidget(objectsTreeLabel);
 
     // Load an application style
-    QFile styleFile( ":styles/arbalest_light.qss" );
+
+    QFile themeFile( ":themes/arbalest_light.theme" );
+    themeFile.open( QFile::ReadOnly );
+    QString themeStr( themeFile.readAll() );
+    QSSPreprocessor qssPreprocessor(themeStr);
+    themeFile.close();
+
+    QFile styleFile( ":styles/arbalest_simple.qss" );
     styleFile.open( QFile::ReadOnly );
-    QString style( styleFile.readAll() );
-    qApp->setStyleSheet( style );
+    QString styleStr(styleFile.readAll() );
+    qApp->setStyleSheet(qssPreprocessor.process(styleStr));
     styleFile.close();
+
+
 }
 
 void MainWindow::closeButtonPressed(){

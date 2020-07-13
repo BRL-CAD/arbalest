@@ -50,6 +50,8 @@ ObjectsTreeView::ObjectsTreeView
             this,
             &ObjectsTreeView::Activated
     );
+
+    setObjectName("objectsTreeView");
 }
 
 
