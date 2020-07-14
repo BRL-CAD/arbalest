@@ -43,7 +43,7 @@ ObjectsTreeView::ObjectsTreeView
     setModel(m_objectsTree);
     setHeaderHidden(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionMode(QAbstractItemView::SingleSelection);
 
     connect(selectionModel(),
             &QItemSelectionModel::selectionChanged,
@@ -51,7 +51,7 @@ ObjectsTreeView::ObjectsTreeView
             &ObjectsTreeView::Activated
     );
 
-    setObjectName("objectsTreeView");
+    setObjectName("dockableContentWide");
 }
 
 
@@ -121,9 +121,15 @@ void ObjectsTreeView::Activated(const QItemSelection & selected, const QItemSele
 
     for (int i = 0; i < selectedIndexes.size(); i++) {
         const QModelIndex selectedIndex = selectedIndexes.at(i);
-
         m_database.Select(m_objectsTree->itemFromIndex(selectedIndex)->text().toUtf8().data());
     }
 
-    emit SelectionChanged();
+    auto p = selectedIndexes.at(0);
+    QString fullPath = m_objectsTree->itemFromIndex(p)->text();
+    p = p.parent();
+    while(p.isValid()){
+        fullPath =  m_objectsTree->itemFromIndex(p)->text() + "/" + fullPath;
+        p = p.parent();
+    }
+    emit SelectionChanged(fullPath);
 }

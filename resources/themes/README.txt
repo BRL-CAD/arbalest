@@ -2,7 +2,7 @@
 Syntax highlighting for SCSS files should work with *.theme
 Syntax example
     $primary-color: #333333;
-    $border-color : #ff1111;
+    $border-color : #ff1111;    // the color used for borders
 
 I could have used a simpler format (ex: "primary-color = #ccc") but this way I can
 use SCSS settings in the IDE (live color gutter icon etc.)

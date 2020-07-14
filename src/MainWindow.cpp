@@ -4,6 +4,7 @@
 #include <Document.h>
 #include <QtWidgets/QLabel>
 #include <include/QSSPreprocessor.h>
+#include <include/Dockable.h>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -11,12 +12,9 @@ using namespace BRLCAD;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    prepareDockables();
     setTheme();
     showMaximized();
-
-    QTreeView *emptyTreeView = new QTreeView(); //todo: free this
-    emptyTreeView->setObjectName("objectsTreeView");
-    ui->dockWidgetObjectsTree->setWidget(emptyTreeView);
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
@@ -41,7 +39,7 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
     if (display == nullptr) return;
     if (display->getDocumentId() != activeDocumentId){
         activeDocumentId = display->getDocumentId();
-        ui->dockWidgetObjectsTree->setWidget(documents[activeDocumentId]->getObjectsTree());
+        objectTreeDockable->setWidget(documents[activeDocumentId]->getObjectsTree());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath());
     }
 }
@@ -70,6 +68,18 @@ void MainWindow::openFileDialog()
 void MainWindow::saveFileDialog(){
     QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     //database->Save(filePath.toUtf8().data());
+}
+
+
+void MainWindow::prepareDockables(){
+
+    // Object tree
+    objectTreeDockable = new Dockable("Objects", this, Dockable::FillerObject::WideFillerObject);
+    addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
+
+    // Properties
+    objectTreeDockable = new Dockable("Properties", this, Dockable::FillerObject::WideFillerObject);
+    addDockWidget(Qt::RightDockWidgetArea,objectTreeDockable);
 }
 
 void MainWindow::setTheme() {
@@ -115,10 +125,6 @@ void MainWindow::setTheme() {
     connect(closeButton,  &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
     layoutTopRightWidget->addWidget(closeButton);
 
-    QLabel * objectsTreeLabel = new QLabel("Objects");
-    objectsTreeLabel->setObjectName("objectsTreeLabel");
-    ui->dockWidgetObjectsTree->setTitleBarWidget(objectsTreeLabel);
-
     // Load an application style
 
     QFile themeFile( ":themes/arbalest_light.theme" );
@@ -132,8 +138,6 @@ void MainWindow::setTheme() {
     QString styleStr(styleFile.readAll() );
     qApp->setStyleSheet(qssPreprocessor.process(styleStr));
     styleFile.close();
-
-
 }
 
 void MainWindow::closeButtonPressed(){

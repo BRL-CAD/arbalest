@@ -46,7 +46,7 @@ public:
     void Rebuild(void);
 
 signals:
-    void SelectionChanged(void);
+    void SelectionChanged(QString fullPath);
 
 private:
     BRLCAD::ConstDatabase& m_database;

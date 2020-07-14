@@ -28,18 +28,20 @@ QStatusBar {
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 
-/* Object tree -------------------------------------------------------------------------------------------------------*/
-#objectsTreeView { border-style: solid; padding: 5px; background-color:"$Color-Secondary";}
-
-#objectsTreeLabel {
+/* Dockables ---------------------------------------------------------------------------------------------------------*/
+#dockableHeader {
     color: "$Color-DockableHeaderText";
     font-size: 11px;
     background-color: "$Color-DockableHeader";
     min-height: 17px;
     padding-left: 8px;
+    padding-right: 15px;
     border-bottom-width: 0px;
     border-style: solid;
 }
+
+#dockableContent        { border-style: solid; padding: 5px; background-color:"$Color-Secondary";}
+#dockableContentWide    { border-style: solid; padding: 5px; background-color:"$Color-Secondary"; min-width:200px;}
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Document area and its tab bar -------------------------------------------------------------------------------------*/

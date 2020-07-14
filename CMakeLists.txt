@@ -24,7 +24,8 @@ set(arbalest_Sources
         src/display/AxesRenderer.cpp
         src/GeometryOperationsManager.cpp
         src/ArbalestSettings.cpp
-        src/utils/QSSPreprocessor.cpp)
+        src/utils/QSSPreprocessor.cpp
+        src/Dockable.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface
