@@ -3,6 +3,8 @@ QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
 
 QMainWindow { background-color:"$Color-Main"; }
 
+QObject {font-size: 10pt;}
+
 QMenuBar {
 	background-color:"$Color-Main";
     min-height: 24px;
@@ -16,7 +18,8 @@ QStatusBar {
 	border-top-color: "$Color-SeparatorLine";
     border-top-width: 1px;
     border-style: solid;
-    min-height: 21px;
+    padding-top:5px;
+    padding-bottom:5px;
 }
 
 #statusBarPathLabel {
@@ -31,9 +34,9 @@ QStatusBar {
 #dockableHeader {
     color: "$Color-DockableHeaderText";
     background-color: "$Color-DockableHeader";
-    min-height: 17px;
     padding-left: 8px;
-    padding-right: 15px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     border-bottom-width: 0px;
     border-style: solid;
 }
@@ -48,8 +51,13 @@ QStatusBar {
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 #propertyNameWidget {
-    font-size: 9px;
-    color: "$Color-SelectedObjectText";
+    font-size: 11pt;
+    color: "$Color-SelectedObject";
+}
+
+#propertyFullPathWidget {
+    color: "$Color-SemiDarkText";
+    font-size: 8pt;
 }
 
 
