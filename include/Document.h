@@ -9,14 +9,14 @@
 #include <QtWidgets/QMdiSubWindow>
 #include "GeometryOperationsManager.h"
 #include "Display.h"
-#include "ObjectsTreeView.h"
+#include "ObjectTree.h"
 
 class Document {
 private:
     BRLCAD::MemoryDatabase *database;
     GeometryOperationsManager *geometryOperationsManager;
     Display *display;
-    ObjectsTreeView *objectsTree;
+    ObjectTree *objectTree;
     const int documentId;
     const QString filePath;
 
@@ -28,7 +28,7 @@ public:
     // getters
     GeometryOperationsManager *getGeometryOperationsManager() const;
     Display *getDisplay() const;
-    ObjectsTreeView *getObjectsTree() const;
+    ObjectTree *getObjectTree() const;
     std::vector<std::string> getTopObjectsList();
     const QString &getFilePath() const;
 };

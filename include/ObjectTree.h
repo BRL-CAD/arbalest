@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/** @file ObjectsTreeView.h
+/** @file ObjectTree.h
  *
  *  taken from RT3/QtGUI:
  *      declaration of the objects' tree visualization
  */
 
-#ifndef OBJECTSTREEVIEW_H
-#define OBJECTSTREEVIEW_H
+#ifndef OBJECTTREE_H
+#define OBJECTTREE_H
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -37,11 +37,11 @@
 #include <brlcad/ConstDatabase.h>
 
 
-class ObjectsTreeView : public QTreeView {
+class ObjectTree : public QTreeView {
     Q_OBJECT
 public:
-    ObjectsTreeView(BRLCAD::ConstDatabase& database,
-                    QWidget*               parent = 0);
+    ObjectTree(BRLCAD::ConstDatabase& database,
+               QWidget*               parent = 0);
 
     void Rebuild(void);
 
@@ -50,11 +50,11 @@ signals:
 
 private:
     BRLCAD::ConstDatabase& m_database;
-    QStandardItemModel*    m_objectsTree;
+    QStandardItemModel*    m_objectTree;
 
 private slots:
     void Activated(const QItemSelection &, const QItemSelection &);
 };
 
 
-#endif // OBJECTSTREEVIEW_H
+#endif // OBJECTTREE_H

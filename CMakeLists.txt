@@ -12,10 +12,10 @@ set(arbalest_Include_Dirs
         ${RT3_SOURCE_DIR}/include/brlcad)
 
 set(arbalest_Sources
-        src/MainWindow.cpp
+        src/gui/MainWindow.cpp
         src/main.cpp
         src/Document.cpp
-        src/ObjectsTreeView.cpp
+        src/gui/ObjectTree.cpp
         src/display/GeometryRenderer.cpp
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp
@@ -25,7 +25,7 @@ set(arbalest_Sources
         src/GeometryOperationsManager.cpp
         src/ArbalestSettings.cpp
         src/utils/QSSPreprocessor.cpp
-        src/Dockable.cpp)
+        src/gui/Dockable.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

@@ -39,7 +39,7 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
     if (display == nullptr) return;
     if (display->getDocumentId() != activeDocumentId){
         activeDocumentId = display->getDocumentId();
-        objectTreeDockable->setWidget(documents[activeDocumentId]->getObjectsTree());
+        objectTreeDockable->setWidget(documents[activeDocumentId]->getObjectTree());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath());
     }
 }
@@ -78,8 +78,8 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
 
     // Properties
-    objectTreeDockable = new Dockable("Properties", this, Dockable::FillerObject::WideFillerObject);
-    addDockWidget(Qt::RightDockWidgetArea,objectTreeDockable);
+    objectPropertiesDockable = new Dockable("Properties", this, Dockable::FillerObject::WideFillerObject);
+    addDockWidget(Qt::RightDockWidgetArea,objectPropertiesDockable);
 }
 
 void MainWindow::setTheme() {

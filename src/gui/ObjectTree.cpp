@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/** @file ObjectsTreeView.cpp
+/** @file ObjectTree.cpp
  *
  *  taken from RT3/QtGUI:
  *      implementation of the objects' tree visualization
@@ -30,17 +30,17 @@
 
 #include <brlcad/Combination.h>
 
-#include "ObjectsTreeView.h"
+#include "ObjectTree.h"
 
 
-ObjectsTreeView::ObjectsTreeView
+ObjectTree::ObjectTree
 (
     BRLCAD::ConstDatabase& database,
     QWidget*               parent
 ) : QTreeView(parent), m_database(database) {
-    m_objectsTree = new QStandardItemModel;
+    m_objectTree = new QStandardItemModel;
 
-    setModel(m_objectsTree);
+    setModel(m_objectTree);
     setHeaderHidden(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setSelectionMode(QAbstractItemView::SingleSelection);
@@ -48,7 +48,7 @@ ObjectsTreeView::ObjectsTreeView
     connect(selectionModel(),
             &QItemSelectionModel::selectionChanged,
             this,
-            &ObjectsTreeView::Activated
+            &ObjectTree::Activated
     );
 
     setObjectName("dockableContentWide");
@@ -96,8 +96,8 @@ private:
 };
 
 
-void ObjectsTreeView::Rebuild(void) {
-    m_objectsTree->clear();
+void ObjectTree::Rebuild(void) {
+    m_objectTree->clear();
 
     BRLCAD::ConstDatabase::TopObjectIterator it = m_database.FirstTopObject();
 
@@ -106,14 +106,14 @@ void ObjectsTreeView::Rebuild(void) {
         ObjectTreeCallback callback(m_database, objectItem);
 
         m_database.Get(it.Name(), callback);
-        m_objectsTree->appendRow(objectItem);
+        m_objectTree->appendRow(objectItem);
 
         ++it;
     }
 }
 
 
-void ObjectsTreeView::Activated(const QItemSelection & selected, const QItemSelection & deselected) {
+void ObjectTree::Activated(const QItemSelection & selected, const QItemSelection & deselected) {
     QModelIndexList selectedIndexes;
 
     m_database.UnSelectAll();
@@ -121,14 +121,14 @@ void ObjectsTreeView::Activated(const QItemSelection & selected, const QItemSele
 
     for (int i = 0; i < selectedIndexes.size(); i++) {
         const QModelIndex selectedIndex = selectedIndexes.at(i);
-        m_database.Select(m_objectsTree->itemFromIndex(selectedIndex)->text().toUtf8().data());
+        m_database.Select(m_objectTree->itemFromIndex(selectedIndex)->text().toUtf8().data());
     }
 
     auto p = selectedIndexes.at(0);
-    QString fullPath = m_objectsTree->itemFromIndex(p)->text();
+    QString fullPath = m_objectTree->itemFromIndex(p)->text();
     p = p.parent();
     while(p.isValid()){
-        fullPath =  m_objectsTree->itemFromIndex(p)->text() + "/" + fullPath;
+        fullPath = m_objectTree->itemFromIndex(p)->text() + "/" + fullPath;
         p = p.parent();
     }
     emit SelectionChanged(fullPath);

@@ -4,7 +4,7 @@
 
 #include <Document.h>
 #include <iostream>
-#include <ObjectsTreeView.h>
+#include <ObjectTree.h>
 
 
 Document::Document(const char *filePath, int documentId) : filePath(QString(filePath)),documentId(documentId) {
@@ -13,11 +13,11 @@ Document::Document(const char *filePath, int documentId) : filePath(QString(file
 
     display = new Display(documentId);
     geometryOperationsManager = new GeometryOperationsManager(*database);
-    objectsTree = new ObjectsTreeView(*database);
+    objectTree = new ObjectTree(*database);
 
     display->onDatabaseOpen(database);
     display->refresh();
-    objectsTree->Rebuild();
+    objectTree->Rebuild();
 }
 
 
@@ -47,8 +47,8 @@ Display *Document::getDisplay() const {
     return display;
 }
 
-ObjectsTreeView *Document::getObjectsTree() const {
-    return objectsTree;
+ObjectTree *Document::getObjectTree() const {
+    return objectTree;
 }
 
 
