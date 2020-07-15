@@ -4,7 +4,9 @@
 #include <Document.h>
 #include <QtWidgets/QLabel>
 #include <include/QSSPreprocessor.h>
-#include <include/Dockable.h>
+#include <include/Properties.h>
+#include <iostream>
+#include <QtGui/QtGui>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -46,15 +48,22 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
 
 void MainWindow::tabCloseRequested(int i){
     ui->documentArea->removeTab(i);
+
+    if (ui->documentArea->currentIndex() == -1){
+        objectTreeDockable->fillWithPlaceholder(Dockable::WideFillerObject);
+        objectPropertiesDockable->fillWithPlaceholder(Dockable::WideFillerObject);
+    }
 }
 
 void MainWindow::openFile(const QString& filePath){
     Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
+    document.getObjectTree()->setObjectName("dockableContentWide");
     documents[documentsCount++] = &document;
-
     QString filename(QFileInfo(filePath).fileName());
-
-    ui->documentArea->addTab(document.getDisplay(),filename);
+    int tabIndex = ui->documentArea->addTab(document.getDisplay(),filename);
+    ui->documentArea->setCurrentIndex(tabIndex);
+    connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
+            this, &MainWindow::objectTreeSelectionChanged);
 }
 
 void MainWindow::openFileDialog()
@@ -78,14 +87,22 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
 
     // Properties
-    objectPropertiesDockable = new Dockable("Properties", this, Dockable::FillerObject::WideFillerObject);
-    addDockWidget(Qt::RightDockWidgetArea,objectPropertiesDockable);
+    properties = new Properties();
+    properties->setObjectName("dockableContentWide");
+    objectPropertiesDockable = new Dockable("Properties", this, properties);
+    addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 }
 
 void MainWindow::setTheme() {
 
     // Hide window title bar
     setWindowFlags(Qt::FramelessWindowHint);
+
+//
+//    int id = QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
+//    QFont font(QFontDatabase::applicationFontFamilies(id).at(0));
+//    font.setStyleStrategy(QFont::PreferAntialias);
+//    QApplication::setFont(font);
 
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
     ui->documentArea->setContentsMargins(0,0,0,0);
@@ -192,4 +209,8 @@ void MainWindow::minimizeButtonPressed() {
 void MainWindow::maximizeButtonPressed() {
     if(!isMaximized())showMaximized();
     else showNormal();
+}
+
+void MainWindow::objectTreeSelectionChanged(QString fullPath) {
+    properties->bindObject(fullPath);
 }

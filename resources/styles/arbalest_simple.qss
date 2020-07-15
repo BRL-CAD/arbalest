@@ -21,7 +21,6 @@ QStatusBar {
 
 #statusBarPathLabel {
     color: "$Color-StatusBarText";
-    font-size: 11px;
     padding-left: 8px;
     padding-right: 20px;
 }
@@ -31,7 +30,6 @@ QStatusBar {
 /* Dockables ---------------------------------------------------------------------------------------------------------*/
 #dockableHeader {
     color: "$Color-DockableHeaderText";
-    font-size: 11px;
     background-color: "$Color-DockableHeader";
     min-height: 17px;
     padding-left: 8px;
@@ -40,9 +38,20 @@ QStatusBar {
     border-style: solid;
 }
 
-#dockableContent        { border-style: solid; padding: 5px; background-color:"$Color-Secondary";}
-#dockableContentWide    { border-style: solid; padding: 5px; background-color:"$Color-Secondary"; min-width:200px;}
+#dockableContent, #dockableContentWide {
+    border-style: solid;
+    padding: 5px;
+    padding-left: 8px;
+    background-color:"$Color-Secondary";
+}
+#dockableContentWide    {  min-width:200px; }
 /* -------------------------------------------------------------------------------------------------------------------*/
+
+#propertyNameWidget {
+    font-size: 9px;
+    color: "$Color-SelectedObjectText";
+}
+
 
 /* Document area and its tab bar -------------------------------------------------------------------------------------*/
 #documentArea::pane {
@@ -56,7 +65,6 @@ QStatusBar {
     padding-top: 5px;
     padding-bottom: 5px;
     background: "$Color-Main";
-    font-size: 11px;
 }
 
 #documentAreaTabBar::tab:selected {

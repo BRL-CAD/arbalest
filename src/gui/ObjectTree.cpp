@@ -50,8 +50,6 @@ ObjectTree::ObjectTree
             this,
             &ObjectTree::Activated
     );
-
-    setObjectName("dockableContentWide");
 }
 
 

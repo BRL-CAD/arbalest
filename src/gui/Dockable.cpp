@@ -2,10 +2,10 @@
 #include <QtWidgets/QLabel>
 #include "Dockable.h"
 
-Dockable::Dockable(const QString &title, QWidget *mainWindow, QWidget * content) : QDockWidget(title, mainWindow) {
-    titleLabel = new QLabel(title);
-    titleLabel->setObjectName("dockableHeader");
-    setTitleBarWidget(titleLabel);
+Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content) : QDockWidget(dockableTitle, mainWindow) {
+    title = new QLabel(dockableTitle);
+    title->setObjectName("dockableHeader");
+    setTitleBarWidget(title);
 
     if (content){
         content->setParent(this);
@@ -13,8 +13,8 @@ Dockable::Dockable(const QString &title, QWidget *mainWindow, QWidget * content)
     }
 }
 
-Dockable::Dockable(const QString &title, QWidget *mainWindow, Dockable::FillerObject fillerObject):
-                                                                        Dockable(title,mainWindow,nullptr){
+Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, Dockable::FillerObject fillerObject):
+                                                                        Dockable(dockableTitle, mainWindow){
     fillWithPlaceholder(fillerObject);
 }
 

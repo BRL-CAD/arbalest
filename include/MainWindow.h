@@ -8,6 +8,7 @@
 #include <QtWidgets/QLabel>
 #include "Document.h"
 #include "Dockable.h"
+#include "Properties.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +25,7 @@ private:
     Ui::MainWindow *ui;
     Dockable *objectTreeDockable;
     Dockable *objectPropertiesDockable;
+    Properties * properties;
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
 
@@ -45,6 +47,8 @@ private:
     QPushButton * maximizeButton;
     QLabel *statusBarPathLabel;
 
+    void prepareDockables();
+
 protected:
 
     void setTheme();
@@ -55,9 +59,7 @@ public slots:
     void onActiveDocumentChanged(int newIndex);
     void closeButtonPressed();
     void tabCloseRequested(int i);
-
-    void prepareDockables();
-
+    void objectTreeSelectionChanged(QString fullPath);
 
 };
 #endif // MAINWINDOW_H

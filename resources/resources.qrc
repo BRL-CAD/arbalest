@@ -13,6 +13,11 @@
   </qresource>
 
   <qresource>
+    <file>fonts/Modak-Regular.ttf</file>
+    <file>fonts/OpenSans-Regular.ttf</file>
+  </qresource>
+
+  <qresource>
     <file>styles/arbalest_simple.qss</file>
     <file>icons/archer.png</file>
     <file>icons/close.png</file>

@@ -45,12 +45,13 @@ public:
 
     void Rebuild(void);
 
-signals:
-    void SelectionChanged(QString fullPath);
 
 private:
     BRLCAD::ConstDatabase& m_database;
     QStandardItemModel*    m_objectTree;
+
+signals:
+    void SelectionChanged(QString fullPath);
 
 private slots:
     void Activated(const QItemSelection &, const QItemSelection &);

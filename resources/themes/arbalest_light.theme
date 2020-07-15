@@ -8,6 +8,7 @@ $Color-DockableHeaderText : #FFFFFF;  // Titlebar text color of all dockable wid
 $Color-StatusBarText      : #222222;  // Text color for all text in status bar
 $Color-SelectedTab        : #FFFFFF;  // Background color for selected tab of the file switcher tab bar
 $Color-SelectedTabLine    : #0000FF;  // Bottom border color for selected tab of the file switcher tab bar
+$Color-SelectedObjectText : #890b0b;  // Object selected in the object tree
 
 $Color-MinMaxHover        : #DADADA;  // Minimize maximize buttons background color when hover
 $Color-MinMaxPressed      : #DFDFDF;  // Minimize maximize buttons background color when pressed

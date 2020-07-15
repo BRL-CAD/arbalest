@@ -10,12 +10,12 @@ class Dockable: public QDockWidget {
 public:
     enum FillerObject {SmallFillerObject, WideFillerObject};
 
-    Dockable(const QString &title, QWidget *mainWindow, QWidget * content = nullptr);
-    Dockable(const QString &title, QWidget *mainWindow, enum FillerObject fillerObject);
+    Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content = nullptr);
+    Dockable(const QString &dockableTitle, QWidget *mainWindow, enum FillerObject fillerObject);
     void fillWithPlaceholder(FillerObject fillerObject);
     virtual ~Dockable() = default;
 private:
-    QLabel *titleLabel;
+    QLabel *title;
 
 };
 
