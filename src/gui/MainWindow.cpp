@@ -16,13 +16,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     prepareDockables();
     setTheme();
-    showMaximized();
+    //showMaximized();
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
     connect(ui->documentArea, &QTabWidget::currentChanged, this, &MainWindow::onActiveDocumentChanged);
     connect(ui->documentArea, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
     ui->menubar->installEventFilter(this);
+
+    if(QCoreApplication::arguments().length()>1){
+        openFile(QString(QCoreApplication::arguments().at(1)));
+    }
 }
 
 MainWindow::~MainWindow()
