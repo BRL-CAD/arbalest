@@ -10,7 +10,7 @@ class Dockable: public QDockWidget {
 public:
     enum FillerObject {SmallFillerObject, WideFillerObject};
 
-    Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content = nullptr);
+    Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content = nullptr, bool scrollable = false);
     Dockable(const QString &dockableTitle, QWidget *mainWindow, enum FillerObject fillerObject);
     void fillWithPlaceholder(FillerObject fillerObject);
     virtual ~Dockable() = default;

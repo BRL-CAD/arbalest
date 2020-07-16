@@ -23,7 +23,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <QtWidgets/QApplication>
 #include <OrthographicCamera.h>
-#include <brlcad/MemoryDatabase.h>
 #include "DisplayManager.h"
 #include "GeometryRenderer.h"
 

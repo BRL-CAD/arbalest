@@ -4,6 +4,7 @@
 Properties::Properties()  {
     nameWidget = new QLabel();
     fullPathWidget = new QLabel();
+    fullPathWidget->setWordWrap(true);
 
     nameWidget->setObjectName("propertyNameWidget");
     fullPathWidget->setObjectName("propertyFullPathWidget");
@@ -13,6 +14,21 @@ Properties::Properties()  {
 
     _layout->addWidget(nameWidget);
     _layout->addWidget(fullPathWidget);
+
+
+    Section* section = new Section("Elipsaid  ►", 50, this);
+    auto* anyLayout = new QVBoxLayout();
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    anyLayout->addWidget(new QLabel("Some Text in Section", section));
+    section->setContentLayout(*anyLayout);
+    layout()->addWidget(section);
+
     _layout->addStretch();
 }
 
@@ -21,5 +37,11 @@ void Properties::bindObject(const QString &fullPath) {
     this->name = fullPath.split("/").last();
 
     nameWidget->setText(name);
-    fullPathWidget->setText(fullPath);
+    QString fullPathDisplay = fullPath;
+    fullPathWidget->setText("/ "+fullPathDisplay.replace("/"," / "));
+
+
+
+
+
 }

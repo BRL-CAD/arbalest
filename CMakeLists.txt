@@ -26,7 +26,8 @@ set(arbalest_Sources
         src/ArbalestSettings.cpp
         src/utils/QSSPreprocessor.cpp
         src/gui/Dockable.cpp
-        src/gui/Properties.cpp)
+        src/gui/Properties.cpp
+        src/utils/Section.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

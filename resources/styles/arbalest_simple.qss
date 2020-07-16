@@ -1,10 +1,15 @@
 
 QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
 
-QMainWindow { background-color:"$Color-Main"; }
+QWidget         {outline: none;}  /* removes ugly dotted lines around focused widgets*/
 
-QObject {font-size: 10pt;}
+QMainWindow     { background-color:"$Color-Main"; }
 
+QObject         { font-size: 10pt; color: "$Color-DefaultFontColor";}
+
+QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
+
+/* Menu bar --------------------------------------------------------------------------------------------------------*/
 QMenuBar {
 	background-color:"$Color-Main";
     min-height: 24px;
@@ -12,6 +17,7 @@ QMenuBar {
     border-bottom-width: 1px;
     border-style: solid;
 }
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Status bar --------------------------------------------------------------------------------------------------------*/
 QStatusBar {
@@ -23,14 +29,13 @@ QStatusBar {
 }
 
 #statusBarPathLabel {
-    color: "$Color-StatusBarText";
     padding-left: 8px;
     padding-right: 20px;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 
-/* Dockables ---------------------------------------------------------------------------------------------------------*/
+/* Dockable ----------------------------------------------------------------------------------------------------------*/
 #dockableHeader {
     color: "$Color-DockableHeaderText";
     background-color: "$Color-DockableHeader";
@@ -50,16 +55,32 @@ QStatusBar {
 #dockableContentWide    {  min-width:200px; }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
+/* ObjectTree --------------------------------------------------------------------------------------------------------*/
+ObjectTree::item:hover {
+    background: #EDEDED;
+}
+
+ObjectTree::item:selected {
+    border: 3px solid "$Color-SelectedObjectText";
+    color: "$Color-SelectedObjectText";
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    background: "$Color-SelectedObjectRow";
+}
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+/* Properties --------------------------------------------------------------------------------------------------------*/
 #propertyNameWidget {
     font-size: 11pt;
-    color: "$Color-SelectedObject";
+    color: "$Color-SelectedObjectText";
 }
 
 #propertyFullPathWidget {
-    color: "$Color-SemiDarkText";
-    font-size: 8pt;
+    color: "$Color-LightText";
+    font-size: 9pt;
 }
-
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Document area and its tab bar -------------------------------------------------------------------------------------*/
 #documentArea::pane {
@@ -105,4 +126,5 @@ not use the system title bar
 #closeButton:hover                                  { background-color:"$Color-CloseHover"; }
 #closeButton:pressed                                { background-color:"$Color-ClosePressed"; }
 /* ------------------------------------------------------------------------------------------------------------------ */
+
 

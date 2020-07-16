@@ -5,6 +5,7 @@
 
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
+#include <include/Section.h>
 
 class Properties: public QFrame{
 public:
@@ -15,6 +16,7 @@ public:
 
     QLabel * nameWidget;
     QLabel * fullPathWidget;
+    Section* typeProperties;
 };
 
 

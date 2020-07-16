@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     prepareDockables();
     setTheme();
-    //showMaximized();
+    showMaximized();
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
     connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
@@ -93,7 +93,7 @@ void MainWindow::prepareDockables(){
     // Properties
     properties = new Properties();
     properties->setObjectName("dockableContentWide");
-    objectPropertiesDockable = new Dockable("Properties", this, properties);
+    objectPropertiesDockable = new Dockable("Properties", this, properties,true);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 }
 
@@ -135,7 +135,12 @@ void MainWindow::setTheme() {
     layoutTopRightWidget->addWidget(minimizeButton);
 
     maximizeButton = new QPushButton( topRightWidget);
-    maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+    if (this->windowState() == Qt::WindowMaximized) {
+        maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+    }
+    else{
+        maximizeButton->setIcon(QIcon(":/icons/maximize.png"));
+    }
     maximizeButton->setObjectName("maximizeButton");
     connect(maximizeButton,  &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
     layoutTopRightWidget->addWidget(maximizeButton);
