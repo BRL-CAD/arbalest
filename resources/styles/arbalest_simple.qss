@@ -9,6 +9,21 @@ QObject         { font-size: 10pt; color: "$Color-DefaultFontColor";}
 
 QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
 
+QScrollBar:vertical {border: none;background-color: #00000000;width: 9px;margin: 0px 0 0px 0;}
+QScrollBar::handle:vertical{
+    border-radius: 0px;
+    border-color: "$Color-ScrollBars";
+    border-width: 0px;
+    border-style: solid;
+    background-color: "$Color-ScrollBars";
+    min-height: 25px;
+}
+QScrollBar::add-line:vertical{width: 0px; height: 0px;}
+QScrollBar::sub-line:vertical{width: 0px; height: 0px;}
+QScrollBar::add-page:vertical{background-color: transparent;}
+QScrollBar::sub-page:vertical{background-color: transparent;}
+
+
 /* Menu bar --------------------------------------------------------------------------------------------------------*/
 QMenuBar {
 	background-color:"$Color-Main";
@@ -48,7 +63,7 @@ QStatusBar {
 
 #dockableContent, #dockableContentWide {
     border-style: solid;
-    padding: 5px;
+    padding-top: 5px;
     padding-left: 8px;
     background-color:"$Color-Secondary";
 }
