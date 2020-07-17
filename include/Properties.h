@@ -12,6 +12,7 @@ class Properties: public QFrame{
 public:
     explicit Properties(BRLCAD::ConstDatabase& database);
     void bindObject(const QString &fullPath);
+
 private:
     class ObjectCallback: public BRLCAD::ConstDatabase::ObjectCallback{
     public:
@@ -26,7 +27,7 @@ private:
     QString name, fullPath, objectType;
     QLabel * nameWidget;
     QLabel * fullPathWidget;
-    CollapsibleWidget * typeProperties;
+    CollapsibleWidget * typeSpecificPropertiesArea;
 };
 
 

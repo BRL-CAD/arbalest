@@ -69,7 +69,7 @@ QStatusBar {
     padding-left: 8px;
     background-color:"$Color-Secondary";
 }
-#dockableContentWide    {  min-width:60px; }
+#dockableContentWide    {  min-width:200px;}
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* ObjectTree --------------------------------------------------------------------------------------------------------*/

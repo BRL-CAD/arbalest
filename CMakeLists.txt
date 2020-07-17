@@ -27,7 +27,8 @@ set(arbalest_Sources
         src/utils/QSSPreprocessor.cpp
         src/gui/Dockable.cpp
         src/gui/Properties.cpp
-        src/gui/CollapsibleWidget.cpp)
+        src/gui/CollapsibleWidget.cpp
+        src/gui/TypeSpecificProperties.cpp src/gui/typespecificproperties/ConeSpecificProperties.cpp src/gui/typespecificproperties/ConeSpecificProperties.h)
 
 set(arbalest_Link_Libraries
         coreinterface

@@ -20,7 +20,6 @@ void CollapsibleWidget::setTitle(QString title) {
 void CollapsibleWidget::setWidget(QWidget *widget) {
     if (this->widget){
         _layout->removeWidget(this->widget);
-        delete this->widget;
     }
     _layout->addWidget(widget);
     this->widget = widget;
