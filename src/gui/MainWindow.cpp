@@ -5,11 +5,13 @@
 #include <QtWidgets/QLabel>
 #include <include/QSSPreprocessor.h>
 #include <include/Properties.h>
+#include <include/Globals.h>
 #include <iostream>
 #include <QtGui/QtGui>
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -18,10 +20,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setTheme();
     showMaximized();
 
-    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFileDialog);
-    connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::saveFileDialog);
-    connect(ui->documentArea, &QTabWidget::currentChanged, this, &MainWindow::onActiveDocumentChanged);
-    connect(ui->documentArea, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
+    connect(ui->actionOpen,     &QAction::triggered,            this,   &MainWindow::openFileDialog);
+    connect(ui->actionSave_As,  &QAction::triggered,            this,   &MainWindow::saveFileDialog);
+    connect(ui->documentArea,   &QTabWidget::currentChanged,    this,   &MainWindow::onActiveDocumentChanged);
+    connect(ui->documentArea,   &QTabWidget::tabCloseRequested, this,   &MainWindow::tabCloseRequested);
     ui->menubar->installEventFilter(this);
 
     if(QCoreApplication::arguments().length()>1){
@@ -45,7 +47,8 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
     if (display == nullptr) return;
     if (display->getDocumentId() != activeDocumentId){
         activeDocumentId = display->getDocumentId();
-        objectTreeDockable->setWidget(documents[activeDocumentId]->getObjectTree());
+        objectTreeDockable->setContent(documents[activeDocumentId]->getObjectTree());
+        objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath());
     }
 }
@@ -54,14 +57,15 @@ void MainWindow::tabCloseRequested(int i){
     ui->documentArea->removeTab(i);
 
     if (ui->documentArea->currentIndex() == -1){
-        objectTreeDockable->fillWithPlaceholder(Dockable::WideFillerObject);
-        objectPropertiesDockable->fillWithPlaceholder(Dockable::WideFillerObject);
+        objectTreeDockable->clear();
+        objectPropertiesDockable->clear();
     }
 }
 
 void MainWindow::openFile(const QString& filePath){
     Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
     document.getObjectTree()->setObjectName("dockableContentWide");
+    document.getProperties()->setObjectName("dockableContentWide");
     documents[documentsCount++] = &document;
     QString filename(QFileInfo(filePath).fileName());
     int tabIndex = ui->documentArea->addTab(document.getDisplay(),filename);
@@ -87,13 +91,11 @@ void MainWindow::saveFileDialog(){
 void MainWindow::prepareDockables(){
 
     // Object tree
-    objectTreeDockable = new Dockable("Objects", this, Dockable::FillerObject::WideFillerObject);
+    objectTreeDockable = new Dockable("Objects", this,false,true);
     addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
 
     // Properties
-    properties = new Properties();
-    properties->setObjectName("dockableContentWide");
-    objectPropertiesDockable = new Dockable("Properties", this, properties,true);
+    objectPropertiesDockable = new Dockable("Properties", this,true,true);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 }
 
@@ -101,12 +103,6 @@ void MainWindow::setTheme() {
 
     // Hide window title bar
     setWindowFlags(Qt::FramelessWindowHint);
-
-//
-//    int id = QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
-//    QFont font(QFontDatabase::applicationFontFamilies(id).at(0));
-//    font.setStyleStrategy(QFont::PreferAntialias);
-//    QApplication::setFont(font);
 
     centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
     ui->documentArea->setContentsMargins(0,0,0,0);
@@ -156,13 +152,13 @@ void MainWindow::setTheme() {
     QFile themeFile( ":themes/arbalest_light.theme" );
     themeFile.open( QFile::ReadOnly );
     QString themeStr( themeFile.readAll() );
-    QSSPreprocessor qssPreprocessor(themeStr);
+    Globals::theme = new QSSPreprocessor(themeStr);
     themeFile.close();
 
     QFile styleFile( ":styles/arbalest_simple.qss" );
     styleFile.open( QFile::ReadOnly );
     QString styleStr(styleFile.readAll() );
-    qApp->setStyleSheet(qssPreprocessor.process(styleStr));
+    qApp->setStyleSheet(Globals::theme->process(styleStr));
     styleFile.close();
 }
 
@@ -221,5 +217,5 @@ void MainWindow::maximizeButtonPressed() {
 }
 
 void MainWindow::objectTreeSelectionChanged(QString fullPath) {
-    properties->bindObject(fullPath);
+    documents[activeDocumentId]->getProperties()->bindObject(fullPath);
 }

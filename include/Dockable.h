@@ -3,20 +3,23 @@
 #define RT3_DOCKABLE_H
 
 
+#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
+#include <unordered_map>
 
 class Dockable: public QDockWidget {
 public:
-    enum FillerObject {SmallFillerObject, WideFillerObject};
-
-    Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content = nullptr, bool scrollable = false);
-    Dockable(const QString &dockableTitle, QWidget *mainWindow, enum FillerObject fillerObject);
-    void fillWithPlaceholder(FillerObject fillerObject);
+    Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrollable, bool wide);
+    void clear();
+    void setContent(QWidget *content);
     virtual ~Dockable() = default;
 private:
     QLabel *title;
-
+    QWidget * filler;
+    bool scrollable;
+    bool wide;
+    std::unordered_map< QWidget*, QScrollArea *> widgetToScrollAreaMap;
 };
 
 

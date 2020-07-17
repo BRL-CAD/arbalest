@@ -9,9 +9,10 @@ $Color-DefaultFontColor   : #555555;  // Text color for all text in status bar
 $Color-SelectedTab        : #FFFFFF;  // Background color for selected tab of the file switcher tab bar
 $Color-SelectedTabLine    : #0000FF;  // Bottom border color for selected tab of the file switcher tab bar
 $Color-SelectedObjectText : #bf1919;  // Object selected in the object tree.
-$Color-SelectedObjectRow  : #EDEDED;  // Background of the object selected in the object tree.
+$Color-SelectedObjectRow  : #e3e3e3;  // Background of the object selected in the object tree.
 $Color-LightText          : #8d8d8d;  // for non important text
-$Color-ScrollBars         : #DDDDDD;  // for non important text
+$Color-ScrollBars         : #DDDDDD;
+$Color-CollapsibleTitle   : #007ACC;  // Title of CollapsibleWidget
 
 $Color-MinMaxHover        : #DADADA;  // Minimize maximize buttons background color when hover
 $Color-MinMaxPressed      : #DFDFDF;  // Minimize maximize buttons background color when pressed

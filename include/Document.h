@@ -10,6 +10,7 @@
 #include "GeometryOperationsManager.h"
 #include "Display.h"
 #include "ObjectTree.h"
+#include "Properties.h"
 
 class Document {
 private:
@@ -17,6 +18,7 @@ private:
     GeometryOperationsManager *geometryOperationsManager;
     Display *display;
     ObjectTree *objectTree;
+    Properties *properties;
     const int documentId;
     const QString filePath;
 
@@ -29,6 +31,8 @@ public:
     GeometryOperationsManager *getGeometryOperationsManager() const;
     Display *getDisplay() const;
     ObjectTree *getObjectTree() const;
+    Properties *getProperties() const;
+
     std::vector<std::string> getTopObjectsList();
     const QString &getFilePath() const;
 };

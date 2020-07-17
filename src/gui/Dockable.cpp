@@ -1,34 +1,42 @@
 
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QScrollArea>
 #include "Dockable.h"
 
-Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, QWidget * content, bool scrollable) : QDockWidget(dockableTitle, mainWindow) {
+Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrollable, bool wide) :
+        scrollable(scrollable),
+        wide(wide),
+        QDockWidget(dockableTitle, mainWindow) {
+
     title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     setTitleBarWidget(title);
 
-    if (content){
-        content->setParent(this);
-        if (!scrollable)setWidget(content);
-        else{
-            QScrollArea* scrollArea = new QScrollArea(this);
+    filler = new QWidget(this);
+    if (wide)
+        filler->setObjectName("dockableContentWide");
+    else
+        filler->setObjectName("dockableContent");
+    clear();
+}
+
+void Dockable::setContent(QWidget *content) {
+    if (content != filler && scrollable) { // use scroll areas
+        QScrollArea *scrollArea;
+        if (widgetToScrollAreaMap.find(content) == widgetToScrollAreaMap.end()) {
+            scrollArea = new QScrollArea(this);
+            widgetToScrollAreaMap[content] = scrollArea;
             scrollArea->setWidgetResizable(true);
+            scrollArea->setObjectName(wide ? "dockableContentWide" : "dockableContent");
             scrollArea->setWidget(content);
-            scrollArea->setObjectName("dockableContent");
-            setWidget(scrollArea);
+        } else {
+            scrollArea = widgetToScrollAreaMap[content];
         }
+        setWidget(scrollArea);
+    } else {    // no scroll areas
+        setWidget(content);
     }
 }
 
-Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, Dockable::FillerObject fillerObject):
-                                                                        Dockable(dockableTitle, mainWindow){
-    fillWithPlaceholder(fillerObject);
-}
-
-void Dockable::fillWithPlaceholder( Dockable::FillerObject fillerObject){
-    QWidget * placeholder = new QWidget(this);
-    if (fillerObject == WideFillerObject) placeholder->setObjectName("dockableContentWide");
-    else placeholder->setObjectName("dockableContent");
-    setWidget(placeholder);
+void Dockable::clear() {
+    setWidget(filler);
 }

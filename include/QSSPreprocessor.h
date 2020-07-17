@@ -4,6 +4,7 @@
 
 
 #include <QtCore/qstring.h>
+#include <vector>
 
 class QSSPreprocessor {
 public:

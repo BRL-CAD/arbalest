@@ -14,7 +14,9 @@
 
   <qresource>
     <file>fonts/Modak-Regular.ttf</file>
+    <file>fonts/Pacifico-Regular.ttf</file>
     <file>fonts/OpenSans-Regular.ttf</file>
+    <file>fonts/Rowdies-Regular.ttf</file>
   </qresource>
 
   <qresource>

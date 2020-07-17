@@ -23,11 +23,11 @@ set(arbalest_Sources
         src/display/DisplayManager.cpp
         src/display/AxesRenderer.cpp
         src/GeometryOperationsManager.cpp
-        src/ArbalestSettings.cpp
+        src/Globals.cpp
         src/utils/QSSPreprocessor.cpp
         src/gui/Dockable.cpp
         src/gui/Properties.cpp
-        src/utils/Section.cpp)
+        src/gui/CollapsibleWidget.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

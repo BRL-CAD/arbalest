@@ -14,6 +14,7 @@ Document::Document(const char *filePath, int documentId) : filePath(QString(file
     display = new Display(documentId);
     geometryOperationsManager = new GeometryOperationsManager(*database);
     objectTree = new ObjectTree(*database);
+    properties = new Properties(*database);
 
     display->onDatabaseOpen(database);
     display->refresh();
@@ -58,4 +59,8 @@ void Document::onDatabaseUpdated() {
 
 const QString &Document::getFilePath() const {
     return filePath;
+}
+
+Properties *Document::getProperties() const {
+    return properties;
 }

@@ -9,19 +9,21 @@ QObject         { font-size: 10pt; color: "$Color-DefaultFontColor";}
 
 QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
 
-QScrollBar:vertical {border: none;background-color: #00000000;width: 9px;margin: 0px 0 0px 0;}
-QScrollBar::handle:vertical{
+QScrollBar:vertical     {border: none;background-color: #00000000;width: 9px;margin: 0px 0 0px 0;}
+QScrollBar:horizontal   {border: none;background-color: #00000000;height: 9px;margin: 0px 0 0px 0;}
+QScrollBar::handle{
     border-radius: 0px;
     border-color: "$Color-ScrollBars";
     border-width: 0px;
     border-style: solid;
     background-color: "$Color-ScrollBars";
-    min-height: 25px;
 }
-QScrollBar::add-line:vertical{width: 0px; height: 0px;}
-QScrollBar::sub-line:vertical{width: 0px; height: 0px;}
-QScrollBar::add-page:vertical{background-color: transparent;}
-QScrollBar::sub-page:vertical{background-color: transparent;}
+QScrollBar::handle:vertical{min-height: 25px;}
+QScrollBar::handle:horizontal{min-width: 14px;}
+QScrollBar::add-line{width: 0px; height: 0px;}
+QScrollBar::sub-line{width: 0px; height: 0px;}
+QScrollBar::add-page{background-color: transparent;}
+QScrollBar::sub-page{background-color: transparent;}
 
 
 /* Menu bar --------------------------------------------------------------------------------------------------------*/
@@ -67,33 +69,33 @@ QStatusBar {
     padding-left: 8px;
     background-color:"$Color-Secondary";
 }
-#dockableContentWide    {  min-width:200px; }
+#dockableContentWide    {  min-width:60px; }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* ObjectTree --------------------------------------------------------------------------------------------------------*/
 ObjectTree::item:hover {
-    background: #EDEDED;
+    background: "$Color-SelectedObjectRow";
 }
 
 ObjectTree::item:selected {
-    border: 3px solid "$Color-SelectedObjectText";
+    border-style: solid;
+    border-color: "$Color-SelectedObjectText";
+    border-right-width: 3px;
     color: "$Color-SelectedObjectText";
-    border-top-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
     background: "$Color-SelectedObjectRow";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Properties --------------------------------------------------------------------------------------------------------*/
 #propertyNameWidget {
-    font-size: 11pt;
     color: "$Color-SelectedObjectText";
+    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    padding-right: 8px;
 }
 
-#propertyFullPathWidget {
-    color: "$Color-LightText";
-    font-size: 9pt;
+#collapsibleTitle {
+    color: "$Color-CollapsibleTitle";
+    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
