@@ -55,7 +55,6 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
 
 void MainWindow::tabCloseRequested(int i){
     ui->documentArea->removeTab(i);
-
     if (ui->documentArea->currentIndex() == -1){
         objectTreeDockable->clear();
         objectPropertiesDockable->clear();
@@ -64,8 +63,8 @@ void MainWindow::tabCloseRequested(int i){
 
 void MainWindow::openFile(const QString& filePath){
     Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
-    document.getObjectTree()->setObjectName("dockableContentWide");
-    document.getProperties()->setObjectName("dockableContentWide");
+    document.getObjectTree()->setObjectName("dockableContent");
+    document.getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = &document;
     QString filename(QFileInfo(filePath).fileName());
     int tabIndex = ui->documentArea->addTab(document.getDisplay(),filename);
@@ -90,12 +89,16 @@ void MainWindow::saveFileDialog(){
 
 void MainWindow::prepareDockables(){
     // Object tree
-    objectTreeDockable = new Dockable("Objects", this,false);
-    addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
+    objectTreeDockable = new Dockable("Objects", this,false,300);
+    addDockWidget(Qt::RightDockWidgetArea,objectTreeDockable);
 
     // Properties
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
+
+    // Toolbox
+    toolboxDockable = new Dockable("Create", this,true,50);
+    addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
 void MainWindow::setTheme() {

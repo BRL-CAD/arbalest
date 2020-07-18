@@ -1,6 +1,7 @@
 
 #include <QtWidgets/QLabel>
 #include "Dockable.h"
+#include <iostream>
 
 QSize Dockable::DefaultWidthScrollArea::sizeHint() const  {
     QSize hint = QScrollArea::sizeHint();
@@ -15,6 +16,10 @@ Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrol
     title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     setTitleBarWidget(title);
+
+    fillerWidget = new QWidget(this);
+    fillerWidget->setObjectName("dockableContent");
+    clear();
 }
 
 void Dockable::setContent(QWidget *content) {
@@ -29,12 +34,12 @@ void Dockable::setContent(QWidget *content) {
         } else {
             scrollArea = widgetToScrollAreaMap[content];
         }
-        scrollArea->setVisible(true);
         setWidget(scrollArea);
+        if (!scrollArea->isVisible()) scrollArea->setVisible(true);
     } else {    // no scroll areas
         setWidget(content);
     }
-    content->setVisible(true);
+    if (!content->isVisible()) content->setVisible(true);
 }
 
 void Dockable::clear() {
@@ -42,9 +47,11 @@ void Dockable::clear() {
         widget()->setVisible(false);
         widget()->setParent(nullptr);
     }
+    setContent(fillerWidget);
 }
 
 Dockable::~Dockable() {
+    widget()->setParent(nullptr);
     for (auto i : widgetToScrollAreaMap){
         QScrollArea * scrollArea = i.second;
         if(scrollArea->widget() && scrollArea->widget()->parent() == scrollArea){ // break content objects' child parent for children to survive
@@ -53,4 +60,5 @@ Dockable::~Dockable() {
             delete scrollArea;
         }
     }
+    delete fillerWidget;
 }

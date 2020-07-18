@@ -1,20 +1,21 @@
 
 
-$Color-Main               : #F2F2F2;  // Used as the main background color. Used in main window, menu bar, status bar etc.
-$Color-Secondary          : #FAFAFA;  // Used as the background color for some main UI components like objects tree
-$Color-SeparatorLine      : #CDCDCD;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
-$Color-DockableHeader     : #007ACC;  // Titlebar color of all dockable widgets like objects tree
-$Color-DockableHeaderText : #FFFFFF;  // Titlebar text color of all dockable widgets like objects tree
+$Color-Main               : #f2f2f2;  // Used as the main background color. Used in main window, menu bar, status bar etc.
+$Color-Secondary          : #fcfcfc;  // Used as the background color for some main UI components like objects tree
+$Color-SeparatorLine      : #cdcdcd;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
+$Color-DockableHeader     : #007acc;  // Titlebar color of all dockable widgets like objects tree
+$Color-DockableHeaderText : #ffffff;  // Titlebar text color of all dockable widgets like objects tree
 $Color-DefaultFontColor   : #555555;  // Text color for all text in status bar
-$Color-SelectedTab        : #FFFFFF;  // Background color for selected tab of the file switcher tab bar
-$Color-SelectedTabLine    : #0000FF;  // Bottom border color for selected tab of the file switcher tab bar
+$Color-SelectedTab        : #ffffff;  // Background color for selected tab of the file switcher tab bar
+$Color-SelectedTabLine    : #0000ff;  // Bottom border color for selected tab of the file switcher tab bar
 $Color-SelectedObjectText : #bf1919;  // Object selected in the object tree.
 $Color-SelectedObjectRow  : #e3e3e3;  // Background of the object selected in the object tree.
 $Color-LightText          : #8d8d8d;  // for non important text
-$Color-ScrollBars         : #DDDDDD;
-$Color-CollapsibleTitle   : #007ACC;  // Title of CollapsibleWidget
+$Color-ScrollBars         : #dddddd;
+$Color-CollapsibleTitle   : #007acc;  // Title of CollapsibleWidget
+$Color-CollapsibleHover   : #fefefe;
 
-$Color-MinMaxHover        : #DADADA;  // Minimize maximize buttons background color when hover
-$Color-MinMaxPressed      : #DFDFDF;  // Minimize maximize buttons background color when pressed
-$Color-CloseHover         : #E81123;  // Close button background color when hover
-$Color-ClosePressed       : #F1707A;  // Close button background color when pressed
+$Color-MinMaxHover        : #dadada;  // Minimize maximize buttons background color when hover
+$Color-MinMaxPressed      : #dfdfdf;  // Minimize maximize buttons background color when pressed
+$Color-CloseHover         : #e81123;  // Close button background color when hover
+$Color-ClosePressed       : #f1707a;  // Close button background color when pressed

@@ -28,7 +28,8 @@ set(arbalest_Sources
         src/gui/Dockable.cpp
         src/gui/Properties.cpp
         src/gui/CollapsibleWidget.cpp
-        src/gui/TypeSpecificProperties.cpp src/gui/typespecificproperties/ConeSpecificProperties.cpp src/gui/typespecificproperties/ConeSpecificProperties.h)
+        src/gui/TypeSpecificProperties.cpp
+        src/gui/typespecificproperties/ConeProperties.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

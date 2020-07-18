@@ -57,19 +57,18 @@ QStatusBar {
     color: "$Color-DockableHeaderText";
     background-color: "$Color-DockableHeader";
     padding-left: 8px;
+    padding-right: 8px;
     padding-top: 2px;
     padding-bottom: 2px;
     border-bottom-width: 0px;
     border-style: solid;
 }
 
-#dockableContent, #dockableContentWide {
+#dockableContent{
     border-style: solid;
     padding-top: 5px;
-    padding-left: 8px;
     background-color:"$Color-Secondary";
 }
-#dockableContentWide    {  min-width:200px;}
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* ObjectTree --------------------------------------------------------------------------------------------------------*/
@@ -80,22 +79,39 @@ ObjectTree::item:hover {
 ObjectTree::item:selected {
     border-style: solid;
     border-color: "$Color-SelectedObjectText";
-    border-right-width: 3px;
+    border-right-width: 4px;
     color: "$Color-SelectedObjectText";
     background: "$Color-SelectedObjectRow";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Properties --------------------------------------------------------------------------------------------------------*/
-#propertyNameWidget {
-    color: "$Color-SelectedObjectText";
+#properties-NameWidget {
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
-    padding-right: 8px;
+    padding-right: 4px;
+    padding-left: 4px;
 }
 
-#collapsibleTitle {
+#properties-fullPathWidget{
+    padding-left: 4px;
+    padding-bottom: 4px;
+}
+
+#properties-collapsibleTitle{
     color: "$Color-CollapsibleTitle";
+    padding-left: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    border-style: solid;
+    text-align:left;
+	background-color:transparent;
+}
+#properties-collapsibleWidget:hover { background-color:"$Color-CollapsibleHover"; }
+
+#properties-TypeSpecificProperties{
+    padding-left: 12px;
+    padding-bottom: 12px;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 

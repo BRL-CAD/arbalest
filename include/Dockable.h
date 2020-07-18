@@ -33,6 +33,7 @@ private:
     QLabel *title;
     bool scrollable;
     int width;
+    QWidget * fillerWidget;
     std::unordered_map< QWidget*, QScrollArea *> widgetToScrollAreaMap;
 };
 

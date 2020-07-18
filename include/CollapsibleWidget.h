@@ -6,17 +6,23 @@
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QPushButton>
 
 class CollapsibleWidget: public QFrame {
+    Q_OBJECT
 public:
-    CollapsibleWidget();
+    CollapsibleWidget(QWidget * parent = nullptr);
     void setTitle(QString title);
     void setWidget(QWidget *widget);
 
 private:
-    QLabel * title;
+    QString title;
+    QPushButton * titleWidget;
     QWidget * widget;
     QVBoxLayout *_layout;
+    bool expanded = true;
+private slots:
+    void setExpanded(bool expanded);
 };
 
 

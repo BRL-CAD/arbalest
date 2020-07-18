@@ -26,6 +26,7 @@ private:
     Ui::MainWindow *ui;
     Dockable *objectTreeDockable;
     Dockable *objectPropertiesDockable;
+    Dockable *toolboxDockable;
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
 

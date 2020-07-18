@@ -6,24 +6,25 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
 #include <include/CollapsibleWidget.h>
-#include <brlcad/ConstDatabase.h>
+#include <brlcad/Database.h>
+#include <brlcad/MemoryDatabase.h>
 
 class Properties: public QFrame{
 public:
-    explicit Properties(BRLCAD::ConstDatabase& database);
+    explicit Properties(BRLCAD::MemoryDatabase& database);
     void bindObject(const QString &fullPath);
 
 private:
-    class ObjectCallback: public BRLCAD::ConstDatabase::ObjectCallback{
+
+    class ObjectCallback: public BRLCAD::Database::ObjectCallback{
     public:
         explicit ObjectCallback(Properties *properties) : properties(properties) {}
-        void operator()(const BRLCAD::Object& object) override;
-
+        void operator()(BRLCAD::Object& object) override;
     private:
         Properties *properties;
     };
 
-    BRLCAD::ConstDatabase & database;
+    BRLCAD::MemoryDatabase & database;
     QString name, fullPath, objectType;
     QLabel * nameWidget;
     QLabel * fullPathWidget;
