@@ -2,41 +2,55 @@
 #include <QtWidgets/QLabel>
 #include "Dockable.h"
 
-Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrollable, bool wide) :
-        scrollable(scrollable),
-        wide(wide),
-        QDockWidget(dockableTitle, mainWindow) {
+QSize Dockable::DefaultWidthScrollArea::sizeHint() const  {
+    QSize hint = QScrollArea::sizeHint();
+    if(defaultWidth != -1) hint.setWidth(defaultWidth);
+    return hint;
+}
 
+Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrollable, int width) :
+        scrollable(scrollable),
+        width(width),
+        QDockWidget(dockableTitle, mainWindow) {
     title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     setTitleBarWidget(title);
-
-    filler = new QWidget(this);
-    if (wide)
-        filler->setObjectName("dockableContentWide");
-    else
-        filler->setObjectName("dockableContent");
-    clear();
 }
 
 void Dockable::setContent(QWidget *content) {
-    if (content != filler && scrollable) { // use scroll areas
+    if(widget())widget()->setVisible(false);
+    if (scrollable) { // use scroll areas
         QScrollArea *scrollArea;
         if (widgetToScrollAreaMap.find(content) == widgetToScrollAreaMap.end()) {
-            scrollArea = new QScrollArea(this);
+            scrollArea = new DefaultWidthScrollArea(this,width);
             widgetToScrollAreaMap[content] = scrollArea;
             scrollArea->setWidgetResizable(true);
-            scrollArea->setObjectName(wide ? "dockableContentWide" : "dockableContent");
             scrollArea->setWidget(content);
         } else {
             scrollArea = widgetToScrollAreaMap[content];
         }
+        scrollArea->setVisible(true);
         setWidget(scrollArea);
     } else {    // no scroll areas
         setWidget(content);
     }
+    content->setVisible(true);
 }
 
 void Dockable::clear() {
-    setWidget(filler);
+    if(widget()){
+        widget()->setVisible(false);
+        widget()->setParent(nullptr);
+    }
+}
+
+Dockable::~Dockable() {
+    for (auto i : widgetToScrollAreaMap){
+        QScrollArea * scrollArea = i.second;
+        if(scrollArea->widget() && scrollArea->widget()->parent() == scrollArea){ // break content objects' child parent for children to survive
+            scrollArea->widget()->setVisible(false);
+            scrollArea->widget()->setParent(nullptr);
+            delete scrollArea;
+        }
+    }
 }

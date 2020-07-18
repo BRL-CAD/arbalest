@@ -89,13 +89,12 @@ void MainWindow::saveFileDialog(){
 
 
 void MainWindow::prepareDockables(){
-
     // Object tree
-    objectTreeDockable = new Dockable("Objects", this,false,true);
+    objectTreeDockable = new Dockable("Objects", this,false);
     addDockWidget(Qt::LeftDockWidgetArea,objectTreeDockable);
 
     // Properties
-    objectPropertiesDockable = new Dockable("Properties", this,true,true);
+    objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 }
 
