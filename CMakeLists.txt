@@ -29,7 +29,10 @@ set(arbalest_Sources
         src/gui/Properties.cpp
         src/gui/CollapsibleWidget.cpp
         src/gui/TypeSpecificProperties.cpp
-        src/gui/typespecificproperties/ConeProperties.cpp)
+        src/gui/typespecificproperties/ConeProperties.cpp
+        src/gui/QHBoxWidget.cpp
+        src/gui/QVBoxWidget.cpp
+        src/gui/DataRow.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

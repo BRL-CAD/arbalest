@@ -12,6 +12,11 @@ ConeProperties::ConeProperties(BRLCAD::MemoryDatabase &database, BRLCAD::Cone &o
     this->mainVLayout->addWidget(g);
 
 
+    BRLCAD::Cone * b = &o;
+
+    auto j = &BRLCAD::Cone::BasePoint;
+
+    auto h=(o.*j)();
 
     QTableWidget * tableWidget = new QTableWidget(12, 3, this);
     tableWidget->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Maximum);
