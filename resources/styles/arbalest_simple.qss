@@ -103,14 +103,14 @@ ObjectTree::item:selected {
     padding-top: 4px;
     padding-bottom: 4px;
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
-    border-style: solid;
     text-align:left;
 	background-color:transparent;
 }
-#properties-collapsibleWidget:hover { background-color:"$Color-CollapsibleHover"; }
+#properties-collapsibleWidjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjget:hover { background-color:"$Color-CollapsibleHover"; }
 
 #properties-TypeSpecificProperties{
     padding-left: 12px;
+    padding-right: 12px;
     padding-bottom: 12px;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
@@ -160,4 +160,41 @@ not use the system title bar
 #closeButton:pressed                                { background-color:"$Color-ClosePressed"; }
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+/*
+QHeaderView::secjtion {  background-color:white; */
 
+QTableWidget {
+    border-width:0px;
+    border-style:solid;
+    gridline-color: #d8d8d8;
+    outline: none;
+}
+QTableView::item{
+
+}
+QTableView::item:focus{border: 0px solid transparent;}
+QTableView::item:selected {background-color: #fdfdfd; color:black;}
+QHeaderView::section {
+    border-top:0px solid #D8D8D8;
+    border-left:0px solid #D8D8D8;
+    border-right:1px solid #D8D8D8;
+    border-bottom: 1px solid #D8D8D8;
+    padding:4px;
+    background: #D8D8D8;
+}
+
+QHeaderView::section:horizontal {
+    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    font-size: 8pt;
+}
+
+QHeaderView::section:vertical {
+    background: transparent;
+}
+QTableCornerButton::section {
+    border-top:0px solid #D8D8D8;
+    border-left:0px solid #D8D8D8;
+    border-right:1px solid #D8D8D8;
+    border-bottom: 1px solid #D8D8D8;
+    background: transparent;
+}
