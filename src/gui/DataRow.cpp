@@ -51,3 +51,7 @@ void DataRow::setHeaderTexts(const QStringList &headerTexts) {
     DataRow::headerTexts = headerTexts;
     for (int i = 0; i < count; i++) headerLabels[i]->setText(headerTexts[i%headerTexts.length()]);
 }
+
+const std::vector<QLineEdit *> &DataRow::getTextBoxes() const {
+    return textBoxes;
+}

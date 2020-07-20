@@ -9,6 +9,8 @@
 #include <QStyledItemDelegate>
 #include <include/QVBoxWidget.h>
 #include <include/DataRow.h>
+#include <include/VectorDataRow.h>
+#include <include/ObjectDataTable.h>
 
 
 TypeSpecificProperties::TypeSpecificProperties(BRLCAD::MemoryDatabase &database, const BRLCAD::Object &object)
@@ -19,9 +21,11 @@ TypeSpecificProperties::TypeSpecificProperties(BRLCAD::MemoryDatabase &database,
     setLayout(mainVLayout);
     setObjectName("properties-TypeSpecificProperties");
 
-    DataRow *dataRow =     new DataRow(3,0,this);
+    ObjectDataTable *vectorDataRow =     new ObjectDataTable();
 
-    mainVLayout->addWidget(dataRow);
+    vectorDataRow->initialize<BRLCAD::Ellipsoid>(&BRLCAD::Ellipsoid::SemiPrincipalAxis);
+
+    mainVLayout->addWidget(vectorDataRow);
     mainVLayout->addStretch(1);
 }
 
@@ -32,11 +36,6 @@ TypeSpecificProperties *TypeSpecificProperties::build(BRLCAD::MemoryDatabase &da
 
     return new TypeSpecificProperties(database, object);
 }
-
-
-
-
-
 
 
 

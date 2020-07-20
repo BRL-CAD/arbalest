@@ -32,7 +32,8 @@ set(arbalest_Sources
         src/gui/typespecificproperties/ConeProperties.cpp
         src/gui/QHBoxWidget.cpp
         src/gui/QVBoxWidget.cpp
-        src/gui/DataRow.cpp)
+        src/gui/DataRow.cpp src/gui/VectorDataRow.cpp
+        src/gui/ObjectDataTable.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

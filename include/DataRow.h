@@ -3,12 +3,16 @@
 #define RT3_DATAROW_H
 
 
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QLabel>
 #include "QHBoxWidget.h"
 
 class DataRow : public QHBoxWidget {
 public:
     DataRow(int count, bool hasHeader, QWidget * parent = nullptr);
     void setHeaderTexts(const QStringList &headerTexts);
+
+    const std::vector<QLineEdit *> &getTextBoxes() const;
 
 private:
     QStringList headerTexts = {"x","y","z"};
