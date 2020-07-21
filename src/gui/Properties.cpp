@@ -5,7 +5,18 @@
 #include <Globals.h>
 #include <iostream>
 
-Properties::Properties(BRLCAD::MemoryDatabase& database) : database(database) {
+QString breakStringAtCaps(const QString& in)
+{
+    QString newName;
+    for(int i = 0; i < in.size(); i++)
+    {
+        if(in[i].isUpper() && i != 0) newName += " ";
+        newName += in[i];
+    }
+    return newName;
+}
+
+Properties::Properties(Document & document) : document(document) {
     QVBoxLayout * _layout = new QVBoxLayout;
     setLayout(_layout);
     _layout->setContentsMargins(0,0,0,0);
@@ -32,18 +43,21 @@ void Properties::bindObject(const QString &fullPath) {
     this->name = fullPath.split("/").last();
     fullPathWidget->setText("/ "+QString(fullPath).replace("/"," / "));
 
-    ObjectCallback objectCallback(this);
-    database.Get(fullPath.toUtf8().data(),objectCallback);
+    BRLCAD::Object * object = document.getDatabase()->Get(fullPath.toUtf8().data());
+
+    objectType = QString(object->Type());
+
+    static TypeSpecificProperties * current = nullptr;
+    delete current;
+    current = new TypeSpecificProperties(document,object);
+    typeSpecificPropertiesArea->setWidget(current);
+
+
     QString nameType = "<font color='$Color-SelectedObjectText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
-                        "<font color='$Color-CollapsibleTitle'>"+objectType+"</font><font color='$Color-DefaultFontColor'> )";
+                        "<font color='$Color-CollapsibleTitle'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
     nameWidget->setText(Globals::theme->process(nameType));
-    typeSpecificPropertiesArea->setTitle(objectType);
+    typeSpecificPropertiesArea->setTitle(breakStringAtCaps(objectType));
 }
 
 void Properties::ObjectCallback::operator()(BRLCAD::Object &object) {
-    properties->objectType = QString(object.Type());
-    static TypeSpecificProperties * current = nullptr;
-    delete current;
-    current = TypeSpecificProperties::build(properties->database,object);
-    properties->typeSpecificPropertiesArea->setWidget(current);
 }

@@ -12,6 +12,7 @@
 #include "ObjectTree.h"
 #include "Properties.h"
 
+class Properties;
 class Document {
 private:
     BRLCAD::MemoryDatabase *database;
@@ -29,6 +30,7 @@ public:
 
     // getters
     GeometryOperationsManager *getGeometryOperationsManager() const;
+    MemoryDatabase *getDatabase();
     Display *getDisplay() const;
     ObjectTree *getObjectTree() const;
     Properties *getProperties() const;

@@ -98,15 +98,29 @@ ObjectTree::item:selected {
 }
 
 #properties-collapsibleTitle{
-    color: "$Color-CollapsibleTitle";
+    margin-top: 4px;
+    padding-left: 8px;
+    padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 2px;
+    text-align:left;
+    font-weight: bold;
+	background-color:transparent;/*
+    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    color: "$Color-CollapsibleTitle";*/
+}
+#properties-collapsibleIcon{
     padding-left: 8px;
     padding-top: 4px;
-    padding-bottom: 4px;
-    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    padding-bottom: 0px;
     text-align:left;
-	background-color:transparent;
+    font-size: 6pt;
+    font-weight: bold;
+	background-color:transparent;/*
+    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    color: "$Color-CollapsibleTitle";*/
 }
-#properties-collapsibleWidjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjget:hover { background-color:"$Color-CollapsibleHover"; }
+#properties-collapsibleWiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiidget:hover { background-color:"$Color-CollapsibleHover"; }
 
 #properties-TypeSpecificProperties{
     padding-left: 12px;
@@ -172,7 +186,11 @@ not use the system title bar
 }
 
 #dataRowHeader {
-    background:#bbbbbb;
+    padding-top:1.3px;
+    padding-bottom:1.3px;
+
+    font-size:7pt;
+    font-weight: bold;
+    background:#aaaaaa;
     color: white;
-    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
 }

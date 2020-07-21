@@ -168,6 +168,7 @@ void Display::keyPressEvent( QKeyEvent *k ) {
 
 void Display::onDatabaseUpdated() {
     geometryRenderer->onDatabaseUpdated();
+    update();
 }
 
 int Display::getW() const {

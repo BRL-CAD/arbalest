@@ -9,13 +9,13 @@
 
 class DataRow : public QHBoxWidget {
 public:
-    DataRow(int count, bool hasHeader, QWidget * parent = nullptr);
+    DataRow(int count, bool hasHeader,const QString& indexText = "", QWidget * parent = nullptr);
     void setHeaderTexts(const QStringList &headerTexts);
 
     const std::vector<QLineEdit *> &getTextBoxes() const;
 
 private:
-    QStringList headerTexts = {"x","y","z"};
+    QStringList headerTexts = {"X","Y","Z"};
     int count;
     bool hasHeader;
     std::vector<QLabel*> headerLabels;

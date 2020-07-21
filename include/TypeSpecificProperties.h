@@ -6,16 +6,16 @@
 #include <brlcad/MemoryDatabase.h>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QVBoxLayout>
+#include "Document.h"
 
 class TypeSpecificProperties: public QFrame {
 public:
-    TypeSpecificProperties(BRLCAD::MemoryDatabase &database, const BRLCAD::Object &object);
-    static TypeSpecificProperties * build(BRLCAD::MemoryDatabase& database, BRLCAD::Object &object);
+    TypeSpecificProperties(Document &document, BRLCAD::Object *object);
 
 protected:
-    BRLCAD::MemoryDatabase& database;
-    const BRLCAD::Object &object;
-    QVBoxLayout *mainVLayout;
+    Document& document;
+    BRLCAD::Object *object;
+    QVBoxLayout *l;
 };
 
 

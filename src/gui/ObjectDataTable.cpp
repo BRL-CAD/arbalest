@@ -1,5 +1,5 @@
 
-#include <include/VectorDataRow.h>
+#include <include/ObjectDataField.h>
 #include <brlcad/Ellipsoid.h>
 #include "ObjectDataTable.h"
 
@@ -17,11 +17,11 @@ ObjectDataTable::ObjectDataTable(QWidget *parent) : QVBoxWidget(parent) {
 
     int count = 1;
     for (int i = 0; i < count; i++) {
-        VectorDataRow *vectorDataRow = new VectorDataRow(!i, this);
+        ObjectDataField<BRLCAD::Ellipsoid> *vectorDataRow;// = new VectorDataRow<BRLCAD::Ellipsoid>(!i, this);
         if(i!=count-1) {
-            for(QLineEdit * textBox: vectorDataRow->getTextBoxes()){
-                textBox->setStyleSheet("border-bottom-width: 0px");
-            }
+//            for(QLineEdit * textBox: vectorDataRow->getTextBoxes()){
+//                textBox->setStyleSheet("border-bottom-width: 0px");
+//            }
         }
         addWidget(vectorDataRow);
     }

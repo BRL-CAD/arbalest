@@ -8,10 +8,12 @@
 #include <include/CollapsibleWidget.h>
 #include <brlcad/Database.h>
 #include <brlcad/MemoryDatabase.h>
+#include "Document.h"
 
+class Document;
 class Properties: public QFrame{
 public:
-    explicit Properties(BRLCAD::MemoryDatabase& database);
+    explicit Properties(Document & document);
     void bindObject(const QString &fullPath);
 
 private:
@@ -24,7 +26,7 @@ private:
         Properties *properties;
     };
 
-    BRLCAD::MemoryDatabase & database;
+    Document & document;
     QString name, fullPath, objectType;
     QLabel * nameWidget;
     QLabel * fullPathWidget;

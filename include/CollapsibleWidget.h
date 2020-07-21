@@ -17,7 +17,8 @@ public:
 
 private:
     QString title;
-    QPushButton * titleWidget;
+    QPushButton * titleLabel;
+    QPushButton * collapseIcon;
     QWidget * widget;
     QVBoxLayout *_layout;
     bool expanded = true;
