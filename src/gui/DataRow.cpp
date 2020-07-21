@@ -4,25 +4,9 @@
 #include <QtWidgets/QLabel>
 #include "DataRow.h"
 #include <QtOpenGL/QtOpenGL>
+#include <include/DragEditLineEdit.h>
 #include "QHBoxWidget.h"
 
-
-static void setLineEditTextFormat(QLineEdit *lineEdit, const QList<QTextLayout::FormatRange> &formats) {
-    if (!lineEdit) return;
-    QList<QInputMethodEvent::Attribute> attributes;
-    foreach(const QTextLayout::FormatRange &fr, formats) {
-        QInputMethodEvent::AttributeType type = QInputMethodEvent::TextFormat;
-        int start = fr.start - lineEdit->cursorPosition();
-        int length = fr.length;
-        QVariant value = fr.format;
-        attributes.append(QInputMethodEvent::Attribute(type, start, length, value));
-    }
-    QInputMethodEvent event(QString(), attributes);
-    QCoreApplication::sendEvent(lineEdit, &event);
-}
-static void clearLineEditTextFormat(QLineEdit *lineEdit) {
-    setLineEditTextFormat(lineEdit, QList<QTextLayout::FormatRange>());
-}
 
 DataRow::DataRow(int count, bool hasHeader, const QString& indexText, QWidget *parent): QHBoxWidget::QHBoxWidget(parent), count(count), hasHeader(hasHeader) {
 
@@ -58,7 +42,7 @@ DataRow::DataRow(int count, bool hasHeader, const QString& indexText, QWidget *p
             headerLabels.push_back(header);
         }
 
-        QLineEdit *textBox = new QLineEdit(this);
+        DragEditLineEdit *textBox = new DragEditLineEdit(this);
         textBox->setObjectName(i == count - 1 ? "cellLastInRow" : "cell");
         textBox->setAlignment(Qt::AlignRight);
         vbox->addWidget(textBox);
