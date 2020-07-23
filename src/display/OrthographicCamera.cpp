@@ -81,3 +81,16 @@ void OrthographicCamera::processZoomRequest(const int &deltaWheelAngle) {
     zoom = pow(zoom, zoomFactor);
     if (zoom < zoomLowerBound) zoom = zoomLowerBound;
 }
+
+glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
+    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
+    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
+    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
+    glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+
+    return rotationMatrix;
+}
+
+glm::mat4 OrthographicCamera::projectionMatrix(float x, float y) const {
+    return glm::ortho(-x, x, -y, y, nearPlane, farPlane);
+}

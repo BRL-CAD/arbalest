@@ -32,7 +32,7 @@ set(arbalest_Sources
         src/gui/QHBoxWidget.cpp
         src/gui/QVBoxWidget.cpp
         src/gui/DataRow.cpp
-        src/gui/DragEditLineEdit.cpp src/gui/DragEditLineEdit.h)
+        src/gui/DragEditLineEdit.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

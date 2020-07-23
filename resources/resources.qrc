@@ -23,6 +23,9 @@
     <file>styles/arbalest_simple.qss</file>
     <file>icons/archer.png</file>
     <file>icons/close.png</file>
+    <file>icons/file-plus.png</file>
+    <file>icons/new.png</file>
+    <file>icons/folder-open-outline.png</file>
     <file>icons/close-smaller.png</file>
     <file>icons/minimize.png</file>
     <file>icons/maximize.png</file>

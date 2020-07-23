@@ -59,7 +59,11 @@ public:
 
     glm::mat4 modelViewMatrix() const override;
 
+    glm::mat4 modelViewMatrixNoTranslate() const override;
+
     glm::mat4 projectionMatrix() const override;
+
+    glm::mat4 projectionMatrix(float x, float y) const override;
 };
 
 

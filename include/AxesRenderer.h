@@ -26,6 +26,7 @@
 #include "Renderer.h"
 
 class AxesRenderer: public Renderer {
+public:
     void render() override;
 };
 

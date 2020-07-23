@@ -55,10 +55,15 @@ void Display::resizeGL(int w, int h) {
 void Display::paintGL() {
     displayManager->drawBegin();
 
+    glViewport(0,0,w,h);
     displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
     displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix()));
+    geometryRenderer->render();
 
-    for (Renderer * i:renderers) i->render();
+    glViewport(w*.9,0,w/10,w/10);
+    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
+    displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix(w/10,w/10)));
+    axesRenderer->render();
 }
 
 void Display::refresh() {

@@ -38,7 +38,9 @@ public:
     virtual void processZoomRequest(const int & deltaWheelAngle) = 0;
 
     virtual glm::mat4 modelViewMatrix() const = 0;
+    virtual glm::mat4 modelViewMatrixNoTranslate() const = 0;
     virtual glm::mat4 projectionMatrix() const = 0;
+    virtual glm::mat4 projectionMatrix(float x, float y) const = 0;
 
 };
 
