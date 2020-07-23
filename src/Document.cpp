@@ -16,9 +16,9 @@ Document::Document(const char *filePath, int documentId) : filePath(QString(file
     objectTree = new ObjectTree(*database);
     properties = new Properties(*this);
 
+    objectTree->Rebuild();
     display->onDatabaseOpen(database);
     display->refresh();
-    objectTree->Rebuild();
 }
 
 

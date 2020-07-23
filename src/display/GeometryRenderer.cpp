@@ -105,6 +105,7 @@ void GeometryRenderer::drawDatabase() {
         database->Get(it.Name(), walker);
         ++it;
     }
+
 }
 
 

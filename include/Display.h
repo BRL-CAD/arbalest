@@ -29,6 +29,8 @@
 #include <QMouseEvent>
 #include <brlcad/MemoryDatabase.h>
 
+#include "OrthographicCamera.h"
+
 class DisplayManager;
 class GeometryRenderer;
 
@@ -39,7 +41,7 @@ public:
     Display(int documentId);
     virtual ~Display();
 
-    Camera *camera;
+    OrthographicCamera  *camera;
     void onDatabaseUpdated();
     void refresh();
     void onDatabaseOpen(BRLCAD::MemoryDatabase *pDatabase);

@@ -20,11 +20,14 @@
 /** @file Display.cpp */
 
 #include "Display.h"
+
+#include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <QtWidgets/QApplication>
 #include <OrthographicCamera.h>
 #include "DisplayManager.h"
 #include "GeometryRenderer.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -61,9 +64,11 @@ void Display::paintGL() {
     geometryRenderer->render();
 
     glViewport(w*.9,0,w/10,w/10);
-    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
+    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrixNoTranslate()));
     displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix(w/10,w/10)));
     axesRenderer->render();
+
+    std::cout << camera->eyePosition.x << " " << camera->eyePosition.y << " " << camera->eyePosition.z << endl;
 }
 
 void Display::refresh() {
@@ -184,11 +189,22 @@ int Display::getH() const {
     return h;
 }
 
+
 void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
     makeCurrent();
     geometryRenderer->setDatabase(database);
     onDatabaseUpdated();
     update();
+
+    BRLCAD::Vector3D midPoint = (database->BoundingBoxMinima() + database->BoundingBoxMaxima()) / 2;
+    auto a = database->BoundingBoxMinima();
+    auto b = database->BoundingBoxMaxima();
+    camera->setEyePosition(-midPoint.coordinates[0], -midPoint.coordinates[1], -midPoint.coordinates[2]);
+
+
+    BRLCAD::Vector3D volume = (database->BoundingBoxMinima() - database->BoundingBoxMaxima());
+    camera->zoom = vector3DLength(volume)*.6;
+	
 }
 
 const int Display::getDocumentId() const {

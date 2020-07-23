@@ -94,3 +94,11 @@ glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
 glm::mat4 OrthographicCamera::projectionMatrix(float x, float y) const {
     return glm::ortho(-x, x, -y, y, nearPlane, farPlane);
 }
+
+void OrthographicCamera::setEyePosition(float x, float y, float z)
+{
+    eyePosition.x = x;
+    eyePosition.y = y;
+    eyePosition.z = z;
+}
+

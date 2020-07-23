@@ -55,7 +55,7 @@ ObjectTree::ObjectTree
 
 class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
 public:
-    ObjectTreeCallback(const BRLCAD::ConstDatabase& database,
+    ObjectTreeCallback(BRLCAD::ConstDatabase& database,
                        QStandardItem*               parentItem) : m_database(database), m_parentItem(parentItem) {}
 
     virtual void operator()(const BRLCAD::Object &object) {
@@ -63,10 +63,11 @@ public:
 
         if (comb != 0)
             ListTreeNode(comb->Tree());
+        if(comb == nullptr) m_database.Select(object.Name());
     }
 
 private:
-    const BRLCAD::ConstDatabase& m_database;
+    BRLCAD::ConstDatabase& m_database;
     QStandardItem*               m_parentItem;
 
     void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) {

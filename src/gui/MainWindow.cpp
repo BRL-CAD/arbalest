@@ -14,49 +14,7 @@
 using namespace BRLCAD;
 using namespace std;
 
-void TintImage(QImage& inoutImage, const QColor& tintColor)
-{
-    if (tintColor == Qt::white)
-        return;
 
-    // Convert to 4-channel 32-bit format if needed
-    auto format = inoutImage.format();
-    if (format != QImage::Format_ARGB32 && format != QImage::Format_ARGB32_Premultiplied)
-    {
-        format = QImage::Format_ARGB32_Premultiplied;
-        inoutImage = inoutImage.convertToFormat(format);
-    }
-
-    const bool isPremultiplied = (format == QImage::Format_ARGB32_Premultiplied);
-    const auto tint = tintColor.rgba();
-
-    // Convert scanline by scanline (a bit tricker than using setPixelColor, but much more efficient)
-    const int sizeX = inoutImage.width();
-    const int sizeY = inoutImage.height();
-    for (int y = 0; y < sizeY; ++y)
-    {
-        // Note: Qt documentation explicitly recommends this cast for 32-bit images
-        auto* scanline = (QRgb*)inoutImage.scanLine(y);
-        for (int x = 0; x < sizeX; ++x)
-        {
-            auto color = scanline[x];
-            if (isPremultiplied)
-                color = qUnpremultiply(color);
-
-            color = qRgba(
-                    (qRed(color) * qRed(tint)) / 255
-                    , (qGreen(color) * qGreen(tint)) / 255
-                    , (qBlue(color) * qBlue(tint)) / 255
-                    , (qAlpha(color) * qAlpha(tint)) / 255
-            );
-
-            if (isPremultiplied)
-                color = qPremultiply(color);
-
-            scanline[x] = color;
-        }
-    }
-}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -142,7 +100,8 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
     // Toolbox
-    toolboxDockable = new Dockable("Create", this,true,50);
+    toolboxDockable = new Dockable("Make", this,true,30);
+    toolboxDockable->setTitleBarWidget(new QWidget());
     toolboxDockable->widget()->setStyleSheet("background:#f2f2f2");
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
@@ -158,26 +117,22 @@ void MainWindow::setTheme() {
 
 
     QHBoxWidget * tabCorner = new QHBoxWidget();
-    QPixmap *pixmap = new QPixmap(":/icons/new.png");
-    QBitmap mask = pixmap->createMaskFromColor(QColor("black"), Qt::MaskInColor);
-    QImage j(":/icons/new.png");
-    TintImage(j, QColor("red"));
-    pixmap->fill((QColor("#007acc")));
-    pixmap->setMask(mask);
-    QPushButton* open = new QPushButton( menuBar());
-    open->setIcon(QIcon(*pixmap));
-    open->setIcon(QPixmap::fromImage(j));
-    open->setObjectName("maximizeButton");
-    tabCorner->addWidget(open);
 
-    pixmap = new QPixmap(":/icons/folder-open-outline.png");
-    mask = pixmap->createMaskFromColor(QColor("white"), Qt::MaskOutColor);
-    pixmap->fill((QColor("#007acc")));
-    pixmap->setMask(mask);
-    open = new QPushButton( menuBar());
-    open->setIcon(QIcon(*pixmap));
-    open->setObjectName("maximizeButton");
-    tabCorner->addWidget(open);
+    tabCorner->setStyleSheet("QFrame {border-right-width:1px;border-color:#cdcdcd;border-style:solid;}");
+    QPushButton* newFileIcon = new QPushButton(menuBar());
+    newFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
+    newFileIcon->setObjectName("maximizeButton");
+    tabCorner->addWidget(newFileIcon);
+
+    QPushButton* openFileIcon = new QPushButton(menuBar());
+    openFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
+    openFileIcon->setObjectName("maximizeButton");
+    tabCorner->addWidget(openFileIcon);
+
+    QPushButton* saveFileIcon = new QPushButton(menuBar());
+    saveFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
+    saveFileIcon->setObjectName("maximizeButton");
+    tabCorner->addWidget(saveFileIcon);
 
     ui->documentArea->setCornerWidget(tabCorner,Qt::Corner::TopLeftCorner);
 
@@ -213,7 +168,7 @@ void MainWindow::setTheme() {
     maximizeButton->setObjectName("maximizeButton");
     connect(maximizeButton,  &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
     layoutTopRightWidget->addWidget(maximizeButton);
-
+    
     QPushButton* closeButton = new QPushButton( topRightWidget);
     closeButton->setIcon(QIcon(":/icons/close.png"));
     closeButton->setObjectName("closeButton");

@@ -42,6 +42,8 @@ public:
     virtual glm::mat4 projectionMatrix() const = 0;
     virtual glm::mat4 projectionMatrix(float x, float y) const = 0;
 
+    virtual void setEyePosition(float x, float y, float z) = 0;
+
 };
 
 

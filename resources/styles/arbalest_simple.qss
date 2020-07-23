@@ -38,16 +38,22 @@ QMenuBar {
 
 /* Status bar --------------------------------------------------------------------------------------------------------*/
 QStatusBar {
-	border-top-color: "$Color-SeparatorLine";
+    border-top-color: "$Color-SeparatorLine";
     border-top-width: 1px;
     border-style: solid;
-    padding-top:5px;
-    padding-bottom:5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: "#68217A";
+}
+
+QStatusBar::item {
+    border: None;
 }
 
 #statusBarPathLabel {
     padding-left: 8px;
     padding-right: 20px;
+    color:#ffffff;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
@@ -64,7 +70,10 @@ QStatusBar {
     border-style: solid;
 }
 
-#dockableContent{
+#dockableHeader:focus {
+    background-color: blue;
+}
+    #dockableContent{
     border-style: solid;
     padding-top: 5px;
     background-color:"$Color-Secondary";
