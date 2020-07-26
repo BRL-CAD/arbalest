@@ -88,9 +88,12 @@ ObjectTree::item:hover {
 ObjectTree::item:selected {
     border-style: solid;
     border-color: "$Color-SelectedObjectText";
-    border-right-width: 4px;
-    color: "$Color-SelectedObjectText";
-    background: "$Color-SelectedObjectRow";
+    border-width: 1px;
+    margin-right:5px;
+    /*color: "$Color-SelectedObjectText";*/
+    color: #000000;
+    /*background: "$Color-SelectedObjectRow";*/
+    background: transparent;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 

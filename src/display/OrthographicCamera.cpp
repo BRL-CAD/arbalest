@@ -31,7 +31,7 @@ glm::mat4 OrthographicCamera::modelViewMatrix() const {
     glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
     glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
 
-    return glm::translate(rotationMatrix, eyePosition);
+    return glm::translate(rotationMatrix, -eyePosition);
 }
 
 glm::mat4 OrthographicCamera::projectionMatrix() const {

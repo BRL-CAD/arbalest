@@ -199,7 +199,7 @@ void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
     BRLCAD::Vector3D midPoint = (database->BoundingBoxMinima() + database->BoundingBoxMaxima()) / 2;
     auto a = database->BoundingBoxMinima();
     auto b = database->BoundingBoxMaxima();
-    camera->setEyePosition(-midPoint.coordinates[0], -midPoint.coordinates[1], -midPoint.coordinates[2]);
+    camera->setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
 
 
     BRLCAD::Vector3D volume = (database->BoundingBoxMinima() - database->BoundingBoxMaxima());

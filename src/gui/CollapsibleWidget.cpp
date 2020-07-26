@@ -1,7 +1,5 @@
 
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
 #include <include/QHBoxWidget.h>
 #include "CollapsibleWidget.h"
 

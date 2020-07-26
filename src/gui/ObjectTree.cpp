@@ -63,7 +63,6 @@ public:
 
         if (comb != 0)
             ListTreeNode(comb->Tree());
-        if(comb == nullptr) m_database.Select(object.Name());
     }
 
 private:
@@ -106,6 +105,7 @@ void ObjectTree::Rebuild(void) {
 
         m_database.Get(it.Name(), callback);
         m_objectTree->appendRow(objectItem);
+        if (QString(it.Name()) != QString("_GLOBAL")) m_database.Select(it.Name());
 
         ++it;
     }
