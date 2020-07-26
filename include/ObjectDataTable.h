@@ -12,7 +12,7 @@ class ObjectDataTable : public QVBoxWidget {
 public:
     explicit ObjectDataTable(QWidget* parent = nullptr);
 
-    template <typename T> void initialize(BRLCAD::Vector3D (T::*function)(unsigned __int64)const){
+    template <typename T> void initialize(BRLCAD::Vector3D (T::*function)(size_t)const){
 
     }
 

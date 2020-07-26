@@ -18,10 +18,10 @@ public:
     ObjectDataField(
             Document *document,
             void *obj,
-            BRLCAD::Vector3D (T::*getter)(unsigned __int64) const,
-            void (T::*setter)(unsigned __int64, const BRLCAD::Vector3D&),
-            unsigned __int64 start,
-            unsigned __int64 count,
+            BRLCAD::Vector3D (T::*getter)(size_t) const,
+            void (T::*setter)(size_t, const BRLCAD::Vector3D&),
+            size_t start,
+            size_t count,
             const QStringList & indices,
             QString title
     ) : QVBoxWidget() , document(document) {
@@ -75,10 +75,10 @@ public:
     ObjectDataField(
             Document *document,
             void *obj,
-            BRLCAD::Vector3D (T::*getter)(unsigned __int64) const,
-            void (T::*setter)(unsigned __int64, BRLCAD::Vector3D&),
-            unsigned __int64 start,
-            unsigned __int64 count,
+            BRLCAD::Vector3D (T::*getter)(size_t) const,
+            void (T::*setter)(size_t, BRLCAD::Vector3D&),
+            size_t start,
+            size_t count,
             const QStringList & indices,
             QString title
     ) : QVBoxWidget() , document(document) {
