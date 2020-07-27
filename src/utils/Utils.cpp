@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "cicommon.h"
 
 BRLCAD::Vector3D operator+(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b)
