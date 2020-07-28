@@ -32,7 +32,8 @@ set(arbalest_Sources
         src/gui/QHBoxWidget.cpp
         src/gui/QVBoxWidget.cpp
         src/gui/DataRow.cpp
-        src/gui/DragEditLineEdit.cpp "src/utils/Utils.cpp")
+        src/gui/DragEditLineEdit.cpp 
+        src/utils/Utils.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface
@@ -61,9 +62,6 @@ ENDIF()
 find_package(Qt5 COMPONENTS Widgets Gui OpenGL REQUIRED)
 find_package(OpenGL REQUIRED)
 
-# User Interface Compiling
-qt5_wrap_ui(arbalest_PROCESSED_UIC resources/ui/MainWindow.ui)
-
 # Meta-Object Compiling
 file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
 qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
@@ -75,7 +73,6 @@ include_directories(${arbalest_Include_Dirs})
 
 add_executable(arbalest
         ${arbalest_Sources}
-        ${arbalest_PROCESSED_UIC}
         ${arbalest_PROCESSED_MOCS}
         ${arbalest_PROCESSED_RCC})
 

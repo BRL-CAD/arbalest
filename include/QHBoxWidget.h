@@ -9,6 +9,7 @@
 class QHBoxWidget : public QFrame{
 public:
     QHBoxWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    QHBoxWidget(QWidget* parent, QWidget *child);
     QHBoxLayout *getBoxLayout();
     void addWidget(QWidget* widget);
 private:

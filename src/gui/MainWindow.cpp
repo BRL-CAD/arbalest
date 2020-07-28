@@ -9,6 +9,8 @@
 #include <iostream>
 #include <QtGui/QtGui>
 #include <include/QHBoxWidget.h>
+
+#include "QVBoxWidget.h"
 #include "ui_MainWindow.h"
 
 using namespace BRLCAD;
@@ -19,15 +21,15 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    prepareUi();
     prepareDockables();
-    setTheme();
     showMaximized();
 
     connect(ui->actionOpen,     &QAction::triggered,            this,   &MainWindow::openFileDialog);
     connect(ui->actionSave_As,  &QAction::triggered,            this,   &MainWindow::saveFileDialog);
-    connect(ui->documentArea,   &QTabWidget::currentChanged,    this,   &MainWindow::onActiveDocumentChanged);
-    connect(ui->documentArea,   &QTabWidget::tabCloseRequested, this,   &MainWindow::tabCloseRequested);
-    ui->menubar->installEventFilter(this);
+    connect(documentArea,   &QTabWidget::currentChanged,    this,   &MainWindow::onActiveDocumentChanged);
+    connect(documentArea,   &QTabWidget::tabCloseRequested, this,   &MainWindow::tabCloseRequested);
+    menuTitleBar->installEventFilter(this);
 
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
@@ -40,13 +42,12 @@ MainWindow::~MainWindow()
         Document * document = pair.second;
         delete document;
     }
-
     delete ui;
 }
 
 
 void MainWindow::onActiveDocumentChanged(int newIndex){
-    Display * display = dynamic_cast<Display*>(ui->documentArea->widget(newIndex));
+    Display * display = dynamic_cast<Display*>(documentArea->widget(newIndex));
     if (display == nullptr) return;
     if (display->getDocumentId() != activeDocumentId){
         activeDocumentId = display->getDocumentId();
@@ -57,8 +58,8 @@ void MainWindow::onActiveDocumentChanged(int newIndex){
 }
 
 void MainWindow::tabCloseRequested(int i){
-    ui->documentArea->removeTab(i);
-    if (ui->documentArea->currentIndex() == -1){
+    documentArea->removeTab(i);
+    if (documentArea->currentIndex() == -1){
         objectTreeDockable->clear();
         objectPropertiesDockable->clear();
     }
@@ -70,15 +71,15 @@ void MainWindow::openFile(const QString& filePath){
     document.getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = &document;
     QString filename(QFileInfo(filePath).fileName());
-    int tabIndex = ui->documentArea->addTab(document.getDisplay(),filename);
-    ui->documentArea->setCurrentIndex(tabIndex);
+    int tabIndex = documentArea->addTab(document.getDisplay(),filename);
+    documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
             this, &MainWindow::objectTreeSelectionChanged);
 }
 
 void MainWindow::openFileDialog()
 {
-    QString filePath = QFileDialog::getOpenFileName(ui->documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()){
         openFile(filePath);
     }
@@ -101,56 +102,80 @@ void MainWindow::prepareDockables(){
 
     // Toolbox
     toolboxDockable = new Dockable("Make", this,true,30);
-    toolboxDockable->setTitleBarWidget(new QWidget());
-    toolboxDockable->widget()->setStyleSheet("background:#f2f2f2");
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
-void MainWindow::setTheme() {
-
+void MainWindow::prepareUi() {
     // Hide window title bar
     setWindowFlags(Qt::FramelessWindowHint);
 
-    centralWidget()->layout()->setContentsMargins(0, 0, 0, 0);
-    ui->documentArea->setContentsMargins(0,0,0,0);
-    ui->documentArea->tabBar()->setObjectName("documentAreaTabBar");
+
+	// Menu bar -------------------------------------------------------------------------------------------------------------
+    menuTitleBar = new QMenuBar(this);
+    setMenuBar(menuTitleBar);
+
+    QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
+
+    QAction *openAct = new QAction(tr("&Open"), this);
+    openAct->setShortcuts(QKeySequence::Open);
+    openAct->setStatusTip(tr("Opens a .g file"));
+    connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
+    fileMenu->addAction(openAct);
+	
+
+	// Status bar ----------------------------------------------------------------------------------------------------------
+    statusBar = new QStatusBar(this);
+    setStatusBar(statusBar);
+    statusBarPathLabel = new QLabel("No document open");
+    statusBarPathLabel->setObjectName("statusBarPathLabel");
+    statusBar->addWidget(statusBarPathLabel);
+	
+
+    // Document area --------------------------------------------------------------------------------------------------------
+    documentArea = new QTabWidget(this);
+    documentArea->setObjectName("documentArea");
+    documentArea->setMovable(true);
+    documentArea->setTabsClosable(true);
+    setCentralWidget(new QVBoxWidget(this, documentArea));
+    documentArea->tabBar()->setObjectName("documentAreaTabBar");
+	
+
+	
 
 
-    QHBoxWidget * tabCorner = new QHBoxWidget();
+    QHBoxWidget * mainTabBarCornerWidget = new QHBoxWidget();
 
-    tabCorner->setStyleSheet("QFrame {border-right-width:1px;border-color:#cdcdcd;border-style:solid;}");
-    QPushButton* newFileIcon = new QPushButton(menuBar());
+    mainTabBarCornerWidget->setStyleSheet("QFrame {border-right-width:1px;border-color:#cdcdcd;border-style:solid;}");
+    QPushButton* newFileIcon = new QPushButton(menuTitleBar);
     newFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
     newFileIcon->setObjectName("maximizeButton");
-    tabCorner->addWidget(newFileIcon);
+    mainTabBarCornerWidget->addWidget(newFileIcon);
 
-    QPushButton* openFileIcon = new QPushButton(menuBar());
+    QPushButton* openFileIcon = new QPushButton(menuTitleBar);
     openFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
     openFileIcon->setObjectName("maximizeButton");
-    tabCorner->addWidget(openFileIcon);
+    mainTabBarCornerWidget->addWidget(openFileIcon);
+	
 
-    QPushButton* saveFileIcon = new QPushButton(menuBar());
+    QPushButton* saveFileIcon = new QPushButton(menuTitleBar);
     saveFileIcon->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
     saveFileIcon->setObjectName("maximizeButton");
-    tabCorner->addWidget(saveFileIcon);
+    mainTabBarCornerWidget->addWidget(saveFileIcon);
 
-    ui->documentArea->setCornerWidget(tabCorner,Qt::Corner::TopLeftCorner);
+    documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopLeftCorner);
 
-    QPushButton* applicationIcon = new QPushButton( menuBar());
+    QPushButton* applicationIcon = new QPushButton( menuTitleBar);
     applicationIcon->setIcon(QIcon(":/icons/archer.png"));
     applicationIcon->setObjectName("applicationIcon");
-    menuBar()->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
+    menuTitleBar->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
 
     QHBoxLayout *layoutTopRightWidget = new QHBoxLayout;
     layoutTopRightWidget->setContentsMargins(0,0,0,0);
     QWidget * topRightWidget = new QWidget;
     topRightWidget->setLayout(layoutTopRightWidget);
-    menuBar()->setCornerWidget(topRightWidget, Qt::TopRightCorner);
+    menuTitleBar->setCornerWidget(topRightWidget, Qt::TopRightCorner);
     layoutTopRightWidget->setSpacing(0);
 
-    statusBarPathLabel = new QLabel("No document open");
-    statusBarPathLabel->setObjectName("statusBarPathLabel");
-    statusBar()->addWidget(statusBarPathLabel);
 
     QPushButton* minimizeButton = new QPushButton( topRightWidget);
     minimizeButton->setIcon(QIcon(":/icons/minimize.png"));
@@ -197,7 +222,7 @@ void MainWindow::closeButtonPressed(){
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     static QPoint dragPosition{};
-    if (watched == ui->menubar)
+    if (watched == menuTitleBar)
     {
         if (event->type() == QEvent::MouseButtonPress)
         {

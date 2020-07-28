@@ -10,6 +10,8 @@
 #include "Dockable.h"
 #include "Properties.h"
 #include "QSSPreprocessor.h"
+#include <QStatusBar>
+#include <QMenuBar>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,6 +29,9 @@ private:
     Dockable *objectTreeDockable;
     Dockable *objectPropertiesDockable;
     Dockable *toolboxDockable;
+    QStatusBar *statusBar;
+    QMenuBar* menuTitleBar;
+    QTabWidget *documentArea;
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
 
@@ -52,7 +57,7 @@ private:
 
 protected:
 
-    void setTheme();
+    void prepareUi();
     void changeEvent(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
 

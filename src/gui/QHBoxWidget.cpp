@@ -9,6 +9,11 @@ QHBoxWidget::QHBoxWidget(QWidget *parent, Qt::WindowFlags f) : QFrame(parent, f)
     setLayout(boxLayout);
 }
 
+QHBoxWidget::QHBoxWidget(QWidget* parent, QWidget* child):QHBoxWidget(parent)
+{
+    addWidget(child);
+}
+
 QHBoxLayout *QHBoxWidget::getBoxLayout() {
     return boxLayout;
 }

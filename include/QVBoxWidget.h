@@ -9,6 +9,7 @@
 class QVBoxWidget : public QFrame{
 public:
     QVBoxWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    QVBoxWidget(QWidget* parent, QWidget* child);
     QVBoxLayout *getBoxLayout();
     void addWidget(QWidget* widget);
 private:

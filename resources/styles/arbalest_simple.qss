@@ -44,6 +44,7 @@ QStatusBar {
     padding-top: 5px;
     padding-bottom: 5px;
     background-color: "#68217A";
+    color:#ffffff;
 }
 
 QStatusBar::item {
@@ -53,7 +54,7 @@ QStatusBar::item {
 #statusBarPathLabel {
     padding-left: 8px;
     padding-right: 20px;
-    color:#ffffff;
+    color: #ffffff;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
@@ -117,8 +118,8 @@ ObjectTree::item:selected {
     padding-bottom: 2px;
     text-align:left;
     font-weight: bold;
-	background-color:transparent;/*
-    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+	background-color:transparent;
+    /*
     color: "$Color-CollapsibleTitle";*/
 }
 #properties-collapsibleIcon{

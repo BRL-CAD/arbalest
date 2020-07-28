@@ -10,6 +10,11 @@ QVBoxWidget::QVBoxWidget(QWidget *parent, Qt::WindowFlags f) : QFrame(parent, f)
     setLayout(boxLayout);
 }
 
+QVBoxWidget::QVBoxWidget(QWidget* parent, QWidget* child) : QVBoxWidget(parent)
+{
+    addWidget(child);
+}
+
 QVBoxLayout *QVBoxWidget::getBoxLayout() {
     return boxLayout;
 }
