@@ -23,7 +23,7 @@ Properties::Properties(Document & document) : document(document) {
 
     nameWidget = new QLabel(this);
     nameWidget->setWordWrap(true);
-    nameWidget->setObjectName("properties-NameWidget");
+    nameWidget->setObjectName("properties-nameWidget");
 
     fullPathWidget = new QLabel(this);
     fullPathWidget->setWordWrap(true);
@@ -52,9 +52,8 @@ void Properties::bindObject(const QString &fullPath) {
     current = new TypeSpecificProperties(document,object);
     typeSpecificPropertiesArea->setWidget(current);
 
-
     QString nameType = "<font color='$Color-SelectedObjectText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
-                        "<font color='$Color-CollapsibleTitle'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
+                        "<font color='$Color-SelectedObjectTypeText'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
     nameWidget->setText(Globals::theme->process(nameType));
     typeSpecificPropertiesArea->setTitle(breakStringAtCaps(objectType));
 }

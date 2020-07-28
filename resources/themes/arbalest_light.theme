@@ -1,23 +1,23 @@
 
 
-$Color-Main                 : #f2f2f2;  // Used as the main background color. Used in main window, menu bar, status bar etc.
-$Color-Secondary            : #fcfcfc;  // Used as the background color for some main UI components like objects tree
-$Color-SeparatorLine        : #cdcdcd;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
-$Color-DockableHeader: #EAEAEA; // Titlebar color of all dockable widgets like objects tree
-$Color-DockableHeaderText   : #0D0D0D; // Titlebar text color of all dockable widgets like objects tree
-//$Color-DockableHeader       : #007acc; // Titlebar color of all dockable widgets like objects tree
-//$Color-DockableHeaderText   : #ffffff; // Titlebar text color of all dockable widgets like objects tree
-$Color-DefaultFontColor     : #555555;  // Text color for all text in status bar
-$Color-SelectedTab          : #ffffff;  // Background color for selected tab of the file switcher tab bar
-$Color-SelectedTabLine      : #0000ff;  // Bottom border color for selected tab of the file switcher tab bar
-$Color-SelectedObjectText   : #bf1919;  // Object selected in the object tree.
-$Color-SelectedObjectRow    : #e3e3e3;  // Background of the object selected in the object tree.
-$Color-LightText            : #8d8d8d;  // for non important text
-$Color-ScrollBars           : #dddddd;
-$Color-CollapsibleTitle     : #007acc; // Title of CollapsibleWidget
-$Color-CollapsibleHover     : #fefefe;
-
-$Color-MinMaxHover          : #dadada;  // Minimize maximize buttons background color when hover
-$Color-MinMaxPressed        : #dfdfdf;  // Minimize maximize buttons background color when pressed
-$Color-CloseHover           : #E81123;  // Close button background color when hover
-$Color-ClosePressed         : #f1707a;  // Close button background color when pressed
+$Color-Main                             : #f2f2f2;  // Used as the main background color. Used in main window, menu bar, status bar etc.
+$Color-Secondary                        : #fcfcfc;  // Used as the background color for some main UI components like objects tree
+$Color-SeparatorLine                    : #cdcdcd;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
+$Color-DockableHeader                   : #EAEAEA; // Titlebar color of all dockable widgets like objects tree
+$Color-DockableHeaderText               : #0D0D0D; // Titlebar text color of all dockable widgets like objects tree
+//$Color-DockableHeaderActive           : #007acc; // Titlebar color of all dockable widgets like objects tree
+//$Color-DockableHeaderTextActive       : #ffffff; // Titlebar text color of all dockable widgets like objects tree
+$Color-DefaultFontColor                 : #555555;  // Text color for all text in status bar
+$Color-SelectedTab                      : #ffffff;  // Background color for selected tab of the file switcher tab bar
+$Color-SelectedTabLine                  : #0000ff;  // Bottom border color for selected tab of the file switcher tab bar
+$Color-SelectedObjectText               : #bf1919;  // Object selected in the object tree.
+$Color-SelectedObjectTypeText           : #007acc; // Title of CollapsibleWidget
+$Color-SelectedObjectRow                : #e3e3e3;  // Background of the object selected in the object tree.
+$Color-LightText                        : #8d8d8d;  // for non important text
+$Color-ScrollBars                       : #dddddd;
+$Color-DataCellBordersAndHeader         : #aaaaaa;
+$Color-ButtonHoverMask                  : #22000000;  // Alpha mask
+$Color-ButtonPressedMask                : #11000000;  // Alpha mask
+$Color-StatusBar                        : #68217A;
+$Color-StatusBarText                    : #ffffff;
+$Color-ObjectTreeItemText               : #000000;

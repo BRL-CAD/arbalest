@@ -7,7 +7,7 @@
 #include <ObjectTree.h>
 
 
-Document::Document(const char *filePath, int documentId) : filePath(QString(filePath)),documentId(documentId) {
+Document::Document(const char *filePath, const int documentId) : filePath(QString(filePath)),documentId(documentId) {
     database =  new BRLCAD::MemoryDatabase();
     database->Load(filePath);
 

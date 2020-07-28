@@ -13,7 +13,7 @@ CollapsibleWidget::CollapsibleWidget(QWidget * parent):QFrame(parent) {
     titleLabel = new QPushButton(titleBar);
     collapseIcon = new QPushButton(titleBar);
     titleLabel->setObjectName("properties-collapsibleTitle");
-    collapseIcon->setObjectName("properties-collapsibleIcon");
+    collapseIcon->setObjectName("properties-collapsibleCollapseIcon");
     titleBar->addWidget(titleLabel);
     titleBar->addWidget(collapseIcon);
     titleBar->getBoxLayout()->addStretch();

@@ -1,16 +1,37 @@
 
 QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
 
-QWidget         {outline: none;}  /* removes ugly dotted lines around focused widgets*/
+QWidget {
+    outline: none; /* removes ugly dotted lines around focused widgets*/
+    font-size: 10pt; 
+    color: "$Color-DefaultFontColor";
+}  
 
 QMainWindow     { background-color:"$Color-Main"; }
 
-QObject         { font-size: 10pt; color: "$Color-DefaultFontColor";}
 
+#topLeftAppIcon, #minimizeButton, #maximizeButton, #closeButton {
+    border-style: solid;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 13px;
+    padding-right: 13px;
+}
+
+#toolbarButton { padding: 8px;}
+
+#minimizeButton { padding-top: 3px; padding-bottom: 11px;}
+
+#toolbarButton, #topLeftAppIcon, #minimizeButton, #maximizeButton, #closeButton                     { background-color: transparent;}
+
+#toolbarButton:hover, #minimizeButton:hover,   #maximizeButton:hover,     #closeButton:hover        { background-color:"$Color-ButtonHoverMask" ; }
+
+#toolbarButton:pressed, #minimizeButton:pressed, #maximizeButton:pressed,   #closeButton:pressed    { background-color:"$Color-ButtonPressedMask" ; }
+
+/* Scroll bars ----------------------------------------------------------------------------------------------------*/
 QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
-
-QScrollBar:vertical     {border: none;background-color: #00000000;width: 9px;margin: 0px 0 0px 0;}
-QScrollBar:horizontal   {border: none;background-color: #00000000;height: 9px;margin: 0px 0 0px 0;}
+QScrollBar:vertical     {border: none; background-color: transparent; width : 9px;margin: 0px 0 0px 0;}
+QScrollBar:horizontal   {border: none; background-color: transparent; height: 9px;margin: 0px 0 0px 0;}
 QScrollBar::handle{
     border-radius: 0px;
     border-color: "$Color-ScrollBars";
@@ -24,6 +45,7 @@ QScrollBar::add-line{width: 0px; height: 0px;}
 QScrollBar::sub-line{width: 0px; height: 0px;}
 QScrollBar::add-page{background-color: transparent;}
 QScrollBar::sub-page{background-color: transparent;}
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 
 /* Menu bar --------------------------------------------------------------------------------------------------------*/
@@ -43,8 +65,8 @@ QStatusBar {
     border-style: solid;
     padding-top: 5px;
     padding-bottom: 5px;
-    background-color: "#68217A";
-    color:#ffffff;
+    background-color: "$Color-StatusBar";
+    color: "$Color-StatusBarText";
 }
 
 QStatusBar::item {
@@ -54,7 +76,7 @@ QStatusBar::item {
 #statusBarPathLabel {
     padding-left: 8px;
     padding-right: 20px;
-    color: #ffffff;
+    color: "$Color-StatusBarText";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
@@ -74,7 +96,8 @@ QStatusBar::item {
 #dockableHeader:focus {
     background-color: blue;
 }
-    #dockableContent{
+
+#dockableContent {
     border-style: solid;
     padding-top: 5px;
     background-color:"$Color-Secondary";
@@ -82,24 +105,21 @@ QStatusBar::item {
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* ObjectTree --------------------------------------------------------------------------------------------------------*/
+ObjectTree::item {
+    color: "$Color-ObjectTreeItemText";
+}
 ObjectTree::item:hover {
     background: "$Color-SelectedObjectRow";
 }
-
 ObjectTree::item:selected {
-    border-style: solid;
-    border-color: "$Color-SelectedObjectText";
-    border-width: 1px;
     margin-right:5px;
     /*color: "$Color-SelectedObjectText";*/
-    color: #000000;
-    /*background: "$Color-SelectedObjectRow";*/
-    background: transparent;
+    background: "$Color-SelectedObjectRow";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Properties --------------------------------------------------------------------------------------------------------*/
-#properties-NameWidget {
+#properties-nameWidget {
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
     padding-right: 4px;
     padding-left: 4px;
@@ -119,26 +139,41 @@ ObjectTree::item:selected {
     text-align:left;
     font-weight: bold;
 	background-color:transparent;
-    /*
-    color: "$Color-CollapsibleTitle";*/
 }
-#properties-collapsibleIcon{
+#properties-collapsibleCollapseIcon {
     padding-left: 8px;
     padding-top: 4px;
     padding-bottom: 0px;
-    text-align:left;
+    text-align: left;
     font-size: 6pt;
     font-weight: bold;
-	background-color:transparent;/*
-    font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
-    color: "$Color-CollapsibleTitle";*/
+    background-color: transparent;
 }
-#properties-collapsibleWiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiidget:hover { background-color:"$Color-CollapsibleHover"; }
 
 #properties-TypeSpecificProperties{
     padding-left: 12px;
     padding-right: 12px;
     padding-bottom: 12px;
+}
+
+#cell, #cellLastInRow {
+    border: 1px solid "$Color-DataCellBordersAndHeader";
+    border-right-width: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#cellLastInRow {
+    border-right-width: 1px;
+}
+
+#dataRowHeader {
+    padding-top: 1.3px;
+    padding-bottom: 1.3px;
+    font-size: 7pt;
+    font-weight: bold;
+    background: "$Color-DataCellBordersAndHeader";
+    color: white;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
@@ -166,44 +201,16 @@ ObjectTree::item:selected {
     image: url(:/icons/close-smaller.png);
     subcontrol-position: right;
 }
+
+#mainTabBarCornerWidget {
+    border-right-width:1px;
+    border-color:#cdcdcd;
+    border-style:solid;
+}
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /*
 Styling for the Minimize, Maximize and close buttons in the nemu bar. We have to do the styling manually since we do
 not use the system title bar
 */
-#applicationIcon, #minimizeButton, #maximizeButton, #closeButton{
-    border-style: solid;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    padding-left: 13px;
-    padding-right: 13px;
-	background-color:"$Color-Main";
-}
-#minimizeButton { padding-top: 3px; padding-bottom: 11px;}
-#minimizeButton:hover,   #maximizeButton:hover      { background-color:"$Color-MinMaxHover"; }
-#minimizeButton:pressed, #maximizeButton:pressed    { background-color:"$Color-MinMaxPressed"; }
-#closeButton:hover                                  { background-color:"$Color-CloseHover"; }
-#closeButton:pressed                                { background-color:"$Color-ClosePressed"; }
 /* ------------------------------------------------------------------------------------------------------------------ */
-
-
-#cell, #cellLastInRow{
-    border: 1px solid #bbbbbb;
-    border-right-width: 0px;
-    padding-left:6px;
-    padding-right:6px;
-}
-#cellLastInRow{
-    border-right-width: 1px;
-}
-
-#dataRowHeader {
-    padding-top:1.3px;
-    padding-bottom:1.3px;
-
-    font-size:7pt;
-    font-weight: bold;
-    background:#aaaaaa;
-    color: white;
-}

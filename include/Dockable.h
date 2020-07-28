@@ -25,9 +25,10 @@ public:
     };
 
     Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrollable, int width = -1);
+    ~Dockable() override;
+	
     void clear();
     void setContent(QWidget *content);
-    ~Dockable() override;
 
 private:
     QLabel *title;
