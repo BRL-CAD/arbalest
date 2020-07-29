@@ -45,17 +45,22 @@ private:
     void loadTheme();
     void prepareDockables();
 
+    void newFile();
     void openFile(const QString& filePath);
+    bool saveFile(const QString& filePath);
 
+    const int statusBarShortMessageDuration = 7000;
 
-
+	
 protected:
     void changeEvent(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
 
+	
 public slots:
     void openFileDialog();
-    void saveFileDialog();
+    void saveAsFileDialog();
+    void saveFileDefaultPath();
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) const;
     void objectTreeSelectionChanged(QString fullPath);

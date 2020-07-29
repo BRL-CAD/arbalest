@@ -7,9 +7,15 @@
 #include <ObjectTree.h>
 
 
-Document::Document(const char *filePath, const int documentId) : filePath(QString(filePath)),documentId(documentId) {
+Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
+    if (filePath != nullptr) this->filePath = new QString(*filePath);
     database =  new BRLCAD::MemoryDatabase();
-    database->Load(filePath);
+    if (filePath != nullptr) {
+        if (!database->Load(filePath->toUtf8().data()))
+        {
+            throw -1;
+        }
+    }
 
     display = new Display(documentId);
     geometryOperationsManager = new GeometryOperationsManager(*database);
@@ -57,8 +63,13 @@ void Document::onDatabaseUpdated() {
     display->onDatabaseUpdated();
 }
 
-const QString &Document::getFilePath() const {
+const QString *Document::getFilePath() const {
     return filePath;
+}
+
+void Document::setFilePath(const QString& filePath)
+{
+    this->filePath = new QString(filePath);
 }
 
 Properties *Document::getProperties() const {

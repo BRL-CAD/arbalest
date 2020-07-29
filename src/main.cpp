@@ -5,8 +5,10 @@
 
 int main(int argc, char*argv[]) {
 #ifdef ARB_DEBUG
-    argv = new char* [2]{ argv[0], "C:/Users/Sadeep/Desktop/sma/moss.g" };
-    argc = 2;
+    if (argc < 2) {
+        argv = new char* [2]{ argv[0], "C:/Users/Sadeep/Desktop/sma/moss.g" };
+        argc = 2;
+    }
 #endif
 
 

@@ -51,6 +51,6 @@ void DragEditLineEdit::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 double DragEditLineEdit::map(int cursorValue){
-    double val = initialValue + cursorValue * (initialValue * 0.01 + 0.02);
+    double val = initialValue + cursorValue * (abs(initialValue) * 0.01 + 0.02);
     return val;
 }

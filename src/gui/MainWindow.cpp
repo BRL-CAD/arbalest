@@ -9,6 +9,7 @@
 #include <QtGui/QtGui>
 #include <include/QHBoxWidget.h>
 #include <QApplication>
+#include <QMessageBox>
 
 
 using namespace BRLCAD;
@@ -47,17 +48,29 @@ void MainWindow::prepareUi() {
 
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
+    QAction* newAct = new QAction(tr("&New"), this);
+    newAct->setShortcuts(QKeySequence::New);
+    newAct->setStatusTip(tr("New .g file"));
+    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+    fileMenu->addAction(newAct);
+
     QAction* openAct = new QAction(tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QAction* saveAct = new QAction(tr("&Save"), this);
+    QAction* saveAct = new QAction(tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
-    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDialog);
+    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
     fileMenu->addAction(saveAct);
+
+    QAction* saveAsAct = new QAction(tr("Save As..."), this);
+    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setStatusTip(tr("Save database as"));
+    connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
+    fileMenu->addAction(saveAsAct);
 
     QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
 
@@ -118,22 +131,29 @@ void MainWindow::prepareUi() {
     QHBoxWidget * mainTabBarCornerWidget = new QHBoxWidget();
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
-    QPushButton* newFileButton = new QPushButton(menuTitleBar);
-    newFileButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
-    newFileButton->setObjectName("toolbarButton");
-    mainTabBarCornerWidget->addWidget(newFileButton);
+    QPushButton* newButton = new QPushButton(menuTitleBar);
+    newButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
+    newButton->setObjectName("toolbarButton");
+    mainTabBarCornerWidget->addWidget(newButton);
+    connect(newButton, &QPushButton::clicked, this, &MainWindow::newFile);
 
-    QPushButton* openFileButton = new QPushButton(menuTitleBar);
-    openFileButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
-    openFileButton->setObjectName("toolbarButton");
-    mainTabBarCornerWidget->addWidget(openFileButton);	
-    connect(openFileButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
+    QPushButton* openButton = new QPushButton(menuTitleBar);
+    openButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
+    openButton->setObjectName("toolbarButton");
+    mainTabBarCornerWidget->addWidget(openButton);	
+    connect(openButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
 
-    QPushButton* saveFileButton = new QPushButton(menuTitleBar);
-    saveFileButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
-    saveFileButton->setObjectName("toolbarButton");
-    mainTabBarCornerWidget->addWidget(saveFileButton);
-    connect(saveFileButton, &QPushButton::clicked, this, &MainWindow::saveFileDialog);
+    QPushButton* saveButton = new QPushButton(menuTitleBar);
+    saveButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
+    saveButton->setObjectName("toolbarButton");
+    mainTabBarCornerWidget->addWidget(saveButton);
+    connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveFileDefaultPath);
+	
+    QPushButton* saveAsButton = new QPushButton(menuTitleBar);
+    saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
+    saveAsButton->setObjectName("toolbarButton");
+    mainTabBarCornerWidget->addWidget(saveAsButton);
+    connect(saveAsButton, &QPushButton::clicked, this, &MainWindow::saveAsFileDialog);
 
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopLeftCorner);
 }
@@ -167,29 +187,82 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
-void MainWindow::openFile(const QString& filePath){
-    Document & document = * (new Document(filePath.toUtf8().data(), documentsCount));
-    document.getObjectTree()->setObjectName("dockableContent");
-    document.getProperties()->setObjectName("dockableContent");
-    documents[documentsCount++] = &document;
-    QString filename(QFileInfo(filePath).fileName());
-    const int tabIndex = documentArea->addTab(document.getDisplay(),filename);
+void MainWindow::newFile() {
+    Document* document = new Document(documentsCount);
+    document->getObjectTree()->setObjectName("dockableContent");
+    document->getProperties()->setObjectName("dockableContent");
+    documents[documentsCount++] = document;
+    QString filename( "Untitled");
+    const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
+        this, &MainWindow::objectTreeSelectionChanged);
+    
+}
+void MainWindow::openFile(const QString& filePath) {
+    Document* document = nullptr;
+
+    try {
+        document = new Document(documentsCount, &filePath);
+    }
+    catch (...) {
+        QString msg = "Failed to open " + filePath;
+        statusBar->showMessage(msg, statusBarShortMessageDuration);
+
+        QMessageBox msgBox;
+        msgBox.setText(msg);
+        msgBox.exec();
+    }
+
+    if (document != nullptr) {
+        document->getObjectTree()->setObjectName("dockableContent");
+        document->getProperties()->setObjectName("dockableContent");
+        documents[documentsCount++] = document;
+        QString filename(QFileInfo(filePath).fileName());
+        const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
+        documentArea->setCurrentIndex(tabIndex);
+        connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
             this, &MainWindow::objectTreeSelectionChanged);
+    }
+}
+
+bool MainWindow::saveFile(const QString& filePath) {
+    return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
 }
 
 void MainWindow::openFileDialog()
 {
-    QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()){
         openFile(filePath);
     }
 }
 
-void MainWindow::saveFileDialog(){
-    QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
+void MainWindow::saveAsFileDialog() {
+	const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    if (!filePath.isEmpty()) {
+        if (saveFile(filePath))
+        {
+            documents[activeDocumentId]->setFilePath(filePath);
+            QString filename(QFileInfo(filePath).fileName());
+            documentArea->setTabText(documentArea->currentIndex(), filename);
+            statusBarPathLabel->setText(*documents[activeDocumentId]->getFilePath());
+            statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
+        }
+    }
+}
+
+void MainWindow::saveFileDefaultPath() {
+    if (documents[activeDocumentId]->getFilePath() == nullptr) saveAsFileDialog();
+    else {
+        const QString filePath = *documents[activeDocumentId]->getFilePath();
+        if (!filePath.isEmpty()) {
+            if (saveFile(filePath))
+            {
+                statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
+            }
+        }
+    }
 }
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
@@ -199,7 +272,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
         activeDocumentId = display->getDocumentId();
         objectTreeDockable->setContent(documents[activeDocumentId]->getObjectTree());
         objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
-        statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath());
+        statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
     }
 }
 
