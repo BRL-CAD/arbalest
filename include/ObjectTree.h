@@ -14,28 +14,29 @@ class ObjectTree {
 public:
     ObjectTree(BRLCAD::MemoryDatabase* database);
 
-    const QString rootName = "/";
 
 	// getters	
-    BRLCAD::MemoryDatabase* getDatabase() const
+    inline BRLCAD::MemoryDatabase* getDatabase() const
     {
 	    return database;
     }
 
-    QHash<QString, QVector<QString>>& getTree()
+    inline QHash<int, QVector<int>>& getTree()
     {
-	    return tree;
+        return tree;
+    }
+    inline QHash<int, QString>& getNameMap()
+    {
+        return nameMap;
     }
 
-	QVector<QString> & getRoot()
-    {
-        return tree["/"];
-    }
-
+    int lastAllocatedId = 0;
+	
 private:
     BRLCAD::MemoryDatabase* database;
-    QHash<QString, QVector<QString>> tree;
 	
+    QHash<int, QVector<int>> tree;
+    QHash<int, QString> nameMap;
 };
 
 #endif

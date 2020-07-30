@@ -32,19 +32,16 @@
 #include "MemoryDatabase.h"
 
 
-static class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+	
 public:
-
     ObjectTreeCallback(ObjectTree *objectTree, QString &objectName) :objectTree(objectTree), objectName(objectName) {}
 
     void operator()(const BRLCAD::Object& object) override
     {
-        if (objectTree->getTree().contains(objectName)) {
-            return;
-        }
-
-        objectTree->getTree()[objectName] = QVector<QString>();
-        childrenNames = &objectTree->getTree()[objectName];
+        id = ++objectTree->lastAllocatedId;
+        objectTree->getTree()[id] = QVector<int>();
+        childrenNames = &objectTree->getTree()[id];
     	
         const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
     	
@@ -54,9 +51,10 @@ public:
     }
 
 private:
+    int id=-1;
     ObjectTree* objectTree = nullptr;
     QString objectName;
-    QVector<QString>* childrenNames = nullptr;
+    QVector<int>* childrenNames = nullptr;
 	
     void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) const
     {
@@ -74,10 +72,11 @@ private:
             break;
 
         case BRLCAD::Combination::ConstTreeNode::Leaf:
+            objectTree->getTree()[id].append(objectTree->lastAllocatedId + 1);
             QString childName = QString(node.Name());
+            objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
             ObjectTreeCallback callback(objectTree, childName);
             objectTree->getDatabase()->Get(node.Name(), callback);
-            objectTree->getTree()[objectName].append(childName);
         }
     }
 };
@@ -87,14 +86,15 @@ ObjectTree::ObjectTree (BRLCAD::MemoryDatabase* database) :  database(database) 
     
     BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
 
-    getTree()[rootName] = QVector<QString>();
-    QVector<QString>* childrenNames = &getTree()[rootName];
+    getTree()[0] = QVector<int>();
+    QVector<int>* childrenNames = &getTree()[0];
 
     while (it.Good()) {
         QString childName = it.Name();
+        childrenNames->append(lastAllocatedId+1);
+        getNameMap()[lastAllocatedId + 1] = childName;
         ObjectTreeCallback callback(this, childName);
         database->Get(it.Name(), callback);
-        childrenNames->append(childName);
         ++it;
     }
 }
