@@ -20,4 +20,4 @@ $Color-ButtonHoverMask                  : #22000000;  // Alpha mask
 $Color-ButtonPressedMask                : #11000000;  // Alpha mask
 $Color-StatusBar                        : #68217A;
 $Color-StatusBarText                    : #ffffff;
-$Color-ObjectTreeItemText               : #000000;
+$Color-ObjectTreeWidgetItemText         : #000000;

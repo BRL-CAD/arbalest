@@ -10,6 +10,7 @@
 #include "GeometryOperationsManager.h"
 #include "Display.h"
 #include "ObjectTree.h"
+#include "ObjectTreeWidget.h"
 #include "Properties.h"
 
 class Properties;
@@ -19,9 +20,10 @@ private:
     BRLCAD::MemoryDatabase *database;
     GeometryOperationsManager *geometryOperationsManager;
     Display *display;
-    ObjectTree *objectTree;
+    ObjectTreeWidget *objectTreeWidget;
     Properties *properties;
     const int documentId;
+    ObjectTree* objectTree;
 
 public:
     explicit Document(int documentId, const QString *filePath = nullptr);
@@ -32,7 +34,7 @@ public:
     GeometryOperationsManager *getGeometryOperationsManager() const;
     MemoryDatabase *getDatabase();
     Display *getDisplay() const;
-    ObjectTree *getObjectTree() const;
+    ObjectTreeWidget *getObjectTreeWidget() const;
     Properties *getProperties() const;
     std::vector<std::string> getTopObjectsList();
     const QString *getFilePath() const;

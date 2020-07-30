@@ -15,7 +15,8 @@ set(arbalest_Sources
         src/gui/MainWindow.cpp
         src/main.cpp
         src/Document.cpp
-        src/gui/ObjectTree.cpp
+        src/ObjectTree.cpp
+        src/gui/ObjectTreeWidget.cpp
         src/display/GeometryRenderer.cpp
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp

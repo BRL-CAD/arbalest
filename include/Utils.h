@@ -8,5 +8,7 @@ BRLCAD::Vector3D operator-(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b)
 BRLCAD::Vector3D operator/(const BRLCAD::Vector3D& a, const int& b);
 double vector3DLength(const BRLCAD::Vector3D& a);
 
+QString breakStringAtCaps(const QString& in);
+
 
 #endif // UTILS_ARBALEST_H

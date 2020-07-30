@@ -22,7 +22,7 @@ public:
 	
 private:
 	// UI components
-    Dockable *objectTreeDockable;
+    Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
     Dockable *toolboxDockable;
     QStatusBar *statusBar;
@@ -63,7 +63,7 @@ public slots:
     void saveFileDefaultPath();
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) const;
-    void objectTreeSelectionChanged(QString fullPath);
+    void objectTreeWidgetSelectionChanged(QString fullPath);
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();

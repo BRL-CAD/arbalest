@@ -104,15 +104,15 @@ QStatusBar::item {
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
-/* ObjectTree --------------------------------------------------------------------------------------------------------*/
-ObjectTree::item {
-    color: "$Color-ObjectTreeItemText";
+/* ObjectTreeWidget --------------------------------------------------------------------------------------------------------*/
+ObjectTreeWidget::item {
+    color: "$Color-ObjectTreeWidgetItemText";
     margin-right:5px;
 }
-ObjectTree::item:hover {
+ObjectTreeWidget::item:hover {
     background: "$Color-SelectedObjectRow";
 }
-ObjectTree::item:selected {
+ObjectTreeWidget::item:selected {
     /*color: "$Color-SelectedObjectText";*/
     background: "$Color-SelectedObjectRow";
 }

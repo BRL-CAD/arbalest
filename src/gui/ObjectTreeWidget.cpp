@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/** @file ObjectTree.cpp
+/** @file ObjectTreeWidget.cpp
  *
  *  taken from RT3/QtGUI:
  *      implementation of the objects' tree visualization
@@ -30,10 +30,10 @@
 
 #include <brlcad/Combination.h>
 
-#include "ObjectTree.h"
+#include "ObjectTreeWidget.h"
 
 
-ObjectTree::ObjectTree
+ObjectTreeWidget::ObjectTreeWidget
 (
     BRLCAD::ConstDatabase& database,
     QWidget*               parent
@@ -48,15 +48,15 @@ ObjectTree::ObjectTree
     connect(selectionModel(),
             &QItemSelectionModel::selectionChanged,
             this,
-            &ObjectTree::Activated
+            &ObjectTreeWidget::Activated
     );
 }
 
 
-class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+class ObjectTreeWidgetCallback : public BRLCAD::ConstDatabase::ObjectCallback {
 public:
-    ObjectTreeCallback(BRLCAD::ConstDatabase& database,
-                       QStandardItem*               parentItem) : m_database(database), m_parentItem(parentItem) {}
+    ObjectTreeWidgetCallback(BRLCAD::ConstDatabase& database,
+                       QStandardItem*               parentItem) : database(database), m_parentItem(parentItem) {}
 
     virtual void operator()(const BRLCAD::Object &object) {
         const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    BRLCAD::ConstDatabase& m_database;
+    BRLCAD::ConstDatabase& database;
     QStandardItem*               m_parentItem;
 
     void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) {
@@ -85,23 +85,23 @@ private:
 
             case BRLCAD::Combination::ConstTreeNode::Leaf:
                 QStandardItem*     objectItem = new QStandardItem(node.Name());
-                ObjectTreeCallback callback(m_database, objectItem);
+                ObjectTreeWidgetCallback callback(database, objectItem);
 
-                m_database.Get(node.Name(), callback);
+                database.Get(node.Name(), callback);
                 m_parentItem->appendRow(objectItem);
         }
     }
 };
 
 
-void ObjectTree::Rebuild(void) {
+void ObjectTreeWidget::Rebuild(void) {
     m_objectTree->clear();
 
     BRLCAD::ConstDatabase::TopObjectIterator it = m_database.FirstTopObject();
 
     while (it.Good()) {
         QStandardItem*     objectItem = new QStandardItem(it.Name());
-        ObjectTreeCallback callback(m_database, objectItem);
+        ObjectTreeWidgetCallback callback(m_database, objectItem);
 
         m_database.Get(it.Name(), callback);
         m_objectTree->appendRow(objectItem);
@@ -112,7 +112,7 @@ void ObjectTree::Rebuild(void) {
 }
 
 
-void ObjectTree::Activated(const QItemSelection & selected, const QItemSelection & deselected) {
+void ObjectTreeWidget::Activated(const QItemSelection & selected, const QItemSelection & deselected) {
     QModelIndexList selectedIndexes;
 
     m_database.UnSelectAll();

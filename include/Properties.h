@@ -9,25 +9,19 @@
 #include <brlcad/Database.h>
 #include <brlcad/MemoryDatabase.h>
 #include "Document.h"
+#include "QVBoxWidget.h"
 
 class Document;
-class Properties: public QFrame{
+class Properties: public QVBoxWidget{
 public:
     explicit Properties(Document & document);
     void bindObject(const QString &fullPath);
 
 private:
-
-    class ObjectCallback: public BRLCAD::Database::ObjectCallback{
-    public:
-        explicit ObjectCallback(Properties *properties) : properties(properties) {}
-        void operator()(BRLCAD::Object& object) override;
-    private:
-        Properties *properties;
-    };
-
-    Document & document;
     QString name, fullPath, objectType;
+
+	// UI components
+    Document & document;
     QLabel * nameWidget;
     QLabel * fullPathWidget;
     CollapsibleWidget * typeSpecificPropertiesArea;

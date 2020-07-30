@@ -42,6 +42,11 @@ void Dockable::setContent(QWidget *content) {
     if (!content->isVisible()) content->setVisible(true);
 }
 
+void Dockable::hideHeader()
+{
+    setTitleBarWidget(new QWidget(this));
+}
+
 void Dockable::clear() {
     if(widget()){
         widget()->setVisible(false);

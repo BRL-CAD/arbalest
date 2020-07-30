@@ -1,61 +1,41 @@
-/*                      O B J E C T S T R E E V I E W . H
- * BRL-CAD
- *
- * Copyright (c) 2018 United States Government as represented by
- * the U.S. Army Research Laboratory.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/** @file ObjectTree.h
- *
- *  taken from RT3/QtGUI:
- *      declaration of the objects' tree visualization
- */
 
-#ifndef OBJECTTREE_H
-#define OBJECTTREE_H
+#ifndef RT3_OBJECTTREE_H
+#define RT3_OBJECTTREE_H
 
-#include <QTreeView>
-#include <QStandardItemModel>
-
+#include <QString>
+#include <QHash>
+#include <QVector>
 #include <brlcad/ConstDatabase.h>
 
+#include "brlcad/MemoryDatabase.h"
 
-class ObjectTree : public QTreeView {
-    Q_OBJECT
+
+class ObjectTree {
 public:
-    ObjectTree(BRLCAD::ConstDatabase& database,
-               QWidget*               parent = 0);
+    ObjectTree(BRLCAD::MemoryDatabase* database);
 
-    void Rebuild(void);
+    const QString rootName = "/";
 
+	// getters	
+    BRLCAD::MemoryDatabase* getDatabase() const
+    {
+	    return database;
+    }
+
+    QHash<QString, QVector<QString>>& getTree()
+    {
+	    return tree;
+    }
+
+	QVector<QString> & getRoot()
+    {
+        return tree["/"];
+    }
 
 private:
-    BRLCAD::ConstDatabase& m_database;
-    QStandardItemModel*    m_objectTree;
-
-signals:
-    void SelectionChanged(QString fullPath);
-
-private slots:
-    void Activated(const QItemSelection &, const QItemSelection &);
+    BRLCAD::MemoryDatabase* database;
+    QHash<QString, QVector<QString>> tree;
+	
 };
 
-
-#endif // OBJECTTREE_H
+#endif

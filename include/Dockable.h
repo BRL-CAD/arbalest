@@ -29,6 +29,7 @@ public:
 	
     void clear();
     void setContent(QWidget *content);
+    void hideHeader();
 
 private:
     QLabel *title;

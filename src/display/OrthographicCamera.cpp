@@ -26,10 +26,10 @@
 OrthographicCamera::OrthographicCamera() = default;
 
 glm::mat4 OrthographicCamera::modelViewMatrix() const {
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
-    glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+	const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
+	const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
+	const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
+	const glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
 
     return glm::translate(rotationMatrix, -eyePosition);
 }
@@ -48,8 +48,8 @@ void OrthographicCamera::processRotateRequest(const int &deltaX, const int &delt
         return;
     }
 
-    float deltaAngleX = float(deltaX) / h;
-    float deltaAngleY = float(deltaY) / h;
+    const float deltaAngleX = float(deltaX) / h;
+    const float deltaAngleY = float(deltaY) / h;
     if (thirdAxis) {
         angleAroundAxes.y += deltaAngleX * eyeRotationPerMouseDelta;
     } else {
@@ -64,30 +64,29 @@ void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY
         return;
     }
 
-    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(-angleAroundAxes.z), axisZ);
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
+    const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(-angleAroundAxes.z), axisZ);
+    const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
+    const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
+    const glm::mat4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
 
-    glm::vec3 cameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
-    eyePosition += float(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * zoom;
+    const glm::vec3 cameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
+    eyePosition -= static_cast<float>(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * zoom;
 
-    glm::vec3 cameraUpDirection(rotationMatrix * glm::vec4(axisY, 1.0));
-    eyePosition -= float(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * zoom;
+    const glm::vec3 cameraUpDirection(rotationMatrix * glm::vec4(axisY, 1.0));
+    eyePosition += static_cast<float>(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * zoom;
 }
 
 void OrthographicCamera::processZoomRequest(const int &deltaWheelAngle) {
-    float zoomFactor = 1 - zoomFactorMultiplier * float(deltaWheelAngle);
+	const float zoomFactor = 1 - zoomFactorMultiplier * static_cast<float>(deltaWheelAngle);
     zoom = pow(zoom, zoomFactor);
     if (zoom < zoomLowerBound) zoom = zoomLowerBound;
 }
 
 glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
+	const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
+	const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
+	const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
     glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
-
     return rotationMatrix;
 }
 

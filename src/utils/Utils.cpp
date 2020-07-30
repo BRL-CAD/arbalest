@@ -1,4 +1,6 @@
 #include <cmath>
+#include <QString>
+
 
 #include "cicommon.h"
 
@@ -32,4 +34,15 @@ BRLCAD::Vector3D operator/(const BRLCAD::Vector3D& a, const int& b)
 double vector3DLength(const BRLCAD::Vector3D& a)
 {
     return sqrt(a.coordinates[0] * a.coordinates[0] + a.coordinates[1] * a.coordinates[1] + a.coordinates[2] * a.coordinates[2]);
+}
+
+QString breakStringAtCaps(const QString& in)
+{
+    QString newName;
+    for (int i = 0; i < in.size(); i++)
+    {
+        if (in[i].isUpper() && i != 0) newName += " ";
+        newName += in[i];
+    }
+    return newName;
 }

@@ -37,6 +37,20 @@ MainWindow::~MainWindow()
     }
 }
 
+void MainWindow::loadTheme()
+{
+	QFile themeFile( ":themes/arbalest_light.theme" );
+	themeFile.open( QFile::ReadOnly );
+	QString themeStr( themeFile.readAll() );
+	Globals::theme = new QSSPreprocessor(themeStr);
+	themeFile.close();
+
+	QFile styleFile( ":styles/arbalest_simple.qss" );
+	styleFile.open( QFile::ReadOnly );
+	QString styleStr(styleFile.readAll() );
+	qApp->setStyleSheet(Globals::theme->process(styleStr));
+	styleFile.close();
+}
 
 void MainWindow::prepareUi() {
     setWindowFlags(Qt::FramelessWindowHint);    // Hide window title bar
@@ -92,6 +106,7 @@ void MainWindow::prepareUi() {
     minimizeButton->setObjectName("minimizeButton");
     connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
     layoutTopRightWidget->addWidget(minimizeButton);
+
 
     maximizeButton = new QPushButton(topRightWidget);
     if (this->windowState() == Qt::WindowMaximized) {
@@ -158,25 +173,10 @@ void MainWindow::prepareUi() {
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopLeftCorner);
 }
 
-void MainWindow::loadTheme()
-{
-	QFile themeFile( ":themes/arbalest_light.theme" );
-	themeFile.open( QFile::ReadOnly );
-	QString themeStr( themeFile.readAll() );
-	Globals::theme = new QSSPreprocessor(themeStr);
-	themeFile.close();
-
-	QFile styleFile( ":styles/arbalest_simple.qss" );
-	styleFile.open( QFile::ReadOnly );
-	QString styleStr(styleFile.readAll() );
-	qApp->setStyleSheet(Globals::theme->process(styleStr));
-	styleFile.close();
-}
-
 void MainWindow::prepareDockables(){
     // Object tree
-    objectTreeDockable = new Dockable("Objects", this,false,300);
-    addDockWidget(Qt::RightDockWidgetArea,objectTreeDockable);
+    objectTreeWidgetDockable = new Dockable("Objects", this, false, 300);
+    addDockWidget(Qt::RightDockWidgetArea, objectTreeWidgetDockable);
 
     // Properties
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
@@ -184,21 +184,23 @@ void MainWindow::prepareDockables(){
 
     // Toolbox
     toolboxDockable = new Dockable("Make", this,true,30);
+    toolboxDockable->hideHeader();
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
 void MainWindow::newFile() {
     Document* document = new Document(documentsCount);
-    document->getObjectTree()->setObjectName("dockableContent");
+    document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
     QString filename( "Untitled");
     const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
     documentArea->setCurrentIndex(tabIndex);
-    connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
-        this, &MainWindow::objectTreeSelectionChanged);
+    connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::SelectionChanged,
+            this, &MainWindow::objectTreeWidgetSelectionChanged);
     
 }
+
 void MainWindow::openFile(const QString& filePath) {
     Document* document = nullptr;
 
@@ -215,14 +217,14 @@ void MainWindow::openFile(const QString& filePath) {
     }
 
     if (document != nullptr) {
-        document->getObjectTree()->setObjectName("dockableContent");
+        document->getObjectTreeWidget()->setObjectName("dockableContent");
         document->getProperties()->setObjectName("dockableContent");
         documents[documentsCount++] = document;
         QString filename(QFileInfo(filePath).fileName());
         const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
         documentArea->setCurrentIndex(tabIndex);
-        connect(documents[activeDocumentId]->getObjectTree(), &ObjectTree::SelectionChanged,
-            this, &MainWindow::objectTreeSelectionChanged);
+        connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::SelectionChanged,
+                this, &MainWindow::objectTreeWidgetSelectionChanged);
     }
 }
 
@@ -270,7 +272,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     if (display == nullptr) return;
     if (display->getDocumentId() != activeDocumentId){
         activeDocumentId = display->getDocumentId();
-        objectTreeDockable->setContent(documents[activeDocumentId]->getObjectTree());
+        objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
         objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
     }
@@ -280,12 +282,12 @@ void MainWindow::tabCloseRequested(const int i) const
 {
     documentArea->removeTab(i);
     if (documentArea->currentIndex() == -1){
-        objectTreeDockable->clear();
+        objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
     }
 }
 
-void MainWindow::objectTreeSelectionChanged(QString fullPath) {
+void MainWindow::objectTreeWidgetSelectionChanged(QString fullPath) {
     documents[activeDocumentId]->getProperties()->bindObject(fullPath);
 }
 

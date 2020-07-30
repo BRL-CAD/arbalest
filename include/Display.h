@@ -48,7 +48,7 @@ public:
 
     int getW() const;
     int getH() const;
-    const int getDocumentId() const;
+    int getDocumentId() const;
 
 protected:
     void resizeGL(int w, int h) override;

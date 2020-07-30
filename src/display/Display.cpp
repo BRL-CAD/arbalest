@@ -67,8 +67,6 @@ void Display::paintGL() {
     displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrixNoTranslate()));
     displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix(w/10,w/10)));
     axesRenderer->render();
-
-    std::cout << camera->eyePosition.x << " " << camera->eyePosition.y << " " << camera->eyePosition.z << endl;
 }
 
 void Display::refresh() {
@@ -78,8 +76,8 @@ void Display::refresh() {
 
 
 void Display::mouseMoveEvent(QMouseEvent *event) {
-    int x = event->x();
-    int y = event->y();
+	const int x = event->x();
+	const int y = event->y();
     int globalX = event->globalX();
     int globalY = event->globalY();
 
@@ -91,7 +89,7 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
             return;
         }
         if(event->buttons() & (rotateCameraMouseButton)) {
-            bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
+	        const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
             camera->processRotateRequest(x- prevMouseX, y - prevMouseY,rotateThirdAxis);
         }
         if(event->buttons() & (moveCameraMouseButton)){
@@ -100,8 +98,8 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
 
         refresh();
 
-        QPoint topLeft = mapToGlobal(QPoint(0,0));
-        QPoint bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
+        const QPoint topLeft = mapToGlobal(QPoint(0,0));
+        const QPoint bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
 
         int newX = -1;
         int newY = -1;
@@ -202,11 +200,12 @@ void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
     camera->setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
 
 
-    BRLCAD::Vector3D volume = (database->BoundingBoxMinima() - database->BoundingBoxMaxima());
+    const BRLCAD::Vector3D volume = (database->BoundingBoxMinima() - database->BoundingBoxMaxima());
     camera->zoom = vector3DLength(volume)*.6;
 	
 }
 
-const int Display::getDocumentId() const {
+int Display::getDocumentId() const
+{
     return documentId;
 }
