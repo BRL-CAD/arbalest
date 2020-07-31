@@ -270,8 +270,8 @@ void MainWindow::saveFileDefaultPath() {
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     Display * display = dynamic_cast<Display*>(documentArea->widget(newIndex));
     if (display == nullptr) return;
-    if (display->getDocumentId() != activeDocumentId){
-        activeDocumentId = display->getDocumentId();
+    if (display->getDocument()->getDocumentId() != activeDocumentId){
+        activeDocumentId = display->getDocument()->getDocumentId();
         objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
         objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");

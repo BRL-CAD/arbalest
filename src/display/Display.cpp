@@ -24,6 +24,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <QtWidgets/QApplication>
+#include <QWidget>
 #include <OrthographicCamera.h>
 #include "DisplayManager.h"
 #include "GeometryRenderer.h"
@@ -31,16 +32,20 @@
 
 using namespace std;
 
-Display::Display(int documentId):documentId(documentId) {
+
+Display::Display(Document*  document):document(document) {
     camera = new OrthographicCamera();
     displayManager = new DisplayManager(*this);
-    geometryRenderer = new GeometryRenderer(*displayManager);
+    geometryRenderer = new GeometryRenderer(displayManager, document);
     axesRenderer = new AxesRenderer();
 
-    renderers.push_back(geometryRenderer);
-    renderers.push_back(axesRenderer);
-
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
+
+    makeCurrent();
+    onDatabaseUpdated();
+    autoView();
+    update();
+
 }
 
 Display::~Display() {
@@ -49,7 +54,42 @@ Display::~Display() {
     delete geometryRenderer;
     delete axesRenderer;
 }
-void Display::resizeGL(int w, int h) {
+
+void Display::onDatabaseUpdated() {
+    geometryRenderer->onDatabaseUpdated();
+    update();
+}
+
+void Display::refresh() {
+    makeCurrent();
+    update();
+}
+
+void Display::autoView() const
+{
+	BRLCAD::Vector3D midPoint = (document->getDatabase()->BoundingBoxMinima() + document->getDatabase()->BoundingBoxMaxima()) / 2;
+	auto a = document->getDatabase()->BoundingBoxMinima();
+	auto b = document->getDatabase()->BoundingBoxMaxima();
+	camera->setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
+
+	const BRLCAD::Vector3D volume = (document->getDatabase()->BoundingBoxMinima() - document->getDatabase()->BoundingBoxMaxima());
+	camera->setZoom(vector3DLength(volume) * 1.1);
+}
+
+int Display::getW() const {
+    return w;
+}
+
+int Display::getH() const {
+    return h;
+}
+
+const Document* Display::getDocument() const
+{
+    return document;
+}
+
+void Display::resizeGL(const int w, const int h) {
     camera->setWH(w,h);
     this->w = w;
     this->h = h;
@@ -59,21 +99,15 @@ void Display::paintGL() {
     displayManager->drawBegin();
 
     glViewport(0,0,w,h);
-    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrix()));
-    displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix()));
+    displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrix())));
+    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix())));
     geometryRenderer->render();
 
     glViewport(w*.9,0,w/10,w/10);
-    displayManager->loadMatrix((const float*)glm::value_ptr(camera->modelViewMatrixNoTranslate()));
-    displayManager->loadPMatrix((const float*)glm::value_ptr(camera->projectionMatrix(w/10,w/10)));
+    displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrixNoTranslate())));
+    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix(w / 10, w / 10))));
     axesRenderer->render();
 }
-
-void Display::refresh() {
-    makeCurrent();
-    update();
-}
-
 
 void Display::mouseMoveEvent(QMouseEvent *event) {
 	const int x = event->x();
@@ -172,40 +206,4 @@ void Display::keyPressEvent( QKeyEvent *k ) {
             refresh();
             break;
     }
-}
-
-void Display::onDatabaseUpdated() {
-    geometryRenderer->onDatabaseUpdated();
-    update();
-}
-
-int Display::getW() const {
-    return w;
-}
-
-int Display::getH() const {
-    return h;
-}
-
-
-void Display::onDatabaseOpen(BRLCAD::MemoryDatabase *database) {
-    makeCurrent();
-    geometryRenderer->setDatabase(database);
-    onDatabaseUpdated();
-    update();
-
-    BRLCAD::Vector3D midPoint = (database->BoundingBoxMinima() + database->BoundingBoxMaxima()) / 2;
-    auto a = database->BoundingBoxMinima();
-    auto b = database->BoundingBoxMaxima();
-    camera->setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
-
-
-    const BRLCAD::Vector3D volume = (database->BoundingBoxMinima() - database->BoundingBoxMaxima());
-    camera->zoom = vector3DLength(volume)*.6;
-	
-}
-
-int Display::getDocumentId() const
-{
-    return documentId;
 }

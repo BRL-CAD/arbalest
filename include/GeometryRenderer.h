@@ -28,9 +28,7 @@
 
 class GeometryRenderer:public Renderer {
 public:
-    explicit GeometryRenderer(DisplayManager &displayManager);
-
-    void setDatabase(BRLCAD::MemoryDatabase *database);
+    GeometryRenderer(DisplayManager* displayManager, Document* document);
 
     // This method should be called database is changed (i.e. after changing this->database) or updated
     void onDatabaseUpdated();
@@ -48,26 +46,26 @@ public:
     void drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo);
 
     // traversing through the database
-    class DatabaseWalker: public BRLCAD::ConstDatabase::ObjectCallback{
+    class DatabaseWalker: public BRLCAD::MemoryDatabase::ObjectCallback{
     public:
-        DatabaseWalker(BRLCAD::ConstDatabase &database, GeometryRenderer &geometryRenderer, std::string &path,
+        DatabaseWalker(BRLCAD::MemoryDatabase*database, GeometryRenderer &geometryRenderer, std::string &path,
                        ColorInfo colorInfo)
-                : database(database),
-                  geometryRenderer(geometryRenderer),
-                  path(path), colorInfo(colorInfo) {}
-        void operator()(const BRLCAD::Object& object) override;
+                : colorInfo(colorInfo),
+                  database(database),
+                  geometryRenderer(geometryRenderer), path(path) {}
+        void operator()(BRLCAD::Object& object) override;
         void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node);
 
     private:
         ColorInfo colorInfo;
-        BRLCAD::ConstDatabase & database;
+        BRLCAD::MemoryDatabase * database;
         GeometryRenderer & geometryRenderer;
         std::string& path;
     };
 
 private:
-    BRLCAD::MemoryDatabase *database = nullptr;
-    DisplayManager &displayManager;
+    DisplayManager* displayManager;
+    Document* document;
     float defaultWireColor[3] = {1.0,.1,.4};
     bool databaseUpdated = false;
 

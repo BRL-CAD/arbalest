@@ -22,23 +22,26 @@
 #include <brlcad/Combination.h>
 #include "GeometryRenderer.h"
 
-GeometryRenderer::GeometryRenderer(DisplayManager &displayManager) : displayManager(displayManager) {}
 
+GeometryRenderer::GeometryRenderer(DisplayManager* displayManager, Document* document) : displayManager(displayManager), document(document)
+{
+	
+}
 void GeometryRenderer::render() {
-    if (database == nullptr) return;
-    displayManager.saveState();
+    if (document->getDatabase() == nullptr) return;
+    displayManager->saveState();
 
     // If database has been updated we need to redraw.
     // Also QOpenGLWidget sometimes looses saved display list after UI changes (dock / undock etc).
     // Therefore we need to draw again if the dlists are not available
-    if (databaseUpdated || (!solids.empty() && !displayManager.isDListValid(solids[0]))) {
+    if (databaseUpdated || (!solids.empty() && !displayManager->isDListValid(solids[0]))) {
         drawDatabase();
         databaseUpdated = false;
     }
     for (int i:solids) {
-        displayManager.drawDList(i);
+        displayManager->drawDList(i);
     }
-    displayManager.restoreState();
+    displayManager->restoreState();
 }
 
 /*
@@ -49,7 +52,7 @@ void GeometryRenderer::onDatabaseUpdated() {
 }
 
 
-void GeometryRenderer::DatabaseWalker::operator()(const BRLCAD::Object& object) {
+void GeometryRenderer::DatabaseWalker::operator()(BRLCAD::Object& object) {
     const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
     if (comb != 0) {
         if(comb->HasColor()) {
@@ -83,7 +86,7 @@ void GeometryRenderer::DatabaseWalker::ListTreeNode(const BRLCAD::Combination::C
             const char * leafName = node.Name();
             std::string leafPath = path + "/" + std::string(leafName);
             DatabaseWalker callback(database, geometryRenderer, leafPath, colorInfo);
-            database.Get(leafName, callback);
+            database->Get(leafName, callback);
     }
 }
 
@@ -92,17 +95,17 @@ void GeometryRenderer::DatabaseWalker::ListTreeNode(const BRLCAD::Combination::C
  */
 void GeometryRenderer::drawDatabase() {
     for (int i: solids){
-        displayManager.freeDLists(i,1);
+        displayManager->freeDLists(i,1);
     }
     solids.clear();
 
-    BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
+    BRLCAD::ConstDatabase::TopObjectIterator it = document->getDatabase()->FirstTopObject();
     while (it.Good()) {
         std::string objectName = std::string(it.Name());
         ColorInfo colorInfo{};
         colorInfo.hasColor = false;
-        DatabaseWalker walker(*database, *this, objectName, colorInfo);
-        database->Get(it.Name(), walker);
+        DatabaseWalker walker(document->getDatabase(), *this, objectName, colorInfo);
+        document->getDatabase()->Get(it.Name(), walker);
         ++it;
     }
 
@@ -116,28 +119,23 @@ void GeometryRenderer::drawDatabase() {
 void
 GeometryRenderer::drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo) {
     BRLCAD::VectorList vectorList;
-    database->Plot(name,vectorList);
+    document->getDatabase()->Plot(name,vectorList);
 
 
     GLuint dlist;
-    dlist = displayManager.genDLists(1);
-    displayManager.beginDList(dlist);  // begin display list --------------
+    dlist = displayManager->genDLists(1);
+    displayManager->beginDList(dlist);  // begin display list --------------
     solids.push_back(dlist);
 
     if (colorInfo.hasColor) {
-        displayManager.setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
+        displayManager->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
     }
     else {
-        displayManager.setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
+        displayManager->setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
     }
 
     //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
-    displayManager.drawVList(&vectorList);
-    displayManager.endDList();     // end display list --------------
-}
-
-void GeometryRenderer::setDatabase(BRLCAD::MemoryDatabase *database) {
-    this->database = database;
-    onDatabaseUpdated();
+    displayManager->drawVList(&vectorList);
+    displayManager->endDList();     // end display list --------------
 }
 

@@ -35,7 +35,7 @@ glm::mat4 OrthographicCamera::modelViewMatrix() const {
 }
 
 glm::mat4 OrthographicCamera::projectionMatrix() const {
-    return glm::ortho(-zoom * w / h, zoom * w / h, -zoom, zoom, nearPlane, farPlane);
+    return glm::ortho(-(verticalSpan/2) * w / h, (verticalSpan/2) * w / h, -verticalSpan/2, verticalSpan/2, nearPlane, farPlane);
 }
 
 void OrthographicCamera::setWH(float w, float h) {
@@ -70,16 +70,16 @@ void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY
     const glm::mat4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
 
     const glm::vec3 cameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
-    eyePosition -= static_cast<float>(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * zoom;
+    eyePosition -= static_cast<float>(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * verticalSpan;
 
     const glm::vec3 cameraUpDirection(rotationMatrix * glm::vec4(axisY, 1.0));
-    eyePosition += static_cast<float>(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * zoom;
+    eyePosition += static_cast<float>(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * verticalSpan;
 }
 
 void OrthographicCamera::processZoomRequest(const int &deltaWheelAngle) {
 	const float zoomFactor = 1 - zoomFactorMultiplier * static_cast<float>(deltaWheelAngle);
-    zoom = pow(zoom, zoomFactor);
-    if (zoom < zoomLowerBound) zoom = zoomLowerBound;
+    verticalSpan = pow(verticalSpan, zoomFactor);
+    if (verticalSpan < zoomLowerBound) verticalSpan = zoomLowerBound;
 }
 
 glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
@@ -99,5 +99,10 @@ void OrthographicCamera::setEyePosition(float x, float y, float z)
     eyePosition.x = x;
     eyePosition.y = y;
     eyePosition.z = z;
+}
+
+void OrthographicCamera::setZoom(const float zoom)
+{
+	this->verticalSpan = zoom;
 }
 

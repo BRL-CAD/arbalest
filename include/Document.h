@@ -11,6 +11,8 @@
 #include "Properties.h"
 
 class Properties;
+class Display;
+
 class Document {
 private:
     QString *filePath = nullptr;
@@ -24,14 +26,14 @@ private:
 public:
     explicit Document(int documentId, const QString *filePath = nullptr);
     virtual ~Document();
-    void onDatabaseUpdated();
+    void onDatabaseUpdated() const;
 
     // getters setters
-    BRLCAD::MemoryDatabase *getDatabase();
+    BRLCAD::MemoryDatabase *getDatabase() const;
     Display *getDisplay() const;
     ObjectTreeWidget *getObjectTreeWidget() const;
     Properties *getProperties() const;
-    std::vector<std::string> getTopObjectsList();
+    int getDocumentId() const;
     const QString *getFilePath() const;
     void setFilePath(const QString& filePath);
 };

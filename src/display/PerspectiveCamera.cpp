@@ -1,4 +1,4 @@
-
+// This class probably does not work anymore
 #include "PerspectiveCamera.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>

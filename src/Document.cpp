@@ -6,43 +6,27 @@
 #include <iostream>
 #include <ObjectTreeWidget.h>
 
-
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
     if (filePath != nullptr) this->filePath = new QString(*filePath);
     database =  new BRLCAD::MemoryDatabase();
     if (filePath != nullptr) {
         if (!database->Load(filePath->toUtf8().data()))
         {
-            throw -1;
+            throw std::exception("Failed to open file");
         }
     }
 
-    display = new Display(documentId);
     objectTree = new ObjectTree(database);
     objectTreeWidget = new ObjectTreeWidget(objectTree);
     properties = new Properties(*this);
 
-    display->onDatabaseOpen(database);
+    display = new Display(this);
     display->refresh();
 }
-
 
 Document::~Document() {
     delete database;
     delete display;
-}
-
-
-
-std::vector<std::string> Document::getTopObjectsList() {
-    std::vector<std::string> list;
-
-    BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
-    while (it.Good()){
-        list.push_back(it.Name());
-        ++it;
-    }
-    return list;
 }
 
 Display *Document::getDisplay() const {
@@ -53,8 +37,8 @@ ObjectTreeWidget *Document::getObjectTreeWidget() const {
     return objectTreeWidget;
 }
 
-
-void Document::onDatabaseUpdated() {
+void Document::onDatabaseUpdated() const
+{
     display->onDatabaseUpdated();
 }
 
@@ -71,6 +55,12 @@ Properties *Document::getProperties() const {
     return properties;
 }
 
-BRLCAD::MemoryDatabase *Document::getDatabase() {
+int Document::getDocumentId() const
+{
+	return documentId;
+}
+
+BRLCAD::MemoryDatabase *Document::getDatabase() const
+{
     return database;
 }

@@ -1,6 +1,6 @@
 //
 // Created by Sadeep on 09-Jun.
-//
+// This class probably does not work anymore
 
 #ifndef RT3_PerspectiveCamera_H
 #define RT3_PerspectiveCamera_H

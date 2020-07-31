@@ -41,13 +41,15 @@ private:
     const float zoomLowerBound = 0.00001;
     const int mouseMaxDrag = 500;
 
+    glm::vec3 eyePosition = initialEyePosition; // Camera coordinates
+    float verticalSpan = 600;
+
     glm::vec3 angleAroundAxes = initialAngleAroundAxes; // Camera direction in degrees
     float w = 400, h = 400;         // Display width and height.
 
 public:
-    glm::vec3 eyePosition = initialEyePosition; // Camera coordinates
-    float zoom = 600;
     OrthographicCamera();
+    virtual ~OrthographicCamera() = default;
 
     void setWH(float w, float h) override;
 
@@ -66,6 +68,9 @@ public:
     glm::mat4 projectionMatrix(float x, float y) const override;
 
     void setEyePosition(float x, float y, float z) override;
+
+
+    void setZoom(const float zoom);
 };
 
 

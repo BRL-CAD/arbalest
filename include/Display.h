@@ -24,13 +24,13 @@
 #define RT3_DISPLAY_H
 
 #include <QtWidgets/QOpenGLWidget>
-#include "Camera.h"
 #include "AxesRenderer.h"
 #include <QMouseEvent>
-#include <brlcad/MemoryDatabase.h>
 
+#include "Document.h"
 #include "OrthographicCamera.h"
 
+class Document;
 class DisplayManager;
 class GeometryRenderer;
 
@@ -38,31 +38,29 @@ class GeometryRenderer;
 class Display : public QOpenGLWidget{
 
 public:
-    Display(int documentId);
+    Display(Document * document);
     virtual ~Display();
 
-    OrthographicCamera  *camera;
     void onDatabaseUpdated();
     void refresh();
-    void onDatabaseOpen(BRLCAD::MemoryDatabase *pDatabase);
+	void autoView() const;
 
     int getW() const;
     int getH() const;
-    int getDocumentId() const;
+    const Document* getDocument() const;
 
 protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *k) override ;
 
-
 private:
-    const int documentId;
+    Document * document;
     int w = 400;
     int h = 400;
     int prevMouseX = -1;
@@ -70,16 +68,15 @@ private:
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     float bgColor[3] = {.9,.9,.9};
+    OrthographicCamera  *camera;
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;
     Qt::KeyboardModifier rotateAroundThirdAxisModifier = Qt::ShiftModifier;
 
     DisplayManager *displayManager;
-    rt_wdb *database = nullptr;
     GeometryRenderer * geometryRenderer;
     AxesRenderer * axesRenderer;
-    std::vector<Renderer*> renderers;
 };
 
 
