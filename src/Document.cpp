@@ -18,12 +18,10 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     }
 
     display = new Display(documentId);
-    geometryOperationsManager = new GeometryOperationsManager(*database);
-    objectTreeWidget = new ObjectTreeWidget(*database);
-    properties = new Properties(*this);
     objectTree = new ObjectTree(database);
+    objectTreeWidget = new ObjectTreeWidget(objectTree);
+    properties = new Properties(*this);
 
-    objectTreeWidget->Rebuild();
     display->onDatabaseOpen(database);
     display->refresh();
 }
@@ -45,10 +43,6 @@ std::vector<std::string> Document::getTopObjectsList() {
         ++it;
     }
     return list;
-}
-
-GeometryOperationsManager *Document::getGeometryOperationsManager() const {
-    return geometryOperationsManager;
 }
 
 Display *Document::getDisplay() const {
@@ -77,6 +71,6 @@ Properties *Document::getProperties() const {
     return properties;
 }
 
-MemoryDatabase *Document::getDatabase() {
+BRLCAD::MemoryDatabase *Document::getDatabase() {
     return database;
 }

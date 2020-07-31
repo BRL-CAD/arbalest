@@ -28,7 +28,7 @@ Properties::Properties(Document & document) : document(document) {
 void Properties::bindObject(const QString &fullPath) {
     this->fullPath = fullPath;
     this->name = fullPath.split("/").last();
-    fullPathWidget->setText("/ "+QString(fullPath).replace("/"," / "));
+    fullPathWidget->setText(QString(fullPath).replace("/"," / "));
 
     static BRLCAD::Object* object = nullptr;
     delete object;

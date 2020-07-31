@@ -25,9 +25,15 @@ public:
     {
         return tree;
     }
+	
     inline QHash<int, QString>& getNameMap()
     {
         return nameMap;
+    }
+	
+    inline int getRootObjectId()
+    {
+        return 0;
     }
 
     int lastAllocatedId = 0;

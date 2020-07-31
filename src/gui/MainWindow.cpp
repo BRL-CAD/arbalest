@@ -196,7 +196,7 @@ void MainWindow::newFile() {
     QString filename( "Untitled");
     const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
     documentArea->setCurrentIndex(tabIndex);
-    connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::SelectionChanged,
+    connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
             this, &MainWindow::objectTreeWidgetSelectionChanged);
     
 }
@@ -223,7 +223,7 @@ void MainWindow::openFile(const QString& filePath) {
         QString filename(QFileInfo(filePath).fileName());
         const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
         documentArea->setCurrentIndex(tabIndex);
-        connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::SelectionChanged,
+        connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
                 this, &MainWindow::objectTreeWidgetSelectionChanged);
     }
 }

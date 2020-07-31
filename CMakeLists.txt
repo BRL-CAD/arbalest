@@ -23,7 +23,6 @@ set(arbalest_Sources
         src/display/Display.cpp
         src/display/DisplayManager.cpp
         src/display/AxesRenderer.cpp
-        src/GeometryOperationsManager.cpp
         src/Globals.cpp
         src/utils/QSSPreprocessor.cpp
         src/gui/Dockable.cpp

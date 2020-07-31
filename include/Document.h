@@ -5,9 +5,6 @@
 #ifndef RT3_DOCUMENT_H
 #define RT3_DOCUMENT_H
 
-
-#include <QtWidgets/QMdiSubWindow>
-#include "GeometryOperationsManager.h"
 #include "Display.h"
 #include "ObjectTree.h"
 #include "ObjectTreeWidget.h"
@@ -18,7 +15,6 @@ class Document {
 private:
     QString *filePath = nullptr;
     BRLCAD::MemoryDatabase *database;
-    GeometryOperationsManager *geometryOperationsManager;
     Display *display;
     ObjectTreeWidget *objectTreeWidget;
     Properties *properties;
@@ -31,8 +27,7 @@ public:
     void onDatabaseUpdated();
 
     // getters setters
-    GeometryOperationsManager *getGeometryOperationsManager() const;
-    MemoryDatabase *getDatabase();
+    BRLCAD::MemoryDatabase *getDatabase();
     Display *getDisplay() const;
     ObjectTreeWidget *getObjectTreeWidget() const;
     Properties *getProperties() const;

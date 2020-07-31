@@ -24,63 +24,54 @@
  */
 /** @file ObjectTreeWidget.cpp
  *
- *  taken from RT3/QtGUI:
- *      implementation of the objects' tree visualization
  */
 
 #include <brlcad/Combination.h>
-
 #include "ObjectTreeWidget.h"
 
 
-ObjectTreeWidget::ObjectTreeWidget
-(
-    BRLCAD::ConstDatabase& database,
-    QWidget*               parent
-) : QTreeView(parent), m_database(database) {
-    m_objectTree = new QStandardItemModel;
 
-    setModel(m_objectTree);
+ObjectTreeWidget::ObjectTreeWidget (ObjectTree *objectTree, QWidget *parent) : QTreeView(parent), objectTree(objectTree) {
+    treeModel = buildRoot();
+    setModel(treeModel);
     setHeaderHidden(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setSelectionMode(QAbstractItemView::SingleSelection);
-
-    connect(selectionModel(),
-            &QItemSelectionModel::selectionChanged,
-            this,
-            &ObjectTreeWidget::Activated
-    );
+    connect(selectionModel(),&QItemSelectionModel::selectionChanged, this, &ObjectTreeWidget::selectionChangedInternal);
 }
 
 
 class ObjectTreeWidgetCallback : public BRLCAD::ConstDatabase::ObjectCallback {
 public:
     ObjectTreeWidgetCallback(BRLCAD::ConstDatabase& database,
-                       QStandardItem*               parentItem) : database(database), m_parentItem(parentItem) {}
+                       QStandardItem*               parentItem) : database(database), parentItem(parentItem) {}
 
-    virtual void operator()(const BRLCAD::Object &object) {
+    void operator()(const BRLCAD::Object &object) override
+    {
         const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
 
-        if (comb != 0)
-            ListTreeNode(comb->Tree());
+        if (comb != nullptr) {
+            iterateBinaryTree(comb->Tree());
+        }
     }
 
 private:
     BRLCAD::ConstDatabase& database;
-    QStandardItem*               m_parentItem;
+    QStandardItem*  parentItem;
 
-    void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) {
+    void iterateBinaryTree(const BRLCAD::Combination::ConstTreeNode& node) const
+    {
         switch (node.Operation()) {
             case BRLCAD::Combination::ConstTreeNode::Union:
             case BRLCAD::Combination::ConstTreeNode::Intersection:
             case BRLCAD::Combination::ConstTreeNode::Subtraction:
             case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-                ListTreeNode(node.LeftOperand());
-                ListTreeNode(node.RightOperand());
+                iterateBinaryTree(node.LeftOperand());
+                iterateBinaryTree(node.RightOperand());
                 break;
 
             case BRLCAD::Combination::ConstTreeNode::Not:
-                ListTreeNode(node.Operand());
+                iterateBinaryTree(node.Operand());
                 break;
 
             case BRLCAD::Combination::ConstTreeNode::Leaf:
@@ -88,47 +79,43 @@ private:
                 ObjectTreeWidgetCallback callback(database, objectItem);
 
                 database.Get(node.Name(), callback);
-                m_parentItem->appendRow(objectItem);
+                parentItem->appendRow(objectItem);
         }
     }
 };
 
 
-void ObjectTreeWidget::Rebuild(void) {
-    m_objectTree->clear();
 
-    BRLCAD::ConstDatabase::TopObjectIterator it = m_database.FirstTopObject();
-
-    while (it.Good()) {
-        QStandardItem*     objectItem = new QStandardItem(it.Name());
-        ObjectTreeWidgetCallback callback(m_database, objectItem);
-
-        m_database.Get(it.Name(), callback);
-        m_objectTree->appendRow(objectItem);
-        if (QString(it.Name()) != QString("_GLOBAL")) m_database.Select(it.Name());
-
-        ++it;
+QStandardItem* ObjectTreeWidget::build(const int objectId) const
+{
+    QStandardItem* objectItem = new QStandardItem(objectTree->getNameMap()[objectId]);
+    for (int childObjectId : objectTree->getTree()[objectId])
+    {
+        objectItem->appendRow(build(childObjectId));
     }
+    return objectItem;
+}
+
+QStandardItemModel* ObjectTreeWidget::buildRoot() const
+{
+	const int objectId = objectTree->getRootObjectId();
+    QStandardItemModel* objectItem = new QStandardItemModel();
+    for (int childObjectId : objectTree->getTree()[objectId])
+    {
+        objectItem->appendRow(build(childObjectId));
+    }
+    return objectItem;
 }
 
 
-void ObjectTreeWidget::Activated(const QItemSelection & selected, const QItemSelection & deselected) {
-    QModelIndexList selectedIndexes;
-
-    m_database.UnSelectAll();
-    selectedIndexes = selectionModel()->selectedIndexes();
-
-    for (int i = 0; i < selectedIndexes.size(); i++) {
-        const QModelIndex selectedIndex = selectedIndexes.at(i);
-        m_database.Select(m_objectTree->itemFromIndex(selectedIndex)->text().toUtf8().data());
+void ObjectTreeWidget::selectionChangedInternal(const QItemSelection & selected, const QItemSelection & deselected) {
+	QModelIndex selectedIndex = selected.indexes().at(0);
+    QString fullPath;
+	
+    while(selectedIndex.isValid()){
+        fullPath = "/" + treeModel->itemFromIndex(selectedIndex)->text() + fullPath;
+        selectedIndex = selectedIndex.parent();
     }
-
-    auto p = selectedIndexes.at(0);
-    QString fullPath = m_objectTree->itemFromIndex(p)->text();
-    p = p.parent();
-    while(p.isValid()){
-        fullPath = m_objectTree->itemFromIndex(p)->text() + "/" + fullPath;
-        p = p.parent();
-    }
-    emit SelectionChanged(fullPath);
+	
+    emit selectionChanged(fullPath);
 }

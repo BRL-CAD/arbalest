@@ -39,9 +39,9 @@ public:
 
     void operator()(const BRLCAD::Object& object) override
     {
-        id = ++objectTree->lastAllocatedId;
-        objectTree->getTree()[id] = QVector<int>();
-        childrenNames = &objectTree->getTree()[id];
+        objectId = ++objectTree->lastAllocatedId;
+        objectTree->getTree()[objectId] = QVector<int>();
+        childrenNames = &objectTree->getTree()[objectId];
     	
         const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
     	
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    int id=-1;
+    int objectId=-1;
     ObjectTree* objectTree = nullptr;
     QString objectName;
     QVector<int>* childrenNames = nullptr;
@@ -72,7 +72,7 @@ private:
             break;
 
         case BRLCAD::Combination::ConstTreeNode::Leaf:
-            objectTree->getTree()[id].append(objectTree->lastAllocatedId + 1);
+            objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
             QString childName = QString(node.Name());
             objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
             ObjectTreeCallback callback(objectTree, childName);
@@ -95,6 +95,7 @@ ObjectTree::ObjectTree (BRLCAD::MemoryDatabase* database) :  database(database) 
         getNameMap()[lastAllocatedId + 1] = childName;
         ObjectTreeCallback callback(this, childName);
         database->Get(it.Name(), callback);
+        if (childName != QString("_GLOBAL")) database->Select(it.Name());
         ++it;
     }
 }

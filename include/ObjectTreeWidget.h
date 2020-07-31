@@ -24,8 +24,6 @@
  */
 /** @file ObjectTreeWidget.h
  *
- *  taken from RT3/QtGUI:
- *      declaration of the objects' tree visualization
  */
 
 #ifndef OBJECTTREEWIDGET_H
@@ -34,27 +32,27 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 
-#include <brlcad/ConstDatabase.h>
 
+#include "ObjectTree.h"
 
 class ObjectTreeWidget : public QTreeView {
     Q_OBJECT
 public:
-    ObjectTreeWidget(BRLCAD::ConstDatabase& database,
-               QWidget*               parent = 0);
+    ObjectTreeWidget(ObjectTree *objectTree,   QWidget *parent = nullptr);
 
-    void Rebuild(void);
+    QStandardItem *build(const int objectId) const;
+    QStandardItemModel* buildRoot() const;
 
 
 private:
-    BRLCAD::ConstDatabase& m_database;
-    QStandardItemModel*    m_objectTree;
+    QStandardItemModel* treeModel;
+    ObjectTree* objectTree;
 
 signals:
-    void SelectionChanged(QString fullPath);
+    void selectionChanged(QString fullPath);
 
 private slots:
-    void Activated(const QItemSelection &, const QItemSelection &);
+    void selectionChangedInternal(const QItemSelection &, const QItemSelection &);
 };
 
 
