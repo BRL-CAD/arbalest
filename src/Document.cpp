@@ -46,6 +46,11 @@ const QString *Document::getFilePath() const {
     return filePath;
 }
 
+ObjectTree* Document::getObjectTree() const
+{
+	return objectTree;
+}
+
 void Document::setFilePath(const QString& filePath)
 {
     this->filePath = new QString(filePath);

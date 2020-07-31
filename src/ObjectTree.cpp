@@ -33,70 +33,78 @@
 
 
 class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
-	
-public:
-    ObjectTreeCallback(ObjectTree *objectTree, QString &objectName) :objectTree(objectTree), objectName(objectName) {}
 
-    void operator()(const BRLCAD::Object& object) override
-    {
-        objectId = ++objectTree->lastAllocatedId;
-        objectTree->getTree()[objectId] = QVector<int>();
-        childrenNames = &objectTree->getTree()[objectId];
-    	
-        const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
-    	
-        if (comb != nullptr) {
-            ListTreeNode(comb->Tree());
-        }
-    }
+public:
+	ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const QString &parentPath) :
+		objectTree(objectTree),
+		objectName(objectName),
+		currentObjectPath(parentPath+"/"+objectName) {}
+
+	void operator()(const BRLCAD::Object& object) override
+	{
+		objectId = ++objectTree->lastAllocatedId;
+		objectTree->getTree()[objectId] = QVector<int>();
+		childrenNames = &objectTree->getTree()[objectId];
+
+		const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
+
+		objectTree->getFullNameMap()[objectId] = currentObjectPath;
+		if (comb != nullptr) {
+			ListTreeNode(comb->Tree());
+		}
+		else {
+			objectTree->getSolidObjectIds().insert(objectId);
+		}
+	}
 
 private:
-    int objectId=-1;
-    ObjectTree* objectTree = nullptr;
-    QString objectName;
-    QVector<int>* childrenNames = nullptr;
-	
-    void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) const
-    {
-        switch (node.Operation()) {
-        case BRLCAD::Combination::ConstTreeNode::Union:
-        case BRLCAD::Combination::ConstTreeNode::Intersection:
-        case BRLCAD::Combination::ConstTreeNode::Subtraction:
-        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-            ListTreeNode(node.LeftOperand());
-            ListTreeNode(node.RightOperand());
-            break;
+	int objectId = -1;
+	ObjectTree* objectTree = nullptr;
+	QString objectName;
+	QString currentObjectPath;
+	QVector<int>* childrenNames = nullptr;
 
-        case BRLCAD::Combination::ConstTreeNode::Not:
-            ListTreeNode(node.Operand());
-            break;
+	void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) const
+	{
+		switch (node.Operation()) {
+		case BRLCAD::Combination::ConstTreeNode::Union:
+		case BRLCAD::Combination::ConstTreeNode::Intersection:
+		case BRLCAD::Combination::ConstTreeNode::Subtraction:
+		case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+			ListTreeNode(node.LeftOperand());
+			ListTreeNode(node.RightOperand());
+			break;
 
-        case BRLCAD::Combination::ConstTreeNode::Leaf:
-            objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
-            QString childName = QString(node.Name());
-            objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
-            ObjectTreeCallback callback(objectTree, childName);
-            objectTree->getDatabase()->Get(node.Name(), callback);
-        }
-    }
+		case BRLCAD::Combination::ConstTreeNode::Not:
+			ListTreeNode(node.Operand());
+			break;
+
+		case BRLCAD::Combination::ConstTreeNode::Leaf:
+			objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
+			QString childName = QString(node.Name());
+			objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
+			ObjectTreeCallback callback(objectTree, childName,currentObjectPath);
+			objectTree->getDatabase()->Get(node.Name(), callback);
+		}
+	}
 };
 
 
-ObjectTree::ObjectTree (BRLCAD::MemoryDatabase* database) :  database(database) {
-    
-    BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
+ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
+	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
 
-    getTree()[0] = QVector<int>();
-    QVector<int>* childrenNames = &getTree()[0];
+	getTree()[0] = QVector<int>();
+	getNameMap()[0] = "";
+	QVector<int>* childrenNames = &getTree()[0];
 
-    while (it.Good()) {
-        QString childName = it.Name();
-        childrenNames->append(lastAllocatedId+1);
-        getNameMap()[lastAllocatedId + 1] = childName;
-        ObjectTreeCallback callback(this, childName);
-        database->Get(it.Name(), callback);
-        if (childName != QString("_GLOBAL")) database->Select(it.Name());
-        ++it;
-    }
+	while (it.Good()) {
+		QString childName = it.Name();
+		childrenNames->append(lastAllocatedId + 1);
+		getNameMap()[lastAllocatedId + 1] = childName;
+		ObjectTreeCallback callback(this, childName, getNameMap()[0]);
+		database->Get(it.Name(), callback);
+		if (childName != QString("_GLOBAL")) database->Select(it.Name());
+		++it;
+	}
 }
 

@@ -24,11 +24,10 @@
 
 #include "DisplayManager.h"
 #include "Renderer.h"
-#include <brlcad/Combination.h>
 
 class GeometryRenderer:public Renderer {
 public:
-    GeometryRenderer(DisplayManager* displayManager, Document* document);
+    GeometryRenderer(Document* document);
 
     // This method should be called database is changed (i.e. after changing this->database) or updated
     void onDatabaseUpdated();
@@ -43,34 +42,15 @@ public:
     };
 
     // draw object and add its display list to solids
-    void drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo);
+    int drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo);
 
-    // traversing through the database
-    class DatabaseWalker: public BRLCAD::MemoryDatabase::ObjectCallback{
-    public:
-        DatabaseWalker(BRLCAD::MemoryDatabase*database, GeometryRenderer &geometryRenderer, std::string &path,
-                       ColorInfo colorInfo)
-                : colorInfo(colorInfo),
-                  database(database),
-                  geometryRenderer(geometryRenderer), path(path) {}
-        void operator()(BRLCAD::Object& object) override;
-        void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node);
-
-    private:
-        ColorInfo colorInfo;
-        BRLCAD::MemoryDatabase * database;
-        GeometryRenderer & geometryRenderer;
-        std::string& path;
-    };
 
 private:
-    DisplayManager* displayManager;
     Document* document;
     float defaultWireColor[3] = {1.0,.1,.4};
     bool databaseUpdated = false;
 
     void drawDatabase();
-    std::vector<int> solids; // contains the display list of each solid
 };
 
 

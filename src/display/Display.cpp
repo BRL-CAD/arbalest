@@ -36,7 +36,7 @@ using namespace std;
 Display::Display(Document*  document):document(document) {
     camera = new OrthographicCamera();
     displayManager = new DisplayManager(*this);
-    geometryRenderer = new GeometryRenderer(displayManager, document);
+    geometryRenderer = new GeometryRenderer(document);
     axesRenderer = new AxesRenderer();
 
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
@@ -45,7 +45,6 @@ Display::Display(Document*  document):document(document) {
     onDatabaseUpdated();
     autoView();
     update();
-
 }
 
 Display::~Display() {
@@ -87,6 +86,11 @@ int Display::getH() const {
 const Document* Display::getDocument() const
 {
     return document;
+}
+
+DisplayManager* Display::getDisplayManager() const
+{
+	return displayManager;
 }
 
 void Display::resizeGL(const int w, const int h) {

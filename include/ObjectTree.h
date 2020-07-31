@@ -4,9 +4,8 @@
 
 #include <QString>
 #include <QHash>
+#include <QSet>
 #include <QVector>
-#include <brlcad/ConstDatabase.h>
-
 #include "brlcad/MemoryDatabase.h"
 
 
@@ -25,12 +24,26 @@ public:
     {
         return tree;
     }
-	
+
     inline QHash<int, QString>& getNameMap()
     {
         return nameMap;
     }
 	
+    inline QHash<int, QString>& getFullNameMap()
+    {
+        return fullNameMap;
+    }
+
+    inline QSet<int>& getSolidObjectIds()
+    {
+        return solidObjectIds;
+    }
+    inline QVector<int>& getActiveDisplayListIds()
+    {
+        return activeDisplayListIds;
+    }
+
     inline int getRootObjectId()
     {
         return 0;
@@ -43,6 +56,9 @@ private:
 	
     QHash<int, QVector<int>> tree;
     QHash<int, QString> nameMap;
+    QHash<int, QString> fullNameMap;
+    QSet<int> solidObjectIds;
+    QVector<int> activeDisplayListIds;
 };
 
 #endif

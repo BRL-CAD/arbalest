@@ -35,6 +35,7 @@ public:
     Properties *getProperties() const;
     int getDocumentId() const;
     const QString *getFilePath() const;
+    ObjectTree* getObjectTree() const;
     void setFilePath(const QString& filePath);
 };
 
