@@ -32,14 +32,8 @@ public:
     // this is called by Display to render a single frame
     void render() override;
 
-    // used to represent color as traversed through database
-    struct ColorInfo{
-        float red,green,blue;
-        bool hasColor;
-    };
-
     // draw object and add its display list to solids
-    int drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo);
+    int drawSolid(const char *name, ColorInfo colorInfo);
 
 
 private:

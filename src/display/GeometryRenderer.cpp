@@ -34,7 +34,6 @@ void GeometryRenderer::render() {
     if (!document->getObjectTree()->getObjectsToBeDrawnIds().isEmpty()) {
         for (int objectId : document->getObjectTree()->getObjectsToBeDrawnIds())
         {
-
             // if object was already drawn earlier, need to remove the previous display list
             if (document->getObjectTree()->getObjectIdDisplayListIdMap().contains(objectId))
             {
@@ -43,13 +42,15 @@ void GeometryRenderer::render() {
                 // no need to remove from objectIdDisplayListIdMap or visibleDisplayListIds since they'll be dealt with later
             }
 
-            const char* objectFullPath = document->getObjectTree()->getFullNameMap()[objectId].toUtf8().data();
-            const ColorInfo objectColor{ .2f, .2f, .2f, true };
-            const int  displayListId = drawSolid(objectFullPath, objectColor);
+            const QString objectFullPath = document->getObjectTree()->getFullPathMap()[objectId];
+            const ColorInfo objectColor = document->getObjectTree()->getColorMap()[objectId];
+            const int  displayListId = drawSolid(objectFullPath.toUtf8(), objectColor);
             document->getObjectTree()->getObjectIdDisplayListIdMap()[objectId] = displayListId;
+            static int a = 0;
         }
 
         document->getObjectTree()->rebuildVisibleDisplayListIds();
+        document->getObjectTree()->getObjectsToBeDrawnIds().clear();
     }
 
     for (int i : document->getObjectTree()->getVisibleDisplayListIds()) {
@@ -60,32 +61,15 @@ void GeometryRenderer::render() {
 
 
 /*
- * Clears existing display lists, iterate through each solid and generates display lists by calling drawSolid on each
- */
-void GeometryRenderer::drawDatabase() {
-
-    document->getObjectTree()->getVisibleDisplayListIds().clear();
-
-    for (int solidObjectId : document->getObjectTree()->getSolidObjectIds())
-    {
-        int  objectDisplayListId = drawSolid(document->getObjectTree()->getFullNameMap()[solidObjectId].toUtf8(),
-            { .2f, .2f, .2f, true }
-        );
-        document->getObjectTree()->getVisibleDisplayListIds().push_back(objectDisplayListId);
-    }
-}
-
-
-/*
  * Set the color and line attribute to suit a given solid, creates a display list, plots and draws solid's vlist into the display list.
  * The created display list is added to GeometryRenderer::solids
  */
-int GeometryRenderer::drawSolid(const char* name, GeometryRenderer::ColorInfo colorInfo) {
+int GeometryRenderer::drawSolid(const char* name, ColorInfo colorInfo) {
     BRLCAD::VectorList vectorList;
     document->getDatabase()->Plot(name, vectorList);
 
-    int dlist = document->getDisplay()->getDisplayManager()->genDLists(1);
-    document->getDisplay()->getDisplayManager()->beginDList(dlist);  // begin display list --------------
+    const int displayListId = document->getDisplay()->getDisplayManager()->genDLists(1);
+    document->getDisplay()->getDisplayManager()->beginDList(displayListId);  // begin display list --------------
 
     if (colorInfo.hasColor) {
         document->getDisplay()->getDisplayManager()->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
@@ -98,6 +82,6 @@ int GeometryRenderer::drawSolid(const char* name, GeometryRenderer::ColorInfo co
     document->getDisplay()->getDisplayManager()->drawVList(&vectorList);
     document->getDisplay()->getDisplayManager()->endDList();     // end display list --------------
 
-    return dlist;
+    return displayListId;
 }
 

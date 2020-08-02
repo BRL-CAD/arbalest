@@ -8,6 +8,9 @@
 #include <QVector>
 #include "brlcad/MemoryDatabase.h"
 #include <brlcad/Combination.h>
+#include <functional>
+
+#include "Utils.h"
 
 /*
  * Generates and stores the object tree by reading a database.
@@ -28,7 +31,7 @@ public:
 
     int lastAllocatedId = 0;
 
-    void traverseSubTree(int rootOfSubTree, void callback(int));
+    void traverseSubTree(int rootOfSubTreeId, const std::function<void(int)>&);
 
     // builds visibleDisplayListIds from visibleObjectIds and objectIdDisplayListIdMap
     void rebuildVisibleDisplayListIds();
@@ -51,9 +54,14 @@ public:
         return nameMap;
     }
 
-    QHash<int, QString>& getFullNameMap()
+    QHash<int, QString>& getFullPathMap()
     {
-        return fullNameMap;
+        return fullPathMap;
+    }
+	
+    QHash<int, ColorInfo>& getColorMap()
+    {
+        return colorMap;
     }
 
     QHash<int, int>& getObjectIdDisplayListIdMap()
@@ -61,7 +69,7 @@ public:
         return objectIdDisplayListIdMap;
     }
 
-    QSet<int>& getSolidObjectIds()
+    QSet<int>& getDrawableObjectIds()
     {
         return drawableObjectIds;
     }
@@ -92,15 +100,18 @@ private:
 	// this class is used for traversing the MemoryDatabase and produce the tree
     class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
     public:
-        ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const QString& parentPath) :
+        ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const int& parentObjectId) :
             objectTree(objectTree),
             objectName(objectName),
-            currentObjectPath(parentPath + "/" + objectName) {}
+            parentObjectId(parentObjectId),
+            currentObjectPath(objectTree->fullPathMap[parentObjectId] + "/" + objectName) {}
         void operator()(const BRLCAD::Object& object) override;
     private:
         int objectId = -1;
         ObjectTree* objectTree = nullptr;
-        QString objectName, currentObjectPath;
+        QString objectName;
+        const int& parentObjectId;
+    	QString currentObjectPath;
         QVector<int>* childrenNames = nullptr;
         void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) const; //traverse the boolean tree of the MemoryDatabase
     };
@@ -112,7 +123,10 @@ private:
     QHash<int, QString>         nameMap;
 
     // Object id to it's full path mapping
-    QHash<int, QString>         fullNameMap;
+    QHash<int, QString>         fullPathMap;
+
+    // Object id to it's full path mapping
+    QHash<int, ColorInfo>         colorMap;
 
 	// Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
     QHash<int, int>             objectIdDisplayListIdMap;

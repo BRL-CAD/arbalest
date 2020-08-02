@@ -11,4 +11,9 @@ double vector3DLength(const BRLCAD::Vector3D& a);
 QString breakStringAtCaps(const QString& in);
 
 
+struct ColorInfo {
+    float red, green, blue;
+    bool hasColor;
+};
+
 #endif // UTILS_ARBALEST_H

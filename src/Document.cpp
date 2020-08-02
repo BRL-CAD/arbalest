@@ -19,6 +19,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     objectTree = new ObjectTree(database);
     objectTreeWidget = new ObjectTreeWidget(objectTree);
     properties = new Properties(*this);
+    objectTree->changeSubTreeVisibility(objectTree->getRootObjectId(), true);
 
     display = new Display(this);
     display->refresh();

@@ -63,7 +63,7 @@ public:
                     val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                     ((*object).*setter)(c,val);
                     document->getDatabase()->Set(*object);
-                    document->onDatabaseUpdated();
+                    //document->onDatabaseUpdated(); todo enable object editing
                 });
             }
             addWidget(row);
@@ -120,7 +120,7 @@ public:
                     val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                     ((*object).*setter)(c,val);
                     document->getDatabase()->Set(*object);
-                    document->onDatabaseUpdated();
+                    //document->onDatabaseUpdated(); todo enable object editing
                 });
             }
             addWidget(row);
@@ -156,7 +156,7 @@ public:
                 val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                 ((*object).*setter)(val);
                 document->getDatabase()->Set(*object);
-                document->onDatabaseUpdated();
+                //document->onDatabaseUpdated(); todo enable object editing
             });
         }
 
@@ -189,7 +189,7 @@ public:
         connect(row->getTextBoxes()[0], &QLineEdit::textEdited, this, [setter,getter,document,object,row,this]() {
             ((*object).*setter)(row->getTextBoxes()[0]->text().toDouble());
             document->getDatabase()->Set(*object);
-            document->onDatabaseUpdated();
+            //document->onDatabaseUpdated(); todo enable object editing
         });
 
         addWidget(row);
