@@ -7,58 +7,131 @@
 #include <QSet>
 #include <QVector>
 #include "brlcad/MemoryDatabase.h"
+#include <brlcad/Combination.h>
 
+/*
+ * Generates and stores the object tree by reading a database.
+ * This class is used by ObjectTreeWidget, GeometryRenderer etc. throughout the application a lot.
+ * This class also contains several data structures needed for rendering the tree.
+ * BRLCAD already provides options for traversing the database.
+ * But BRLCAD traverses through the entire bool tree. Also we cannot randomly access nodes in the tree.
+ * Therefore in this class we use the BRLCAD methods to copy and create out own tree.
+ * 
+ *
+ * We assign an integer id to each object to identify it. Same object can have multiple ids if they appear
+ * multiple times in the tree like all.g\orb and ball.g\orb
+ */
 
 class ObjectTree {
 public:
     ObjectTree(BRLCAD::MemoryDatabase* database);
 
+    int lastAllocatedId = 0;
 
+    void traverseSubTree(int rootOfSubTree, void callback(int));
+
+    // builds visibleDisplayListIds from visibleObjectIds and objectIdDisplayListIdMap
+    void rebuildVisibleDisplayListIds();
+
+    void changeSubTreeVisibility(int rootOfSubTreeId, bool visible);
+	
 	// getters	
-    inline BRLCAD::MemoryDatabase* getDatabase() const
+    BRLCAD::MemoryDatabase* getDatabase() const
     {
 	    return database;
     }
 
-    inline QHash<int, QVector<int>>& getTree()
+    QHash<int, QVector<int>>& getTree()
     {
         return tree;
     }
 
-    inline QHash<int, QString>& getNameMap()
+    QHash<int, QString>& getNameMap()
     {
         return nameMap;
     }
-	
-    inline QHash<int, QString>& getFullNameMap()
+
+    QHash<int, QString>& getFullNameMap()
     {
         return fullNameMap;
     }
 
-    inline QSet<int>& getSolidObjectIds()
+    QHash<int, int>& getObjectIdDisplayListIdMap()
     {
-        return solidObjectIds;
-    }
-    inline QVector<int>& getActiveDisplayListIds()
-    {
-        return activeDisplayListIds;
+        return objectIdDisplayListIdMap;
     }
 
-    inline int getRootObjectId()
+    QSet<int>& getSolidObjectIds()
+    {
+        return drawableObjectIds;
+    }
+
+    QSet<int>& getVisibleObjectIds()
+    {
+        return visibleObjectIds;
+    }
+
+    const QVector<int>& getVisibleDisplayListIds() const
+    {
+        return visibleDisplayListIds;
+    }
+	
+    QVector<int>& getObjectsToBeDrawnIds()
+    {
+        return objectsToBeDrawnIds;
+    }
+
+    int getRootObjectId() const
     {
         return 0;
     }
-
-    int lastAllocatedId = 0;
 	
 private:
     BRLCAD::MemoryDatabase* database;
 	
-    QHash<int, QVector<int>> tree;
-    QHash<int, QString> nameMap;
-    QHash<int, QString> fullNameMap;
-    QSet<int> solidObjectIds;
-    QVector<int> activeDisplayListIds;
+	// this class is used for traversing the MemoryDatabase and produce the tree
+    class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+    public:
+        ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const QString& parentPath) :
+            objectTree(objectTree),
+            objectName(objectName),
+            currentObjectPath(parentPath + "/" + objectName) {}
+        void operator()(const BRLCAD::Object& object) override;
+    private:
+        int objectId = -1;
+        ObjectTree* objectTree = nullptr;
+        QString objectName, currentObjectPath;
+        QVector<int>* childrenNames = nullptr;
+        void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) const; //traverse the boolean tree of the MemoryDatabase
+    };
+
+    // Stores the object tree in  {parent's object id (key), children's object ids (value)} format
+    QHash<int, QVector<int>>    tree;
+
+	// Object id to it's name mapping
+    QHash<int, QString>         nameMap;
+
+    // Object id to it's full path mapping
+    QHash<int, QString>         fullNameMap;
+
+	// Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
+    QHash<int, int>             objectIdDisplayListIdMap;
+
+    // Get all objects that are not combinations. (ie. these are also the objects that can be drawn) //todo _GLOBAL?
+    QSet<int>                   drawableObjectIds;
+
+	// This set contains all visible objects that can drawn. It only contains drawableObjects, so no combinations.
+	// Should be updated whenever user makes subtrees (in)visible from ui etc.
+    QSet<int>                   visibleObjectIds;
+
+    // Needs to be recalculated whenever visibleObjectIds changes or objects are redrawn (i.e. get a new display list)
+    QVector<int>                visibleDisplayListIds;
+
+    // GeometryRenderer should draw in this vector, and generate display lists and then clear() this QVector in its
+    // next render() event if there are items in this vector
+    // Objects that were changed should be added here to acknowledge it to redraw
+    QVector<int>                objectsToBeDrawnIds;
+
 };
 
 #endif

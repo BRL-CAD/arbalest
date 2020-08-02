@@ -26,17 +26,48 @@ private:
 public:
     explicit Document(int documentId, const QString *filePath = nullptr);
     virtual ~Document();
-    void onDatabaseUpdated() const;
 
     // getters setters
-    BRLCAD::MemoryDatabase *getDatabase() const;
-    Display *getDisplay() const;
-    ObjectTreeWidget *getObjectTreeWidget() const;
-    Properties *getProperties() const;
-    int getDocumentId() const;
-    const QString *getFilePath() const;
-    ObjectTree* getObjectTree() const;
-    void setFilePath(const QString& filePath);
+    QString* getFilePath() const
+    {
+	    return filePath;
+    }
+
+    BRLCAD::MemoryDatabase* getDatabase() const
+    {
+	    return database;
+    }
+
+    Display* getDisplay() const
+    {
+	    return display;
+    }
+
+    ObjectTreeWidget* getObjectTreeWidget() const
+    {
+	    return objectTreeWidget;
+    }
+
+    Properties* getProperties() const
+    {
+	    return properties;
+    }
+
+    int getDocumentId() const
+    {
+	    return documentId;
+    }
+
+    ObjectTree* getObjectTree() const
+    {
+	    return objectTree;
+    }
+
+    void setFilePath(const QString& filePath)
+    {
+        this->filePath = new QString(filePath);
+    }
+
 };
 
 

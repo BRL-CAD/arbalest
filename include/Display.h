@@ -41,7 +41,6 @@ public:
     Display(Document * document);
     virtual ~Display();
 
-    void onDatabaseUpdated();
     void refresh();
 	void autoView() const;
 

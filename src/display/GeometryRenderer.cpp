@@ -17,56 +17,61 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file GeometryRenderer.cpp */
+ /** @file GeometryRenderer.cpp */
 
 #include "GeometryRenderer.h"
 
 
 GeometryRenderer::GeometryRenderer(Document* document) : document(document)
 {
-	
+
 }
+
 void GeometryRenderer::render() {
     if (document->getDatabase() == nullptr) return;
     document->getDisplay()->getDisplayManager()->saveState();
 
-    // If database has been updated we need to redraw.
-    // Also QOpenGLWidget sometimes looses saved display list after UI changes (dock / undock etc).
-    // Therefore we need to draw again if the dlists are not available
-    if (databaseUpdated || 
-        (!document->getObjectTree()->getActiveDisplayListIds().empty() // (can't check for first element if empty)
-            && 
-            !document->getDisplay()->getDisplayManager()->isDListValid(document->getObjectTree()->getActiveDisplayListIds()[0]))) {
-        drawDatabase();
-        databaseUpdated = false;
+    if (!document->getObjectTree()->getObjectsToBeDrawnIds().isEmpty()) {
+        for (int objectId : document->getObjectTree()->getObjectsToBeDrawnIds())
+        {
+
+            // if object was already drawn earlier, need to remove the previous display list
+            if (document->getObjectTree()->getObjectIdDisplayListIdMap().contains(objectId))
+            {
+                const int previousDisplayListId = document->getObjectTree()->getObjectIdDisplayListIdMap()[objectId];
+                document->getDisplay()->getDisplayManager()->freeDLists(previousDisplayListId, 1); // free ot from openGL
+                // no need to remove from objectIdDisplayListIdMap or visibleDisplayListIds since they'll be dealt with later
+            }
+
+            const char* objectFullPath = document->getObjectTree()->getFullNameMap()[objectId].toUtf8().data();
+            const ColorInfo objectColor{ .2f, .2f, .2f, true };
+            const int  displayListId = drawSolid(objectFullPath, objectColor);
+            document->getObjectTree()->getObjectIdDisplayListIdMap()[objectId] = displayListId;
+        }
+
+        document->getObjectTree()->rebuildVisibleDisplayListIds();
     }
-    for (int i:document->getObjectTree()->getActiveDisplayListIds()) {
+
+    for (int i : document->getObjectTree()->getVisibleDisplayListIds()) {
         document->getDisplay()->getDisplayManager()->drawDList(i);
     }
     document->getDisplay()->getDisplayManager()->restoreState();
 }
 
-/*
- * This method should be called database is changed (i.e. after changing this->database) or updated
- */
-void GeometryRenderer::onDatabaseUpdated() {
-    databaseUpdated = true;
-}
 
 /*
  * Clears existing display lists, iterate through each solid and generates display lists by calling drawSolid on each
  */
 void GeometryRenderer::drawDatabase() {
-    for (int i: document->getObjectTree()->getActiveDisplayListIds()){
-        document->getDisplay()->getDisplayManager()->freeDLists(i,1);
-    }
-    document->getObjectTree()->getActiveDisplayListIds().clear();
 
-    for( int solidObjectId: document->getObjectTree()->getSolidObjectIds())
+    document->getObjectTree()->getVisibleDisplayListIds().clear();
+
+    for (int solidObjectId : document->getObjectTree()->getSolidObjectIds())
     {
-        int  dlist = drawSolid(document->getObjectTree()->getFullNameMap()[solidObjectId].toUtf8(),
-									{.2f, .2f, .2f, true});
-        document->getObjectTree()->getActiveDisplayListIds().push_back(dlist);
+        int  objectDisplayListId = drawSolid(document->getObjectTree()->getFullNameMap()[solidObjectId].toUtf8(),
+            { .2f, .2f, .2f, true }
+        );
+        document->getObjectTree()->getVisibleDisplayListIds().push_back(objectDisplayListId);
     }
 }
 
@@ -75,9 +80,9 @@ void GeometryRenderer::drawDatabase() {
  * Set the color and line attribute to suit a given solid, creates a display list, plots and draws solid's vlist into the display list.
  * The created display list is added to GeometryRenderer::solids
  */
-int GeometryRenderer::drawSolid(const char *name, GeometryRenderer::ColorInfo colorInfo) {
+int GeometryRenderer::drawSolid(const char* name, GeometryRenderer::ColorInfo colorInfo) {
     BRLCAD::VectorList vectorList;
-    document->getDatabase()->Plot(name,vectorList);
+    document->getDatabase()->Plot(name, vectorList);
 
     int dlist = document->getDisplay()->getDisplayManager()->genDLists(1);
     document->getDisplay()->getDisplayManager()->beginDList(dlist);  // begin display list --------------

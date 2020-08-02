@@ -29,9 +29,6 @@ class GeometryRenderer:public Renderer {
 public:
     GeometryRenderer(Document* document);
 
-    // This method should be called database is changed (i.e. after changing this->database) or updated
-    void onDatabaseUpdated();
-
     // this is called by Display to render a single frame
     void render() override;
 
@@ -48,9 +45,6 @@ public:
 private:
     Document* document;
     float defaultWireColor[3] = {1.0,.1,.4};
-    bool databaseUpdated = false;
-
-    void drawDatabase();
 };
 
 

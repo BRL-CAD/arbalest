@@ -32,68 +32,48 @@
 #include "MemoryDatabase.h"
 
 
-class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
+{
+	objectId = ++objectTree->lastAllocatedId;
+	objectTree->getTree()[objectId] = QVector<int>();
+	childrenNames = &objectTree->getTree()[objectId];
 
-public:
-	ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const QString &parentPath) :
-		objectTree(objectTree),
-		objectName(objectName),
-		currentObjectPath(parentPath+"/"+objectName) {}
+	const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
 
-	void operator()(const BRLCAD::Object& object) override
+	objectTree->getFullNameMap()[objectId] = currentObjectPath;
+	if (comb == nullptr)objectTree->getSolidObjectIds().insert(objectId);
+	else traverseSubTree(comb->Tree());
+}
+
+void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) const
+{
+	switch (node.Operation())
 	{
-		objectId = ++objectTree->lastAllocatedId;
-		objectTree->getTree()[objectId] = QVector<int>();
-		childrenNames = &objectTree->getTree()[objectId];
+	case BRLCAD::Combination::ConstTreeNode::Union:
+	case BRLCAD::Combination::ConstTreeNode::Intersection:
+	case BRLCAD::Combination::ConstTreeNode::Subtraction:
+	case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+		traverseSubTree(node.LeftOperand());
+		traverseSubTree(node.RightOperand());
+		break;
 
-		const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
+	case BRLCAD::Combination::ConstTreeNode::Not:
+		traverseSubTree(node.Operand());
+		break;
 
-		objectTree->getFullNameMap()[objectId] = currentObjectPath;
-		if (comb != nullptr) {
-			ListTreeNode(comb->Tree());
-		}
-		else {
-			objectTree->getSolidObjectIds().insert(objectId);
-		}
+	case BRLCAD::Combination::ConstTreeNode::Leaf:
+		objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
+		QString childName = QString(node.Name());
+		objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
+		ObjectTreeCallback callback(objectTree, childName, currentObjectPath);
+		objectTree->getDatabase()->Get(node.Name(), callback);
 	}
-
-private:
-	int objectId = -1;
-	ObjectTree* objectTree = nullptr;
-	QString objectName;
-	QString currentObjectPath;
-	QVector<int>* childrenNames = nullptr;
-
-	void ListTreeNode(const BRLCAD::Combination::ConstTreeNode& node) const
-	{
-		switch (node.Operation()) {
-		case BRLCAD::Combination::ConstTreeNode::Union:
-		case BRLCAD::Combination::ConstTreeNode::Intersection:
-		case BRLCAD::Combination::ConstTreeNode::Subtraction:
-		case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-			ListTreeNode(node.LeftOperand());
-			ListTreeNode(node.RightOperand());
-			break;
-
-		case BRLCAD::Combination::ConstTreeNode::Not:
-			ListTreeNode(node.Operand());
-			break;
-
-		case BRLCAD::Combination::ConstTreeNode::Leaf:
-			objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
-			QString childName = QString(node.Name());
-			objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
-			ObjectTreeCallback callback(objectTree, childName,currentObjectPath);
-			objectTree->getDatabase()->Get(node.Name(), callback);
-		}
-	}
-};
-
+}
 
 ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
 
-	getTree()[0] = QVector<int>();
+	getTree()[0] = QVector<int>(); // objectId of root is 0
 	getNameMap()[0] = "";
 	QVector<int>* childrenNames = &getTree()[0];
 
@@ -106,5 +86,32 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 		if (childName != QString("_GLOBAL")) database->Select(it.Name());
 		++it;
 	}
+}
+
+void ObjectTree::traverseSubTree(const int rootOfSubTreeId, void callback(int))
+{
+	for (int objectId : tree[rootOfSubTreeId]) {
+		callback(objectId);
+		if (tree.contains(rootOfSubTreeId)) traverseSubTree(objectId, callback);
+	}
+}
+
+void ObjectTree::rebuildVisibleDisplayListIds()
+{
+	visibleDisplayListIds.clear();
+
+	for(int objectId : visibleObjectIds)
+	{
+		visibleDisplayListIds.push_back(objectIdDisplayListIdMap[objectId]);
+	}
+}
+
+void ObjectTree::changeSubTreeVisibility(const int rootOfSubTreeId, const bool visible)
+{
+	traverseSubTree(rootOfSubTreeId, [this](int objectId)
+	{
+		if (drawableObjectIds.contains(objectId))
+		visibleObjectIds
+	});
 }
 

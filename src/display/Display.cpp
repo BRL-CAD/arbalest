@@ -42,7 +42,6 @@ Display::Display(Document*  document):document(document) {
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
 
     makeCurrent();
-    onDatabaseUpdated();
     autoView();
     update();
 }
@@ -54,10 +53,6 @@ Display::~Display() {
     delete axesRenderer;
 }
 
-void Display::onDatabaseUpdated() {
-    geometryRenderer->onDatabaseUpdated();
-    update();
-}
 
 void Display::refresh() {
     makeCurrent();
