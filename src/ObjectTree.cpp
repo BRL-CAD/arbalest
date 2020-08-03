@@ -134,7 +134,7 @@ void ObjectTree::changeSubTreeVisibility(const int rootOfSubTreeId, const bool v
 				}
 			}
 			else {
-				visibleObjectIds.remove(objectId);
+				visibleObjectIds.erase(objectId);
 			}				
 		}
 	});

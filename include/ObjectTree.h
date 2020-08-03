@@ -9,6 +9,8 @@
 #include "brlcad/MemoryDatabase.h"
 #include <brlcad/Combination.h>
 #include <functional>
+#include <set>
+
 
 #include "Utils.h"
 
@@ -74,7 +76,7 @@ public:
         return drawableObjectIds;
     }
 
-    QSet<int>& getVisibleObjectIds()
+    std::set<int>& getVisibleObjectIds()
     {
         return visibleObjectIds;
     }
@@ -136,7 +138,7 @@ private:
 
 	// This set contains all visible objects that can drawn. It only contains drawableObjects, so no combinations.
 	// Should be updated whenever user makes subtrees (in)visible from ui etc.
-    QSet<int>                   visibleObjectIds;
+    std::set<int>                   visibleObjectIds;
 
     // Needs to be recalculated whenever visibleObjectIds changes or objects are redrawn (i.e. get a new display list)
     QVector<int>                visibleDisplayListIds;
