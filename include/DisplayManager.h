@@ -27,6 +27,7 @@
 #endif
 
 #include "Display.h"
+class Display;
 
 class DisplayManager{
 public:

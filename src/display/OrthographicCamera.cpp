@@ -106,6 +106,18 @@ void OrthographicCamera::setZoom(const float zoom)
 	this->verticalSpan = zoom;
 }
 
+void OrthographicCamera::centerToCurrentSelection() {
+    BRLCAD::Vector3D a = document->getDatabase()->BoundingBoxMinima();
+    BRLCAD::Vector3D b = document->getDatabase()->BoundingBoxMaxima();
+    BRLCAD::Vector3D midPoint = (a+b) / 2;
+    setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
+
+    const BRLCAD::Vector3D volume = (a - b);
+    double diagonalLength = vector3DLength(volume);
+    if (diagonalLength > 0.001) setZoom(diagonalLength * 1.1);
+    document->getDisplay()->forceRerenderFrame();
+}
+
 void OrthographicCamera::autoview() {
     document->getDatabase()->UnSelectAll();
     document->getObjectTree()->traverseSubTree(0, false, [this]
@@ -124,14 +136,13 @@ void OrthographicCamera::autoview() {
     }
     );
 
-    BRLCAD::Vector3D a = document->getDatabase()->BoundingBoxMinima();
-    BRLCAD::Vector3D b = document->getDatabase()->BoundingBoxMaxima();
-    BRLCAD::Vector3D midPoint = (a+b) / 2;
-    setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
+    centerToCurrentSelection();
+}
 
-    const BRLCAD::Vector3D volume = (a - b);
-    double diagonalLength = vector3DLength(volume);
-    if (diagonalLength > 0.001) setZoom(diagonalLength * 1.1);
-    document->getDisplay()->forceRerenderFrame();
+void OrthographicCamera::centerView(int objectId) {
+    document->getDatabase()->UnSelectAll();
+    QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
+    document->getDatabase()->Select(fullPath.toUtf8());
+    centerToCurrentSelection();
 }
 

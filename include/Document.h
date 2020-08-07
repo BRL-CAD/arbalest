@@ -9,9 +9,11 @@
 #include "ObjectTree.h"
 #include "ObjectTreeWidget.h"
 #include "Properties.h"
+#include "GeometryRenderer.h"
 
 class Properties;
 class Display;
+class GeometryRenderer;
 
 class Document {
 private:
@@ -26,6 +28,8 @@ private:
 public:
     explicit Document(int documentId, const QString *filePath = nullptr);
     virtual ~Document();
+
+    void modifyObject(BRLCAD::Object* newObject);
 
     // getters setters
     QString* getFilePath() const

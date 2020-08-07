@@ -1,6 +1,6 @@
 
-#ifndef RT3_VISIBILITYBUTTON_H
-#define RT3_VISIBILITYBUTTON_H
+#ifndef RT3_OBJECTTREEROWBUTTONS_H
+#define RT3_OBJECTTREEROWBUTTONS_H
 
 #include <QtWidgets/QStyledItemDelegate>
 #include <QtCore/QtCore>
@@ -11,11 +11,12 @@
 #include "ObjectTree.h"
 #include "Document.h"
 
-class VisibilityButton : public QStyledItemDelegate {
+class ObjectTreeRowButtons : public QStyledItemDelegate {
 Q_OBJECT
 public:
-    explicit VisibilityButton(ObjectTree *objectTree, QObject *parent = nullptr);
-    QPoint iconPos(const QStyleOptionViewItem &option) const;
+    explicit ObjectTreeRowButtons(ObjectTree *objectTree, QObject *parent = nullptr);
+    QPoint visibilityIconPosition(const QStyleOptionViewItem &option) const;
+    QPoint centerIconPosition(const QStyleOptionViewItem &option) const;
 
 protected:
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
@@ -27,17 +28,20 @@ private:
     QImage iconSomeChildrenVisible;
     QImage iconInvisible;
 
+    QImage iconCenter;
+
     int objectId = 0;
     ObjectTree *objectTree;
-
     ObjectTree::VisibilityState visibilityState = ObjectTree::Invisible;
-    static const int margin = 0; // pixels to keep around the icon
-    const char *const iconFilePath = ":/icons/icons8-eye-20.png";
-    Q_DISABLE_COPY(VisibilityButton)
+    static const int margin = 0;
+    const char *const visibilityIconFilePath = ":/icons/icons8-eye-20.png";
+    const char *const centerIconFilePath = ":/icons/baseline_center_focus_strong_black_18dp.png";
+    Q_DISABLE_COPY(ObjectTreeRowButtons)
 
 signals:
     void visibilityButtonClicked(int objectId);
+    void centerButtonClicked(int objectId);
 
 };
 
-#endif //RT3_VISIBILITYBUTTON_H
+#endif //RT3_OBJECTTREEROWBUTTONS_H

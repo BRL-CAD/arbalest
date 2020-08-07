@@ -32,8 +32,9 @@ public:
 
     // this is called by Display to render a single frame
     void render() override;
-
     void refreshForVisibilityAndSolidChanges();
+    void clearSolidIfAvailable(int objectId);
+    void clearObject(int objectId);
 
 private:
     Document* document;
@@ -41,8 +42,6 @@ private:
 
 
     void drawSolid(int objectId);
-    void clearSolidIfAvailable(int objectId);
-    void clearObject(int objectId);
 
     // Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
     QHash<int, int>             objectIdDisplayListIdMap;

@@ -75,6 +75,10 @@ public:
     void setZoom(float zoom);
 
     void autoview();
+
+    void centerView(int objectId);
+
+    void centerToCurrentSelection();
 };
 
 

@@ -198,6 +198,7 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
+// empty new file
 void MainWindow::newFile() {
     Document* document = new Document(documentsCount);
     document->getObjectTreeWidget()->setObjectName("dockableContent");

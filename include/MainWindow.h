@@ -45,7 +45,7 @@ private:
     void loadTheme();
     void prepareDockables();
 
-    void newFile();
+    void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
 

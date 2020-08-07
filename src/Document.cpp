@@ -3,8 +3,7 @@
 //
 
 #include <Document.h>
-#include <iostream>
-#include <ObjectTreeWidget.h>
+
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
     if (filePath != nullptr) this->filePath = new QString(*filePath);
@@ -35,4 +34,19 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 Document::~Document() {
     delete database;
     delete display;
+}
+
+void Document::modifyObject(BRLCAD::Object *newObject) {
+    database->Set(*newObject);
+    QString objectName = newObject->Name();
+    getObjectTree()->traverseSubTree(0,false,[this, objectName]
+    (int objectId){
+        if (getObjectTree()->getNameMap()[objectId] == objectName){
+            display->getGeometryRenderer()->clearObject(objectId);
+        }
+        return true;
+    }
+    );
+    display->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    display->forceRerenderFrame();
 }

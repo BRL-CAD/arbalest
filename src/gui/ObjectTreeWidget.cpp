@@ -30,7 +30,7 @@
 #include "ObjectTreeWidget.h"
 #include <QHBoxLayout>
 #include <QtCore/QtCore>
-#include <include/VisibilityButton.h>
+#include <include/ObjectTreeRowButtons.h>
 #include <GeometryRenderer.h>
 
 ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : document(document)
@@ -41,16 +41,15 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
 
 	build(0);
 
-    VisibilityButton *visibilityButton = new VisibilityButton(document->getObjectTree(), this);
+    ObjectTreeRowButtons *visibilityButton = new ObjectTreeRowButtons(document->getObjectTree(), this);
     setItemDelegateForColumn(0, visibilityButton);
 
     connect(this,&QTreeWidget::currentItemChanged,this,[this](QTreeWidgetItem *current, QTreeWidgetItem *previous){
         selectionChanged (current->data(0, Qt::UserRole).toInt());
-
         // Qt changes foreground color for selected items. We don't want it changed
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+current->foreground(0).color().name()+";}");
     });
-    connect(visibilityButton, &VisibilityButton::visibilityButtonClicked,this,[this](int objectId){
+    connect(visibilityButton, &ObjectTreeRowButtons::visibilityButtonClicked, this, [this](int objectId){
         switch(this->document->getObjectTree()->getObjectVisibility()[objectId]){
             case ObjectTree::Invisible:
             case ObjectTree::SomeChildrenVisible:
@@ -61,6 +60,12 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
                 break;
         }
         this->document->getDisplay()->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        this->document->getDisplay()->forceRerenderFrame();
+        refreshItemTextColors();
+    });
+
+    connect(visibilityButton, &ObjectTreeRowButtons::centerButtonClicked, this, [this](int objectId){
+        this->document->getDisplay()->getCamera()->centerView(objectId);
         this->document->getDisplay()->forceRerenderFrame();
         refreshItemTextColors();
     });

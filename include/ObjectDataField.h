@@ -62,8 +62,7 @@ public:
                     BRLCAD::Vector3D val = ((*object).*getter)(c);
                     val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                     ((*object).*setter)(c,val);
-                    document->getDatabase()->Set(*object);
-                    //document->onDatabaseUpdated(); todo enable object editing
+                    document->modifyObject(object);
                 });
             }
             addWidget(row);
@@ -119,8 +118,7 @@ public:
                     BRLCAD::Vector3D val = ((*object).*getter)(c);
                     val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                     ((*object).*setter)(c,val);
-                    document->getDatabase()->Set(*object);
-                    //document->onDatabaseUpdated(); todo enable object editing
+                    document->modifyObject(object);
                 });
             }
             addWidget(row);
@@ -155,8 +153,7 @@ public:
                 BRLCAD::Vector3D val = ((*object).*getter)();
                 val.coordinates[i] = row->getTextBoxes()[i]->text().toDouble();
                 ((*object).*setter)(val);
-                document->getDatabase()->Set(*object);
-                //document->onDatabaseUpdated(); todo enable object editing
+                document->modifyObject(object);
             });
         }
 
@@ -188,8 +185,7 @@ public:
 
         connect(row->getTextBoxes()[0], &QLineEdit::textEdited, this, [setter,getter,document,object,row,this]() {
             ((*object).*setter)(row->getTextBoxes()[0]->text().toDouble());
-            document->getDatabase()->Set(*object);
-            //document->onDatabaseUpdated(); todo enable object editing
+            document->modifyObject(object);
         });
 
         addWidget(row);
