@@ -35,8 +35,9 @@
 void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
 {
 	objectId = ++objectTree->lastAllocatedId;
-	objectTree->getTree()[objectId] = QVector<int>();
-	childrenNames = &objectTree->getTree()[objectId];
+    objectTree->getChildren()[objectId] = QVector<int>();
+	objectTree->objectIdParentObjectIdMap[objectId] = parentObjectId;
+	childrenNames = &objectTree->getChildren()[objectId];
 
 	objectTree->getFullPathMap()[objectId] = currentObjectPath;
 	
@@ -74,7 +75,7 @@ void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::
 		break;
 
 	case BRLCAD::Combination::ConstTreeNode::Leaf:
-		objectTree->getTree()[objectId].append(objectTree->lastAllocatedId + 1);
+        objectTree->getChildren()[objectId].append(objectTree->lastAllocatedId + 1);
 		QString childName = QString(node.Name());
 		objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
 		ObjectTreeCallback callback(objectTree, childName, objectId);
@@ -85,11 +86,12 @@ void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::
 ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
 
-	tree[0] = QVector<int>(); // objectId of root is 0
+    objectIdChildrenObjectIdsMap[0] = QVector<int>(); // objectId of root is 0
+    objectIdParentObjectIdMap[0] = -1;
 	nameMap[0] = "";
 	colorMap[0] = {1,1,1,false };
 	
-	QVector<int>* childrenNames = &getTree()[0];
+	QVector<int>* childrenNames = &getChildren()[0];
 
 	while (it.Good()) {
 		QString childName = it.Name();
@@ -97,46 +99,73 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 		getNameMap()[lastAllocatedId + 1] = childName;
 		ObjectTreeCallback callback(this, childName, 0);
 		database->Get(it.Name(), callback);
-		if (childName != QString("_GLOBAL")) database->Select(it.Name());
 		++it;
 	}
+
+    traverseSubTree(0, true,[this] (int childId){
+        objectIdVisibilityStateMap[childId] = Invisible;
+        return true;
+    });
 }
 
-void ObjectTree::traverseSubTree(const int rootOfSubTreeId, const std::function<void(int)>& callback)
+void ObjectTree::traverseSubTree(const int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>& callback)
 {
-	for (int objectId : tree[rootOfSubTreeId]) {
-		callback(objectId);
-		if (tree.contains(rootOfSubTreeId)) traverseSubTree(objectId, callback);
+	if(traverseRoot) callback(rootOfSubTreeId);
+	for (int objectId : objectIdChildrenObjectIdsMap[rootOfSubTreeId]) {
+		if (!callback(objectId)) continue;
+		if (objectIdChildrenObjectIdsMap.contains(rootOfSubTreeId)) traverseSubTree(objectId, false, callback);
 	}
 }
 
-void ObjectTree::rebuildVisibleDisplayListIds()
-{
-	visibleDisplayListIds.clear();
 
-	for(int objectId : visibleObjectIds)
-	{
-		visibleDisplayListIds.append(objectIdDisplayListIdMap[objectId]);
-	}
+void ObjectTree::changeVisibilityState(int objectId, bool visible) {
+    if (visible){
+        objectIdVisibilityStateMap[objectId] = FullyVisible;
+
+        // First we go up in the tree and make necessary changes
+        int ancestorId = getParent()[objectId];
+        while (ancestorId != -1){
+            // if all children of the ancestor are fully visible after the change ancestor's visibility should be FullyVisible
+            objectIdVisibilityStateMap[ancestorId] = FullyVisible;
+
+            // but if there is a not fully visible child it should be SomeChildrenVisible
+            for (int ancestorChildId : getChildren()[ancestorId]){
+                if (objectIdVisibilityStateMap[ancestorChildId] != FullyVisible){
+                    objectIdVisibilityStateMap[ancestorId] = SomeChildrenVisible;
+                }
+            }
+            ancestorId = getParent()[ancestorId];
+        }
+
+        // All children of objectId should be fully visible
+        traverseSubTree(objectId, false,[this] (int childId){
+            objectIdVisibilityStateMap[childId] = FullyVisible;
+            return true;
+        });
+    }
+
+    else{
+        objectIdVisibilityStateMap[objectId] = Invisible;
+
+        // First we go up in the tree and make necessary changes
+        int ancestorId = getParent()[objectId];
+        while (ancestorId != -1){
+            // if all children of the ancestor are invisible after the change ancestor's visibility should be Invisible
+            objectIdVisibilityStateMap[ancestorId] = Invisible;
+
+            // but if there is a not fully visible child it should be SomeChildrenVisible
+            for (int ancestorChildId : getChildren()[ancestorId]){
+                if (objectIdVisibilityStateMap[ancestorChildId] != Invisible){
+                    objectIdVisibilityStateMap[ancestorId] = SomeChildrenVisible;
+                }
+            }
+            ancestorId = getParent()[ancestorId];
+        }
+
+        // All children of objectId should be invisible
+        traverseSubTree(objectId, false,[this] (int childId){
+            objectIdVisibilityStateMap[childId] = Invisible;
+            return true;
+        });
+    }
 }
-
-void ObjectTree::changeSubTreeVisibility(const int rootOfSubTreeId, const bool visible)
-{
-	traverseSubTree(rootOfSubTreeId, [this, visible](int objectId)
-	{
-		if (drawableObjectIds.contains(objectId))
-		{
-			if (visible) {
-				visibleObjectIds.insert(objectId);
-				if (!getObjectIdDisplayListIdMap().contains(objectId))
-				{
-					objectsToBeDrawnIds.append(objectId);
-				}
-			}
-			else {
-				visibleObjectIds.erase(objectId);
-			}				
-		}
-	});
-}
-

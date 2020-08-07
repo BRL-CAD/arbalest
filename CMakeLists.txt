@@ -32,8 +32,10 @@ set(arbalest_Sources
         src/gui/QHBoxWidget.cpp
         src/gui/QVBoxWidget.cpp
         src/gui/DataRow.cpp
-        src/gui/DragEditLineEdit.cpp 
-        src/utils/Utils.cpp)
+        src/gui/DragEditLineEdit.cpp
+        src/gui/VisibilityButton.cpp
+        src/utils/Utils.cpp
+        include/VisibilityButton.h)
 
 set(arbalest_Link_Libraries
         coreinterface

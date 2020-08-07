@@ -27,18 +27,28 @@
 
 class GeometryRenderer:public Renderer {
 public:
-    GeometryRenderer(Document* document);
+
+    explicit GeometryRenderer(Document* document);
 
     // this is called by Display to render a single frame
     void render() override;
 
-    // draw object and add its display list to solids
-    int drawSolid(const char *name, ColorInfo colorInfo);
-
+    void refreshForVisibilityAndSolidChanges();
 
 private:
     Document* document;
     float defaultWireColor[3] = {1.0,.1,.4};
+
+
+    void drawSolid(int objectId);
+    void clearSolidIfAvailable(int objectId);
+    void clearObject(int objectId);
+
+    // Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
+    QHash<int, int>             objectIdDisplayListIdMap;
+
+    QVector<int> visibleDisplayListIds;
+    QVector<int> objectsToBeDisplayedIds;
 };
 
 

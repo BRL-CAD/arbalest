@@ -63,7 +63,7 @@ public slots:
     void saveFileDefaultPath();
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) const;
-    void objectTreeWidgetSelectionChanged(QString fullPath);
+    void objectTreeWidgetSelectionChanged(int objectId);
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();

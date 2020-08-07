@@ -106,14 +106,13 @@ QStatusBar::item {
 
 /* ObjectTreeWidget --------------------------------------------------------------------------------------------------------*/
 ObjectTreeWidget::item {
-    color: "$Color-ObjectTreeWidgetItemText";
-    margin-right:5px;
+    padding-right:5px;
+    margin-right:2px;
 }
 ObjectTreeWidget::item:hover {
-    background: "$Color-SelectedObjectRow";
+    background: "$Color-HoverObjectRow";
 }
 ObjectTreeWidget::item:selected {
-    /*color: "$Color-SelectedObjectText";*/
     background: "$Color-SelectedObjectRow";
 }
 /* -------------------------------------------------------------------------------------------------------------------*/

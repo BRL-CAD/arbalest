@@ -29,26 +29,34 @@
 
 class ObjectTree {
 public:
+    enum VisibilityState{
+        Invisible,
+        SomeChildrenVisible,
+        FullyVisible,
+    };
+
     ObjectTree(BRLCAD::MemoryDatabase* database);
 
     int lastAllocatedId = 0;
 
-    void traverseSubTree(int rootOfSubTreeId, const std::function<void(int)>&);
+    void traverseSubTree(int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>&);
 
-    // builds visibleDisplayListIds from visibleObjectIds and objectIdDisplayListIdMap
-    void rebuildVisibleDisplayListIds();
+    void changeVisibilityState(int objectId, bool visible);
 
-    void changeSubTreeVisibility(int rootOfSubTreeId, bool visible);
-	
-	// getters	
+        // getters
     BRLCAD::MemoryDatabase* getDatabase() const
     {
 	    return database;
     }
 
-    QHash<int, QVector<int>>& getTree()
+    QHash<int, QVector<int>>& getChildren()
     {
-        return tree;
+        return objectIdChildrenObjectIdsMap;
+    }
+
+    QHash<int, int>& getParent()
+    {
+        return objectIdParentObjectIdMap;
     }
 
     QHash<int, QString>& getNameMap()
@@ -66,34 +74,13 @@ public:
         return colorMap;
     }
 
-    QHash<int, int>& getObjectIdDisplayListIdMap()
-    {
-        return objectIdDisplayListIdMap;
-    }
-
     QSet<int>& getDrawableObjectIds()
     {
         return drawableObjectIds;
     }
 
-    std::set<int>& getVisibleObjectIds()
-    {
-        return visibleObjectIds;
-    }
-
-    const QVector<int>& getVisibleDisplayListIds() const
-    {
-        return visibleDisplayListIds;
-    }
-	
-    QVector<int>& getObjectsToBeDrawnIds()
-    {
-        return objectsToBeDrawnIds;
-    }
-
-    int getRootObjectId() const
-    {
-        return 0;
+    QHash<int, VisibilityState> &getObjectVisibility() {
+        return objectIdVisibilityStateMap;
     }
 	
 private:
@@ -119,7 +106,10 @@ private:
     };
 
     // Stores the object tree in  {parent's object id (key), children's object ids (value)} format
-    QHash<int, QVector<int>>    tree;
+    QHash<int, QVector<int>>    objectIdChildrenObjectIdsMap;
+
+    // Stores the object tree in  { object id (key), parent's object id (value)} format
+    QHash<int, int>    objectIdParentObjectIdMap;
 
 	// Object id to it's name mapping
     QHash<int, QString>         nameMap;
@@ -130,24 +120,11 @@ private:
     // Object id to it's full path mapping
     QHash<int, ColorInfo>         colorMap;
 
-	// Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
-    QHash<int, int>             objectIdDisplayListIdMap;
-
     // Get all objects that are not combinations. (ie. these are also the objects that can be drawn) //todo _GLOBAL?
     QSet<int>                   drawableObjectIds;
 
-	// This set contains all visible objects that can drawn. It only contains drawableObjects, so no combinations.
-	// Should be updated whenever user makes subtrees (in)visible from ui etc.
-    std::set<int>                   visibleObjectIds;
 
-    // Needs to be recalculated whenever visibleObjectIds changes or objects are redrawn (i.e. get a new display list)
-    QVector<int>                visibleDisplayListIds;
-
-    // GeometryRenderer should draw in this vector, and generate display lists and then clear() this QVector in its
-    // next render() event if there are items in this vector
-    // Objects that were changed should be added here to acknowledge it to redraw
-    QVector<int>                objectsToBeDrawnIds;
-
+    QHash<int, VisibilityState>             objectIdVisibilityStateMap;
 };
 
 #endif

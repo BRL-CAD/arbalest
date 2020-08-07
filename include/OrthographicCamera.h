@@ -25,11 +25,14 @@
 
 
 #include <glm/detail/type_mat4x4.hpp>
+#include <brlcad/cicommon.h>
 #include "Camera.h"
+#include "Document.h"
 
-
-class OrthographicCamera : public Camera {
+class Document;
+class OrthographicCamera : Camera{
 private:
+    Document * document;
     const glm::vec3 initialEyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
     const glm::vec3 initialAngleAroundAxes = glm::vec3(295.0f, 0.0f, 235.0f);
 
@@ -48,29 +51,30 @@ private:
     float w = 400, h = 400;         // Display width and height.
 
 public:
-    OrthographicCamera();
+    explicit OrthographicCamera(Document * document) : document(document){}
     virtual ~OrthographicCamera() = default;
 
-    void setWH(float w, float h) override;
+    void setWH(float w, float h);
 
-    void processMoveRequest(const int &deltaX, const int &deltaY) override;
+    void processMoveRequest(const int &deltaX, const int &deltaY) ;
 
-    void processRotateRequest(const int &deltaX, const int &deltaY, const bool &thirdAxis) override;
+    void processRotateRequest(const int &deltaX, const int &deltaY, const bool &thirdAxis) ;
 
-    void processZoomRequest(const int &deltaWheelAngle) override;
+    void processZoomRequest(const int &deltaWheelAngle) ;
 
-    glm::mat4 modelViewMatrix() const override;
+    glm::mat4 modelViewMatrix() const ;
 
-    glm::mat4 modelViewMatrixNoTranslate() const override;
+    glm::mat4 modelViewMatrixNoTranslate() const ;
 
-    glm::mat4 projectionMatrix() const override;
+    glm::mat4 projectionMatrix() const ;
 
-    glm::mat4 projectionMatrix(float x, float y) const override;
+    glm::mat4 projectionMatrix(float x, float y) const ;
 
-    void setEyePosition(float x, float y, float z) override;
+    void setEyePosition(float x, float y, float z) ;
 
+    void setZoom(float zoom);
 
-    void setZoom(const float zoom);
+    void autoview();
 };
 
 

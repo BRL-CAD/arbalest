@@ -15,7 +15,7 @@ class Document;
 class Properties: public QVBoxWidget{
 public:
     explicit Properties(Document & document);
-    void bindObject(const QString &fullPath);
+    void bindObject(const int objectId);
 
 private:
     QString name, fullPath, objectType;

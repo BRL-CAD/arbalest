@@ -34,7 +34,7 @@ using namespace std;
 
 
 Display::Display(Document*  document):document(document) {
-    camera = new OrthographicCamera();
+    camera = new OrthographicCamera(document);
     displayManager = new DisplayManager(*this);
     geometryRenderer = new GeometryRenderer(document);
     axesRenderer = new AxesRenderer();
@@ -42,7 +42,6 @@ Display::Display(Document*  document):document(document) {
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
 
     makeCurrent();
-    autoView();
     update();
 }
 
@@ -54,20 +53,9 @@ Display::~Display() {
 }
 
 
-void Display::refresh() {
+void Display::forceRerenderFrame() {
     makeCurrent();
     update();
-}
-
-void Display::autoView() const
-{
-	BRLCAD::Vector3D midPoint = (document->getDatabase()->BoundingBoxMinima() + document->getDatabase()->BoundingBoxMaxima()) / 2;
-	auto a = document->getDatabase()->BoundingBoxMinima();
-	auto b = document->getDatabase()->BoundingBoxMaxima();
-	camera->setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
-
-	const BRLCAD::Vector3D volume = (document->getDatabase()->BoundingBoxMinima() - document->getDatabase()->BoundingBoxMaxima());
-	camera->setZoom(vector3DLength(volume) * 1.1);
 }
 
 int Display::getW() const {
@@ -129,7 +117,7 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
             camera->processMoveRequest(x- prevMouseX, y - prevMouseY);
         }
 
-        refresh();
+        forceRerenderFrame();
 
         const QPoint topLeft = mapToGlobal(QPoint(0,0));
         const QPoint bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
@@ -182,7 +170,7 @@ void Display::wheelEvent(QWheelEvent *event) {
 
     if (event->phase() == Qt::NoScrollPhase || event->phase() == Qt::ScrollUpdate || event->phase() == Qt::ScrollMomentum) {
         camera->processZoomRequest(event->angleDelta().y() / 8);
-        refresh();
+        forceRerenderFrame();
     }
 }
 
@@ -190,19 +178,27 @@ void Display::keyPressEvent( QKeyEvent *k ) {
     switch (k->key()) {
         case Qt::Key_Up:
             camera->processMoveRequest(0, keyPressSimulatedMouseMoveDistance);
-            refresh();
+            forceRerenderFrame();
             break;
         case Qt::Key_Down:
             camera->processMoveRequest(0, -keyPressSimulatedMouseMoveDistance);
-            refresh();
+            forceRerenderFrame();
             break;
         case Qt::Key_Left:
             camera->processMoveRequest(keyPressSimulatedMouseMoveDistance, 0);
-            refresh();
+            forceRerenderFrame();
             break;
         case Qt::Key_Right:
             camera->processMoveRequest(-keyPressSimulatedMouseMoveDistance, 0);
-            refresh();
+            forceRerenderFrame();
             break;
     }
+}
+
+GeometryRenderer *Display::getGeometryRenderer() {
+    return geometryRenderer;
+}
+
+OrthographicCamera *Display::getCamera() const {
+    return camera;
 }

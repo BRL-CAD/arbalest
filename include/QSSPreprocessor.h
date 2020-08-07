@@ -9,7 +9,7 @@
 class QSSPreprocessor {
 public:
     QSSPreprocessor(QString &theme);
-    QString process(QString &styleStr);
+    QString process(QString styleStr);
 
 private:
     QString theme;

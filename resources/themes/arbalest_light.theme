@@ -10,9 +10,10 @@ $Color-DockableHeaderText               : #0D0D0D; // Titlebar text color of all
 $Color-DefaultFontColor                 : #555555;  // Text color for all text in status bar
 $Color-SelectedTab                      : #ffffff;  // Background color for selected tab of the file switcher tab bar
 $Color-SelectedTabLine                  : #0000ff;  // Bottom border color for selected tab of the file switcher tab bar
-$Color-SelectedObjectText               : #bf1919;  // Object selected in the object tree.
-$Color-SelectedObjectTypeText           : #007acc; // Title of CollapsibleWidget
-$Color-SelectedObjectRow                : #e3e3e3;  // Background of the object selected in the object tree.
+$Color-PropertiesObjectNameText         : #bf1919;  // Name text color of selected object in properties.
+$Color-PropertiesObjectTypeText         : #007acc; // Title of CollapsibleWidget
+$Color-SelectedObjectRow                : #10000000;  // Background of the object selected in the object tree.
+$Color-HoverObjectRow                   : #00000000;  // Background of the object selected in the object tree.
 $Color-LightText                        : #8d8d8d;  // for non important text
 $Color-ScrollBars                       : #dddddd;
 $Color-DataCellBordersAndHeader         : #aaaaaa;
@@ -21,3 +22,7 @@ $Color-ButtonPressedMask                : #11000000;  // Alpha mask
 $Color-StatusBar                        : #68217A;
 $Color-StatusBarText                    : #ffffff;
 $Color-ObjectTreeWidgetItemText         : #000000;
+
+$Color-FullyVisibleObjectText           : #0000ff;  // object tree item text.
+$Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.
+$Color-InvisibleObjectText              : #7c7c7c;  // object tree item text.

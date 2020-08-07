@@ -88,6 +88,16 @@ void MainWindow::prepareUi() {
 
     QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
 
+    QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
+
+    QAction* autoViewAct = new QAction(tr("Autoview"), this);
+    autoViewAct->setShortcuts(QKeySequence::Find);
+    autoViewAct->setStatusTip(tr("Autoview based on the current visible objects"));
+    connect(autoViewAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getDisplay()->getCamera()->autoview();
+    });
+    viewMenu->addAction(autoViewAct);
+
     // Title bar [widgets in the menu bar] ----------------------------------------------------------------------------------------
     QPushButton* applicationIcon = new QPushButton(menuTitleBar);
     applicationIcon->setIcon(QIcon(":/icons/archer.png"));
@@ -287,8 +297,8 @@ void MainWindow::tabCloseRequested(const int i) const
     }
 }
 
-void MainWindow::objectTreeWidgetSelectionChanged(QString fullPath) {
-    documents[activeDocumentId]->getProperties()->bindObject(fullPath);
+void MainWindow::objectTreeWidgetSelectionChanged(int objectId) {
+    documents[activeDocumentId]->getProperties()->bindObject(objectId);
 }
 
 void MainWindow::closeButtonPressed(){

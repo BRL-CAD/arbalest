@@ -58,7 +58,7 @@ QSSPreprocessor::QSSPreprocessor(QString &theme) : theme(theme) {
     std::sort(keysValuePairs.begin(),keysValuePairs.end(),cmp);
 }
 
-QString QSSPreprocessor::process(QString &styleStr) {
+QString QSSPreprocessor::process(QString styleStr) {
     QString processedStr = styleStr;
     for(std::pair<QString,QString> keyValuePair: keysValuePairs){
         processedStr = processedStr.replace(keyValuePair.first,keyValuePair.second);

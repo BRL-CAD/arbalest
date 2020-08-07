@@ -30,29 +30,41 @@
 #define OBJECTTREEWIDGET_H
 
 #include <QTreeView>
-#include <QStandardItemModel>
-
-
+#include <qtreewidget.h>
+#include <QtWidgets/QStyledItemDelegate>
 #include "ObjectTree.h"
-
-class ObjectTreeWidget : public QTreeView {
+#include <QApplication>
+#include <QMouseEvent>
+#include "Globals.h"
+#include <QPainter>
+class Document;
+class ObjectTreeWidget : public QTreeWidget {
     Q_OBJECT
 public:
-    ObjectTreeWidget(ObjectTree *objectTree,   QWidget *parent = nullptr);
+    explicit ObjectTreeWidget(Document *objectTree,   QWidget *parent = nullptr);
+    void refreshItemTextColors();
 
-    QStandardItem *build(const int objectId) const;
-    QStandardItemModel* buildRoot() const;
-
+    const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
 
 private:
-    QStandardItemModel* treeModel;
-    ObjectTree* objectTree;
+    void build(int objectId, QTreeWidgetItem* parent = nullptr);
+
+protected:
+
+private:
+    Document* document;
+    QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
+
+    const QColor colorFullVisible = QColor(Globals::theme->process("$Color-FullyVisibleObjectText"));
+    const QColor colorSomeChildrenVisible = QColor(Globals::theme->process("$Color-SomeChildrenVisibleObjectText"));
+    const QColor colorInvisible = QColor(Globals::theme->process("$Color-InvisibleObjectText"));
+protected:
+
 
 signals:
-    void selectionChanged(QString fullPath);
+    void visibilityButtonClicked(int objectId);
+    void selectionChanged(int objectId);
 
-private slots:
-    void selectionChangedInternal(const QItemSelection &, const QItemSelection &);
 };
 
 

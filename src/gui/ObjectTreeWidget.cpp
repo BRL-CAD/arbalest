@@ -28,94 +28,93 @@
 
 #include <brlcad/Combination.h>
 #include "ObjectTreeWidget.h"
+#include <QHBoxLayout>
+#include <QtCore/QtCore>
+#include <include/VisibilityButton.h>
+#include <GeometryRenderer.h>
 
+ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : document(document)
+{
+	this->setHeaderHidden(true);
+	setColumnCount(1);
+	setMouseTracking(true);
 
+	build(0);
 
-ObjectTreeWidget::ObjectTreeWidget (ObjectTree *objectTree, QWidget *parent) : QTreeView(parent), objectTree(objectTree) {
-    treeModel = buildRoot();
-    setModel(treeModel);
-    setHeaderHidden(true);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(selectionModel(),&QItemSelectionModel::selectionChanged, this, &ObjectTreeWidget::selectionChangedInternal);
+    VisibilityButton *visibilityButton = new VisibilityButton(document->getObjectTree(), this);
+    setItemDelegateForColumn(0, visibilityButton);
+
+    connect(this,&QTreeWidget::currentItemChanged,this,[this](QTreeWidgetItem *current, QTreeWidgetItem *previous){
+        selectionChanged (current->data(0, Qt::UserRole).toInt());
+
+        // Qt changes foreground color for selected items. We don't want it changed
+        setStyleSheet("ObjectTreeWidget::item:selected { color: "+current->foreground(0).color().name()+";}");
+    });
+    connect(visibilityButton, &VisibilityButton::visibilityButtonClicked,this,[this](int objectId){
+        switch(this->document->getObjectTree()->getObjectVisibility()[objectId]){
+            case ObjectTree::Invisible:
+            case ObjectTree::SomeChildrenVisible:
+                this->document->getObjectTree()->changeVisibilityState(objectId, true);
+                break;
+            case ObjectTree::FullyVisible:
+                this->document->getObjectTree()->changeVisibilityState(objectId, false);
+                break;
+        }
+        this->document->getDisplay()->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        this->document->getDisplay()->forceRerenderFrame();
+        refreshItemTextColors();
+    });
+    refreshItemTextColors();
 }
 
+void ObjectTreeWidget::build(const int objectId, QTreeWidgetItem* parent)
+{
+	QTreeWidgetItem* item = nullptr;
 
-class ObjectTreeWidgetCallback : public BRLCAD::ConstDatabase::ObjectCallback {
-public:
-    ObjectTreeWidgetCallback(BRLCAD::ConstDatabase& database,
-                       QStandardItem*               parentItem) : database(database), parentItem(parentItem) {}
+	if (objectId != 0) {
+        item = new QTreeWidgetItem();
+        objectIdTreeWidgetItemMap[objectId] = item;
+        item->setText(0,document->getObjectTree()->getNameMap()[objectId]);
+        item->setData(0, Qt::UserRole, objectId);
 
-    void operator()(const BRLCAD::Object &object) override
-    {
-        const BRLCAD::Combination* comb = dynamic_cast<const BRLCAD::Combination*>(&object);
-
-        if (comb != nullptr) {
-            iterateBinaryTree(comb->Tree());
+        if (parent != nullptr) {
+            parent->addChild(item);
+        } else {
+            addTopLevelItem(item);
         }
     }
 
-private:
-    BRLCAD::ConstDatabase& database;
-    QStandardItem*  parentItem;
+	for (int childObjectId : document->getObjectTree()->getChildren()[objectId])
+	{
+		build(childObjectId, objectId ? item: nullptr);
+	}
+}
 
-    void iterateBinaryTree(const BRLCAD::Combination::ConstTreeNode& node) const
-    {
-        switch (node.Operation()) {
-            case BRLCAD::Combination::ConstTreeNode::Union:
-            case BRLCAD::Combination::ConstTreeNode::Intersection:
-            case BRLCAD::Combination::ConstTreeNode::Subtraction:
-            case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-                iterateBinaryTree(node.LeftOperand());
-                iterateBinaryTree(node.RightOperand());
+const QHash<int, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetItemMap() const {
+    return objectIdTreeWidgetItemMap;
+}
+
+void ObjectTreeWidget::refreshItemTextColors() {
+    document->getObjectTree()->traverseSubTree(0,false,[this](int objectId){
+        switch (document->getObjectTree()->getObjectVisibility()[objectId]){
+
+            case ObjectTree::Invisible:
+                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorInvisible));
                 break;
-
-            case BRLCAD::Combination::ConstTreeNode::Not:
-                iterateBinaryTree(node.Operand());
+            case ObjectTree::SomeChildrenVisible:
+                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorSomeChildrenVisible));
                 break;
-
-            case BRLCAD::Combination::ConstTreeNode::Leaf:
-                QStandardItem*     objectItem = new QStandardItem(node.Name());
-                ObjectTreeWidgetCallback callback(database, objectItem);
-
-                database.Get(node.Name(), callback);
-                parentItem->appendRow(objectItem);
+            case ObjectTree::FullyVisible:
+                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorFullVisible));
+                break;
         }
+
+        return true;
+    });
+
+    // Qt changes foreground color for selected items. We don't want it changed
+    if (currentItem()){
+        setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
-};
-
-
-
-QStandardItem* ObjectTreeWidget::build(const int objectId) const
-{
-    QStandardItem* objectItem = new QStandardItem(objectTree->getNameMap()[objectId]);
-    for (int childObjectId : objectTree->getTree()[objectId])
-    {
-        objectItem->appendRow(build(childObjectId));
-    }
-    return objectItem;
 }
 
-QStandardItemModel* ObjectTreeWidget::buildRoot() const
-{
-	const int objectId = objectTree->getRootObjectId();
-    QStandardItemModel* objectItem = new QStandardItemModel();
-    for (int childObjectId : objectTree->getTree()[objectId])
-    {
-        objectItem->appendRow(build(childObjectId));
-    }
-    return objectItem;
-}
-
-
-void ObjectTreeWidget::selectionChangedInternal(const QItemSelection & selected, const QItemSelection & deselected) {
-	QModelIndex selectedIndex = selected.indexes().at(0);
-    QString fullPath;
-	
-    while(selectedIndex.isValid()){
-        fullPath = "/" + treeModel->itemFromIndex(selectedIndex)->text() + fullPath;
-        selectedIndex = selectedIndex.parent();
-    }
-	
-    emit selectionChanged(fullPath);
-}

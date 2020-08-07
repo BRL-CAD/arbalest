@@ -22,8 +22,8 @@
 #include "OrthographicCamera.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-
-OrthographicCamera::OrthographicCamera() = default;
+#include "Utils.h"
+#include <QDebug>
 
 glm::mat4 OrthographicCamera::modelViewMatrix() const {
 	const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
@@ -104,5 +104,34 @@ void OrthographicCamera::setEyePosition(float x, float y, float z)
 void OrthographicCamera::setZoom(const float zoom)
 {
 	this->verticalSpan = zoom;
+}
+
+void OrthographicCamera::autoview() {
+    document->getDatabase()->UnSelectAll();
+    document->getObjectTree()->traverseSubTree(0, false, [this]
+    (int objectId){
+        switch(document->getObjectTree()->getObjectVisibility()[objectId]){
+            case ObjectTree::Invisible:
+                return false;
+            case ObjectTree::SomeChildrenVisible:
+                return true;
+            case ObjectTree::FullyVisible:
+                QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
+                document->getDatabase()->Select(fullPath.toUtf8());
+                return false;
+        }
+        return true;
+    }
+    );
+
+    BRLCAD::Vector3D a = document->getDatabase()->BoundingBoxMinima();
+    BRLCAD::Vector3D b = document->getDatabase()->BoundingBoxMaxima();
+    BRLCAD::Vector3D midPoint = (a+b) / 2;
+    setEyePosition(midPoint.coordinates[0], midPoint.coordinates[1], midPoint.coordinates[2]);
+
+    const BRLCAD::Vector3D volume = (a - b);
+    double diagonalLength = vector3DLength(volume);
+    if (diagonalLength > 0.001) setZoom(diagonalLength * 1.1);
+    document->getDisplay()->forceRerenderFrame();
 }
 

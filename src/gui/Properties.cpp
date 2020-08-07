@@ -25,8 +25,8 @@ Properties::Properties(Document & document) : document(document) {
 }
 
 
-void Properties::bindObject(const QString &fullPath) {
-    this->fullPath = fullPath;
+void Properties::bindObject(const int objectId) {
+    this->fullPath = document.getObjectTree()->getFullPathMap()[objectId];
     this->name = fullPath.split("/").last();
     fullPathWidget->setText(QString(fullPath).replace("/"," / "));
 
@@ -40,8 +40,8 @@ void Properties::bindObject(const QString &fullPath) {
     current = new TypeSpecificProperties(document,object);
     typeSpecificPropertiesArea->setWidget(current);
 
-    QString nameType = "<font color='$Color-SelectedObjectText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
-                        "<font color='$Color-SelectedObjectTypeText'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
+    QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
+                        "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
     nameWidget->setText(Globals::theme->process(nameType));
     typeSpecificPropertiesArea->setTitle(breakStringAtCaps(objectType));
 }

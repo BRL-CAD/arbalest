@@ -33,6 +33,7 @@
 class Document;
 class DisplayManager;
 class GeometryRenderer;
+class OrthographicCamera;
 
 
 class Display : public QOpenGLWidget{
@@ -41,13 +42,15 @@ public:
     Display(Document * document);
     virtual ~Display();
 
-    void refresh();
-	void autoView() const;
+    void forceRerenderFrame();
 
     int getW() const;
     int getH() const;
     const Document* getDocument() const;
-    DisplayManager* getDisplayManager() const;
+	OrthographicCamera* getCamera() const;
+	DisplayManager* getDisplayManager() const;
+	GeometryRenderer *getGeometryRenderer();
+
 protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
@@ -67,12 +70,12 @@ private:
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     float bgColor[3] = {.9,.9,.9};
-    OrthographicCamera  *camera;
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;
     Qt::KeyboardModifier rotateAroundThirdAxisModifier = Qt::ShiftModifier;
 
+	OrthographicCamera  *camera;
     DisplayManager *displayManager;
     GeometryRenderer * geometryRenderer;
     AxesRenderer * axesRenderer;

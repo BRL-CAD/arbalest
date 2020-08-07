@@ -17,12 +17,19 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     }
 
     objectTree = new ObjectTree(database);
-    objectTreeWidget = new ObjectTreeWidget(objectTree);
     properties = new Properties(*this);
-    objectTree->changeSubTreeVisibility(objectTree->getRootObjectId(), true);
-
     display = new Display(this);
-    display->refresh();
+    objectTreeWidget = new ObjectTreeWidget(this);
+    display->forceRerenderFrame();
+
+//
+//    int t0 = time(NULL);
+//    for (int i=0;i<1000;i++){
+//        objectTree->traverseSubTree(0,false,[this](int objectId){
+//            if(objectId%2)objectTreeWidget->getObjectIdTreeWidgetItemMap()[objectId]->setForeground(0, QBrush(QColor(Qt::green)));
+//        });
+//    }
+//    printf("time = %d secs\n",  time(NULL) - t0);
 }
 
 Document::~Document() {
