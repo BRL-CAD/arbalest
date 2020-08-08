@@ -11,7 +11,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     if (filePath != nullptr) {
         if (!database->Load(filePath->toUtf8().data()))
         {
-            throw std::exception("Failed to open file");
+            throw std::runtime_error("Failed to open file");
         }
     }
 
