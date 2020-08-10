@@ -83,9 +83,9 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 result = glm::transpose(result);
 
                 //glm::rotate(rotation,)
-                for(int c=0;c<4;c++){for(int i=0;i<4;i++)cout<<transformationMatrix[c*4+i]<<"     ";cout<<endl;}cout<<endl;
+//                for(int c=0;c<4;c++){for(int i=0;i<4;i++)cout<<transformationMatrix[c*4+i]<<"     ";cout<<endl;}cout<<endl;
 
-                cout<<endl;
+//                cout<<endl;
             });
         }
 

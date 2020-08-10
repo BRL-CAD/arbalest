@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <include/RaytraceView.h>
+#include <include/AboutWindow.h>
 
 
 using namespace BRLCAD;
@@ -178,6 +179,14 @@ void MainWindow::prepareUi() {
         statusBar->showMessage("Raytracing completed.", statusBarShortMessageDuration);
     });
     raytrace->addAction(raytraceAct);
+
+
+    QMenu* help = menuTitleBar->addMenu(tr("&Help"));
+    QAction* aboutAct = new QAction(tr("About"), this);
+    connect(aboutAct, &QAction::triggered, this, [this](){
+        (new AboutWindow())->show();
+    });
+    help->addAction(aboutAct);
 
     // Title bar [widgets in the menu bar] ----------------------------------------------------------------------------------------
     QPushButton* applicationIcon = new QPushButton(menuTitleBar);

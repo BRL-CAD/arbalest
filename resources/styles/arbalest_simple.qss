@@ -210,7 +210,6 @@ ObjectTreeWidget::item:selected {
 }
 
 #mainTabBarCornerWidget {
-    border-color:#cdcdcd;
     border-style:solid;
 }
 
@@ -219,7 +218,13 @@ ObjectTreeWidget::item:selected {
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
+#aboutWindow  {
+    background: "$Color-Secondary";
+}
 
+#aboutText  {
+    color: black;
+}
 
 
 
