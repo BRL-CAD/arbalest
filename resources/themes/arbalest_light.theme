@@ -5,8 +5,6 @@ $Color-Secondary                        : #fcfcfc;  // Used as the background co
 $Color-SeparatorLine                    : #cdcdcd;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
 $Color-DockableHeader                   : #EAEAEA; // Titlebar color of all dockable widgets like objects tree
 $Color-DockableHeaderText               : #0D0D0D; // Titlebar text color of all dockable widgets like objects tree
-//$Color-DockableHeaderActive           : #007acc; // Titlebar color of all dockable widgets like objects tree
-//$Color-DockableHeaderTextActive       : #ffffff; // Titlebar text color of all dockable widgets like objects tree
 $Color-DefaultFontColor                 : #555555;  // Text color for all text in status bar
 $Color-SelectedTab                      : #ffffff;  // Background color for selected tab of the file switcher tab bar
 $Color-SelectedTabLine                  : #0000ff;  // Bottom border color for selected tab of the file switcher tab bar
@@ -22,6 +20,7 @@ $Color-ButtonPressedMask                : #11000000;  // Alpha mask
 $Color-StatusBar                        : #68217A;
 $Color-StatusBarText                    : #ffffff;
 $Color-ObjectTreeWidgetItemText         : #000000;
+$Color-ToolbarSeparator                 : #c2c2c2;
 
 $Color-FullyVisibleObjectText           : #0000ff;  // object tree item text.
 $Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.

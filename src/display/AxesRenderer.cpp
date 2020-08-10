@@ -26,7 +26,7 @@
 #include <GL/gl.h>
 #include "AxesRenderer.h"
 
-#define GRID_LINE_LENGTH 130
+#define GRID_LINE_LENGTH 100
 
 void AxesRenderer::render() {
     //todo implement line drawing in DisplayManager and use it instead of calling OpenGL here

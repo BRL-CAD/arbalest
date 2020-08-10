@@ -10,20 +10,27 @@
 #include "ObjectTreeWidget.h"
 #include "Properties.h"
 #include "GeometryRenderer.h"
+#include "DisplayGrid.h"
+#include <include/RaytraceView.h>
 
 class Properties;
 class Display;
 class GeometryRenderer;
+class DisplayGrid;
+class RaytraceView;
+class ObjectTreeWidget;
 
 class Document {
 private:
     QString *filePath = nullptr;
     BRLCAD::MemoryDatabase *database;
-    Display *display;
+    DisplayGrid *displayGrid;
     ObjectTreeWidget *objectTreeWidget;
     Properties *properties;
     const int documentId;
     ObjectTree* objectTree;
+    GeometryRenderer * geometryRenderer;
+
 
 public:
     explicit Document(int documentId, const QString *filePath = nullptr);
@@ -31,21 +38,23 @@ public:
 
     void modifyObject(BRLCAD::Object* newObject);
 
+    RaytraceView * raytraceWidget;
     // getters setters
     QString* getFilePath() const
     {
 	    return filePath;
     }
 
+    RaytraceView * getRaytraceWidget() const
+    {
+        return raytraceWidget;
+    }
     BRLCAD::MemoryDatabase* getDatabase() const
     {
-	    return database;
+        return database;
     }
 
-    Display* getDisplay() const
-    {
-	    return display;
-    }
+    Display* getDisplay();
 
     ObjectTreeWidget* getObjectTreeWidget() const
     {
@@ -57,6 +66,10 @@ public:
 	    return properties;
     }
 
+    DisplayGrid *getDisplayGrid()  {
+        return displayGrid;
+    }
+
     int getDocumentId() const
     {
 	    return documentId;
@@ -66,12 +79,16 @@ public:
     {
 	    return objectTree;
     }
+    GeometryRenderer *getGeometryRenderer(){
+        return geometryRenderer;
+    }
 
     void setFilePath(const QString& filePath)
     {
         this->filePath = new QString(filePath);
     }
 
+    void modifyObjectNoSet(BRLCAD::Object *newObject);
 };
 
 

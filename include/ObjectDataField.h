@@ -29,27 +29,7 @@ public:
         T* object = reinterpret_cast<T*>(obj);
         if (object == nullptr) return;
 
-        if (title != "") {
-            if (!indices.isEmpty()) {
-                QHBoxWidget * hbox = new QHBoxWidget();
-                QLabel *padding = new QLabel(indices[0]);
-                QFont font("Monospace");
-                font.setStyleHint(QFont::TypeWriter);
-                padding->setFont(font);
-                padding->setStyleSheet("color:transparent;padding-right:3px;");
-                hbox->addWidget(padding);
-                QLabel *titleWidget = new QLabel(title);
-                titleWidget->setMargin(2);
-                hbox->addWidget(titleWidget);
-                addWidget(hbox);
-                hbox->getBoxLayout()->addStretch();
-            }
-            else{
-                QLabel *titleWidget = new QLabel(title);
-                titleWidget->setMargin(2);
-                addWidget(titleWidget);
-            }
-        }
+        setTitle(indices, title);
 
         for (int c=start; c < start+count; c++) {
             BRLCAD::Vector3D val = ((*object).*getter)(c);
@@ -85,27 +65,7 @@ public:
         T* object = reinterpret_cast<T*>(obj);
         if (object == nullptr) return;
 
-        if (title != "") {
-            if (!indices.isEmpty()) {
-                QHBoxWidget * hbox = new QHBoxWidget();
-                QLabel *padding = new QLabel(indices[0]);
-                QFont font("Monospace");
-                font.setStyleHint(QFont::TypeWriter);
-                padding->setFont(font);
-                padding->setStyleSheet("color:transparent;padding-right:3px;");
-                hbox->addWidget(padding);
-                QLabel *titleWidget = new QLabel(title);
-                titleWidget->setMargin(2);
-                hbox->addWidget(titleWidget);
-                addWidget(hbox);
-                hbox->getBoxLayout()->addStretch();
-            }
-            else{
-                QLabel *titleWidget = new QLabel(title);
-                titleWidget->setMargin(2);
-                addWidget(titleWidget);
-            }
-        }
+        setTitle(indices, title);
 
         for (int c=start; c < start+count; c++) {
             BRLCAD::Vector3D val = ((*object).*getter)(c);
@@ -124,7 +84,6 @@ public:
             addWidget(row);
         }
     }
-
 
     ObjectDataField(
             Document *document,
@@ -190,6 +149,33 @@ public:
 
         addWidget(row);
     }
+
+
+    void setTitle(const QStringList &indices, const QString &title) {
+        if (title != "") {
+            if (!indices.isEmpty()) {
+                QHBoxWidget * hbox = new QHBoxWidget();
+                QLabel *padding = new QLabel(indices[0]);
+                QFont font("Monospace");
+                font.setStyleHint(QFont::TypeWriter);
+                padding->setFont(font);
+                padding->setStyleSheet("color:transparent;padding-right:3px;");
+                hbox->addWidget(padding);
+                QLabel *titleWidget = new QLabel(title);
+                titleWidget->setMargin(2);
+                hbox->addWidget(titleWidget);
+                addWidget(hbox);
+                hbox->getBoxLayout()->addStretch();
+            }
+            else{
+                QLabel *titleWidget = new QLabel(title);
+                titleWidget->setMargin(2);
+                addWidget(titleWidget);
+            }
+        }
+    }
+
+
 };
 
 

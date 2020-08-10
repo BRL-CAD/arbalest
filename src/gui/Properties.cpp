@@ -37,7 +37,7 @@ void Properties::bindObject(const int objectId) {
 
     static TypeSpecificProperties * current = nullptr;
     delete current;
-    current = new TypeSpecificProperties(document,object);
+    current = new TypeSpecificProperties(document, object, objectId);
     typeSpecificPropertiesArea->setWidget(current);
 
     QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "

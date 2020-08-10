@@ -68,9 +68,10 @@ public:
 
     glm::mat4 projectionMatrix() const ;
 
-    glm::mat4 projectionMatrix(float x, float y) const ;
 
     void setEyePosition(float x, float y, float z) ;
+    void setAnglesAroundAxes(float x, float y, float z) ;
+    glm::vec3 getAnglesAroundAxes();
 
     void setZoom(float zoom);
 
@@ -79,6 +80,10 @@ public:
     void centerView(int objectId);
 
     void centerToCurrentSelection();
+
+    glm::vec3 getEyePosition();
+
+    double getVerticalSpan();
 };
 
 

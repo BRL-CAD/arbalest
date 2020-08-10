@@ -28,6 +28,7 @@
 #include <QMouseEvent>
 
 #include "Document.h"
+#include "DisplayManager.h"
 #include "OrthographicCamera.h"
 
 class Document;
@@ -49,7 +50,6 @@ public:
     const Document* getDocument() const;
 	OrthographicCamera* getCamera() const;
 	DisplayManager* getDisplayManager() const;
-	GeometryRenderer *getGeometryRenderer();
 
 protected:
     void resizeGL(int w, int h) override;
@@ -69,7 +69,7 @@ private:
     int prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
-    float bgColor[3] = {.9,.9,.9};
+    float bgColor[3] = {.85,.85,.85};
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;
@@ -77,7 +77,6 @@ private:
 
 	OrthographicCamera  *camera;
     DisplayManager *displayManager;
-    GeometryRenderer * geometryRenderer;
     AxesRenderer * axesRenderer;
 };
 

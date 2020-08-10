@@ -1,5 +1,6 @@
 #include <QtWidgets/QFileDialog>
 #include "MainWindow.h"
+#include "DisplayGrid.h"
 #include <Document.h>
 #include <QtWidgets/QLabel>
 #include <include/QSSPreprocessor.h>
@@ -10,6 +11,8 @@
 #include <include/QHBoxWidget.h>
 #include <QApplication>
 #include <QMessageBox>
+#include <QComboBox>
+#include <include/RaytraceView.h>
 
 
 using namespace BRLCAD;
@@ -27,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
+    Globals::mainWindow = this;
 }
 
 MainWindow::~MainWindow()
@@ -86,23 +90,101 @@ void MainWindow::prepareUi() {
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
     fileMenu->addAction(saveAsAct);
 
-    QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
-    QAction* autoViewAct = new QAction(tr("Autoview"), this);
-    autoViewAct->setShortcuts(QKeySequence::Find);
-    autoViewAct->setStatusTip(tr("Autoview based on the current visible objects"));
+    QAction* resetViewportAct = new QAction("Reset current viewport", this);
+    resetViewportAct->setStatusTip(tr("Reset to default camera orientation for the viewport and autoview to currently visible objects"));
+    connect(resetViewportAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getDisplayGrid()->resetViewPort(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+    });
+    viewMenu->addAction(resetViewportAct);
+
+    QAction* resetAllViewportsAct = new QAction("Reset all viewports", this);
+    resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
+    connect(resetAllViewportsAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getDisplayGrid()->resetAllViewPorts();
+    });
+    viewMenu->addAction(resetAllViewportsAct);
+
+    viewMenu->addSeparator();
+
+    QAction* autoViewAct = new QAction(tr("Focus visible objects (all viewports)"), this);
+    autoViewAct->setShortcut(Qt::Key_F|Qt::CTRL);
+    autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewAct, &QAction::triggered, this, [this](){
-        documents[activeDocumentId]->getDisplay()->getCamera()->autoview();
+        for(Display * display : documents[activeDocumentId]->getDisplayGrid()->getDisplays()){
+            display->getCamera()->autoview();
+            display->forceRerenderFrame();
+        }
     });
     viewMenu->addAction(autoViewAct);
 
+    QAction* autoViewSingleAct = new QAction(tr("Focus visible objects (current viewport)"), this);
+    autoViewSingleAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
+    connect(autoViewSingleAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getDisplay()->getCamera()->autoview();
+        documents[activeDocumentId]->getDisplay()->forceRerenderFrame();
+    });
+    viewMenu->addAction(autoViewSingleAct);
+
+    QAction* centerViewAct = new QAction(tr("Focus selected object"), this);
+    centerViewAct->setStatusTip(tr("Resize and center the view based on the selected objects"));
+    centerViewAct->setShortcut(Qt::Key_F);
+    connect(centerViewAct, &QAction::triggered, this, [this](){
+        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
+    });
+    viewMenu->addAction(centerViewAct);
+    
+    viewMenu->addSeparator();
+
+    currentViewport = new QComboBox();
+
+    QMenu* singleView = viewMenu->addMenu(tr("&Single View"));
+
+    QActionGroup *viewportMenuGroup = new QActionGroup(this);
+    for(int i=0;i<4;i++) {
+        singleViewAct[i] = new QAction("Viewport " + QString::number(i+1), this);
+        viewportMenuGroup->addAction(singleViewAct[i]);
+        singleViewAct[i]->setCheckable(true);
+        singleViewAct[i]->setStatusTip("Display viewport " + QString::number(i+1));
+        connect(singleViewAct[i], &QAction::triggered, this, [this,i]() {
+            documents[activeDocumentId]->getDisplayGrid()->singleDisplayMode(i);
+            currentViewport->setCurrentIndex(i);
+        });
+        singleView->addAction(singleViewAct[i]);
+    }
+    singleViewAct[3]->setChecked(true);
+
+    QAction* quadViewAct = new QAction(tr("All Viewports"), this);
+    quadViewAct->setStatusTip(tr("Display 4 viewports"));
+    connect(quadViewAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getDisplayGrid()->quadDisplayMode();
+        for(QAction *i : singleViewAct) i->setChecked(false);
+        currentViewport->setCurrentIndex(4);
+    });
+    viewMenu->addAction(quadViewAct);
+
+
+    QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
+    QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
+    raytraceAct->setStatusTip(tr("Raytrace current viewport"));
+    raytraceAct->setShortcut(Qt::CTRL|Qt::Key_R);
+    connect(raytraceAct, &QAction::triggered, this, [this](){
+        statusBar->showMessage("Raytracing current viewport...", statusBarShortMessageDuration);
+        QCoreApplication::processEvents();
+        documents[activeDocumentId]->getRaytraceWidget()->raytrace();
+        statusBar->showMessage("Raytracing completed.", statusBarShortMessageDuration);
+    });
+    raytrace->addAction(raytraceAct);
+
     // Title bar [widgets in the menu bar] ----------------------------------------------------------------------------------------
     QPushButton* applicationIcon = new QPushButton(menuTitleBar);
-    applicationIcon->setIcon(QIcon(":/icons/archer.png"));
+    applicationIcon->setIcon(QIcon(":/icons/arbalest_icon.png"));
     applicationIcon->setObjectName("topLeftAppIcon");
     menuTitleBar->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
+    setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
 
     QHBoxLayout* layoutTopRightWidget = new QHBoxLayout;
     layoutTopRightWidget->setContentsMargins(0, 0, 0, 0);
@@ -159,43 +241,113 @@ void MainWindow::prepareUi() {
     QPushButton* newButton = new QPushButton(menuTitleBar);
     newButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
     newButton->setObjectName("toolbarButton");
+    newButton->setToolTip("New..");
     mainTabBarCornerWidget->addWidget(newButton);
     connect(newButton, &QPushButton::clicked, this, &MainWindow::newFile);
 
     QPushButton* openButton = new QPushButton(menuTitleBar);
     openButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
     openButton->setObjectName("toolbarButton");
+    openButton->setToolTip("Open..");
     mainTabBarCornerWidget->addWidget(openButton);	
     connect(openButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
 
     QPushButton* saveButton = new QPushButton(menuTitleBar);
     saveButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
     saveButton->setObjectName("toolbarButton");
+    saveButton->setToolTip("Save");
     mainTabBarCornerWidget->addWidget(saveButton);
     connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveFileDefaultPath);
-	
+
     QPushButton* saveAsButton = new QPushButton(menuTitleBar);
     saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
     saveAsButton->setObjectName("toolbarButton");
+    saveAsButton->setToolTip("Save as..");
     mainTabBarCornerWidget->addWidget(saveAsButton);
     connect(saveAsButton, &QPushButton::clicked, this, &MainWindow::saveAsFileDialog);
 
-    documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopLeftCorner);
+    mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
+
+
+    QPushButton* focusAll = new QPushButton(menuTitleBar);
+    focusAll->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_crop_free_black_48dp.png")));
+    focusAll->setObjectName("toolbarButton");
+    focusAll->setToolTip("Focus on all visible objects");
+    connect(focusAll, &QPushButton::clicked, this, [this](){
+        for(Display * display : documents[activeDocumentId]->getDisplayGrid()->getDisplays()){
+            display->getCamera()->autoview();
+            display->forceRerenderFrame();
+        }
+    });
+    mainTabBarCornerWidget->addWidget(focusAll);
+
+    QPushButton* focusCurrent = new QPushButton(menuTitleBar);
+    focusCurrent->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_center_focus_strong_black_48dp.png")));
+    focusCurrent->setObjectName("toolbarButton");
+    focusCurrent->setToolTip("Focus on selected object");
+    connect(focusCurrent, &QPushButton::clicked, this, [this](){
+        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
+    });
+    mainTabBarCornerWidget->addWidget(focusCurrent);
+
+
+    QPushButton* resetViewports = new QPushButton(menuTitleBar);
+    resetViewports->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_refresh_black_48dp.png")));
+    resetViewports->setObjectName("toolbarButton");
+    resetViewports->setToolTip("Reset the viewports and focus on the visible");
+    connect(resetViewports, &QPushButton::clicked, this, [this](){
+        documents[activeDocumentId]->getDisplayGrid()->resetAllViewPorts();
+    });
+    mainTabBarCornerWidget->addWidget(resetViewports);
+    
+    currentViewport->setToolTip("Change viewport");
+    currentViewport->addItem("Viewport 1");
+    currentViewport->addItem("Viewport 2");
+    currentViewport->addItem("Viewport 3");
+    currentViewport->addItem("Viewport 4");
+    currentViewport->addItem("All Viewports");
+    currentViewport->setCurrentIndex(3);
+    connect(currentViewport, QOverload<int>::of(&QComboBox::activated),[=](int index){
+        if (index <4) documents[activeDocumentId]->getDisplayGrid()->singleDisplayMode(index);
+        else documents[activeDocumentId]->getDisplayGrid()->quadDisplayMode();
+        for(QAction *i : singleViewAct) i->setChecked(false);
+        if(index != 4) singleViewAct[index]->setChecked(true);
+    });
+    mainTabBarCornerWidget->addWidget(currentViewport);
+
+    mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
+
+    QPushButton* raytraceButton = new QPushButton(menuTitleBar);
+    raytraceButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-teapot-40.png")));
+    raytraceButton->setObjectName("toolbarButton");
+    raytraceButton->setToolTip("Render current viewport");
+    mainTabBarCornerWidget->addWidget(raytraceButton);
+    connect(raytraceButton, &QPushButton::clicked, this, [this](){
+        statusBar->showMessage("Raytracing current viewport...", statusBarShortMessageDuration);
+        QCoreApplication::processEvents();
+        documents[activeDocumentId]->getRaytraceWidget()->raytrace();
+        statusBar->showMessage("Raytracing completed.", statusBarShortMessageDuration);
+    });
+
+    documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopRightCorner);
 }
 
 void MainWindow::prepareDockables(){
     // Object tree
     objectTreeWidgetDockable = new Dockable("Objects", this, false, 300);
-    addDockWidget(Qt::RightDockWidgetArea, objectTreeWidgetDockable);
+    addDockWidget(Qt::LeftDockWidgetArea, objectTreeWidgetDockable);
 
     // Properties
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
+
+
     // Toolbox
-    toolboxDockable = new Dockable("Make", this,true,30);
-    toolboxDockable->hideHeader();
-    addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
+//    toolboxDockable = new Dockable("Make", this,true,30);
+//    toolboxDockable->hideHeader();
+//    addDockWidget(Qt::LeftDockWidgetArea, toolboxDockable);
 }
 
 // empty new file
@@ -205,7 +357,7 @@ void MainWindow::newFile() {
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
     QString filename( "Untitled");
-    const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
+    const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
             this, &MainWindow::objectTreeWidgetSelectionChanged);
@@ -232,7 +384,7 @@ void MainWindow::openFile(const QString& filePath) {
         document->getProperties()->setObjectName("dockableContent");
         documents[documentsCount++] = document;
         QString filename(QFileInfo(filePath).fileName());
-        const int tabIndex = documentArea->addTab(document->getDisplay(), filename);
+        const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
         documentArea->setCurrentIndex(tabIndex);
         connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
                 this, &MainWindow::objectTreeWidgetSelectionChanged);
@@ -279,13 +431,22 @@ void MainWindow::saveFileDefaultPath() {
 }
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
-    Display * display = dynamic_cast<Display*>(documentArea->widget(newIndex));
-    if (display == nullptr) return;
-    if (display->getDocument()->getDocumentId() != activeDocumentId){
-        activeDocumentId = display->getDocument()->getDocumentId();
+    DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
+    if (displayGrid != nullptr && displayGrid->getDocument()->getDocumentId() != activeDocumentId){
+        activeDocumentId = displayGrid->getDocument()->getDocumentId();
         objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
         objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
         statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
+
+        if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
+            currentViewport->setCurrentIndex(4);
+            for(QAction * action:singleViewAct) action->setChecked(false);
+        }else {
+            currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+            for(QAction * action:singleViewAct) action->setChecked(false);
+            singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+        }
+
     }
 }
 
@@ -311,7 +472,7 @@ void MainWindow::minimizeButtonPressed() {
 }
 
 void MainWindow::maximizeButtonPressed() {
-    if(!isMaximized())showMaximized();
+    if(!isMaximized()) showMaximized();
     else showNormal();
 }
 
@@ -341,8 +502,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
                 return false;
             }
         }
-
-
     }
     return false;
 }

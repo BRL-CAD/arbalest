@@ -1,5 +1,7 @@
 #include <cmath>
 #include <QString>
+#include <include/Utils.h>
+#include <brlcad/Combination.h>
 
 
 #include "cicommon.h"
@@ -46,3 +48,70 @@ QString breakStringAtCaps(const QString& in)
     }
     return newName;
 }
+
+const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name) {
+    switch (node.Operation())
+    {
+        case BRLCAD::Combination::ConstTreeNode::Union:
+        case BRLCAD::Combination::ConstTreeNode::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr: {
+            BRLCAD::Combination::TreeNode left = node.LeftOperand();
+            BRLCAD::Combination::TreeNode right = node.RightOperand();
+            const double * resultLeft = getLeafMatrix(left, name);
+            const double * resultRight = getLeafMatrix(right, name);
+            if (resultLeft) return resultLeft;
+            return resultRight;
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Not: {
+            BRLCAD::Combination::TreeNode op = node.RightOperand();
+            return getLeafMatrix(op, name);
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Leaf: {
+            QString leafName = QString(node.Name());
+            if (leafName == name) {
+                auto h =  node.Matrix();
+                return h;
+            }
+            return nullptr;
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Null: {
+            return nullptr;
+        }
+    }
+}
+
+void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, double * matrix) {
+    switch (node.Operation())
+    {
+        case BRLCAD::Combination::ConstTreeNode::Union:
+        case BRLCAD::Combination::ConstTreeNode::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr: {
+            BRLCAD::Combination::TreeNode left = node.LeftOperand();
+            BRLCAD::Combination::TreeNode right = node.RightOperand();
+            setLeafMatrix(left, name, matrix);
+            setLeafMatrix(right, name, matrix);
+            break;
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Not: {
+            BRLCAD::Combination::TreeNode op = node.RightOperand();
+            setLeafMatrix(op, name, matrix);
+            break;
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Leaf: {
+            QString leafName = QString(node.Name());
+            if (leafName == name) node.SetMatrix(matrix);
+            break;
+        }
+
+        case BRLCAD::Combination::ConstTreeNode::Null: {
+        }
+    }
+}
+

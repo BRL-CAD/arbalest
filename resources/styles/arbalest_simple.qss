@@ -5,12 +5,20 @@ QWidget {
     outline: none; /* removes ugly dotted lines around focused widgets*/
     font-size: 10pt; 
     color: "$Color-DefaultFontColor";
-}  
+}
+
+
+QComboBox {
+    margin-top:2px;
+    margin-left:6px;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
 
 QMainWindow     { background-color:"$Color-Main"; }
 
 
-#topLeftAppIcon, #minimizeButton, #maximizeButton, #closeButton {
+#minimizeButton, #maximizeButton, #closeButton {
     border-style: solid;
     padding-top: 7px;
     padding-bottom: 7px;
@@ -202,14 +210,16 @@ ObjectTreeWidget::item:selected {
 }
 
 #mainTabBarCornerWidget {
-    border-right-width:1px;
     border-color:#cdcdcd;
     border-style:solid;
 }
+
+#toolbarSeparator {
+    background-color: "$Color-ToolbarSeparator";
+}
 /* -------------------------------------------------------------------------------------------------------------------*/
 
-/*
-Styling for the Minimize, Maximize and close buttons in the nemu bar. We have to do the styling manually since we do
-not use the system title bar
-*/
-/* ------------------------------------------------------------------------------------------------------------------ */
+
+
+
+

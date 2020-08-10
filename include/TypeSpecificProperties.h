@@ -8,9 +8,9 @@
 #include <QtWidgets/QVBoxLayout>
 #include "Document.h"
 
-class TypeSpecificProperties: public QFrame {
+class TypeSpecificProperties: public QVBoxWidget {
 public:
-    TypeSpecificProperties(Document &document, BRLCAD::Object *object);
+    TypeSpecificProperties(Document &document, BRLCAD::Object *object, const int i);
 
 protected:
     Document& document;

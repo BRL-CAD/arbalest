@@ -22,10 +22,17 @@
   <qresource>
     <file>styles/arbalest_simple.qss</file>
     <file>icons/archer.png</file>
+    <file>icons/arbalest_icon.png</file>
     <file>icons/close.png</file>
     <file>icons/icons8-new-file-80.png</file>
+    <file>icons/icons8-teapot-40.png</file>
     <file>icons/icons8-eye-20.png</file>
+    <file>icons/icons8-rectangle-64.png</file>
+    <file>icons/baseline_center_focus_strong_black_48dp.png</file>
+    <file>icons/baseline_crop_free_black_48dp.png</file>
+    <file>icons/baseline_refresh_black_48dp.png</file>
     <file>icons/file-plus.png</file>
+    <file>icons/icons8-rectangle-144.png</file>
     <file>icons/baseline_center_focus_strong_black_18dp.png</file>
     <file>icons/new.png</file>
     <file>icons/icons8-opened-folder-80.png</file>

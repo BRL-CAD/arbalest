@@ -3,6 +3,7 @@
 //
 
 #include <Document.h>
+#include<Display.h>
 
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
@@ -17,9 +18,13 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 
     objectTree = new ObjectTree(database);
     properties = new Properties(*this);
-    display = new Display(this);
+    geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
-    display->forceRerenderFrame();
+    displayGrid = new DisplayGrid(this);
+
+    displayGrid->forceRerenderAllDisplays();
+
+    raytraceWidget = new RaytraceView(this);
 
 //
 //    int t0 = time(NULL);
@@ -33,7 +38,6 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 
 Document::~Document() {
     delete database;
-    delete display;
 }
 
 void Document::modifyObject(BRLCAD::Object *newObject) {
@@ -42,11 +46,30 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
     (int objectId){
         if (getObjectTree()->getNameMap()[objectId] == objectName){
-            display->getGeometryRenderer()->clearObject(objectId);
+            geometryRenderer->clearObject(objectId);
         }
         return true;
     }
     );
-    display->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-    display->forceRerenderFrame();
+    geometryRenderer->refreshForVisibilityAndSolidChanges();
+    for (Display * display : displayGrid->getDisplays())display->forceRerenderFrame();
+}
+
+
+void Document::modifyObjectNoSet(BRLCAD::Object *newObject) {
+    QString objectName = newObject->Name();
+    getObjectTree()->traverseSubTree(0,false,[this, objectName]
+                                             (int objectId){
+                                         if (getObjectTree()->getNameMap()[objectId] == objectName){
+                                             geometryRenderer->clearObject(objectId);
+                                         }
+                                         return true;
+                                     }
+    );
+    geometryRenderer->refreshForVisibilityAndSolidChanges();
+    for (Display * display : displayGrid->getDisplays())display->forceRerenderFrame();
+}
+Display* Document::getDisplay()
+{
+    return displayGrid->getActiveDisplay();
 }

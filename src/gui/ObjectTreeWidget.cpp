@@ -31,10 +31,15 @@
 #include <QHBoxLayout>
 #include <QtCore/QtCore>
 #include <include/ObjectTreeRowButtons.h>
-#include <GeometryRenderer.h>
+#include "Globals.h"
 
 ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : document(document)
 {
+
+    colorFullVisible = QColor(Globals::theme->process("$Color-FullyVisibleObjectText"));
+    colorSomeChildrenVisible = QColor(Globals::theme->process("$Color-SomeChildrenVisibleObjectText"));
+    colorInvisible = QColor(Globals::theme->process("$Color-InvisibleObjectText"));
+
 	this->setHeaderHidden(true);
 	setColumnCount(1);
 	setMouseTracking(true);
@@ -59,14 +64,14 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
                 this->document->getObjectTree()->changeVisibilityState(objectId, false);
                 break;
         }
-        this->document->getDisplay()->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        this->document->getDisplay()->forceRerenderFrame();
+        this->document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        this->document->getDisplayGrid()->forceRerenderAllDisplays();
         refreshItemTextColors();
     });
 
     connect(visibilityButton, &ObjectTreeRowButtons::centerButtonClicked, this, [this](int objectId){
         this->document->getDisplay()->getCamera()->centerView(objectId);
-        this->document->getDisplay()->forceRerenderFrame();
+        this->document->getDisplayGrid()->forceRerenderAllDisplays();
         refreshItemTextColors();
     });
     refreshItemTextColors();
@@ -121,5 +126,9 @@ void ObjectTreeWidget::refreshItemTextColors() {
     if (currentItem()){
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
+}
+
+int ObjectTreeWidget::selectedObjectId() {
+    return 0;
 }
 

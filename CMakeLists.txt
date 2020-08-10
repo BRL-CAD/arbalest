@@ -35,7 +35,8 @@ set(arbalest_Sources
         src/gui/DragEditLineEdit.cpp
         src/gui/ObjectTreeRowButtons.cpp
         src/utils/Utils.cpp
-        )
+        src/gui/DisplayGrid.cpp
+        src/display/GraphicView.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

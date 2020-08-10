@@ -27,6 +27,7 @@
 #endif
 
 #include "Display.h"
+#include "VectorList.h"
 class Display;
 
 class DisplayManager{

@@ -38,6 +38,7 @@ glm::mat4 OrthographicCamera::projectionMatrix() const {
     return glm::ortho(-(verticalSpan/2) * w / h, (verticalSpan/2) * w / h, -verticalSpan/2, verticalSpan/2, nearPlane, farPlane);
 }
 
+
 void OrthographicCamera::setWH(float w, float h) {
     this->w = w;
     this->h = h;
@@ -90,9 +91,6 @@ glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
     return rotationMatrix;
 }
 
-glm::mat4 OrthographicCamera::projectionMatrix(float x, float y) const {
-    return glm::ortho(-x, x, -y, y, nearPlane, farPlane);
-}
 
 void OrthographicCamera::setEyePosition(float x, float y, float z)
 {
@@ -101,9 +99,29 @@ void OrthographicCamera::setEyePosition(float x, float y, float z)
     eyePosition.z = z;
 }
 
+glm::vec3 OrthographicCamera::getEyePosition()
+{
+    return eyePosition;
+}
+
+void OrthographicCamera::setAnglesAroundAxes(float x, float y, float z)
+{
+    angleAroundAxes.x = x;
+    angleAroundAxes.y = y;
+    angleAroundAxes.z = z;
+}
+glm::vec3 OrthographicCamera::getAnglesAroundAxes()
+{
+    return angleAroundAxes;
+}
+
 void OrthographicCamera::setZoom(const float zoom)
 {
-	this->verticalSpan = zoom;
+    this->verticalSpan = zoom;
+}
+double OrthographicCamera::getVerticalSpan()
+{
+    return this->verticalSpan;
 }
 
 void OrthographicCamera::centerToCurrentSelection() {

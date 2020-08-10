@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <iostream>
 #include <include/ObjectTreeRowButtons.h>
+#include "Globals.h"
 
 
 ObjectTreeRowButtons::ObjectTreeRowButtons(ObjectTree *objectTree, QObject *parent) : objectTree(objectTree), QStyledItemDelegate(parent) {
@@ -112,6 +113,17 @@ bool ObjectTreeRowButtons::editorEvent(QEvent *event, QAbstractItemModel *model,
         }
         else if (centerIconRect.contains(mouseEvent->pos())) {
             emit centerButtonClicked(objectId);
+            return true;
+        }
+    }
+    else if (event->type() == QEvent::MouseMove) {
+        QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(event);
+        if (visibilityIconRect.contains(mouseEvent->pos())) {
+            Globals::mainWindow->getStatusBar()->showMessage("Change object visibility", Globals::mainWindow->statusBarShortMessageDuration);
+            return true;
+        }
+        else if (centerIconRect.contains(mouseEvent->pos())) {
+            Globals::mainWindow->getStatusBar()->showMessage("Focus on object",  Globals::mainWindow->statusBarShortMessageDuration);
             return true;
         }
     }

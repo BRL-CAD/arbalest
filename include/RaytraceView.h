@@ -1,4 +1,4 @@
-/*                      O B J E C T S T R E E V I E W . H
+/*                             G R A P H I C V I E W . H
  * BRL-CAD
  *
  * Copyright (c) 2018 United States Government as represented by
@@ -22,49 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/** @file ObjectTreeWidget.h
+/** @file GraphicView.h
  *
+ *  BRL-CAD Qt GUI:
+ *      declaration of the graphical visualization
  */
 
-#ifndef OBJECTTREEWIDGET_H
-#define OBJECTTREEWIDGET_H
+#ifndef GRAPHICVIEW_H
+#define GRAPHICVIEW_H
 
-#include <QTreeView>
-#include <qtreewidget.h>
-#include <QtWidgets/QStyledItemDelegate>
-#include "ObjectTree.h"
-#include <QApplication>
-#include <QMouseEvent>
-#include <QPainter>
-class Document;
-class ObjectTreeWidget : public QTreeWidget {
+#include <QWidget>
+#include <QMatrix4x4>
+
+#include <brlcad/ConstDatabase.h>
+#include "Document.h"
+
+
+class RaytraceView : public QWidget {
     Q_OBJECT
 public:
-    explicit ObjectTreeWidget(Document *objectTree,   QWidget *parent = nullptr);
-    void refreshItemTextColors();
-    int selectedObjectId();
-    const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
-
-private:
-    void build(int objectId, QTreeWidgetItem* parent = nullptr);
+    RaytraceView(Document * document,
+                 QWidget*               parent = 0);
+    void raytrace();
+public slots:
+    void Update();
+    void UpdateTrafo(const QMatrix4x4& transformation);
 
 protected:
+    virtual void paintEvent(QPaintEvent* event);
 
 private:
     Document* document;
-    QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
+    BRLCAD::ConstDatabase& m_database;
+    QMatrix4x4             m_transformation;
+    QImage                 m_image;
+    bool                   m_imageUpTodate;
+    bool                   m_updatingImage;
 
-    QColor colorFullVisible;
-    QColor colorSomeChildrenVisible;
-    QColor colorInvisible;
-protected:
-
-
-signals:
-    void visibilityButtonClicked(int objectId);
-    void selectionChanged(int objectId);
-
+    void UpdateImage(void);
 };
 
 
-#endif // OBJECTTREEWIDGET_H
+#endif // GRAPHICVIEW_H

@@ -36,7 +36,6 @@ using namespace std;
 Display::Display(Document*  document):document(document) {
     camera = new OrthographicCamera(document);
     displayManager = new DisplayManager(*this);
-    geometryRenderer = new GeometryRenderer(document);
     axesRenderer = new AxesRenderer();
 
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
@@ -48,7 +47,6 @@ Display::Display(Document*  document):document(document) {
 Display::~Display() {
     delete camera;
     delete displayManager;
-    delete geometryRenderer;
     delete axesRenderer;
 }
 
@@ -88,11 +86,11 @@ void Display::paintGL() {
     glViewport(0,0,w,h);
     displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrix())));
     displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix())));
-    geometryRenderer->render();
+    document->getGeometryRenderer()->render();
 
-    glViewport(w*.9,0,w/10,w/10);
+    glViewport(w*.88,h*.02,w/10,w/10);
     displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrixNoTranslate())));
-    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix(w / 10, w / 10))));
+    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(glm::ortho(-100.f, 100.f, -100.0f, 100.0f, -1000.f,1000.f))));
     axesRenderer->render();
 }
 
@@ -157,6 +155,7 @@ void Display::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void Display::mousePressEvent(QMouseEvent *event) {
+    document->getDisplayGrid()->setActiveDisplay(this);
     prevMouseX = event->x();
     prevMouseY = event->y();
 }
@@ -193,10 +192,6 @@ void Display::keyPressEvent( QKeyEvent *k ) {
             forceRerenderFrame();
             break;
     }
-}
-
-GeometryRenderer *Display::getGeometryRenderer() {
-    return geometryRenderer;
 }
 
 OrthographicCamera *Display::getCamera() const {
