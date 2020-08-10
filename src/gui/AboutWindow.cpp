@@ -34,7 +34,7 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
             "MD, from 1979 until his death in November 2000.<br><br>"
             "Toolbar icons from  <a href=\"https://icons8.com/\">icons8</a> <br> <br>"
 
-            "Arbalest was developed for a 2020 Google Summer of Code under the guidance of Daniel Rossberg, Inderpreet Singh, and"
+            "Arbalest was initially developed for a 2020 Google Summer of Code under the guidance of Daniel Rossberg, Inderpreet Singh, and"
             " Sean Morrison by Sadeep Weerasinghe (sadeep.16@cse.mrt.ac.lk)."
             "<br><br>"
 
