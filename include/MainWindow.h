@@ -10,6 +10,7 @@
 #include "QSSPreprocessor.h"
 #include <QStatusBar>
 #include <QMenuBar>
+#include <QComboBox>
 
 class Document;
 

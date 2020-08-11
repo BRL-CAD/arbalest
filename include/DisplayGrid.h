@@ -6,7 +6,7 @@
 #include <include/QVBoxWidget.h>
 #include <include/Document.h>
 #include <include/Display.h>
-#include <QSplitter.h>
+#include <QSplitter>
 
 class Display;
 
