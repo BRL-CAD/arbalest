@@ -26,7 +26,7 @@ $Color-IconFile                         : #6c0ad0;
 $Color-IconView                         : #25a2c1;
 $Color-IconRaytrace                     : #d61d32;
 $Color-Cell                             : #606060;
-$Color-WindowTitleButtons               : #c0ffa2;
+$Color-WindowTitleButtons               : #ffffff;
 
 $Color-FullyVisibleObjectText           : #1491e9;  // object tree item text.
 $Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.

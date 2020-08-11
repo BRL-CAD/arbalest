@@ -45,7 +45,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadTheme()
 {
-	QFile themeFile( ":themes/arbalest_light.theme" );
+    QSettings settings("BRLCAD", "arbalest");
+    int themeIndex = settings.value("themeIndex",0).toInt();
+
+    QStringList themes = {":themes/arbalest_light.theme",":themes/arbalest_dark.theme"};
+
+	QFile themeFile(themes[themeIndex] );
+
 	themeFile.open( QFile::ReadOnly );
 	QString themeStr( themeFile.readAll() );
 	Globals::theme = new QSSPreprocessor(themeStr);
@@ -200,6 +206,39 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->forceRerenderFrame();
     });
     viewMenu->addAction(toggleGridAct);
+
+
+    QMenu* selectThemeAct = viewMenu->addMenu(tr("Select theme"));
+    QActionGroup *selectThemeActGroup = new QActionGroup(this);
+
+    themeAct[0] = new QAction(tr("Arbalest Light"), this);
+    themeAct[0]->setCheckable(true);
+    connect(themeAct[0], &QAction::triggered, this, [this](){
+        QSettings settings("BRLCAD", "arbalest");
+        settings.setValue("themeIndex", 0);
+        QWidget styleSetter;
+        styleSetter.setStyleSheet("color:black");
+        styleSetter.hide();
+        QMessageBox::information(&styleSetter, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
+    });
+    selectThemeActGroup->addAction(themeAct[0]);
+    selectThemeAct->addAction(themeAct[0]);
+
+    themeAct[1] = new QAction(tr("Arbalest Dark"), this);
+    themeAct[1]->setCheckable(true);
+    connect(themeAct[1], &QAction::triggered, this, [this](){
+        QSettings settings("BRLCAD", "arbalest");
+        settings.setValue("themeIndex", 1);
+        QWidget styleSetter;
+        styleSetter.setStyleSheet("color:black");
+        styleSetter.hide();
+        QMessageBox::information(&styleSetter, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
+
+    });
+    selectThemeActGroup->addAction(themeAct[1]);
+    selectThemeAct->addAction(themeAct[1]);
+    QSettings settings("BRLCAD", "arbalest");
+    themeAct[settings.value("themeIndex",0).toInt()]->setChecked(true);
 
 
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));

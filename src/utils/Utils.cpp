@@ -72,8 +72,7 @@ const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString&
         case BRLCAD::Combination::ConstTreeNode::Leaf: {
             QString leafName = QString(node.Name());
             if (leafName == name) {
-                auto h =  node.Matrix();
-                return h;
+                return node.Matrix();
             }
             return nullptr;
         }

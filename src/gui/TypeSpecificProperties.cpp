@@ -99,7 +99,6 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
 //        glm::decompose(transformation, scale, rotation, translation, skew, perspective);
 //        getBRLCADObject(document.getDatabase(), object->Name(), [this](BRLCAD::Object &child){
 //            qDebug() << child.Name();
-//            auto z= QString("box.r");
 //
 //            double newmat[16];
 //            for(int c=0;c<16;c++)newmat[c] = j[c];

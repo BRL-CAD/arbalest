@@ -60,7 +60,7 @@ private:
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
 
-
+    QAction *themeAct[2];
 	
 protected:
     void changeEvent(QEvent *e) override;
@@ -77,6 +77,7 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
+
 
 };
 #endif // MAINWINDOW_H

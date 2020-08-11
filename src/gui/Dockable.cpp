@@ -56,7 +56,7 @@ void Dockable::clear() {
 
 Dockable::~Dockable() {
     widget()->setParent(nullptr);
-    for (auto i : widgetToScrollAreaMap){
+    for (std::pair< QWidget*, QScrollArea *> i : widgetToScrollAreaMap){
         QScrollArea * scrollArea = i.second;
         if(scrollArea->widget() && scrollArea->widget()->parent() == scrollArea){ // break content objects' child parent for children to survive
             scrollArea->widget()->setVisible(false);
