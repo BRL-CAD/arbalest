@@ -47,22 +47,17 @@ public:
 
 private:
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
-
-protected:
-
-private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
 
     QColor colorFullVisible;
     QColor colorSomeChildrenVisible;
     QColor colorInvisible;
-protected:
-
 
 signals:
     void visibilityButtonClicked(int objectId);
     void selectionChanged(int objectId);
+
 
 };
 

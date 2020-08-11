@@ -71,7 +71,7 @@ public slots:
     void saveAsFileDialog();
     void saveFileDefaultPath();
     void onActiveDocumentChanged(int newIndex);
-    void tabCloseRequested(int i) const;
+    void tabCloseRequested(int i) ;
     void objectTreeWidgetSelectionChanged(int objectId);
     void closeButtonPressed();
     void minimizeButtonPressed();

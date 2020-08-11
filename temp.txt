@@ -12,11 +12,4 @@ Pipe
 Sketch
 
 
-
-void MainWindow::objectTreeWidgetSelectionChanged(int fullPath) {
-    //documents[activeDocumentId]->getProperties()->bindObject(documents[activeDocumentId]);
-    documents[activeDocumentId]->getObjectTree()->changeSubTreeVisibility(0, false);
-    documents[activeDocumentId]->getObjectTree()->changeSubTreeVisibility(fullPath, true);
-    documents[activeDocumentId]->getObjectTree()->rebuildVisibleDisplayListIds();
-    documents[activeDocumentId]->getDisplay()->refresh();
-}
+"E:\Users\Sadeep\Documents\BRLCAD 7.26.0\goliath.g"

@@ -37,7 +37,9 @@ set(arbalest_Sources
         src/utils/Utils.cpp
         src/gui/DisplayGrid.cpp
         src/gui/AboutWindow.cpp
-        src/display/GraphicView.cpp)
+        src/display/RaytraceView.cpp
+        src/gui/HelpWidget.cpp
+        src/display/GridRenderer.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

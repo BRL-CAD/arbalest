@@ -16,9 +16,8 @@ Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrol
     title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     setTitleBarWidget(title);
-
-    fillerWidget = new QWidget(this);
-    fillerWidget->setObjectName("dockableContent");
+    fillerWidget.width = width;
+    fillerWidget.setObjectName("dockableContent");
     clear();
 }
 
@@ -52,7 +51,7 @@ void Dockable::clear() {
         widget()->setVisible(false);
         widget()->setParent(nullptr);
     }
-    setContent(fillerWidget);
+    setContent(&fillerWidget);
 }
 
 Dockable::~Dockable() {
@@ -65,5 +64,4 @@ Dockable::~Dockable() {
             delete scrollArea;
         }
     }
-    delete fillerWidget;
 }

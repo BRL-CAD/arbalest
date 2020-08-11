@@ -50,10 +50,11 @@ RaytraceView::RaytraceView
     m_updatingImage(false) {
     setMinimumSize(100, 100);
     setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
+    setWindowFlags(Qt::Window| Qt::WindowCloseButtonHint);
 }
 
 
-void RaytraceView::Update(void) {
+void RaytraceView::Update() {
     m_imageUpTodate = false;
 
     update();

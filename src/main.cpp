@@ -1,10 +1,11 @@
-#define ARB_DEBUG
+//#define ARB_DEBUG
 
 #include <QtWidgets/QApplication>
 #include <DisplayGrid.h>
 #include "MainWindow.h"
 
 int main(int argc, char*argv[]) {
+
 #ifdef ARB_DEBUG
     if (argc < 2) {
         argv = new char* [2]{ argv[0], "C:/Users/Sadeep/Desktop/moss.g" };

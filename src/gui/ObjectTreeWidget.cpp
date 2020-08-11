@@ -131,4 +131,3 @@ void ObjectTreeWidget::refreshItemTextColors() {
 int ObjectTreeWidget::selectedObjectId() {
     return 0;
 }
-

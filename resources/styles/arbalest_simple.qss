@@ -224,7 +224,12 @@ ObjectTreeWidget::item:selected {
 
 #aboutText  {
     color: black;
+    background: "$Color-Secondary";
 }
 
 
-
+#helpWidget  {
+    color: "$Color-LightText";
+    background: "$Color-HelpWidget";
+    font-size: 11pt;
+}

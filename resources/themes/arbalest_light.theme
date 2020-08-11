@@ -21,6 +21,7 @@ $Color-StatusBar                        : #68217A;
 $Color-StatusBarText                    : #ffffff;
 $Color-ObjectTreeWidgetItemText         : #000000;
 $Color-ToolbarSeparator                 : #c2c2c2;
+$Color-HelpWidget                       : #f7f7f7;
 
 $Color-FullyVisibleObjectText           : #0000ff;  // object tree item text.
 $Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.

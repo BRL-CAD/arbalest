@@ -35,7 +35,19 @@ private:
     QLabel *title;
     bool scrollable;
     int width;
-    QWidget * fillerWidget;
+    //QWidget * fillerWidget;
+
+    class : public QWidget
+    {
+    public:
+        QSize sizeHint() const  override{
+            QSize hint = QWidget::sizeHint();
+            if(width != -1) hint.setWidth(width);
+            return hint;
+        }
+        int width=-1;
+    } fillerWidget;
+
     std::unordered_map< QWidget*, QScrollArea *> widgetToScrollAreaMap;
 };
 

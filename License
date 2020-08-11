@@ -1,1 +1,119 @@
-Newfile,save,open icon XS https://icons8.com/license needs attribution in about
+BRL-CAD Copying and Distribution
+================================
+
+BRL-CAD is Open Source software with copyright primarily held by the
+U.S. Government.  The source code is controlled and maintained by a
+core team of Open Source developers working around the world.  Those
+core developers operate under a meritocracy organizational structure
+adhering to developer guidelines outlined in the HACKING developer's
+guide and to the legal conventions and requirements outlined in this
+document.
+
+As a unified work, BRL-CAD is made available under the terms of the
+GNU Lesser General Public License (LGPL) as published by the Free
+Software Foundation.
+
+As distinctly organized and separate components, parts of BRL-CAD are
+made available under different licenses for different portions
+including the BSD license and files in the public domain. The Overview
+section describes how the various licenses apply to the different
+portions of BRL-CAD.
+
+BRL-CAD is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this file.  If you did not, please contact one of
+the BRL-CAD project administrators listed at the SourceForge project
+site http://sf.net/projects/brlcad/ or listed in the AUTHORS file
+included as part of the distribution.
+
+Overview
+--------
+
+BRL-CAD consists primarily of libraries, applications, scripts,
+documentation, geometric models, images, data resources, and build
+infrastructure.  The BRL-CAD libraries provide their headers in the
+include/ directory as well as all of the directories that begin with
+the prefix "lib" in the src/ directory (e.g. src/librt/).  All of
+BRL-CAD's libraries, applications, and any content lacking a license
+specification are covered by the terms of the LGPL.
+
+Most of BRL-CAD's build infrastructure including files required by
+the GNU Build System (such as the CMakeLists.txt files), a variety
+of scripts located in the misc/ and sh/ directories, and the testing
+infrastructure (scripts and resources) are provided either under
+the BSD license or are in the public domain.  Similarly, most of
+the geometric models, images, and other data resources are also
+provided under the BSD license.  Refer to each individual file for
+specific terms.
+
+BRL-CAD's documentation consists of manual pages located throughout
+the package, most of the files in the doc/ directory, and the
+top-level administrative project text files (e.g. README & AUTHORS).
+Unless otherwise denoted, all of BRL-CAD's documentation is made
+available under the terms of the BSD Documentation License (BDL) or
+are in the public domain.  Refer to each document for specific terms.
+
+The full text of the LGPL, BDL, and BSD license should be included in
+the source distribution of BRL-CAD in the doc/legal/ directory.  Refer
+to the full license text for more details, information, requirements,
+and implications of each license.
+
+3rd-Party Components
+--------------------
+
+The BRL-CAD package utilizes and redistributes several 3rd party
+source codes, libraries, and applications.  Said 3rd party source
+code, libraries, and applications all retain their respective
+agreements, licenses, and copyrights and should be referred to
+individually for their specific terms.  For the purposes of
+redistribution and legal compatibility for all of BRL-CAD's existing
+user base, NO 3RD PARTY LIBRARIES SHALL BE INCLUDED THAT ARE UNDER THE
+TERMS OF THE GNU GENERAL PUBLIC LICENSE or any other license with
+similar legal implications that would impose legal obligations on
+external codes that utilize BRL-CAD as a library.
+
+When referring to BRL-CAD, its source code, documentation, and
+libraries, the reference is not meant to include or imply 3rd party
+source code, libraries, and/or applications unless specifically stated
+otherwise.  No endorsement or claim of authorship is implied to any
+3rd party asset that is included with BRL-CAD.  The majority of the
+3rd party source code, libraries, and applications included with
+BRL-CAD are located in the src/other/ directory of the source code
+distribution.
+
+Copyright
+---------
+
+All contributions to BRL-CAD have been provided under agreement.  By
+requiring all contributions be given back to the BRL-CAD developers,
+this agreement allows the BRL-CAD project to continue to grow
+unhindered.  As such, a majority of the source code is copyright by
+the United States Government as represented by the United States Army
+Research Laboratory.
+
+Authors and other BRL-CAD contributors must comply with the copyright
+terms for their respective contributions unless otherwise noted or
+arranged.  This includes an implicit assignment of copyright for any
+and all contributions being made.  The following notice should be
+prominent in the BRL-CAD sources:
+
+  Copyright (c) 1984-2016 United States Government as represented by
+  the U.S. Army Research Laboratory.
+
+Contact
+-------
+
+Questions or comments regarding BRL-CAD legal issues pertaining to
+copying, linking, licensing, trademark, or otherwise should be
+directed to the BRL-CAD Development Team at the following address:
+
+BRL-CAD Development Team
+devs@brlcad.org
+http://brlcad.org
+
+---
+$Revision: 68616 $

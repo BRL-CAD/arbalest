@@ -160,7 +160,7 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
             "$Revision: 68616 $"
             );
     intro->setWordWrap(true);
-    intro->setMargin(5);
+    intro->setMargin(15);
     intro->setObjectName("aboutText");
 
     intro->setTextFormat(Qt::RichText);
@@ -170,6 +170,8 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
     container->addWidget(icon);
     container->addWidget(intro);
     QScrollArea * scrollArea = new QScrollArea();
+    scrollArea->setObjectName("aboutWindow");
+    icon->setObjectName("aboutWindow");
     addWidget(scrollArea);
     scrollArea->setWidget(container);
 

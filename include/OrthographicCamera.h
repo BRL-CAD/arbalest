@@ -31,6 +31,7 @@
 
 class Document;
 class OrthographicCamera : Camera{
+
 private:
     Document * document;
     const glm::vec3 initialEyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -42,6 +43,7 @@ private:
     const float eyeRotationPerMouseDelta = 120.f;
     const float zoomFactorMultiplier = 0.001;
     const float zoomLowerBound = 0.00001;
+    const float zoomUpperBound = 1000000000000000;
     const int mouseMaxDrag = 500;
 
     glm::vec3 eyePosition = initialEyePosition; // Camera coordinates

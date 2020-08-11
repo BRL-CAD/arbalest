@@ -26,6 +26,7 @@
 #include <QtWidgets/QOpenGLWidget>
 #include "AxesRenderer.h"
 #include <QMouseEvent>
+#include <include/GridRenderer.h>
 
 #include "Document.h"
 #include "DisplayManager.h"
@@ -35,6 +36,7 @@ class Document;
 class DisplayManager;
 class GeometryRenderer;
 class OrthographicCamera;
+class GridRenderer;
 
 
 class Display : public QOpenGLWidget{
@@ -50,6 +52,7 @@ public:
     const Document* getDocument() const;
 	OrthographicCamera* getCamera() const;
 	DisplayManager* getDisplayManager() const;
+	bool gridEnabled = false;
 
 protected:
     void resizeGL(int w, int h) override;
@@ -78,6 +81,7 @@ private:
 	OrthographicCamera  *camera;
     DisplayManager *displayManager;
     AxesRenderer * axesRenderer;
+	GridRenderer * gridRenderer;
 };
 
 

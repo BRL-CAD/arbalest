@@ -37,6 +37,7 @@ Display::Display(Document*  document):document(document) {
     camera = new OrthographicCamera(document);
     displayManager = new DisplayManager(*this);
     axesRenderer = new AxesRenderer();
+    gridRenderer = new GridRenderer(this);
 
     displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
 
@@ -87,6 +88,7 @@ void Display::paintGL() {
     displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrix())));
     displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix())));
     document->getGeometryRenderer()->render();
+    if(gridEnabled)gridRenderer->render();
 
     glViewport(w*.88,h*.02,w/10,w/10);
     displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrixNoTranslate())));

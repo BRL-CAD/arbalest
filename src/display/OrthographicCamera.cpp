@@ -81,6 +81,7 @@ void OrthographicCamera::processZoomRequest(const int &deltaWheelAngle) {
 	const float zoomFactor = 1 - zoomFactorMultiplier * static_cast<float>(deltaWheelAngle);
     verticalSpan = pow(verticalSpan, zoomFactor);
     if (verticalSpan < zoomLowerBound) verticalSpan = zoomLowerBound;
+    if (verticalSpan > zoomUpperBound) verticalSpan = zoomUpperBound;
 }
 
 glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
