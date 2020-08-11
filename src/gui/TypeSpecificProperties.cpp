@@ -50,7 +50,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 const double * transformationMatrix = getLeafMatrix(tree, childName);
                 if(transformationMatrix== nullptr) transformationMatrix = new double[16]{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
-                addPropertiesTitle(l,childName,"Translation");
+                addPropertiesTitle(l,childName,"Position");
 
                 glm::mat4 transformation = glm::transpose(glm::make_mat4(transformationMatrix));
                 glm::vec3 scale;

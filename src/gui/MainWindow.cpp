@@ -527,6 +527,7 @@ void MainWindow::tabCloseRequested(const int i)
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         activeDocumentId = -1;
+        documentArea->addTab(new HelpWidget(), "Quick Start");
     }
 }
 
