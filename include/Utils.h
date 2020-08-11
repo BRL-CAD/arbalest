@@ -84,4 +84,7 @@ inline QWidget * toolbarSeparator(bool horizontal){
     return widget;
 }
 
+QImage coloredIcon(QString path, QString colorKey = "");
+
+
 #endif // UTILS_ARBALEST_H

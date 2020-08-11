@@ -2,7 +2,7 @@
 #include <QString>
 #include <include/Utils.h>
 #include <brlcad/Combination.h>
-
+#include "Globals.h"
 
 #include "cicommon.h"
 
@@ -117,3 +117,25 @@ void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, dou
     }
 }
 
+QImage coloredIcon(QString path, QString colorKey){
+    QColor color;
+    if (colorKey == ""){
+        color = Globals::theme->getColor("$Color-Icon");
+    }else {
+        color = Globals::theme->getColor(colorKey);
+    }
+
+    QImage oldImage =  QImage(path);
+    QImage image = QImage(oldImage.size(),QImage::Format_ARGB32);
+
+    for (int y = 0; y < image.height(); y++) {
+        for (int x = 0; x < image.width(); x++) {
+            QColor pixel = oldImage.pixelColor(x, y);
+            pixel.setRed(color.red());
+            pixel.setGreen(color.green());
+            pixel.setBlue(color.blue());
+            image.setPixelColor(x, y, pixel);
+        }
+    }
+    return image;
+}

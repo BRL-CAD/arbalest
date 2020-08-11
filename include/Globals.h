@@ -1,10 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "QSSPreprocessor.h"
-#include "MainWindow.h"
+#include "Display.h"
 
 class MainWindow;
+class QSSPreprocessor;
 
 class Globals{
 public:

@@ -1,0 +1,33 @@
+$Color-Main                             : #3b3b3b;  // Used as the main background color. Used in main window, menu bar, status bar etc.
+$Color-Secondary                        : #4e4e4e;  // Used as the background color for some main UI components like objects tree
+$Color-SeparatorLine                    : #2f2f2f;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
+$Color-DockableHeader                   : #5f5f5f; // Titlebar color of all dockable widgets like objects tree
+$Color-DockableHeaderText               : #d6d6d6; // Titlebar text color of all dockable widgets like objects tree
+$Color-DefaultFontColor                 : #e5e5e5;  // Text color for all text in status bar
+$Color-SelectedTab                      : #5f5f5f;  // Background color for selected tab of the file switcher tab bar
+$Color-SelectedTabLine                  : #38afcb;  // Bottom border color for selected tab of the file switcher tab bar
+$Color-PropertiesObjectNameText         : #ff3567;  // Name text color of selected object in properties.
+$Color-PropertiesObjectTypeText         : #08ceff; // Title of CollapsibleWidget
+$Color-SelectedObjectRow                : #646464;  // Background of the object selected in the object tree.
+$Color-HoverObjectRow                   : #00000000;  // Background of the object selected in the object tree.
+$Color-LightText                        : #eaeaea;  // for non important text
+$Color-ScrollBars                       : #626262;
+$Color-DataCellBordersAndHeader         : #3c304a;
+$Color-ButtonHoverMask                  : #22000000;  // Alpha mask
+$Color-ButtonPressedMask                : #11000000;  // Alpha mask
+$Color-StatusBar                        : #0a5466;
+$Color-StatusBarText                    : #ffffff;
+$Color-ObjectTreeWidgetItemText         : #000000;
+$Color-ToolbarSeparator                 : #2f2f2f;
+$Color-HelpWidget                       : #737373;
+$Color-GraphicsView                     : #797979;
+$Color-ColorText                        : #99beff;  // for colorful text
+$Color-IconFile                         : #6c0ad0;
+$Color-IconView                         : #25a2c1;
+$Color-IconRaytrace                     : #d61d32;
+$Color-Cell                             : #606060;
+$Color-WindowTitleButtons               : #c0ffa2;
+
+$Color-FullyVisibleObjectText           : #1491e9;  // object tree item text.
+$Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.
+$Color-InvisibleObjectText              : #dedede;  // object tree item text.

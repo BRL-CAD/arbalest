@@ -23,14 +23,17 @@
 #ifndef RT3_DISPLAY_H
 #define RT3_DISPLAY_H
 
+#include <include/Globals.h>
+
 #include <QtWidgets/QOpenGLWidget>
 #include "AxesRenderer.h"
 #include <QMouseEvent>
 #include <include/GridRenderer.h>
-
 #include "Document.h"
 #include "DisplayManager.h"
 #include "OrthographicCamera.h"
+#include "Globals.h"
+#include "QSSPreprocessor.h"
 
 class Document;
 class DisplayManager;
@@ -72,7 +75,7 @@ private:
     int prevMouseY = -1;
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
-    float bgColor[3] = {.85,.85,.85};
+    QColor bgColor;
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;

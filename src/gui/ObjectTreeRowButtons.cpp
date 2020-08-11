@@ -6,6 +6,7 @@
 #include <QRect>
 #include <QPainter>
 #include <iostream>
+#include "MainWindow.h"
 #include <include/ObjectTreeRowButtons.h>
 #include "Globals.h"
 

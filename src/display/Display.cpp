@@ -26,6 +26,7 @@
 #include <QtWidgets/QApplication>
 #include <QWidget>
 #include <OrthographicCamera.h>
+#include <include/Globals.h>
 #include "DisplayManager.h"
 #include "GeometryRenderer.h"
 #include "Utils.h"
@@ -39,7 +40,8 @@ Display::Display(Document*  document):document(document) {
     axesRenderer = new AxesRenderer();
     gridRenderer = new GridRenderer(this);
 
-    displayManager->setBGColor(bgColor[0],bgColor[1],bgColor[2]);
+    bgColor = Globals::theme->getColor("$Color-GraphicsView");
+    displayManager->setBGColor(bgColor.redF(),bgColor.greenF(),bgColor.blueF());
 
     makeCurrent();
     update();

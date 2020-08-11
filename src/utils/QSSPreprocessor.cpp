@@ -65,3 +65,11 @@ QString QSSPreprocessor::process(QString styleStr) {
     }
     return processedStr;
 }
+
+QColor QSSPreprocessor::getColor(const QString key) {
+    for(std::pair<QString,QString> keyValuePair: keysValuePairs){
+        if(keyValuePair.first == key)
+            return QColor(keyValuePair.second);
+    }
+    return QColor();
+}

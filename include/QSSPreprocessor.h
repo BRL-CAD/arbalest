@@ -5,11 +5,13 @@
 
 #include <QtCore/qstring.h>
 #include <vector>
+#include <QColor>
 
 class QSSPreprocessor {
 public:
     QSSPreprocessor(QString &theme);
     QString process(QString styleStr);
+    QColor getColor(QString key);
 
 private:
     QString theme;

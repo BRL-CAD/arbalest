@@ -20,6 +20,7 @@ CollapsibleWidget::CollapsibleWidget(QWidget * parent):QFrame(parent) {
     _layout->addWidget(titleBar);
     connect(titleLabel, &QPushButton::clicked, this, [this]() {setExpanded(!this->expanded);});
     connect(collapseIcon, &QPushButton::clicked, this, [this]() {setExpanded(!this->expanded);});
+    titleBar->hide(); // THis feature is no longer required
     widget = nullptr;
 }
 

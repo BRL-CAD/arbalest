@@ -91,6 +91,15 @@ void MainWindow::prepareUi() {
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
     fileMenu->addAction(saveAsAct);
+    
+    fileMenu->addSeparator();
+
+    QAction* quitAct = new QAction(tr("Quit"), this);
+    quitAct->setStatusTip(tr("Quit"));
+    connect(quitAct, &QAction::triggered, this,[this](){
+        QCoreApplication::quit();
+    });
+    fileMenu->addAction(quitAct);
 
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
@@ -240,7 +249,7 @@ void MainWindow::prepareUi() {
     layoutTopRightWidget->setSpacing(0);
 
     QPushButton* minimizeButton = new QPushButton(topRightWidget);
-    minimizeButton->setIcon(QIcon(":/icons/minimize.png"));
+    minimizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/minimize.png","$Color-WindowTitleButtons")));
     minimizeButton->setObjectName("minimizeButton");
     connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
     layoutTopRightWidget->addWidget(minimizeButton);
@@ -248,17 +257,17 @@ void MainWindow::prepareUi() {
 
     maximizeButton = new QPushButton(topRightWidget);
     if (this->windowState() == Qt::WindowMaximized) {
-        maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-restore-down-16.png","$Color-WindowTitleButtons")));
     }
     else {
-        maximizeButton->setIcon(QIcon(":/icons/maximize.png"));
+        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/maximize.png","$Color-WindowTitleButtons")));
     }
     maximizeButton->setObjectName("maximizeButton");
     connect(maximizeButton, &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
     layoutTopRightWidget->addWidget(maximizeButton);
 
     QPushButton* closeButton = new QPushButton(topRightWidget);
-    closeButton->setIcon(QIcon(":/icons/close.png"));
+    closeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/close.png","$Color-WindowTitleButtons")));
     closeButton->setObjectName("closeButton");
     connect(closeButton, &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
     layoutTopRightWidget->addWidget(closeButton);
@@ -285,38 +294,38 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
     QPushButton* newButton = new QPushButton(menuTitleBar);
-    newButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-new-file-80.png")));
+    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-add-file-24.png","$Color-IconFile")));
     newButton->setObjectName("toolbarButton");
-    newButton->setToolTip("New..");
+    newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
     connect(newButton, &QPushButton::clicked, this, &MainWindow::newFile);
 
     QPushButton* openButton = new QPushButton(menuTitleBar);
-    openButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-opened-folder-80.png")));
+    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-opened-folder-30.png","$Color-IconFile")));
     openButton->setObjectName("toolbarButton");
-    openButton->setToolTip("Open..");
+    openButton->setToolTip("Open.. (Ctrl+O)");
     mainTabBarCornerWidget->addWidget(openButton);	
     connect(openButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
 
     QPushButton* saveButton = new QPushButton(menuTitleBar);
-    saveButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-80.png")));
+    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-24.png","$Color-IconFile")));
     saveButton->setObjectName("toolbarButton");
-    saveButton->setToolTip("Save");
+    saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);
     connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveFileDefaultPath);
 
-    QPushButton* saveAsButton = new QPushButton(menuTitleBar);
-    saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
-    saveAsButton->setObjectName("toolbarButton");
-    saveAsButton->setToolTip("Save as..");
-    mainTabBarCornerWidget->addWidget(saveAsButton);
-    connect(saveAsButton, &QPushButton::clicked, this, &MainWindow::saveAsFileDialog);
+//    QPushButton* saveAsButton = new QPushButton(menuTitleBar);
+//    saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
+//    saveAsButton->setObjectName("toolbarButton");
+//    saveAsButton->setToolTip("Save as..");
+//    //mainTabBarCornerWidget->addWidget(saveAsButton);
+//    connect(saveAsButton, &QPushButton::clicked, this, &MainWindow::saveAsFileDialog);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
 
     QPushButton* focusAll = new QPushButton(menuTitleBar);
-    focusAll->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_crop_free_black_48dp.png")));
+    focusAll->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png","$Color-IconView")));
     focusAll->setObjectName("toolbarButton");
     focusAll->setToolTip("Focus on all visible objects (Ctrl+F)");
     connect(focusAll, &QPushButton::clicked, this, [this](){
@@ -329,7 +338,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(focusAll);
 
     QPushButton* focusCurrent = new QPushButton(menuTitleBar);
-    focusCurrent->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_center_focus_strong_black_48dp.png")));
+    focusCurrent->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png","$Color-IconView")));
     focusCurrent->setObjectName("toolbarButton");
     focusCurrent->setToolTip("Focus on selected object (F)");
     connect(focusCurrent, &QPushButton::clicked, this, [this](){
@@ -341,7 +350,7 @@ void MainWindow::prepareUi() {
 
 
     QPushButton* resetViewports = new QPushButton(menuTitleBar);
-    resetViewports->setIcon(QPixmap::fromImage(QImage(":/icons/baseline_refresh_black_48dp.png")));
+    resetViewports->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png","$Color-IconView")));
     resetViewports->setObjectName("toolbarButton");
     resetViewports->setToolTip("Reset the viewports and focus on the visible");
     connect(resetViewports, &QPushButton::clicked, this, [this](){
@@ -369,7 +378,7 @@ void MainWindow::prepareUi() {
 
 
     QPushButton* toggleGrid = new QPushButton(menuTitleBar);
-    toggleGrid->setIcon(QPixmap::fromImage(QImage(":/icons/sharp_grid_on_black_48dp.png")));
+    toggleGrid->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png","$Color-IconView")));
     toggleGrid->setObjectName("toolbarButton");
     toggleGrid->setToolTip("Toggle grid on/off (G)");
     connect(toggleGrid, &QPushButton::clicked, this, [this](){
@@ -383,7 +392,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QPushButton* raytraceButton = new QPushButton(menuTitleBar);
-    raytraceButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-teapot-40.png")));
+    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png","$Color-IconRaytrace")));
     raytraceButton->setObjectName("toolbarButton");
     raytraceButton->setToolTip("Raytrace current viewport (Ctrl+R)");
     mainTabBarCornerWidget->addWidget(raytraceButton);
@@ -581,10 +590,10 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 void MainWindow::changeEvent( QEvent* e ) {
     if (e->type() == QEvent::WindowStateChange) {
         if (this->windowState() == Qt::WindowMaximized) {
-            maximizeButton->setIcon(QIcon(":/icons/restore_down.png"));
+            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-restore-down-16.png","$Color-WindowTitleButtons")));
         }
         else{
-            maximizeButton->setIcon(QIcon(":/icons/maximize.png"));
+            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/maximize.png","$Color-WindowTitleButtons")));
         }
     }
 }

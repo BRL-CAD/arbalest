@@ -10,6 +10,7 @@
 
   <qresource>
     <file>themes/arbalest_light.theme</file>
+    <file>themes/arbalest_dark.theme</file>
   </qresource>
 
   <qresource>
@@ -24,6 +25,12 @@
     <file>icons/archer.png</file>
     <file>icons/arbalest_icon.png</file>
     <file>icons/close.png</file>
+    <file>icons/icons8-restore-down-16.png</file>
+    <file>icons/icons8-restore-down-26.png</file>
+    <file>icons/icons8-save-24.png</file>
+    <file>icons/icons8-add-file-24.png</file>
+    <file>icons/icons8-opened-folder-30.png</file>
+    <file>icons/baseline_filter_vintage_black_48dp.png</file>
     <file>icons/icons8-new-file-80.png</file>
     <file>icons/icons8-teapot-40.png</file>
     <file>icons/icons8-eye-20.png</file>

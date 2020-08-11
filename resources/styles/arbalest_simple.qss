@@ -12,11 +12,22 @@ QComboBox {
     margin-top:2px;
     margin-left:6px;
     background-color: transparent;
-    border: 1px solid transparent;
+    border: 0px solid transparent;
+}
+QComboBox QAbstractItemView {
+    background-color: "$Color-Main";
+}
+
+QSplitter::handle {
+    background: "$Color-Main";
 }
 
 QMainWindow     { background-color:"$Color-Main"; }
 
+QMenu::item { background-color: "$Color-Main"; }
+QMenu { background-color: "$Color-Main"; }
+QMenu::item:selected { background-color: "$Color-Secondary"; }
+QMenuBar::item:selected { background-color: "$Color-Secondary"; }
 
 #minimizeButton, #maximizeButton, #closeButton {
     border-style: solid;
@@ -69,7 +80,7 @@ QMenuBar {
 /* Status bar --------------------------------------------------------------------------------------------------------*/
 QStatusBar {
     border-top-color: "$Color-SeparatorLine";
-    border-top-width: 1px;
+    border-top-width: 0px;
     border-style: solid;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -168,6 +179,7 @@ ObjectTreeWidget::item:selected {
     border-right-width: 0px;
     padding-left: 6px;
     padding-right: 6px;
+    background-color: "$Color-Cell";
 }
 
 #cellLastInRow {
@@ -216,6 +228,7 @@ ObjectTreeWidget::item:selected {
 #toolbarSeparator {
     background-color: "$Color-ToolbarSeparator";
 }
+
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 #aboutWindow  {
