@@ -82,6 +82,8 @@ const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString&
             return nullptr;
         }
     }
+
+    return nullptr;
 }
 
 void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, double * matrix) {
