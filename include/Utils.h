@@ -9,6 +9,11 @@
 #include "brlcad/cicommon.h"
 #include "QVBoxWidget.h"
 #include "QHBoxWidget.h"
+#include <chrono>
+#include <stack>
+#include <iostream>
+using namespace std::chrono;
+using namespace std;
 
 BRLCAD::Vector3D operator+(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
 BRLCAD::Vector3D operator-(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
@@ -21,6 +26,14 @@ QString breakStringAtCaps(const QString& in);
 struct ColorInfo {
     float red, green, blue;
     bool hasColor;
+
+    QColor toQColor() const{
+        return QColor(red*255,green*255,blue*255);
+    }
+
+    QString toHexString() const{
+        return toQColor().name(QColor::HexRgb);
+    }
 };
 
 const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name);
@@ -85,6 +98,21 @@ inline QWidget * toolbarSeparator(bool horizontal){
 }
 
 QImage coloredIcon(QString path, QString colorKey = "");
+
+static std::stack <time_point<steady_clock>> times;
+static std::stack <QString> timerNames;
+inline void ts(QString name = "Timer"){
+    times.push(high_resolution_clock::now());
+    timerNames.push(name);
+}
+
+inline void te(){
+    time_point<steady_clock> startTime = times.top();
+
+    milliseconds duration = duration_cast<milliseconds>( high_resolution_clock::now()-startTime);
+    cout << timerNames.top().toStdString()<< "  "<<duration_cast<milliseconds>( high_resolution_clock::now()-startTime).count() <<" ms        "
+    <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< endl;
+}
 
 
 #endif // UTILS_ARBALEST_H

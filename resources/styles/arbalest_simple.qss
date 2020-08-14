@@ -24,10 +24,6 @@ QSplitter::handle {
 
 QMainWindow     { background-color:"$Color-Main"; }
 
-QMenu::item { background-color: "$Color-Main"; }
-QMenu { background-color: "$Color-Main"; }
-QMenu::item:selected { background-color: "$Color-Secondary"; }
-QMenuBar::item:selected { background-color: "$Color-Secondary"; }
 
 #minimizeButton, #maximizeButton, #closeButton {
     border-style: solid;
@@ -35,6 +31,17 @@ QMenuBar::item:selected { background-color: "$Color-Secondary"; }
     padding-bottom: 7px;
     padding-left: 13px;
     padding-right: 13px;
+}
+
+QInputDialog, QMessageBox{
+    color: "$Color-DefaultFontColor";
+    background: "$Color-Main";
+}
+QPushButton, QLineEdit{
+    background: "$Color-Secondary";
+}
+QLabel {
+    color: "$Color-DefaultFontColor";
 }
 
 #toolbarButton { padding: 8px;}
@@ -68,13 +75,36 @@ QScrollBar::sub-page{background-color: transparent;}
 
 
 /* Menu bar --------------------------------------------------------------------------------------------------------*/
+
+QMenu {
+    background-color: "$Color-Menu";
+}
+
+QMenu::item {
+    background-color: "$Color-Menu";
+	color:"$Color-MenuText";
+}
+
+QMenu::item:selected {
+    color: "$Color-Menu";
+	background-color:"$Color-MenuText";
+}
+
 QMenuBar {
-	background-color:"$Color-Main";
+	background-color:"$Color-MainMenu";
+	color:"$Color-MainMenuText";
     min-height: 24px;
 	border-bottom-color: "$Color-SeparatorLine";
-    border-bottom-width: 1px;
+    border-bottom-width: 0px;
     border-style: solid;
 }
+
+QMenuBar::item:selected {
+    color: "$Color-MainMenu";
+	background-color:"$Color-MainMenuText";
+}
+
+
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Status bar --------------------------------------------------------------------------------------------------------*/
@@ -149,11 +179,10 @@ ObjectTreeWidget::item:selected {
 }
 
 #properties-collapsibleTitle{
-    margin-top: 4px;
-    padding-left: 8px;
+    margin-top: 6px;
     padding-right: 0px;
     padding-top: 0px;
-    padding-bottom: 2px;
+    padding-bottom: 0px;
     text-align:left;
     font-weight: bold;
 	background-color:transparent;
@@ -194,6 +223,11 @@ ObjectTreeWidget::item:selected {
     background: "$Color-DataCellBordersAndHeader";
     color: white;
 }
+
+#colorButton {
+    border: 1px solid "$Color-SeparatorLine";
+}
+
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* Document area and its tab bar -------------------------------------------------------------------------------------*/

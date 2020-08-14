@@ -42,6 +42,8 @@ public:
     void traverseSubTree(int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>&);
 
     void changeVisibilityState(int objectId, bool visible);
+    void buildColorMap(int rootObjectId);
+    int addTopObject(QString name);
 
         // getters
     BRLCAD::MemoryDatabase* getDatabase() const

@@ -15,6 +15,18 @@
 #include <include/RaytraceView.h>
 #include <include/AboutWindow.h>
 #include <include/HelpWidget.h>
+#include <brlcad/Arb8.h>
+#include <QtWidgets/QtWidgets>
+#include <brlcad/Torus.h>
+#include <brlcad/Cone.h>
+#include <brlcad/Particle.h>
+#include <brlcad/Paraboloid.h>
+#include <brlcad/Hyperboloid.h>
+#include <brlcad/Halfspace.h>
+#include <brlcad/EllipticalTorus.h>
+#include <brlcad/Ellipsoid.h>
+#include <brlcad/HyperbolicCylinder.h>
+#include <brlcad/ParabolicCylinder.h>
 
 
 using namespace BRLCAD;
@@ -107,6 +119,214 @@ void MainWindow::prepareUi() {
     });
     fileMenu->addAction(quitAct);
 
+    QMenu* createMenu = menuTitleBar->addMenu(tr("&Create"));
+
+    QAction* createArb8Act = new QAction(tr("Arb8"), this);
+    connect(createArb8Act, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Arb8 * object = new BRLCAD::Arb8();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createArb8Act);
+
+    QAction* createConeAct = new QAction(tr("Cone"), this);
+    connect(createConeAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Cone * object = new BRLCAD::Cone();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createConeAct);
+
+
+
+
+    QAction* createEllipsoidAct = new QAction(tr("Ellipsoid"), this);
+    connect(createEllipsoidAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createEllipsoidAct);
+
+
+    QAction* createEllipticalTorusAct = new QAction(tr("EllipticalTorus"), this);
+    connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createEllipticalTorusAct);
+
+
+
+    QAction* createHalfspaceAct = new QAction(tr("Halfspace"), this);
+    connect(createHalfspaceAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createHalfspaceAct);
+
+
+
+    QAction* createHyperbolicCylinderAct = new QAction(tr("HyperbolicCylinder"), this);
+    connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createHyperbolicCylinderAct);
+
+
+
+    QAction* createHyperboloidAct = new QAction(tr("Hyperboloid"), this);
+    connect(createHyperboloidAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createHyperboloidAct);
+
+
+
+
+    QAction* createParabolicCylinderAct = new QAction(tr("ParabolicCylinder"), this);
+    connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createParabolicCylinderAct);
+
+
+
+
+    QAction* createParaboloidAct = new QAction(tr("Paraboloid"), this);
+    connect(createParaboloidAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createParaboloidAct);
+
+
+
+    QAction* createParticleAct = new QAction(tr("Particle"), this);
+    connect(createParticleAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Particle * object = new BRLCAD::Particle();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createParticleAct);
+
+
+    QAction* createTorusAct = new QAction(tr("Torus"), this);
+    connect(createTorusAct, &QAction::triggered, this,[this](){
+        if (activeDocumentId == -1) return;
+
+        BRLCAD::Torus * object = new BRLCAD::Torus();
+        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
+        object->SetName(name.toUtf8());
+        documents[activeDocumentId]->getDatabase()->Add(*object);
+        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
+        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
+        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+    });
+    createMenu->addAction(createTorusAct);
+
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
@@ -154,6 +374,7 @@ void MainWindow::prepareUi() {
     centerViewAct->setShortcut(Qt::Key_F);
     connect(centerViewAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
+        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
     });
@@ -216,10 +437,7 @@ void MainWindow::prepareUi() {
     connect(themeAct[0], &QAction::triggered, this, [this](){
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 0);
-        QWidget styleSetter;
-        styleSetter.setStyleSheet("color:black");
-        styleSetter.hide();
-        QMessageBox::information(&styleSetter, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
+        QMessageBox::information(this, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
     });
     selectThemeActGroup->addAction(themeAct[0]);
     selectThemeAct->addAction(themeAct[0]);
@@ -229,10 +447,7 @@ void MainWindow::prepareUi() {
     connect(themeAct[1], &QAction::triggered, this, [this](){
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 1);
-        QWidget styleSetter;
-        styleSetter.setStyleSheet("color:black");
-        styleSetter.hide();
-        QMessageBox::information(&styleSetter, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
+        QMessageBox::information(this, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
 
     });
     selectThemeActGroup->addAction(themeAct[1]);
@@ -382,6 +597,7 @@ void MainWindow::prepareUi() {
     focusCurrent->setToolTip("Focus on selected object (F)");
     connect(focusCurrent, &QPushButton::clicked, this, [this](){
         if (activeDocumentId == -1) return;
+        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
     });

@@ -16,7 +16,7 @@ Properties::Properties(Document & document) : document(document) {
     fullPathWidget->setWordWrap(true);
     fullPathWidget->setObjectName("properties-fullPathWidget");
 
-    typeSpecificPropertiesArea = new CollapsibleWidget(this);
+    typeSpecificPropertiesArea = new QVBoxWidget(this);
 
     layout()->addWidget(nameWidget);
     layout()->addWidget(fullPathWidget);
@@ -38,10 +38,9 @@ void Properties::bindObject(const int objectId) {
     static TypeSpecificProperties * current = nullptr;
     delete current;
     current = new TypeSpecificProperties(document, object, objectId);
-    typeSpecificPropertiesArea->setWidget(current);
+    typeSpecificPropertiesArea->addWidget(current);
 
     QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
                         "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
     nameWidget->setText(Globals::theme->process(nameType));
-    typeSpecificPropertiesArea->setTitle(breakStringAtCaps(objectType));
 }

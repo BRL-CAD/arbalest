@@ -4,6 +4,7 @@
 
 #include <Document.h>
 #include<Display.h>
+#include <brlcad/Torus.h>
 
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
@@ -25,15 +26,6 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     displayGrid->forceRerenderAllDisplays();
 
     raytraceWidget = new RaytraceView(this);
-
-//
-//    int t0 = time(NULL);
-//    for (int i=0;i<1000;i++){
-//        objectTree->traverseSubTree(0,false,[this](int objectId){
-//            if(objectId%2)objectTreeWidget->getObjectIdTreeWidgetItemMap()[objectId]->setForeground(0, QBrush(QColor(Qt::green)));
-//        });
-//    }
-//    printf("time = %d secs\n",  time(NULL) - t0);
 }
 
 Document::~Document() {
@@ -56,8 +48,8 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
 }
 
 
-void Document::modifyObjectNoSet(BRLCAD::Object *newObject) {
-    QString objectName = newObject->Name();
+void Document::modifyObjectNoSet(int objectId) {
+    QString objectName = objectTree->getNameMap()[objectId];
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
                                              (int objectId){
                                          if (getObjectTree()->getNameMap()[objectId] == objectName){

@@ -46,6 +46,7 @@ set(arbalest_Link_Libraries
         Qt5::Widgets
         Qt5::OpenGL
         Qt5::Gui
+        Qt5::3DCore
         ${BRLCAD_NMG_LIBRARY}
         ${BRLCAD_WDB_LIBRARY}
         ${BRLCAD_RT_LIBRARY}
@@ -65,7 +66,7 @@ IF (WIN32)
             ${gdi32})
 ENDIF()
 
-find_package(Qt5 COMPONENTS Widgets Gui OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Gui OpenGL 3DCore REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # Meta-Object Compiling

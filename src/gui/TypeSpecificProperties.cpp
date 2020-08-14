@@ -8,6 +8,7 @@
 #include "TypeSpecificProperties.h"
 #include "QHBoxWidget.h"
 
+#include <Qt3DCore>
 #include <QStyledItemDelegate>
 #include <include/QVBoxWidget.h>
 #include <include/DataRow.h>
@@ -42,98 +43,60 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
     const QStringList abcdIndices = {"A", "B", "C", "D", "E", "F"};
 
     if(QString(object->Type()) == "Combination") {
+        BRLCAD::Combination *comb = dynamic_cast<BRLCAD::Combination*>(object);
+
+        CollapsibleWidget *childrenListCollapsible = new CollapsibleWidget();
+        l->addWidget(childrenListCollapsible);
+        QVBoxWidget * childrenList = new QVBoxWidget();
+        childrenListCollapsible->setTitle("Children");
+        childrenListCollapsible->setWidget(childrenList);
+
         for (int childId : document.getObjectTree()->getChildren()[objectId]){
             QString childName = document.getObjectTree()->getNameMap()[childId];
-
-            getBRLCADObject(document.getDatabase(), object->Name(), [this, childName](BRLCAD::Object &object){
-                BRLCAD::Combination::TreeNode tree = dynamic_cast<BRLCAD::Combination*>(&object)->Tree();
-                const double * transformationMatrix = getLeafMatrix(tree, childName);
-                if(transformationMatrix== nullptr) transformationMatrix = new double[16]{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
-
-                addPropertiesTitle(l,childName,"Position");
-
-                glm::mat4 transformation = glm::transpose(glm::make_mat4(transformationMatrix));
-                glm::vec3 scale;
-                glm::quat rotation;
-                glm::vec3 translation;
-                glm::vec3 skew;
-                glm::vec4 perspective;
-                glm::decompose(transformation, scale, rotation, translation, skew, perspective);
-
-                DataRow* positionRow = new DataRow(3, true ,"Position", this);
-                DataRow* rotationRow = new DataRow(3, false,"Rotation", this);
-                DataRow* scaleRow    = new DataRow(3, false,"Scale   ", this);
-                for (int i = 0; i < 3; i++)positionRow->getTextBoxes()[i]->setStyleSheet("border-bottom-width: 0px");
-                for (int i = 0; i < 3; i++)rotationRow->getTextBoxes()[i]->setStyleSheet("border-bottom-width: 0px");
-
-                l->addWidget(positionRow);
-                l->addWidget(rotationRow);
-                l->addWidget(scaleRow);
-                if(transformationMatrix){
-                    for(int i=0;i<3;i++) positionRow->getTextBoxes()[i]->setText(QString::number(transformationMatrix[4*i+3]));
-                    for(int i=0;i<3;i++) scaleRow->getTextBoxes()[i]->setText(QString::number(scale[i]));
-                }
-
-                glm::mat4 identity = glm::mat4(1.0);
-                glm::vec3 pos = glm::vec3(transformationMatrix[4*0+3],transformationMatrix[4*1+3],transformationMatrix[4*2+3]);
-                glm::vec3 sca = glm::vec3(scale[0],scale[1],scale[2]);
-                glm::mat4 result = identity;
-                result = glm::translate(result,pos);
-                result = glm::scale(result, sca);
-                result = glm::transpose(result);
-
-                //glm::rotate(rotation,)
-//                for(int c=0;c<4;c++){for(int i=0;i<4;i++)cout<<transformationMatrix[c*4+i]<<"     ";cout<<endl;}cout<<endl;
-
-//                cout<<endl;
-            });
+            childrenList->addWidget(new QLabel(childName));
         }
 
-//        for(int c=0;c<4;c++){for(int i=0;i<4;i++)cout<<transformationMatrix[c*4+i]<<"     ";cout<<endl;}cout<<endl;
-//        glm::mat4 transformation = glm::transpose(glm::make_mat4(transformationMatrix));
-//        glm::vec3 scale;
-//        glm::quat rotation;
-//        glm::vec3 translation;
-//        glm::vec3 skew;
-//        glm::vec4 perspective;
-//        glm::decompose(transformation, scale, rotation, translation, skew, perspective);
-//        getBRLCADObject(document.getDatabase(), object->Name(), [this](BRLCAD::Object &child){
-//            qDebug() << child.Name();
-//
-//            double newmat[16];
-//            for(int c=0;c<16;c++)newmat[c] = j[c];
-//            newmat[3] = -100.;
-//            setLeafMatrix(y,z,newmat);
-//
-//            y = x->Tree();
-//            j=getLeafMatrix(y, z);
-//            if(j)for(int i=0;i<4;i++)qDebug()<<j[i]<<" ";qDebug()<<endl;
-//            if(j)for(int i=4;i<8;i++)qDebug()<<j[i]<<" ";qDebug()<<endl;
-//            if(j)for(int i=8;i<12;i++)qDebug()<<j[i]<<" ";qDebug()<<endl;
-//            if(j)for(int i=12;i<16;i++)qDebug()<<j[i]<<" ";qDebug()<<endl;
-//
-//            this->document.modifyObjectNoSet(&child);
-//
-//            l->addWidget(row);
-//
-//
-//        });
+        QCheckBox *hasColorCheck = new QCheckBox();
+        QHBoxWidget * colorHolder = new QHBoxWidget(this,hasColorCheck);
+        l->addWidget(colorHolder);
+        colorHolder->setStyleSheet("margin-top:11px;");
+        hasColorCheck->setText("Has Color");
+        hasColorCheck->setCheckState(comb->HasColor() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+        connect(hasColorCheck,&QCheckBox::stateChanged,[this,objectId](int newState){
+            getBRLCADObject(this->document.getDatabase(),this->document.getObjectTree()->getFullPathMap()[objectId],[newState](BRLCAD::Object &object){
+                if(newState == Qt::CheckState::Checked){
+                    dynamic_cast<BRLCAD::Combination&>(object).SetHasColor(true);
+                }
+                else {
+                    dynamic_cast<BRLCAD::Combination&>(object).SetHasColor(false);
+                }
+            });
+        });
 
+        colorHolder->getBoxLayout()->addStretch();
 
-//
-//        x->Tree().
-//
-//        property = new ObjectDataField<BRLCAD::Combination>(
-//                &document,
-//                object,
-//                &BRLCAD::Arb8::Point,
-//                &BRLCAD::Arb8::SetPoint,
-//                1,
-//                dynamic_cast<BRLCAD::Arb8*>(object)->NumberOfVertices(),
-//                pointsIndices,
-//                "Points");
-//        l->addWidget(property);
+        QPushButton *colorButton = new QPushButton();
+        colorButton->setObjectName("colorButton");
+        colorButton->setStyleSheet("background-color:"+document.getObjectTree()->getColorMap()[objectId].toHexString());
+        colorHolder->addWidget(colorButton);
+        /*connect(colorButton, &QPushButton::clicked, this, [this,objectId](){
+            const QColor &initial = this->document.getObjectTree()->getColorMap()[objectId].toQColor();
+            QColor selectedColor = QColorDialog::getColor(initial);
+
+            getBRLCADObject(this->document.getDatabase(),this->document.getObjectTree()->getFullPathMap()[objectId],[this,selectedColor](BRLCAD::Object &object){
+                BRLCAD::Combination editableComb =  dynamic_cast<BRLCAD::Combination&>(object);
+                editableComb.SetRed(selectedColor.redF());
+                editableComb.SetGreen(selectedColor.greenF());
+                editableComb.SetBlue(selectedColor.blueF());
+                cout<<selectedColor.redF()<<" "<<selectedColor.greenF()<<" "<<selectedColor.blueF()<<endl;
+                this->document.getDatabase()->Set(editableComb);
+            });
+            this->document.getObjectTree()->buildColorMap(objectId);
+            this->document.modifyObjectNoSet(objectId);
+            this->document.getDisplayGrid()->forceRerenderAllDisplays();
+        });*/
     }
+
     if(QString(object->Type()) == "Arb8") {
         ObjectDataField<BRLCAD::Arb8> * property;
         property = new ObjectDataField<BRLCAD::Arb8>(

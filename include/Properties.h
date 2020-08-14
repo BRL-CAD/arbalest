@@ -24,7 +24,7 @@ private:
     Document & document;
     QLabel * nameWidget;
     QLabel * fullPathWidget;
-    CollapsibleWidget * typeSpecificPropertiesArea;
+    QVBoxWidget * typeSpecificPropertiesArea;
 };
 
 

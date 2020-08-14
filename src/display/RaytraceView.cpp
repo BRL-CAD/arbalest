@@ -51,7 +51,6 @@ RaytraceView::RaytraceView
     setMinimumSize(100, 100);
     setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
     setWindowFlags(Qt::Window| Qt::WindowCloseButtonHint);
-    this->setStyleSheet("color:black");
 }
 
 

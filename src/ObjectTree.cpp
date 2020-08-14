@@ -40,16 +40,10 @@ void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
 	childrenNames = &objectTree->getChildren()[objectId];
 
 	objectTree->getFullPathMap()[objectId] = currentObjectPath;
-	
-	objectTree->colorMap[objectId] = ColorInfo(objectTree->colorMap[parentObjectId]);
+
+
 	if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
-		if (combination->HasColor())
-		{
-			objectTree->colorMap[objectId].red		= combination->Red();
-			objectTree->colorMap[objectId].green	= combination->Green();
-			objectTree->colorMap[objectId].blue		= combination->Blue();
-			objectTree->colorMap[objectId].hasColor = true;
-		}
+
 		traverseSubTree(combination->Tree());
 	}
 	else
@@ -83,6 +77,19 @@ void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::
 	}
 }
 
+
+int ObjectTree::addTopObject(QString name) {
+	QVector<int>* childrenNames = &getChildren()[0];
+    int topObjectId = lastAllocatedId + 1;
+	childrenNames->append(topObjectId);
+	getNameMap()[topObjectId] = name;
+	ObjectTreeCallback callback(this, name, 0);
+	database->Get(name.toUtf8(), callback);
+    buildColorMap(topObjectId);
+	return topObjectId;
+}
+
+
 ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
 
@@ -90,22 +97,14 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
     objectIdParentObjectIdMap[0] = -1;
 	nameMap[0] = "";
 	colorMap[0] = {1,1,1,false };
-	
-	QVector<int>* childrenNames = &getChildren()[0];
+
 
 	while (it.Good()) {
 		QString childName = it.Name();
-		childrenNames->append(lastAllocatedId + 1);
-		getNameMap()[lastAllocatedId + 1] = childName;
-		ObjectTreeCallback callback(this, childName, 0);
-		database->Get(it.Name(), callback);
+		addTopObject(childName);
 		++it;
 	}
 
-    traverseSubTree(0, true,[this] (int childId){
-        objectIdVisibilityStateMap[childId] = Invisible;
-        return true;
-    });
 }
 
 void ObjectTree::traverseSubTree(const int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>& callback)
@@ -168,4 +167,23 @@ void ObjectTree::changeVisibilityState(int objectId, bool visible) {
             return true;
         });
     }
+}
+
+void ObjectTree::buildColorMap(int rootObjectId) {
+	traverseSubTree(rootObjectId,true,[&](int objectId){
+		if(objectId==0)return true;
+		const QString objectName = fullPathMap[objectId];
+		const QByteArray &name = objectName.toUtf8();
+		BRLCAD::Object *object = database->Get(name);
+		colorMap[objectId] = ColorInfo(colorMap[objectIdParentObjectIdMap[objectId]]);
+		if(const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(object)) {
+			if (combination->HasColor()) {
+				colorMap[objectId].red = combination->Red();
+				colorMap[objectId].green = combination->Green();
+				colorMap[objectId].blue = combination->Blue();
+				colorMap[objectId].hasColor = true;
+			}
+		}
+		return true;
+	});
 }

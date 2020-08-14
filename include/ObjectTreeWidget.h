@@ -42,11 +42,9 @@ class ObjectTreeWidget : public QTreeWidget {
 public:
     explicit ObjectTreeWidget(Document *objectTree,   QWidget *parent = nullptr);
     void refreshItemTextColors();
-    int selectedObjectId();
     const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
-
-private:
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
+private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
 

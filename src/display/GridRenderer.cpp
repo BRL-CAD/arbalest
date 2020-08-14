@@ -13,7 +13,7 @@ void GridRenderer::render() {
     //todo implement line drawing in DisplayManager and use it instead of calling OpenGL here
 
     int lineCount = 1000;
-    double lineGap = 10;
+    double lineGap;
     lineGap = .1 * std::pow(2.71,int(std::log(display->getCamera()->getVerticalSpan())));
 
     float length = lineCount*lineGap;
@@ -24,7 +24,6 @@ void GridRenderer::render() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    std::cout<<display->getCamera()->getVerticalSpan()<<" "<<int(std::log(display->getCamera()->getVerticalSpan()))<<" "<<display->getCamera()->getAnglesAroundAxes()[0]<<std::endl;
     float alpha = sqrt(abs(std::fmod(abs(display->getCamera()->getAnglesAroundAxes()[0]),180)-90)/90.)*.7;
     if (abs(std::fmod(abs(display->getCamera()->getAnglesAroundAxes()[0]),180)-90)<4) {
         alpha = (abs(std::fmod(abs(display->getCamera()->getAnglesAroundAxes()[0]),180)-90)/90.)*.7;

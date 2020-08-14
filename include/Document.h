@@ -88,7 +88,7 @@ public:
         this->filePath = new QString(filePath);
     }
 
-    void modifyObjectNoSet(BRLCAD::Object *newObject);
+    void modifyObjectNoSet(int objectId);
 };
 
 

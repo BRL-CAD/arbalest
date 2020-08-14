@@ -127,7 +127,3 @@ void ObjectTreeWidget::refreshItemTextColors() {
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
 }
-
-int ObjectTreeWidget::selectedObjectId() {
-    return 0;
-}
