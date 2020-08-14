@@ -99,7 +99,7 @@ inline QWidget * toolbarSeparator(bool horizontal){
 
 QImage coloredIcon(QString path, QString colorKey = "");
 
-static std::stack <time_point<steady_clock>> times;
+static std::stack <time_point<high_resolution_clock>> times;
 static std::stack <QString> timerNames;
 inline void ts(QString name = "Timer"){
     times.push(high_resolution_clock::now());
@@ -107,7 +107,7 @@ inline void ts(QString name = "Timer"){
 }
 
 inline void te(){
-    time_point<steady_clock> startTime = times.top();
+    time_point<high_resolution_clock> startTime = times.top();
 
     milliseconds duration = duration_cast<milliseconds>( high_resolution_clock::now()-startTime);
     cout << timerNames.top().toStdString()<< "  "<<duration_cast<milliseconds>( high_resolution_clock::now()-startTime).count() <<" ms        "
