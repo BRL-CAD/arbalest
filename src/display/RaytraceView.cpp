@@ -82,7 +82,8 @@ void RaytraceView::paintEvent
 
 class RayTraceCallback : public BRLCAD::ConstDatabase::HitCallback {
 public:
-    RayTraceCallback(const QVector3D& direction) : BRLCAD::ConstDatabase::HitCallback(), m_direction(direction), m_color(Qt::white) {}
+    RayTraceCallback(const QVector3D &direction, const QColor& color)
+            : BRLCAD::ConstDatabase::HitCallback(), m_direction(direction), m_color(color) {}
 
     virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
         double    brightness         = 0;
@@ -140,7 +141,7 @@ void RaytraceView::UpdateImage() {
         for (int row = 0; row < h; row++) {
             QVector3D        imagePoint(column, h - row - 1., 0.);
             QVector3D        modelPoint = m_transformation.map(imagePoint);
-            RayTraceCallback callback(direction);
+            RayTraceCallback callback(direction, color);
             BRLCAD::Ray3D    ray;
 
             ray.origin.coordinates[0]    = modelPoint.x();
@@ -159,6 +160,11 @@ void RaytraceView::UpdateImage() {
 
 
 void RaytraceView::raytrace() {
+    QSettings settings("BRLCAD", "arbalest");
+    color=settings.value("raytraceBackground").value<QColor>();
+    bool valid = color.isValid();
+    if (!valid) color = Qt::black;
+
     hide();
     document->getDatabase()->UnSelectAll();
     document->getObjectTree()->traverseSubTree(0, false, [this]

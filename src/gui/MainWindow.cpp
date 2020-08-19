@@ -469,6 +469,15 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(raytraceAct);
 
+    QAction* setRaytraceBackgroundColorAct = new QAction(tr("Set raytrace background color.."), this);
+    connect(setRaytraceBackgroundColorAct, &QAction::triggered, this, [this](){
+        QSettings settings("BRLCAD", "arbalest");
+        QColor color=settings.value("raytraceBackground").value<QColor>();
+        QColor selectedColor = QColorDialog::getColor(color);
+        settings.setValue("raytraceBackground", selectedColor);
+    });
+    raytrace->addAction(setRaytraceBackgroundColorAct);
+
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);

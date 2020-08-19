@@ -60,6 +60,8 @@ private:
     bool                   m_updatingImage;
 
     void UpdateImage(void);
+
+    QColor color;
 };
 
 
