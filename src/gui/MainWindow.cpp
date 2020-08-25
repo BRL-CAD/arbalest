@@ -557,21 +557,21 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
     QPushButton* newButton = new QPushButton(menuTitleBar);
-    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-add-file-24.png","$Color-IconFile")));
+    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png","$Color-IconFile")));
     newButton->setObjectName("toolbarButton");
     newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
     connect(newButton, &QPushButton::clicked, this, &MainWindow::newFile);
 
     QPushButton* openButton = new QPushButton(menuTitleBar);
-    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-opened-folder-30.png","$Color-IconFile")));
+    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png","$Color-IconFile")));
     openButton->setObjectName("toolbarButton");
     openButton->setToolTip("Open.. (Ctrl+O)");
     mainTabBarCornerWidget->addWidget(openButton);	
     connect(openButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
 
     QPushButton* saveButton = new QPushButton(menuTitleBar);
-    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-24.png","$Color-IconFile")));
+    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png","$Color-IconFile")));
     saveButton->setObjectName("toolbarButton");
     saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);

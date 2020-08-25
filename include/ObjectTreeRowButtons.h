@@ -34,7 +34,7 @@ private:
     ObjectTree *objectTree;
     ObjectTree::VisibilityState visibilityState = ObjectTree::Invisible;
     static const int margin = 0;
-    const char *const visibilityIconFilePath = ":/icons/icons8-eye-20.png";
+    const char *const visibilityIconFilePath = ":/icons/baseline_visibility_black_18dp.png";
     const char *const centerIconFilePath = ":/icons/baseline_center_focus_strong_black_18dp.png";
     Q_DISABLE_COPY(ObjectTreeRowButtons)
 
