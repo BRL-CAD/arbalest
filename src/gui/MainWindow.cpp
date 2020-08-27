@@ -512,7 +512,7 @@ void MainWindow::prepareUi() {
     layoutTopRightWidget->setSpacing(0);
 
     QPushButton* minimizeButton = new QPushButton(topRightWidget);
-    minimizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/minimize.png","$Color-WindowTitleButtons")));
+    minimizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_minimize_white_36dp","$Color-WindowTitleButtons")));
     minimizeButton->setObjectName("minimizeButton");
     connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
     layoutTopRightWidget->addWidget(minimizeButton);
@@ -520,17 +520,17 @@ void MainWindow::prepareUi() {
 
     maximizeButton = new QPushButton(topRightWidget);
     if (this->windowState() == Qt::WindowMaximized) {
-        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-restore-down-16.png","$Color-WindowTitleButtons")));
+        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
     }
     else {
-        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/maximize.png","$Color-WindowTitleButtons")));
+        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
     }
     maximizeButton->setObjectName("maximizeButton");
     connect(maximizeButton, &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
     layoutTopRightWidget->addWidget(maximizeButton);
 
     QPushButton* closeButton = new QPushButton(topRightWidget);
-    closeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/close.png","$Color-WindowTitleButtons")));
+    closeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_close_white_36dp","$Color-WindowTitleButtons")));
     closeButton->setObjectName("closeButton");
     connect(closeButton, &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
     layoutTopRightWidget->addWidget(closeButton);
@@ -854,10 +854,10 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 void MainWindow::changeEvent( QEvent* e ) {
     if (e->type() == QEvent::WindowStateChange) {
         if (this->windowState() == Qt::WindowMaximized) {
-            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/icons8-restore-down-16.png","$Color-WindowTitleButtons")));
+            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
         }
         else{
-            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/maximize.png","$Color-WindowTitleButtons")));
+            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
         }
     }
 }

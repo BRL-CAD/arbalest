@@ -1,58 +1,38 @@
 <RCC>
 
   <qresource>
-    <file>icons/arbs.png</file>
-    <file>icons/cones.png</file>
-    <file>icons/sphere.png</file>
-    <file>icons/torus.png</file>
-    <file>icons/metaballs.png</file>
-  </qresource>
-
-  <qresource>
+    <file>styles/arbalest_simple.qss</file>
     <file>themes/arbalest_light.theme</file>
     <file>themes/arbalest_dark.theme</file>
   </qresource>
 
-  <qresource>
-    <file>fonts/Modak-Regular.ttf</file>
-    <file>fonts/Pacifico-Regular.ttf</file>
-    <file>fonts/OpenSans-Regular.ttf</file>
-    <file>fonts/Rowdies-Regular.ttf</file>
-  </qresource>
 
   <qresource>
-    <file>styles/arbalest_simple.qss</file>
-    <file>icons/archer.png</file>
     <file>icons/arbalest_icon.png</file>
-    <file>icons/close.png</file>
-    <file>icons/icons8-restore-down-16.png</file>
-    <file>icons/sharp_save_black_48dp.png</file>
-    <file>icons/baseline_visibility_black_48dp.png</file>
+
+    <!-- Toolbar file -->
     <file>icons/sharp_note_add_black_48dp.png</file>
-    <file>icons/baseline_visibility_black_18dp.png</file>
     <file>icons/baseline_folder_black_48dp.png</file>
-    <file>icons/icons8-add-file-24.png</file>
-    <file>icons/icons8-opened-folder-30.png</file>
-    <file>icons/baseline_filter_vintage_black_48dp.png</file>
-    <file>icons/icons8-new-file-80.png</file>
-    <file>icons/icons8-teapot-40.png</file>
-    <file>icons/icons8-eye-20.png</file>
-    <file>icons/sharp_grid_on_black_48dp.png</file>
-    <file>icons/icons8-rectangle-64.png</file>
-    <file>icons/baseline_center_focus_strong_black_48dp.png</file>
+    <file>icons/sharp_save_black_48dp.png</file>
+
+    <!-- Toolbar view -->
     <file>icons/baseline_crop_free_black_48dp.png</file>
+    <file>icons/baseline_center_focus_strong_black_48dp.png</file>
     <file>icons/baseline_refresh_black_48dp.png</file>
-    <file>icons/file-plus.png</file>
-    <file>icons/icons8-rectangle-144.png</file>
+    <file>icons/sharp_grid_on_black_48dp.png</file>
+
+    <!-- Toolbar raytrace -->
+    <file>icons/baseline_filter_vintage_black_48dp.png</file>
+
+    <!-- Object tree item buttons -->
     <file>icons/baseline_center_focus_strong_black_18dp.png</file>
-    <file>icons/new.png</file>
-    <file>icons/icons8-opened-folder-80.png</file>
-    <file>icons/icons8-save-80.png</file>
-    <file>icons/icons8-save-as-80.png</file>
-    <file>icons/close-smaller.png</file>
-    <file>icons/minimize.png</file>
-    <file>icons/maximize.png</file>
-    <file>icons/restore_down.png</file>
+    <file>icons/baseline_visibility_black_18dp.png</file>
+
+    <!-- Window maximize / minimize / restore / close icons -->
+    <file>icons/baseline_minimize_white_36dp.png</file>
+    <file>icons/sadeep_edited_baseline_crop_din_white_36dp.png</file>
+    <file>icons/baseline_crop_din_white_36dp.png</file>
+    <file>icons/sadeep_edited_baseline_close_white_36dp.png</file>
   </qresource>
 
 </RCC>
