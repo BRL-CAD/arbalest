@@ -33,6 +33,9 @@
     <file>icons/sadeep_edited_baseline_crop_din_white_36dp.png</file>
     <file>icons/baseline_crop_din_white_36dp.png</file>
     <file>icons/sadeep_edited_baseline_close_white_36dp.png</file>
+
+    <!-- Tab close -->
+    <file>icons/sadeep_created_close-tab.png</file>
   </qresource>
 
 </RCC>

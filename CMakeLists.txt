@@ -39,6 +39,7 @@ set(arbalest_Sources
         src/gui/AboutWindow.cpp
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
+        src/gui/MatrixTransformWidget.cpp
         src/display/GridRenderer.cpp)
 
 set(arbalest_Link_Libraries

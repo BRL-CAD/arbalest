@@ -27,6 +27,7 @@
 #include <brlcad/Ellipsoid.h>
 #include <brlcad/HyperbolicCylinder.h>
 #include <brlcad/ParabolicCylinder.h>
+#include <include/MatrixTransformWidget.h>
 
 
 using namespace BRLCAD;
@@ -326,6 +327,38 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
     });
     createMenu->addAction(createTorusAct);
+
+    QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
+
+    QAction* relativeMoveAct = new QAction("Relative move selected object", this);
+    relativeMoveAct->setStatusTip(tr("Relative move selected object. Top objects cannot be moved."));
+    connect(relativeMoveAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
+        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Translate);
+    });
+    editMenu->addAction(relativeMoveAct);
+
+    QAction* relativeScaleAct = new QAction("Relative scale selected object", this);
+    relativeScaleAct->setStatusTip(tr("Relative scale selected object. Top objects cannot be scaled."));
+    connect(relativeScaleAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
+        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Scale);
+    });
+    editMenu->addAction(relativeScaleAct);
+
+    QAction* relativeRotateAct = new QAction("Relative rotate selected object", this);
+    relativeRotateAct->setStatusTip(tr("Relative rotate selected object. Top objects cannot be rotated."));
+    connect(relativeRotateAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
+        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Rotate);
+    });
+    editMenu->addAction(relativeRotateAct);
 
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));

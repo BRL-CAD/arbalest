@@ -251,7 +251,7 @@ ObjectTreeWidget::item:selected {
     border-style: solid;
 }
 #documentAreaTabBar::close-button {
-    image: url(:/icons/close-smaller.png);
+    image: url(:/icons/sadeep_created_close-tab.png);
     subcontrol-position: right;
 }
 
