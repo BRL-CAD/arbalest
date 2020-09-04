@@ -32,10 +32,8 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
             "Arbalest is dedicated to the memory of Michael Muuss, who served as a Senior Computer Scientist at the U.S. "
             "Army Research Laboratory's (ARL) Survivability/Lethality Analysis Directorate (SLAD) at Aberdeen Proving Ground, "
             "MD, from 1979 until his death in November 2000.<br><br>"
-            "Toolbar icons from  <a href=\"https://icons8.com/\">icons8</a> <br> <br>"
 
-            "Arbalest was initially developed for a 2020 Google Summer of Code under the guidance of Daniel Rossberg, Inderpreet Singh, and"
-            " Sean Morrison by Sadeep Weerasinghe (sadeep.16@cse.mrt.ac.lk)."
+            "Arbalest was initially developed for a 2020 Google Summer of Code by Sadeep Weerasinghe (sadeep.16@cse.mrt.ac.lk)."
             "<br><br>"
 
             "License follows from here.<br>"
