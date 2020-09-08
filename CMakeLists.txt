@@ -56,17 +56,6 @@ set(arbalest_Link_Libraries
         OpenGL::GL
         OpenGL::GLU)
 
-IF (WIN32)
-    find_library(user32 user32)
-    find_library(dwmapi dwmapi)
-    find_library(gdi32 gdi32)
-    set(arbalest_Link_Libraries
-            ${arbalest_Link_Libraries}
-            ${user32}
-            ${dwmapi}
-            ${gdi32})
-ENDIF()
-
 find_package(Qt5 COMPONENTS Widgets Gui OpenGL 3DCore REQUIRED)
 find_package(OpenGL REQUIRED)
 
