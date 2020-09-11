@@ -184,12 +184,12 @@ void RaytraceView::raytrace() {
     );
 
     QMatrix4x4 transformation;
-    transformation.translate(document->getDisplay()->getCamera()->getEyePosition().x,
-                             document->getDisplay()->getCamera()->getEyePosition().y,
-                             document->getDisplay()->getCamera()->getEyePosition().z);
-    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().y, 0., 1., 0.);
-    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().z, 0., 0., 1.);
-    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().x, 1., 0., 0.);
+    transformation.translate(document->getDisplay()->getCamera()->getEyePosition().x(),
+                             document->getDisplay()->getCamera()->getEyePosition().y(),
+                             document->getDisplay()->getCamera()->getEyePosition().z());
+    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().y(), 0., 1., 0.);
+    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().z(), 0., 0., 1.);
+    transformation.rotate(-document->getDisplay()->getCamera()->getAnglesAroundAxes().x(), 1., 0., 0.);
     transformation.translate(0, 0, 10000);
     transformation.scale(document->getDisplay()->getCamera()->getVerticalSpan()/document->getDisplay()->getH());
     transformation.translate(-document->getDisplay()->getW()/2.,-document->getDisplay()->getH()/2.);

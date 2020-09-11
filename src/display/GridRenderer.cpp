@@ -6,6 +6,7 @@
 #endif
 
 #include <GL/gl.h>
+#include <cmath>
 #include <iostream>
 #include "AxesRenderer.h"
 

@@ -1,19 +1,24 @@
 // This class probably does not work anymore
 #include "PerspectiveCamera.h"
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 
 PerspectiveCamera::PerspectiveCamera() = default;
 
-glm::mat4 PerspectiveCamera::modelViewMatrix() const {
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
-    return glm::translate(rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ, eyePosition);
+QMatrix4x4 PerspectiveCamera::modelViewMatrix() const {
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundZ;
+    rotationMatrixAroundZ.rotate(angleAroundAxes.z(), axisZ);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+    rotationMatrix.translate(eyePosition);
+    return rotationMatrix;
 }
 
-glm::mat4 PerspectiveCamera::projectionMatrix() const {
-    return glm::perspective(glm::radians(fov),w/h,nearPlane,farPlane);
+QMatrix4x4 PerspectiveCamera::projectionMatrix() const {
+    QMatrix4x4 ret;
+    ret.perspective(fov,w/h,nearPlane,farPlane);
+    return ret;
 }
 
 void PerspectiveCamera::setWH(float w, float h) {
@@ -29,11 +34,11 @@ void PerspectiveCamera::processRotateRequest(const int &deltaX, const int &delta
     float deltaAngleX = float(deltaX) / h;
     float deltaAngleY = float(deltaY) / h;
     if (thirdAxis) {
-        angleAroundAxes.y += deltaAngleX * eyeRotationPerMouseDelta;
+        angleAroundAxes.setY(angleAroundAxes.y() + deltaAngleX * eyeRotationPerMouseDelta);
     } else {
-        angleAroundAxes.z += deltaAngleX * eyeRotationPerMouseDelta;
+        angleAroundAxes.setZ(angleAroundAxes.z() + deltaAngleX * eyeRotationPerMouseDelta);
     }
-    angleAroundAxes.x += deltaAngleY * eyeRotationPerMouseDelta;
+    angleAroundAxes.setX(angleAroundAxes.x() + deltaAngleY * eyeRotationPerMouseDelta);
 }
 
 void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & deltaY){
@@ -41,23 +46,27 @@ void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & delta
         return;
     }
 
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(-angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
-    glm::vec3 PerspectiveCameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
+    QVector3D PerspectiveCameraRightDirection(rotationMatrix * axisX);
     eyePosition += float(deltaX) * eyeMovementPerMouseDelta * PerspectiveCameraRightDirection;
 
-    glm::vec3 PerspectiveCameraUpDirection(rotationMatrix * glm::vec4(axisY, 1.0));
+    QVector3D PerspectiveCameraUpDirection(rotationMatrix * axisY);
     eyePosition += float(-deltaY) * eyeMovementPerMouseDelta * PerspectiveCameraUpDirection;
 }
 
 void PerspectiveCamera::processZoomRequest(const int & deltaWheelAngle) {
-    glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    glm::mat4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(-angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
-    glm::vec3 PerspectiveCameraForwardDirection(rotationMatrix * glm::vec4(-axisZ, 1.0));
+    QVector3D PerspectiveCameraForwardDirection(rotationMatrix * (-axisZ));
 
     eyePosition += -float(deltaWheelAngle) * eyeMovementPerWheelAngle * PerspectiveCameraForwardDirection;
 }

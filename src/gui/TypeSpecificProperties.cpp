@@ -3,8 +3,7 @@
 #include <brlcad/Arb8.h>
 
 
-#include <QtWidgets/QVBoxLayout>
-#include <QtOpenGL/QtOpenGL>
+#include <QCheckBox>
 #include "TypeSpecificProperties.h"
 #include "QHBoxWidget.h"
 
@@ -23,9 +22,6 @@
 #include <brlcad/Particle.h>
 #include <brlcad/Sphere.h>
 #include <brlcad/Torus.h>
-#include <dependancies/glm/glm/ext/quaternion_float.hpp>
-#include <dependancies/glm/glm/gtx/matrix_decompose.hpp>
-#include <dependancies/glm/glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 using namespace std;

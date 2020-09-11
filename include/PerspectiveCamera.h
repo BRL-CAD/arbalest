@@ -6,14 +6,13 @@
 #define RT3_PerspectiveCamera_H
 
 
-#include <glm/detail/type_mat4x4.hpp>
 #include "Camera.h"
 
 
 class PerspectiveCamera : public Camera {
 private:
-    const glm::vec3 initialEyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-    const glm::vec3 initialAngleAroundAxes = glm::vec3(0.0f, 0.0f, 0.0f);
+    const QVector3D initialEyePosition = QVector3D(0.0f, 0.0f, 0.0f);
+    const QVector3D initialAngleAroundAxes = QVector3D(0.0f, 0.0f, 0.0f);
 
     const float nearPlane = .1f;
     const float farPlane = 2000000.0f;
@@ -23,8 +22,8 @@ private:
     const int mouseMaxDrag = 500;
     const float fov = 60; // Field of view (angle from Display bottom to top) in degrees
 
-    glm::vec3 angleAroundAxes = initialAngleAroundAxes; // Camera direction in degrees
-    glm::vec3 eyePosition = initialEyePosition; // Camera coordinates
+    QVector3D angleAroundAxes = initialAngleAroundAxes; // Camera direction in degrees
+    QVector3D eyePosition = initialEyePosition; // Camera coordinates
     float w = 400, h = 400;         // Display width and height.
 
 public:
@@ -38,9 +37,9 @@ public:
 
     void processZoomRequest(const int &deltaWheelAngle) override;
 
-    glm::mat4 modelViewMatrix() const override;
+    QMatrix4x4 modelViewMatrix() const override;
 
-    glm::mat4 projectionMatrix() const override;
+    QMatrix4x4 projectionMatrix() const override;
 };
 
 

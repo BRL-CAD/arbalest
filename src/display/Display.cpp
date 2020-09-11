@@ -22,8 +22,6 @@
 #include "Display.h"
 
 #include <iostream>
-#include <glm/gtc/type_ptr.hpp>
-#include <QtWidgets/QApplication>
 #include <QWidget>
 #include <OrthographicCamera.h>
 #include <include/Globals.h>
@@ -87,14 +85,16 @@ void Display::paintGL() {
     displayManager->drawBegin();
 
     glViewport(0,0,w,h);
-    displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrix())));
-    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(camera->projectionMatrix())));
+    displayManager->loadMatrix(camera->modelViewMatrix().data());
+    displayManager->loadPMatrix(camera->projectionMatrix().data());
     document->getGeometryRenderer()->render();
     if(gridEnabled)gridRenderer->render();
 
     glViewport(w*.88,h*.02,w/10,w/10);
-    displayManager->loadMatrix(static_cast<const float*>(glm::value_ptr(camera->modelViewMatrixNoTranslate())));
-    displayManager->loadPMatrix(static_cast<const float*>(glm::value_ptr(glm::ortho(-100.f, 100.f, -100.0f, 100.0f, -1000.f,1000.f))));
+    displayManager->loadMatrix(camera->modelViewMatrixNoTranslate().data());
+    QMatrix4x4 orthoMtx;
+    orthoMtx.ortho(-100.f, 100.f, -100.0f, 100.0f, -1000.f,1000.f);
+    displayManager->loadPMatrix(orthoMtx.data());
     axesRenderer->render();
 }
 

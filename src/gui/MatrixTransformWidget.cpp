@@ -1,8 +1,7 @@
 
 #include <brlcad/Object.h>
 #include <brlcad/Combination.h>
-#include <dependancies/glm/glm/gtc/type_ptr.hpp>
-#include <QtWidgets/QMessageBox>
+#include <QMessageBox>
 #include "MatrixTransformWidget.h"
 
 QHash<int,QWidget*> MatrixTransformWidget::widgets;
@@ -46,27 +45,29 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
             change[1] = getTextBoxes()[1]->text().toDouble();
             change[2] = getTextBoxes()[2]->text().toDouble();
 
-
-            auto m = glm::transpose(glm::make_mat4(transformationMatrix));
+            QMatrix4x4 m = QMatrix4x4(transformationMatrix[0], transformationMatrix[1], transformationMatrix[2], transformationMatrix[3],
+                                      transformationMatrix[4], transformationMatrix[5], transformationMatrix[6], transformationMatrix[7],
+                                      transformationMatrix[8], transformationMatrix[9], transformationMatrix[10], transformationMatrix[11],
+                                      transformationMatrix[12], transformationMatrix[13], transformationMatrix[14], transformationMatrix[15]).transposed();
 
             if(transformType == Translate) {
-                m = glm::translate(m, glm::make_vec3(change));
+                m.translate(change[0], change[1], change[2]);
             }
             if(transformType == Scale) {
-                m = glm::scale(m, glm::make_vec3(change));
+                m.scale(change[0], change[1], change[2]);
             }
             if(transformType == Rotate){
                 double degToRad = 0.01745329252;
-                m = glm::rotate(m,change[0]*degToRad, glm::make_vec3(new double[3]{1,0,0}));
-                m = glm::rotate(m,change[1]*degToRad, glm::make_vec3(new double[3]{0,1,0}));
-                m = glm::rotate(m,change[2]*degToRad, glm::make_vec3(new double[3]{0,0,1}));
+                m.rotate(change[0]*degToRad, QVector3D(1.f,0.f,0.f));
+                m.rotate(change[1]*degToRad, QVector3D(0.f,1.f,0.f));
+                m.rotate(change[2]*degToRad, QVector3D(0.f,0.f,1.f));
             }
 
-            m = glm::transpose(m);
+            m = m.transposed();
 
             double *newTransformationMatrix = new double[16]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, .5};
 
-            for (int i = 0; i < 16; ++i) newTransformationMatrix[i] = glm::value_ptr(m)[i];
+            for (int i = 0; i < 16; ++i) newTransformationMatrix[i] = m.data()[i];
 
 
             getBRLCADObject(document->getDatabase(), parentObjectName, [this, childNodeName,childObjectId, newTransformationMatrix,document](BRLCAD::Object &object) {

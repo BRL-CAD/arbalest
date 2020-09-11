@@ -5,7 +5,6 @@ set(arbalest_Include_Dirs
         "${CMAKE_CURRENT_SOURCE_DIR}"
         "src/windows"
         "include"
-        "dependancies/glm/"
         ${BRLCAD_INCLUDE_DIRS}
         ${RT3_SOURCE_DIR}/include/brlcad)
 
