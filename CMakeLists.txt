@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.1.0)
-
-project(arbalest)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
+        "${CMAKE_CURRENT_SOURCE_DIR}"
         "src/windows"
         "include"
         "dependancies/glm/"
@@ -45,19 +43,7 @@ set(arbalest_Sources
 set(arbalest_Link_Libraries
         coreinterface
         Qt5::Widgets
-        Qt5::OpenGL
-        Qt5::Gui
-        Qt5::3DCore
-        ${BRLCAD_NMG_LIBRARY}
-        ${BRLCAD_WDB_LIBRARY}
-        ${BRLCAD_RT_LIBRARY}
-        ${BRLCAD_BN_LIBRARY}
-        ${BRLCAD_BU_LIBRARY}
-        OpenGL::GL
-        OpenGL::GLU)
-
-find_package(Qt5 COMPONENTS Widgets Gui OpenGL 3DCore REQUIRED)
-find_package(OpenGL REQUIRED)
+        OpenGL::GL)
 
 # Meta-Object Compiling
 file(GLOB arbalest_HEADERS_TO_MOC ./include/*)

@@ -8,7 +8,6 @@
 #include "TypeSpecificProperties.h"
 #include "QHBoxWidget.h"
 
-#include <Qt3DCore>
 #include <QStyledItemDelegate>
 #include <include/QVBoxWidget.h>
 #include <include/DataRow.h>
