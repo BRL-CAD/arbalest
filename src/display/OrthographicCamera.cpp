@@ -20,22 +20,28 @@
 /** @file OrthographicCamera.cpp */
 
 #include "OrthographicCamera.h"
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 #include "Utils.h"
+#include <cmath>
 #include <QDebug>
 
-glm::mat4 OrthographicCamera::modelViewMatrix() const {
-	const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-	const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-	const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
-	const glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+QMatrix4x4 OrthographicCamera::modelViewMatrix() const {
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundZ;
+    rotationMatrixAroundZ.rotate(angleAroundAxes.z(), axisZ);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+    rotationMatrix.translate(-eyePosition);
 
-    return glm::translate(rotationMatrix, -eyePosition);
+    return rotationMatrix;
 }
 
-glm::mat4 OrthographicCamera::projectionMatrix() const {
-    return glm::ortho(-(verticalSpan/2) * w / h, (verticalSpan/2) * w / h, -verticalSpan/2, verticalSpan/2, nearPlane, farPlane);
+QMatrix4x4 OrthographicCamera::projectionMatrix() const {
+    QMatrix4x4 ret;
+    ret.ortho(-(verticalSpan/2) * w / h, (verticalSpan/2) * w / h, -verticalSpan/2, verticalSpan/2, nearPlane, farPlane);
+
+    return ret;
 }
 
 
@@ -52,11 +58,11 @@ void OrthographicCamera::processRotateRequest(const int &deltaX, const int &delt
     const float deltaAngleX = float(deltaX) / h;
     const float deltaAngleY = float(deltaY) / h;
     if (thirdAxis) {
-        angleAroundAxes.y += deltaAngleX * eyeRotationPerMouseDelta;
+        angleAroundAxes.setY(angleAroundAxes.y() + deltaAngleX * eyeRotationPerMouseDelta);
     } else {
-        angleAroundAxes.z += deltaAngleX * eyeRotationPerMouseDelta;
+        angleAroundAxes.setZ(angleAroundAxes.z() + deltaAngleX * eyeRotationPerMouseDelta);
     }
-    angleAroundAxes.x += deltaAngleY * eyeRotationPerMouseDelta;
+    angleAroundAxes.setX(angleAroundAxes.x() + deltaAngleY * eyeRotationPerMouseDelta);
 
 }
 
@@ -65,15 +71,18 @@ void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY
         return;
     }
 
-    const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(-angleAroundAxes.z), axisZ);
-    const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(-angleAroundAxes.y), axisY);
-    const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(-angleAroundAxes.x), axisX);
-    const glm::mat4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
+    QMatrix4x4 rotationMatrixAroundZ;
+    rotationMatrixAroundZ.rotate(-angleAroundAxes.z(), axisZ);
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(-angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
 
-    const glm::vec3 cameraRightDirection(rotationMatrix * glm::vec4(axisX, 1.0));
+    QVector3D cameraRightDirection(rotationMatrix * axisX);
     eyePosition -= static_cast<float>(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * verticalSpan;
 
-    const glm::vec3 cameraUpDirection(rotationMatrix * glm::vec4(axisY, 1.0));
+    QVector3D cameraUpDirection(rotationMatrix * axisY);
     eyePosition += static_cast<float>(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * verticalSpan;
 }
 
@@ -84,34 +93,37 @@ void OrthographicCamera::processZoomRequest(const int &deltaWheelAngle) {
     if (verticalSpan > zoomUpperBound) verticalSpan = zoomUpperBound;
 }
 
-glm::mat4 OrthographicCamera::modelViewMatrixNoTranslate() const {
-	const glm::mat4 rotationMatrixAroundX = glm::rotate(glm::radians(angleAroundAxes.x), axisX);
-	const glm::mat4 rotationMatrixAroundY = glm::rotate(glm::radians(angleAroundAxes.y), axisY);
-	const glm::mat4 rotationMatrixAroundZ = glm::rotate(glm::radians(angleAroundAxes.z), axisZ);
-    glm::mat4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
+QMatrix4x4 OrthographicCamera::modelViewMatrixNoTranslate() const {
+    QMatrix4x4 rotationMatrixAroundX;
+    rotationMatrixAroundX.rotate(angleAroundAxes.x(), axisX);
+    QMatrix4x4 rotationMatrixAroundY;
+    rotationMatrixAroundY.rotate(angleAroundAxes.y(), axisY);
+    QMatrix4x4 rotationMatrixAroundZ;
+    rotationMatrixAroundZ.rotate(angleAroundAxes.z(), axisZ);
+    QMatrix4x4 rotationMatrix = rotationMatrixAroundX * rotationMatrixAroundY * rotationMatrixAroundZ;
     return rotationMatrix;
 }
 
 
 void OrthographicCamera::setEyePosition(float x, float y, float z)
 {
-    eyePosition.x = x;
-    eyePosition.y = y;
-    eyePosition.z = z;
+    eyePosition.setX(x);
+    eyePosition.setY(y);
+    eyePosition.setZ(z);
 }
 
-glm::vec3 OrthographicCamera::getEyePosition()
+QVector3D OrthographicCamera::getEyePosition()
 {
     return eyePosition;
 }
 
 void OrthographicCamera::setAnglesAroundAxes(float x, float y, float z)
 {
-    angleAroundAxes.x = x;
-    angleAroundAxes.y = y;
-    angleAroundAxes.z = z;
+    angleAroundAxes.setX(x);
+    angleAroundAxes.setY(y);
+    angleAroundAxes.setZ(z);
 }
-glm::vec3 OrthographicCamera::getAnglesAroundAxes()
+QVector3D OrthographicCamera::getAnglesAroundAxes()
 {
     return angleAroundAxes;
 }
