@@ -829,9 +829,11 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 void MainWindow::tabCloseRequested(const int i)
 {
     documentArea->removeTab(i);
-    if (documentArea->currentIndex() == -1 || (QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0)){
+    if (documentArea->currentIndex() == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        statusBarPathLabel->setText("No document open");
+
         activeDocumentId = -1;
     }
 }
