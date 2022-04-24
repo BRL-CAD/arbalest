@@ -729,7 +729,7 @@ void MainWindow::newFile() {
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
-    QString filename( "Untitled");
+    QString filename("Untitled");
     const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
@@ -829,11 +829,10 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 void MainWindow::tabCloseRequested(const int i)
 {
     documentArea->removeTab(i);
-    if (documentArea->currentIndex() == -1){
+    if (documentArea->currentIndex() == -1 || (QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0)){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         activeDocumentId = -1;
-        documentArea->addTab(new HelpWidget(), "Quick Start");
     }
 }
 
