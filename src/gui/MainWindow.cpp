@@ -48,6 +48,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     Globals::mainWindow = this;
 }
 
+bool MainWindow::checkTabStatus() const {
+    if (activeDocumentId == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
 MainWindow::~MainWindow()
 {
     for (const std::pair<const int, Document *> &pair : documents){
@@ -124,7 +132,9 @@ void MainWindow::prepareUi() {
 
     QAction* createArb8Act = new QAction(tr("Arb8"), this);
     connect(createArb8Act, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -141,7 +151,9 @@ void MainWindow::prepareUi() {
 
     QAction* createConeAct = new QAction(tr("Cone"), this);
     connect(createConeAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Cone * object = new BRLCAD::Cone();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -161,7 +173,9 @@ void MainWindow::prepareUi() {
 
     QAction* createEllipsoidAct = new QAction(tr("Ellipsoid"), this);
     connect(createEllipsoidAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -179,7 +193,9 @@ void MainWindow::prepareUi() {
 
     QAction* createEllipticalTorusAct = new QAction(tr("EllipticalTorus"), this);
     connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -198,7 +214,9 @@ void MainWindow::prepareUi() {
 
     QAction* createHalfspaceAct = new QAction(tr("Halfspace"), this);
     connect(createHalfspaceAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -217,7 +235,9 @@ void MainWindow::prepareUi() {
 
     QAction* createHyperbolicCylinderAct = new QAction(tr("HyperbolicCylinder"), this);
     connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -236,7 +256,9 @@ void MainWindow::prepareUi() {
 
     QAction* createHyperboloidAct = new QAction(tr("Hyperboloid"), this);
     connect(createHyperboloidAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -256,7 +278,9 @@ void MainWindow::prepareUi() {
 
     QAction* createParabolicCylinderAct = new QAction(tr("ParabolicCylinder"), this);
     connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -276,7 +300,9 @@ void MainWindow::prepareUi() {
 
     QAction* createParaboloidAct = new QAction(tr("Paraboloid"), this);
     connect(createParaboloidAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -295,7 +321,9 @@ void MainWindow::prepareUi() {
 
     QAction* createParticleAct = new QAction(tr("Particle"), this);
     connect(createParticleAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Particle * object = new BRLCAD::Particle();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -313,7 +341,9 @@ void MainWindow::prepareUi() {
 
     QAction* createTorusAct = new QAction(tr("Torus"), this);
     connect(createTorusAct, &QAction::triggered, this,[this](){
-        if (activeDocumentId == -1) return;
+        if (checkTabStatus()) {
+            return;
+        }
 
         BRLCAD::Torus * object = new BRLCAD::Torus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -765,24 +795,24 @@ void MainWindow::openFile(const QString& filePath) {
 }
 
 bool MainWindow::saveFile(const QString& filePath) {
-    if (activeDocumentId == -1) return false;
     return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
 }
 
-void MainWindow::openFileDialog()
-{
+void MainWindow::openFileDialog() {
 	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    if (!filePath.isEmpty()){
+    if (!filePath.isEmpty()) {
         openFile(filePath);
     }
 }
 
 void MainWindow::saveAsFileDialog() {
-    if (activeDocumentId == -1) return;
+    if (checkTabStatus()) {
+        return;
+    }
+
 	const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()) {
-        if (saveFile(filePath))
-        {
+        if (saveFile(filePath)) {
             documents[activeDocumentId]->setFilePath(filePath);
             QString filename(QFileInfo(filePath).fileName());
             documentArea->setTabText(documentArea->currentIndex(), filename);
@@ -793,13 +823,17 @@ void MainWindow::saveAsFileDialog() {
 }
 
 void MainWindow::saveFileDefaultPath() {
-    if (activeDocumentId == -1) return;
-    if (documents[activeDocumentId]->getFilePath() == nullptr) saveAsFileDialog();
+    if (checkTabStatus()) {
+        return;
+    }
+
+    if (documents[activeDocumentId]->getFilePath() == nullptr) {
+        saveAsFileDialog();
+    }
     else {
         const QString filePath = *documents[activeDocumentId]->getFilePath();
         if (!filePath.isEmpty()) {
-            if (saveFile(filePath))
-            {
+            if (saveFile(filePath)) {
                 statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
             }
         }
