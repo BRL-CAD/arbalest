@@ -856,7 +856,12 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             for(QAction * action:singleViewAct) action->setChecked(false);
             singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
         }
-
+    }
+    else if (displayGrid == nullptr && documentArea->count() > 1) {
+        objectTreeWidgetDockable->clear();
+        objectPropertiesDockable->clear();
+        statusBarPathLabel->setText("");
+        activeDocumentId = -1;
     }
 }
 
