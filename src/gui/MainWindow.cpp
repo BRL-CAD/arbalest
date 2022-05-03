@@ -48,14 +48,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     Globals::mainWindow = this;
 }
 
-bool MainWindow::checkTabStatus() const {
-    if (activeDocumentId == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0) {
-        return true;
-    }
-
-    return false;
-}
-
 MainWindow::~MainWindow()
 {
     for (const std::pair<const int, Document *> &pair : documents){
@@ -132,9 +124,7 @@ void MainWindow::prepareUi() {
 
     QAction* createArb8Act = new QAction(tr("Arb8"), this);
     connect(createArb8Act, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -151,9 +141,7 @@ void MainWindow::prepareUi() {
 
     QAction* createConeAct = new QAction(tr("Cone"), this);
     connect(createConeAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Cone * object = new BRLCAD::Cone();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -173,9 +161,7 @@ void MainWindow::prepareUi() {
 
     QAction* createEllipsoidAct = new QAction(tr("Ellipsoid"), this);
     connect(createEllipsoidAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -193,9 +179,7 @@ void MainWindow::prepareUi() {
 
     QAction* createEllipticalTorusAct = new QAction(tr("EllipticalTorus"), this);
     connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -214,9 +198,7 @@ void MainWindow::prepareUi() {
 
     QAction* createHalfspaceAct = new QAction(tr("Halfspace"), this);
     connect(createHalfspaceAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -235,9 +217,7 @@ void MainWindow::prepareUi() {
 
     QAction* createHyperbolicCylinderAct = new QAction(tr("HyperbolicCylinder"), this);
     connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -256,9 +236,7 @@ void MainWindow::prepareUi() {
 
     QAction* createHyperboloidAct = new QAction(tr("Hyperboloid"), this);
     connect(createHyperboloidAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -278,9 +256,7 @@ void MainWindow::prepareUi() {
 
     QAction* createParabolicCylinderAct = new QAction(tr("ParabolicCylinder"), this);
     connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -300,9 +276,7 @@ void MainWindow::prepareUi() {
 
     QAction* createParaboloidAct = new QAction(tr("Paraboloid"), this);
     connect(createParaboloidAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -321,9 +295,7 @@ void MainWindow::prepareUi() {
 
     QAction* createParticleAct = new QAction(tr("Particle"), this);
     connect(createParticleAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Particle * object = new BRLCAD::Particle();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -341,9 +313,7 @@ void MainWindow::prepareUi() {
 
     QAction* createTorusAct = new QAction(tr("Torus"), this);
     connect(createTorusAct, &QAction::triggered, this,[this](){
-        if (checkTabStatus()) {
-            return;
-        }
+        if (activeDocumentId == -1) return;
 
         BRLCAD::Torus * object = new BRLCAD::Torus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
@@ -806,7 +776,7 @@ void MainWindow::openFileDialog() {
 }
 
 void MainWindow::saveAsFileDialog() {
-    if (checkTabStatus()) {
+    if (activeDocumentId == -1) {
         return;
     }
 
@@ -823,7 +793,7 @@ void MainWindow::saveAsFileDialog() {
 }
 
 void MainWindow::saveFileDefaultPath() {
-    if (checkTabStatus()) {
+    if (activeDocumentId == -1) {
         return;
     }
 

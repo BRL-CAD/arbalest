@@ -27,9 +27,6 @@ public:
         return statusBar;
     }
 
-    // Returns true if no tabs are active or only current tab is "Quick Start" otherwise false
-    bool checkTabStatus() const;
-
     const int statusBarShortMessageDuration = 7000;
 
 private:
