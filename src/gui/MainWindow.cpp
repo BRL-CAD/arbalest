@@ -836,7 +836,6 @@ void MainWindow::tabCloseRequested(const int i)
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
-
         activeDocumentId = -1;
     }
 }
