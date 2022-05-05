@@ -768,21 +768,20 @@ bool MainWindow::saveFile(const QString& filePath) {
     return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
 }
 
-void MainWindow::openFileDialog() {
+void MainWindow::openFileDialog() 
+{
 	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
-    if (!filePath.isEmpty()) {
+    if (!filePath.isEmpty()){
         openFile(filePath);
     }
 }
 
 void MainWindow::saveAsFileDialog() {
-    if (activeDocumentId == -1) {
-        return;
-    }
-
+    if (activeDocumentId == -1) return;
 	const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()) {
-        if (saveFile(filePath)) {
+        if (saveFile(filePath)) 
+        {
             documents[activeDocumentId]->setFilePath(filePath);
             QString filename(QFileInfo(filePath).fileName());
             documentArea->setTabText(documentArea->currentIndex(), filename);
@@ -793,13 +792,8 @@ void MainWindow::saveAsFileDialog() {
 }
 
 void MainWindow::saveFileDefaultPath() {
-    if (activeDocumentId == -1) {
-        return;
-    }
-
-    if (documents[activeDocumentId]->getFilePath() == nullptr) {
-        saveAsFileDialog();
-    }
+    if (activeDocumentId == -1) return;
+    if (documents[activeDocumentId]->getFilePath() == nullptr) saveAsFileDialog();
     else {
         const QString filePath = *documents[activeDocumentId]->getFilePath();
         if (!filePath.isEmpty()) {
@@ -827,7 +821,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
         }
     }
-    else if (displayGrid == nullptr && documentArea->count() > 1) {
+    else if (displayGrid == nullptr && documentArea->count() > 1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
@@ -838,10 +832,10 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 void MainWindow::tabCloseRequested(const int i)
 {
     documentArea->removeTab(i);
-    if (documentArea->currentIndex() == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0) {
+    if (documentArea->currentIndex() == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
-        statusBarPathLabel->setText("No document open");
+        statusBarPathLabel->setText("");
 
         activeDocumentId = -1;
     }
