@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     prepareUi();
     prepareDockables();
 
-
+    documentArea->addTab(new HelpWidget(), "Quick Start");
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
@@ -702,8 +702,6 @@ void MainWindow::prepareUi() {
     });
 
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopRightCorner);
-
-    documentArea->addTab(new HelpWidget(), "Quick Start");
 }
 
 void MainWindow::prepareDockables(){
@@ -821,7 +819,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
         }
     }
-    else if (displayGrid == nullptr && documentArea->count() > 1){
+    else if (displayGrid == nullptr){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
