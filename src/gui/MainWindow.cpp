@@ -819,7 +819,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
         }
     }
-    else if (displayGrid == nullptr){
+    else{
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
