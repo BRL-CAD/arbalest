@@ -818,8 +818,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             for(QAction * action:singleViewAct) action->setChecked(false);
             singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
         }
-    }
-    else{
+    }else {
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
@@ -830,7 +829,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 void MainWindow::tabCloseRequested(const int i)
 {
     documentArea->removeTab(i);
-    if (documentArea->currentIndex() == -1 || QString::compare(documentArea->tabText(documentArea->currentIndex()), "Quick Start", Qt::CaseSensitive) == 0){
+    if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         statusBarPathLabel->setText("");
