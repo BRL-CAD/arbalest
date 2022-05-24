@@ -804,19 +804,21 @@ void MainWindow::saveFileDefaultPath() {
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
-    if (displayGrid != nullptr && displayGrid->getDocument()->getDocumentId() != activeDocumentId){
-        activeDocumentId = displayGrid->getDocument()->getDocumentId();
-        objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
-        objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
-        statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
+    if (displayGrid != nullptr){
+        if (displayGrid->getDocument()->getDocumentId() != activeDocumentId){
+            activeDocumentId = displayGrid->getDocument()->getDocumentId();
+            objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
+            objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
-        if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
-            currentViewport->setCurrentIndex(4);
-            for(QAction * action:singleViewAct) action->setChecked(false);
-        }else {
-            currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
-            for(QAction * action:singleViewAct) action->setChecked(false);
-            singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+            if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
+                currentViewport->setCurrentIndex(4);
+                for(QAction * action:singleViewAct) action->setChecked(false);
+            }else {
+                currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+                for(QAction * action:singleViewAct) action->setChecked(false);
+                singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+            }
         }
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
