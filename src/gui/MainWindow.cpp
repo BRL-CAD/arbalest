@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     prepareUi();
     prepareDockables();
 
-
+    documentArea->addTab(new HelpWidget(), "Quick Start");
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-    for (const std::pair<const int, Document *> pair: documents){
+    for (const std::pair<const int, Document *> &pair : documents){
         Document * document = pair.second;
         delete document;
     }
@@ -702,8 +702,6 @@ void MainWindow::prepareUi() {
     });
 
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopRightCorner);
-
-    documentArea->addTab(new HelpWidget(), "Quick Start");
 }
 
 void MainWindow::prepareDockables(){
@@ -729,7 +727,7 @@ void MainWindow::newFile() {
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
-    QString filename( "Untitled");
+    QString filename("Untitled");
     const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
@@ -765,11 +763,10 @@ void MainWindow::openFile(const QString& filePath) {
 }
 
 bool MainWindow::saveFile(const QString& filePath) {
-    if (activeDocumentId == -1) return false;
     return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
 }
 
-void MainWindow::openFileDialog()
+void MainWindow::openFileDialog() 
 {
 	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()){
@@ -781,7 +778,7 @@ void MainWindow::saveAsFileDialog() {
     if (activeDocumentId == -1) return;
 	const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()) {
-        if (saveFile(filePath))
+        if (saveFile(filePath)) 
         {
             documents[activeDocumentId]->setFilePath(filePath);
             QString filename(QFileInfo(filePath).fileName());
@@ -798,8 +795,7 @@ void MainWindow::saveFileDefaultPath() {
     else {
         const QString filePath = *documents[activeDocumentId]->getFilePath();
         if (!filePath.isEmpty()) {
-            if (saveFile(filePath))
-            {
+            if (saveFile(filePath)) {
                 statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
             }
         }
@@ -808,21 +804,27 @@ void MainWindow::saveFileDefaultPath() {
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
-    if (displayGrid != nullptr && displayGrid->getDocument()->getDocumentId() != activeDocumentId){
-        activeDocumentId = displayGrid->getDocument()->getDocumentId();
-        objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
-        objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
-        statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
+    if (displayGrid != nullptr){
+        if (displayGrid->getDocument()->getDocumentId() != activeDocumentId){
+            activeDocumentId = displayGrid->getDocument()->getDocumentId();
+            objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
+            objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
-        if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
-            currentViewport->setCurrentIndex(4);
-            for(QAction * action:singleViewAct) action->setChecked(false);
-        }else {
-            currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
-            for(QAction * action:singleViewAct) action->setChecked(false);
-            singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+            if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
+                currentViewport->setCurrentIndex(4);
+                for(QAction * action:singleViewAct) action->setChecked(false);
+            }else {
+                currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+                for(QAction * action:singleViewAct) action->setChecked(false);
+                singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+            }
         }
-
+    }else if (activeDocumentId != -1){
+        objectTreeWidgetDockable->clear();
+        objectPropertiesDockable->clear();
+        statusBarPathLabel->setText("");
+        activeDocumentId = -1;
     }
 }
 
@@ -832,8 +834,8 @@ void MainWindow::tabCloseRequested(const int i)
     if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        statusBarPathLabel->setText("");
         activeDocumentId = -1;
-        documentArea->addTab(new HelpWidget(), "Quick Start");
     }
 }
 
