@@ -1,6 +1,6 @@
 //#define ARB_DEBUG
 
-#include <QtWidgets/QApplication>
+#include <QApplication>
 #include <DisplayGrid.h>
 #include "MainWindow.h"
 
@@ -17,8 +17,7 @@ int main(int argc, char*argv[]) {
     QApplication app(argc,argv);
     MainWindow mainWindow;
     mainWindow.showMaximized();
-    QApplication::exec();
-    return 0;
+    return app.exec();
 }
 
 /*
