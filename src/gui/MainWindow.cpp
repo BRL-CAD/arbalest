@@ -589,26 +589,26 @@ void MainWindow::prepareUi() {
     QHBoxWidget * mainTabBarCornerWidget = new QHBoxWidget();
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
-    QPushButton* newButton = new QPushButton(menuTitleBar);
-    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png","$Color-IconFile")));
-    newButton->setObjectName("toolbarButton");
+    QToolButton* newButton = new QToolButton(menuTitleBar);
+    newButton->setDefaultAction(newAct);
+    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-IconFile")));
+    newButton->setObjectName("newToolButton");
     newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
-    connect(newButton, &QPushButton::clicked, this, &MainWindow::newFile);
 
-    QPushButton* openButton = new QPushButton(menuTitleBar);
-    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png","$Color-IconFile")));
-    openButton->setObjectName("toolbarButton");
-    openButton->setToolTip("Open.. (Ctrl+O)");
-    mainTabBarCornerWidget->addWidget(openButton);	
-    connect(openButton, &QPushButton::clicked, this, &MainWindow::openFileDialog);
+    QToolButton* openButton = new QToolButton(menuTitleBar);
+    openButton->setDefaultAction(openAct);
+    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-IconFile")));
+    openButton->setObjectName("openToolButton");
+    openButton->setToolTip("Open (Ctrl+O)");
+    mainTabBarCornerWidget->addWidget(openButton);
 
-    QPushButton* saveButton = new QPushButton(menuTitleBar);
-    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png","$Color-IconFile")));
-    saveButton->setObjectName("toolbarButton");
+    QToolButton* saveButton = new QToolButton(menuTitleBar);
+    saveButton->setDefaultAction(saveAct);
+    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-IconFile")));
+    saveButton->setObjectName("saveToolButton");
     saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);
-    connect(saveButton, &QPushButton::clicked, this, &MainWindow::saveFileDefaultPath);
 
 //    QPushButton* saveAsButton = new QPushButton(menuTitleBar);
 //    saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
@@ -619,41 +619,25 @@ void MainWindow::prepareUi() {
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
-
-    QPushButton* focusAll = new QPushButton(menuTitleBar);
-    focusAll->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png","$Color-IconView")));
-    focusAll->setObjectName("toolbarButton");
+    QToolButton* focusAll = new QToolButton(menuTitleBar);
+    focusAll->setDefaultAction(autoViewAct);
+    focusAll->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-IconFile")));
+    focusAll->setObjectName("focusAllToolButton");
     focusAll->setToolTip("Focus on all visible objects (Ctrl+F)");
-    connect(focusAll, &QPushButton::clicked, this, [this](){
-        if (activeDocumentId == -1) return;
-        for(Display * display : documents[activeDocumentId]->getDisplayGrid()->getDisplays()){
-            display->getCamera()->autoview();
-            display->forceRerenderFrame();
-        }
-    });
     mainTabBarCornerWidget->addWidget(focusAll);
 
-    QPushButton* focusCurrent = new QPushButton(menuTitleBar);
-    focusCurrent->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png","$Color-IconView")));
-    focusCurrent->setObjectName("toolbarButton");
+    QToolButton* focusCurrent = new QToolButton(menuTitleBar);
+    focusCurrent->setDefaultAction(centerViewAct);
+    focusCurrent->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-IconFile")));
+    focusCurrent->setObjectName("focusCurrentToolButton");
     focusCurrent->setToolTip("Focus on selected object (F)");
-    connect(focusCurrent, &QPushButton::clicked, this, [this](){
-        if (activeDocumentId == -1) return;
-        if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
-        int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
-        documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
-    });
     mainTabBarCornerWidget->addWidget(focusCurrent);
 
-
-    QPushButton* resetViewports = new QPushButton(menuTitleBar);
-    resetViewports->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png","$Color-IconView")));
-    resetViewports->setObjectName("toolbarButton");
+    QToolButton* resetViewports = new QToolButton(menuTitleBar);
+    resetViewports->setDefaultAction(resetAllViewportsAct);
+    resetViewports->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-IconFile")));
+    resetViewports->setObjectName("focusCurrentToolButton");
     resetViewports->setToolTip("Reset the viewports and focus on the visible");
-    connect(resetViewports, &QPushButton::clicked, this, [this](){
-        if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->resetAllViewPorts();
-    });
     mainTabBarCornerWidget->addWidget(resetViewports);
     
     currentViewport->setToolTip("Change viewport");
@@ -672,34 +656,21 @@ void MainWindow::prepareUi() {
     });
     mainTabBarCornerWidget->addWidget(currentViewport);
 
-
-
-    QPushButton* toggleGrid = new QPushButton(menuTitleBar);
-    toggleGrid->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png","$Color-IconView")));
-    toggleGrid->setObjectName("toolbarButton");
+    QToolButton* toggleGrid = new QToolButton(menuTitleBar);
+    toggleGrid->setDefaultAction(toggleGridAct);
+    toggleGrid->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconFile")));
+    toggleGrid->setObjectName("toggleGridToolButton");
     toggleGrid->setToolTip("Toggle grid on/off (G)");
-    connect(toggleGrid, &QPushButton::clicked, this, [this](){
-        if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled =
-                !documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled;
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->forceRerenderFrame();
-    });
     mainTabBarCornerWidget->addWidget(toggleGrid);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
-    QPushButton* raytraceButton = new QPushButton(menuTitleBar);
-    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png","$Color-IconRaytrace")));
-    raytraceButton->setObjectName("toolbarButton");
+    QToolButton* raytraceButton = new QToolButton(menuTitleBar);
+    raytraceButton->setDefaultAction(raytraceAct);
+    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-IconFile")));
+    raytraceButton->setObjectName("toggleGridToolButton");
     raytraceButton->setToolTip("Raytrace current viewport (Ctrl+R)");
     mainTabBarCornerWidget->addWidget(raytraceButton);
-    connect(raytraceButton, &QPushButton::clicked, this, [this](){
-        if (activeDocumentId == -1) return;
-        statusBar->showMessage("Raytracing current viewport...", statusBarShortMessageDuration);
-        QCoreApplication::processEvents();
-        documents[activeDocumentId]->getRaytraceWidget()->raytrace();
-        statusBar->showMessage("Raytracing completed.", statusBarShortMessageDuration);
-    });
 
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopRightCorner);
 }
