@@ -591,21 +591,21 @@ void MainWindow::prepareUi() {
 
     QToolButton* newButton = new QToolButton(menuTitleBar);
     newButton->setDefaultAction(newAct);
-    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-IconView")));
+    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-IconFile")));
     newButton->setObjectName("newToolButton");
     newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
 
     QToolButton* openButton = new QToolButton(menuTitleBar);
     openButton->setDefaultAction(openAct);
-    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-IconView")));
+    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-IconFile")));
     openButton->setObjectName("openToolButton");
     openButton->setToolTip("Open (Ctrl+O)");
     mainTabBarCornerWidget->addWidget(openButton);
 
     QToolButton* saveButton = new QToolButton(menuTitleBar);
     saveButton->setDefaultAction(saveAct);
-    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-IconView")));
+    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-IconFile")));
     saveButton->setObjectName("saveToolButton");
     saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);
@@ -667,7 +667,7 @@ void MainWindow::prepareUi() {
 
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
-    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-IconView")));
+    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-IconRaytrace")));
     raytraceButton->setObjectName("toggleGridToolButton");
     raytraceButton->setToolTip("Raytrace current viewport (Ctrl+R)");
     mainTabBarCornerWidget->addWidget(raytraceButton);
