@@ -104,6 +104,9 @@ QMenuBar::item:selected {
 	background-color:"$Color-MainMenuText";
 }
 
+QToolButton {
+    border: 0px;
+}
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 
