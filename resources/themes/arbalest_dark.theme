@@ -29,6 +29,7 @@ $Color-ColorText                        : #9fc1ff;  // for colorful text
 $Color-IconFile                         : #7b14e3;
 $Color-IconView                         : #25a2c1;
 $Color-IconRaytrace                     : #d61d32;
+$Color-IconHover                        : #addfff;
 $Color-Cell                             : #606060;
 $Color-WindowTitleButtons               : #ffffff;
 

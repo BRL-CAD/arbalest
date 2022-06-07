@@ -110,7 +110,7 @@ QToolButton {
 }
 
 QToolButton:hover {
-    background-color: #ADDFFF;
+    background-color: "$Color-IconHover";
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
