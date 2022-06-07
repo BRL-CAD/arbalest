@@ -37,6 +37,13 @@ QInputDialog, QMessageBox{
     color: "$Color-DefaultFontColor";
     background: "$Color-Main";
 }
+QToolButton {
+    border: 0px;
+    padding: 5px;
+}
+QToolButton:hover {
+    background-color: "$Color-IconHover";
+}
 QPushButton, QLineEdit{
     background: "$Color-Secondary";
 }
@@ -102,15 +109,6 @@ QMenuBar {
 QMenuBar::item:selected {
     color: "$Color-MainMenu";
 	background-color:"$Color-MainMenuText";
-}
-
-QToolButton {
-    border: 0px;
-    padding: 5px;
-}
-
-QToolButton:hover {
-    background-color: "$Color-IconHover";
 }
 
 /* -------------------------------------------------------------------------------------------------------------------*/
