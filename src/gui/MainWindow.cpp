@@ -88,18 +88,21 @@ void MainWindow::prepareUi() {
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
     QAction* newAct = new QAction(tr("&New"), this);
+    newAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-MenuIconFile")));
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("New .g file"));
     connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
     fileMenu->addAction(newAct);
 
     QAction* openAct = new QAction(tr("&Open"), this);
+    openAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-MenuIconFile")));
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
     QAction* saveAct = new QAction(tr("Save"), this);
+    saveAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")));
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
@@ -372,6 +375,7 @@ void MainWindow::prepareUi() {
     viewMenu->addAction(resetViewportAct);
 
     QAction* resetAllViewportsAct = new QAction("Reset all viewports", this);
+    resetAllViewportsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-MenuIconView")));
     resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
     connect(resetAllViewportsAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
@@ -382,6 +386,7 @@ void MainWindow::prepareUi() {
     viewMenu->addSeparator();
 
     QAction* autoViewAct = new QAction(tr("Focus visible objects (all viewports)"), this);
+    autoViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-MenuIconView")));
     autoViewAct->setShortcut(Qt::Key_F|Qt::CTRL);
     autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewAct, &QAction::triggered, this, [this](){
@@ -403,6 +408,7 @@ void MainWindow::prepareUi() {
     viewMenu->addAction(autoViewSingleAct);
 
     QAction* centerViewAct = new QAction(tr("Focus selected object"), this);
+    centerViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-MenuIconView")));
     centerViewAct->setStatusTip(tr("Resize and center the view based on the selected objects"));
     centerViewAct->setShortcut(Qt::Key_F);
     connect(centerViewAct, &QAction::triggered, this, [this](){
@@ -452,6 +458,7 @@ void MainWindow::prepareUi() {
     viewMenu->addSeparator();
     
     QAction* toggleGridAct = new QAction(tr("Toggle grid on/off"), this);
+    toggleGridAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-MenuIconView")));
     toggleGridAct->setShortcut(Qt::Key_G);
     connect(toggleGridAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
@@ -491,6 +498,7 @@ void MainWindow::prepareUi() {
 
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
     QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
+    raytraceAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-MenuIconRaytrace")));
     raytraceAct->setStatusTip(tr("Raytrace current viewport"));
     raytraceAct->setShortcut(Qt::CTRL|Qt::Key_R);
     connect(raytraceAct, &QAction::triggered, this, [this](){
