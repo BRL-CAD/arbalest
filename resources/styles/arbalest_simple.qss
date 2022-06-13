@@ -37,7 +37,7 @@ QInputDialog, QMessageBox{
     color: "$Color-DefaultFontColor";
     background: "$Color-Main";
 }
-QPushButton, QLineEdit{
+QPushButton, QLineEdit, QToolButton{
     background: "$Color-Secondary";
 }
 QLabel {
@@ -103,6 +103,7 @@ QMenuBar::item:selected {
     color: "$Color-MainMenu";
 	background-color:"$Color-MainMenuText";
 }
+
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 
