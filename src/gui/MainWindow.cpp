@@ -659,9 +659,21 @@ void MainWindow::prepareUi() {
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
     toggleGrid->setDefaultAction(toggleGridAct);
     toggleGrid->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconView")));
-    toggleGrid->setObjectName("toggleGridToolButton");
-    toggleGrid->setToolTip("Toggle grid on/off (G)");
+    toggleGrid->setObjectName("toolbarButton");
+    toggleGrid->setToolTip("Toggle grid on (G)");
     mainTabBarCornerWidget->addWidget(toggleGrid);
+    connect(toggleGrid, &QToolButton::pressed, this, [=]() {
+        if (activeDocumentId == -1) return;
+
+        if (!toggleGrid->isChecked()) {
+            toggleGrid->setChecked(true);
+            toggleGrid->setToolTip("Toggle grid off (G)");
+        }
+        else {
+            toggleGrid->setChecked(false);
+            toggleGrid->setToolTip("Toggle grid on (G)");
+        }
+    });
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
