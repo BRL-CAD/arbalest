@@ -599,19 +599,19 @@ void MainWindow::prepareUi() {
 
     QToolButton* newButton = new QToolButton(menuTitleBar);
     newButton->setDefaultAction(newAct);
-    newButton->setObjectName("newToolButton");
+    newButton->setObjectName("toolbarButton");
     newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
 
     QToolButton* openButton = new QToolButton(menuTitleBar);
     openButton->setDefaultAction(openAct);
-    openButton->setObjectName("openToolButton");
+    openButton->setObjectName("toolbarButton");
     openButton->setToolTip("Open (Ctrl+O)");
     mainTabBarCornerWidget->addWidget(openButton);
 
     QToolButton* saveButton = new QToolButton(menuTitleBar);
     saveButton->setDefaultAction(saveAct);
-    saveButton->setObjectName("saveToolButton");
+    saveButton->setObjectName("toolbarButton");
     saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);
 
@@ -626,19 +626,19 @@ void MainWindow::prepareUi() {
 
     QToolButton* focusAll = new QToolButton(menuTitleBar);
     focusAll->setDefaultAction(autoViewAct);
-    focusAll->setObjectName("focusAllToolButton");
+    focusAll->setObjectName("toolbarButton");
     focusAll->setToolTip("Focus on all visible objects (Ctrl+F)");
     mainTabBarCornerWidget->addWidget(focusAll);
 
     QToolButton* focusCurrent = new QToolButton(menuTitleBar);
     focusCurrent->setDefaultAction(centerViewAct);
-    focusCurrent->setObjectName("focusCurrentToolButton");
+    focusCurrent->setObjectName("toolbarButton");
     focusCurrent->setToolTip("Focus on selected object (F)");
     mainTabBarCornerWidget->addWidget(focusCurrent);
 
     QToolButton* resetViewports = new QToolButton(menuTitleBar);
     resetViewports->setDefaultAction(resetAllViewportsAct);
-    resetViewports->setObjectName("focusCurrentToolButton");
+    resetViewports->setObjectName("toolbarButton");
     resetViewports->setToolTip("Reset the viewports and focus on the visible");
     mainTabBarCornerWidget->addWidget(resetViewports);
     
@@ -660,7 +660,7 @@ void MainWindow::prepareUi() {
 
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
     toggleGrid->setDefaultAction(toggleGridAct);
-    toggleGrid->setObjectName("toggleGridToolButton");
+    toggleGrid->setObjectName("toolbarButton");
     toggleGrid->setToolTip("Toggle grid on/off (G)");
     mainTabBarCornerWidget->addWidget(toggleGrid);
 
@@ -668,7 +668,7 @@ void MainWindow::prepareUi() {
 
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
-    raytraceButton->setObjectName("toggleGridToolButton");
+    raytraceButton->setObjectName("toolbarButton");
     raytraceButton->setToolTip("Raytrace current viewport (Ctrl+R)");
     mainTabBarCornerWidget->addWidget(raytraceButton);
 
