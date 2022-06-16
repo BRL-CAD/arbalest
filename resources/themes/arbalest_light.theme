@@ -1,9 +1,9 @@
 $Color-Main                             : #f2f2f2;  // Used as the main background color. Used in main window,  etc.
 $Color-MainMenu                         : #68217A;  //
 $Color-Menu                             : #68217A;  //
-$Color-MenuIconFile                     : #5a96d1;  // Used as color for File menu items
-$Color-MenuIconView                     : #21d1ae;  // Used as color for View menu items
-$Color-MenuIconRaytrace                 : #d61d32;  // Used as color for Raytrace item
+$Color-MenuIconFile                     : #5681a6;  // Used as color for File menu items
+$Color-MenuIconView                     : #0d7088;  // Used as color for View menu items
+$Color-MenuIconRaytrace                 : #cf041b;  // Used as color for Raytrace item
 $Color-MenuText                         : #ffffff;  //
 $Color-MainMenuText                     : #ffffff;  //
 $Color-Secondary                        : #fcfcfc;  // Used as the background color for some main UI components like objects tree
@@ -29,9 +29,6 @@ $Color-ToolbarSeparator                 : #c2c2c2;
 $Color-HelpWidget                       : #f7f7f7;
 $Color-GraphicsView                     : #d8d8d8;
 $Color-ColorText                        : #6666ff;  // for colorful text
-$Color-IconFile                         : #430086;
-$Color-IconView                         : #0d7088;
-$Color-IconRaytrace                     : #cf041b;
 $Color-Cell                             : #fdfdfd;
 $Color-WindowTitleButtons               : #ffffff;
 
