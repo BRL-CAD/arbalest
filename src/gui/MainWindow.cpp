@@ -121,6 +121,7 @@ void MainWindow::prepareUi() {
     QIcon saveAsActIcon;
     saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-as-96.png", "$Color-MenuIconFile")), QIcon::Normal);
     saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-as-96.png", "$Color-Menu")), QIcon::Active);
+    saveAsAct->setIcon(saveAsActIcon);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
