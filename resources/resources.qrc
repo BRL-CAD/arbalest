@@ -36,6 +36,12 @@
 
     <!-- Tab close -->
     <file>icons/sadeep_created_close-tab.png</file>
+
+    <!-- Menu file save as -->
+    <file>icons/icons8-save-as-96.png</file>
+
+    <!-- Menu close -->
+    <file>icons/icons8-close-90.png</file>
   </qresource>
 
 </RCC>

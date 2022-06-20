@@ -4,6 +4,7 @@ $Color-Menu                             : #68217A;  //
 $Color-MenuIconFile                     : #7167a3;  // Used as color for File menu items
 $Color-MenuIconView                     : #0d7088;  // Used as color for View menu items
 $Color-MenuIconRaytrace                 : #cf041b;  // Used as color for Raytrace item
+$Color-MenuIconQuit                     : #d10f1c;  // Used as color for Quit item
 $Color-MenuText                         : #ffffff;  //
 $Color-MainMenuText                     : #ffffff;  //
 $Color-Secondary                        : #fcfcfc;  // Used as the background color for some main UI components like objects tree
