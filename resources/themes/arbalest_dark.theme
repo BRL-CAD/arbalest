@@ -30,6 +30,9 @@ $Color-ToolbarSeparator                 : #151515;
 $Color-HelpWidget                       : #797979;
 $Color-GraphicsView                     : #797979;
 $Color-ColorText                        : #9fc1ff;  // for colorful text
+$Color-IconFile                         : #7b14e3;
+$Color-IconView                         : #25a2c1;
+$Color-IconRaytrace                     : #d61d32;
 $Color-Cell                             : #606060;
 $Color-WindowTitleButtons               : #ffffff;
 
