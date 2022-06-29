@@ -87,41 +87,37 @@ void MainWindow::prepareUi() {
 
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
-    QAction* newAct = new QAction(tr("&New"), this);
     QIcon newActIcon;
     newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    newAct->setIcon(newActIcon);
+    QAction* newAct = new QAction(newActIcon, tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("New .g file"));
     connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
     fileMenu->addAction(newAct);
 
-    QAction* openAct = new QAction(tr("&Open"), this);
     QIcon openActIcon;
     openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    openAct->setIcon(openActIcon);
+    QAction* openAct = new QAction(openActIcon, tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QAction* saveAct = new QAction(tr("Save"), this);
     QIcon saveActIcon;
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    saveAct->setIcon(saveActIcon);
+    QAction* saveAct = new QAction(saveActIcon, tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
     fileMenu->addAction(saveAct);
 
-    QAction* saveAsAct = new QAction(tr("Save As..."), this);
     QIcon saveAsActIcon;
-    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-as-96.png", "$Color-MenuIconFile")), QIcon::Normal);
-    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-as-96.png", "$Color-Menu")), QIcon::Active);
-    saveAsAct->setIcon(saveAsActIcon);
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-MenuIconFile")), QIcon::Normal);
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-Menu")), QIcon::Active);
+    QAction* saveAsAct = new QAction(saveAsActIcon, tr("Save As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
@@ -129,10 +125,9 @@ void MainWindow::prepareUi() {
     
     fileMenu->addSeparator();
 
-    QAction* quitAct = new QAction(tr("Quit"), this);
     QIcon quitActIcon;
-    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-close-90.png", "$Color-MenuIconQuit")), QIcon::Normal);
-    quitAct->setIcon(quitActIcon);
+    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-MenuIconQuit")), QIcon::Normal);
+    QAction* quitAct = new QAction(quitActIcon, tr("Quit"), this);
     quitAct->setStatusTip(tr("Quit"));
     connect(quitAct, &QAction::triggered, this,[this](){
         QCoreApplication::quit();
