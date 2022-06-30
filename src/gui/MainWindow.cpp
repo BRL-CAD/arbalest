@@ -118,7 +118,7 @@ void MainWindow::prepareUi() {
     saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-MenuIconFile")), QIcon::Normal);
     saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-Menu")), QIcon::Active);
     QAction* saveAsAct = new QAction(saveAsActIcon, tr("Save As..."), this);
-    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
     fileMenu->addAction(saveAsAct);
@@ -128,6 +128,7 @@ void MainWindow::prepareUi() {
     QIcon quitActIcon;
     quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-MenuIconQuit")), QIcon::Normal);
     QAction* quitAct = new QAction(quitActIcon, tr("Quit"), this);
+    quitAct->setShortcut(QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit"));
     connect(quitAct, &QAction::triggered, this,[this](){
         QCoreApplication::quit();
