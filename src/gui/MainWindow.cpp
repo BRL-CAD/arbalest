@@ -99,7 +99,7 @@ void MainWindow::prepareUi() {
     QIcon openActIcon;
     openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    QAction* openAct = new QAction(openActIcon, tr("&Open"), this);
+    QAction* openAct = new QAction(openActIcon, tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
@@ -192,7 +192,7 @@ void MainWindow::prepareUi() {
     createMenu->addAction(createEllipsoidAct);
 
 
-    QAction* createEllipticalTorusAct = new QAction(tr("EllipticalTorus"), this);
+    QAction* createEllipticalTorusAct = new QAction(tr("Elliptical Torus"), this);
     connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
@@ -230,7 +230,7 @@ void MainWindow::prepareUi() {
 
 
 
-    QAction* createHyperbolicCylinderAct = new QAction(tr("HyperbolicCylinder"), this);
+    QAction* createHyperbolicCylinderAct = new QAction(tr("Hyperbolic Cylinder"), this);
     connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
@@ -269,7 +269,7 @@ void MainWindow::prepareUi() {
 
 
 
-    QAction* createParabolicCylinderAct = new QAction(tr("ParabolicCylinder"), this);
+    QAction* createParabolicCylinderAct = new QAction(tr("Parabolic Cylinder"), this);
     connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
