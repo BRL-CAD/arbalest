@@ -639,7 +639,7 @@ void MainWindow::prepareUi() {
     saveAsButton->setDefaultAction(saveAsAct);
     saveAsButton->setObjectName("toolbarButton");
     QIcon saveAsButtonIcon;
-    saveAsButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/icons8-save-as-96.png", "$Color-IconFile")), QIcon::Normal);
+    saveAsButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-IconFile")), QIcon::Normal);
     saveAsButton->setIcon(saveAsButtonIcon);
     saveAsButton->setToolTip("Save as..");
     mainTabBarCornerWidget->addWidget(saveAsButton);
