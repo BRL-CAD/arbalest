@@ -59,13 +59,15 @@ private:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
+    bool isModified();
+    bool maybeSave();
 
     QAction *themeAct[2];
 	
 protected:
     void changeEvent(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
-
+    void closeEvent(QCloseEvent* event) override;
 	
 public slots:
     void openFileDialog();

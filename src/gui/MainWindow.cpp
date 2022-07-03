@@ -773,6 +773,34 @@ void MainWindow::saveFileDefaultPath() {
     }
 }
 
+bool MainWindow::isModified() {
+    
+}
+
+bool MainWindow::maybeSave() {
+    if (!isModified()) {
+        return true;
+    }
+
+    const QMessageBox::StandardButton ret
+        = QMessageBox::warning(this, tr("Arbalest"),
+            tr("The document has been modified.\n"
+                "Do you want to save your changes?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    
+    switch (ret) {
+    case QMessageBox::Save:
+        return true;
+    case QMessageBox::Discard:
+        return false;
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        break;
+    }
+    return true;
+}
+
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
     if (displayGrid != nullptr){
@@ -865,5 +893,15 @@ void MainWindow::changeEvent( QEvent* e ) {
         else{
             maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
         }
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+    if (maybeSave()) {
+        saveAsFileDialog();
+        event->accept();
+    }
+    else {
+        event->ignore();
     }
 }
