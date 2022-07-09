@@ -48,7 +48,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     Globals::mainWindow = this;
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow()
+{
+    for (const std::pair<const int, Document*>& pair : documents) {
+        Document* document = pair.second;
+        delete document;
+    }
+}
 
 void MainWindow::loadTheme()
 {
