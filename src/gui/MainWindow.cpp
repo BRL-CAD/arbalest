@@ -50,8 +50,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-    for (const std::pair<const int, Document *> &pair : documents){
-        Document * document = pair.second;
+    for (const std::pair<const int, Document*>& pair : documents) {
+        Document* document = pair.second;
         delete document;
     }
 }
@@ -801,7 +801,17 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 
 void MainWindow::tabCloseRequested(const int i)
 {
+    int documentId = -1;
+    DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(i));
+    
+    if (displayGrid != nullptr) {
+        documentId = displayGrid->getDocument()->getDocumentId();
+    }
     documentArea->removeTab(i);
+    if (documentId != -1) {
+        delete documents[documentId];
+        documents.erase(documentId);
+    }
     if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
