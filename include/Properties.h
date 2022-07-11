@@ -10,8 +10,10 @@
 #include <brlcad/MemoryDatabase.h>
 #include "Document.h"
 #include "QVBoxWidget.h"
+#include "TypeSpecificProperties.h"
 
 class Document;
+class TypeSpecificProperties;
 class Properties: public QVBoxWidget{
 public:
     explicit Properties(Document & document);
@@ -22,6 +24,8 @@ private:
 
 	// UI components
     Document & document;
+    TypeSpecificProperties * current;
+    BRLCAD::Object * object;
     QLabel * nameWidget;
     QLabel * fullPathWidget;
     QVBoxWidget * typeSpecificPropertiesArea;
