@@ -61,6 +61,12 @@ void Document::modifyObjectNoSet(int objectId) {
     geometryRenderer->refreshForVisibilityAndSolidChanges();
     for (Display * display : displayGrid->getDisplays())display->forceRerenderFrame();
 }
+
+bool Document::isModified() {
+    // TO DO
+}
+
+
 Display* Document::getDisplay()
 {
     return displayGrid->getActiveDisplay();

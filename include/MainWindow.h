@@ -59,7 +59,6 @@ private:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
-    bool isModified();
     bool maybeSave();
 
     QAction *themeAct[2];

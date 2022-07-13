@@ -89,6 +89,7 @@ public:
     }
 
     void modifyObjectNoSet(int objectId);
+    bool isModified();
 };
 
 

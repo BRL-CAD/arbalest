@@ -773,14 +773,11 @@ void MainWindow::saveFileDefaultPath() {
     }
 }
 
-bool MainWindow::isModified() {
-    
-}
-
 bool MainWindow::maybeSave() {
-    if (!isModified()) {
-        return true;
-    }
+    // TO DO
+    // if (!isModified()) {
+    //     return true;
+    // }
 
     const QMessageBox::StandardButton ret
         = QMessageBox::warning(this, tr("Arbalest"),
