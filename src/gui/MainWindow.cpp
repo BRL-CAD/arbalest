@@ -471,11 +471,23 @@ void MainWindow::prepareUi() {
     
     QAction* toggleGridAct = new QAction(tr("Toggle grid on/off"), this);
     toggleGridAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-MenuIconView")));
+    toggleGridAct->setCheckable(true);
     toggleGridAct->setShortcut(Qt::Key_G);
-    connect(toggleGridAct, &QAction::triggered, this, [this](){
-        if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = 
-                !documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled;
+    connect(toggleGridAct, &QAction::toggled, this, [=]() {
+        if (activeDocumentId == -1) {
+            toggleGridAct->setChecked(false);
+            return;
+        }
+
+        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled == false) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = true;
+            toggleGridAct->setToolTip("Toggle grid OFF (G)");
+        }
+        else {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = false;
+            toggleGridAct->setToolTip("Toggle grid ON (G)");
+        }
+
         documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->forceRerenderFrame();
     });
     viewMenu->addAction(toggleGridAct);
@@ -696,7 +708,6 @@ void MainWindow::prepareUi() {
     QIcon toggleGridIcon;
     toggleGridIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconView")), QIcon::Normal);
     toggleGrid->setIcon(toggleGridIcon);
-    toggleGrid->setToolTip("Toggle grid on/off (G)");
     mainTabBarCornerWidget->addWidget(toggleGrid);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
