@@ -773,18 +773,39 @@ void MainWindow::saveFileDefaultPath() {
     }
 }
 
+// IN PROGRESS
 bool MainWindow::maybeSave() {
-    // TO DO
-    // if (!isModified()) {
-    //     return true;
-    // }
+    int openedDocumentsCount = documents.size();
+    int documentId = -1;
+    std::vector<int> storeDocumentId;
+    QVector<QString> fileNames;
 
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Arbalest"),
-            tr("The document has been modified.\n"
-                "Do you want to save your changes?"),
-            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    
+    for (int i = 1; i <= openedDocumentsCount; ++i) {
+        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(i));
+        int documentId = displayGrid->getDocument()->getDocumentId();
+        
+        storeDocumentId.push_back(documentId);
+
+        QFileInfo pathName = documents[activeDocumentId]->getFilePath() != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled";
+        fileNames.push_back(pathName.fileName());
+        
+
+
+        //QMessageBox::information(this, "Documents Count", QString::number(activeDocumentId));
+    }
+
+    QMessageBox::StandardButton ret;
+
+    if (storeDocumentId.size() > 1) {
+
+    }
+    else {
+        QString info = "Do you want to save the changes you made to " + fileNames[storeDocumentId[0]] + "?\n" + 
+                       "Your changes will be lost if you don't save them.";
+        ret = QMessageBox::warning(this, tr("Arbalest"), info,
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    }
+
     switch (ret) {
     case QMessageBox::Save:
         return true;
@@ -797,6 +818,7 @@ bool MainWindow::maybeSave() {
     }
     return true;
 }
+
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
@@ -894,11 +916,16 @@ void MainWindow::changeEvent( QEvent* e ) {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if (maybeSave()) {
-        saveAsFileDialog();
-        event->accept();
+    if (documents.size() != 0) {
+        if (maybeSave()) {
+            // saveAsFileDialog();
+            event->accept();
+        }
+        else {
+            event->ignore();
+        }
     }
     else {
-        event->ignore();
+        event->accept();
     }
 }
