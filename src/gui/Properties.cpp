@@ -1,13 +1,11 @@
 
 #include <include/CollapsibleWidget.h>
 #include "Properties.h"
-#include "TypeSpecificProperties.h"
 #include <Globals.h>
 #include <iostream>
 #include "Utils.h"
 
-Properties::Properties(Document & document) : document(document) {
-
+Properties::Properties(Document & document) : document(document), object(nullptr), current(nullptr) {
     nameWidget = new QLabel(this);
     nameWidget->setWordWrap(true);
     nameWidget->setObjectName("properties-nameWidget");
@@ -30,12 +28,10 @@ void Properties::bindObject(const int objectId) {
     this->name = fullPath.split("/").last();
     fullPathWidget->setText(QString(fullPath).replace("/"," / "));
 
-    static BRLCAD::Object* object = nullptr;
     delete object;
-	object = document.getDatabase()->Get(fullPath.toUtf8().data());
+    object = document.getDatabase()->Get(fullPath.toUtf8().data());
     objectType = QString(object->Type());
 
-    static TypeSpecificProperties * current = nullptr;
     delete current;
     current = new TypeSpecificProperties(document, object, objectId);
     typeSpecificPropertiesArea->addWidget(current);
