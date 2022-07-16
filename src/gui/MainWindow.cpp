@@ -734,6 +734,10 @@ void MainWindow::openFile(const QString& filePath) {
 }
 
 bool MainWindow::saveFile(const QString& filePath) {
+    if (!documents[activeDocumentId]->isModified()) {
+        return false;
+    }
+
     return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
 }
 
@@ -776,38 +780,55 @@ void MainWindow::saveFileDefaultPath() {
 // IN PROGRESS
 bool MainWindow::maybeSave() {
     int openedDocumentsCount = documents.size();
-    int documentId = -1;
-    std::vector<int> storeDocumentId;
+    std::vector<int> unsavedDocumentId;
     QVector<QString> fileNames;
 
-    for (int i = 1; i <= openedDocumentsCount; ++i) {
-        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(i));
+    for (int documentIndex = 1; documentIndex <= openedDocumentsCount; ++documentIndex) {
+        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
         int documentId = displayGrid->getDocument()->getDocumentId();
-        
-        storeDocumentId.push_back(documentId);
 
-        QFileInfo pathName = documents[activeDocumentId]->getFilePath() != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled";
-        fileNames.push_back(pathName.fileName());
-        
+        // Checks if the document has any unsaved changes
+        if (documents[documentId]->isModified() == true) {
+            unsavedDocumentId.push_back(documentId);
 
-
+            QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
+            fileNames.push_back(pathName.fileName());
+        }
         //QMessageBox::information(this, "Documents Count", QString::number(activeDocumentId));
+    }
+
+    int unsavedDocumentsSize = unsavedDocumentId.size();
+
+    if (unsavedDocumentsSize == 0) {
+        return false;
     }
 
     QMessageBox::StandardButton ret;
 
-    if (storeDocumentId.size() > 1) {
+    if (unsavedDocumentsSize > 1) {
+        QString unsavedFileNames;
 
+        for (QString& name : fileNames) {
+            unsavedFileNames += name + "\n";
+        }
+
+        QString info = "Do you want to save the changes you made to the following " +
+            QString::number(unsavedDocumentId.size()) + " files?\n" + unsavedFileNames +
+            "Your changes will be lost if you don't save them.";
+        ret = QMessageBox::warning(this, tr("Arbalest"), info,
+            QMessageBox::Save | QMessageBox::SaveAll | QMessageBox::Cancel);
     }
     else {
-        QString info = "Do you want to save the changes you made to " + fileNames[storeDocumentId[0]] + "?\n" + 
-                       "Your changes will be lost if you don't save them.";
+        QString info = "Do you want to save the changes you made to " + fileNames[unsavedDocumentId[0]] + "?\n" +
+            "Your changes will be lost if you don't save them.";
         ret = QMessageBox::warning(this, tr("Arbalest"), info,
-                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     }
 
     switch (ret) {
     case QMessageBox::Save:
+        return true;
+    case QMessageBox::SaveAll:
         return true;
     case QMessageBox::Discard:
         return false;
@@ -816,6 +837,7 @@ bool MainWindow::maybeSave() {
     default:
         break;
     }
+
     return true;
 }
 

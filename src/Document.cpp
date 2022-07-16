@@ -64,6 +64,7 @@ void Document::modifyObjectNoSet(int objectId) {
 
 bool Document::isModified() {
     // TO DO
+    return false;
 }
 
 
