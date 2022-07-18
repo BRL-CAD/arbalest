@@ -780,8 +780,7 @@ void MainWindow::saveFileDefaultPath() {
 // IN PROGRESS
 bool MainWindow::maybeSave() {
     int openedDocumentsCount = documents.size();
-    std::vector<int> unsavedDocumentId;
-    QVector<QString> fileNames;
+    QVector<QPair<int, QString>> unsavedDocuments;
 
     for (int documentIndex = 1; documentIndex <= openedDocumentsCount; ++documentIndex) {
         DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
@@ -789,15 +788,13 @@ bool MainWindow::maybeSave() {
 
         // Checks if the document has any unsaved changes
         if (documents[documentId]->isModified() == true) {
-            unsavedDocumentId.push_back(documentId);
-
             QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
-            fileNames.push_back(pathName.fileName());
+            unsavedDocuments.push_back(qMakePair(documentId, pathName.fileName()));
         }
         //QMessageBox::information(this, "Documents Count", QString::number(activeDocumentId));
     }
 
-    int unsavedDocumentsSize = unsavedDocumentId.size();
+    int unsavedDocumentsSize = unsavedDocuments.size();
 
     if (unsavedDocumentsSize == 0) {
         return false;
@@ -808,18 +805,18 @@ bool MainWindow::maybeSave() {
     if (unsavedDocumentsSize > 1) {
         QString unsavedFileNames;
 
-        for (QString& name : fileNames) {
-            unsavedFileNames += name + "\n";
+        for (QPair<int, QString> &fileName : unsavedDocuments) {
+            unsavedFileNames += fileName.second + "\n";
         }
 
         QString info = "Do you want to save the changes you made to the following " +
-            QString::number(unsavedDocumentId.size()) + " files?\n" + unsavedFileNames +
+            QString::number(unsavedDocumentsSize) + " files?\n" + unsavedFileNames +
             "Your changes will be lost if you don't save them.";
         ret = QMessageBox::warning(this, tr("Arbalest"), info,
             QMessageBox::Save | QMessageBox::SaveAll | QMessageBox::Cancel);
     }
     else {
-        QString info = "Do you want to save the changes you made to " + fileNames[unsavedDocumentId[0]] + "?\n" +
+        QString info = "Do you want to save the changes you made to " + unsavedDocuments[0].second + "?\n" +
             "Your changes will be lost if you don't save them.";
         ret = QMessageBox::warning(this, tr("Arbalest"), info,
             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
