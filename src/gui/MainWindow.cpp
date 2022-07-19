@@ -813,7 +813,7 @@ bool MainWindow::maybeSave() {
             QString::number(unsavedDocumentsSize) + " files?\n" + unsavedFileNames +
             "Your changes will be lost if you don't save them.";
         ret = QMessageBox::warning(this, tr("Arbalest"), info,
-            QMessageBox::Save | QMessageBox::SaveAll | QMessageBox::Cancel);
+            QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel);
     }
     else {
         QString info = "Do you want to save the changes you made to " + unsavedDocuments[0].second + "?\n" +
