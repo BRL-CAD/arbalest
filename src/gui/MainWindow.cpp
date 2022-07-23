@@ -102,13 +102,13 @@ void MainWindow::prepareUi() {
     QAction* saveAct = new QAction(tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
-    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
+    connect(saveAct, SIGNAL(QAction::triggered()), this, SLOT(MainWindow::saveFileDefaultPath()));
     fileMenu->addAction(saveAct);
 
     QAction* saveAsAct = new QAction(tr("Save As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save database as"));
-    connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
+    connect(saveAsAct, SIGNAL(QAction::triggered()), this, SLOT(MainWindow::saveAsFileDialog()));
     fileMenu->addAction(saveAsAct);
     
     fileMenu->addSeparator();
@@ -764,6 +764,24 @@ void MainWindow::saveAsFileDialog() {
     }
 }
 
+bool MainWindow::saveAsFileDialog(int documentId) {
+    if (documentId == -1) return false;
+    const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+    if (!filePath.isEmpty()) {
+        if (saveFile(filePath))
+        {
+            documents[activeDocumentId]->setFilePath(filePath);
+            QString filename(QFileInfo(filePath).fileName());
+            documentArea->setTabText(documentArea->currentIndex(), filename);
+            statusBarPathLabel->setText(*documents[activeDocumentId]->getFilePath());
+            statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void MainWindow::saveFileDefaultPath() {
     if (activeDocumentId == -1) return;
     if (documents[activeDocumentId]->getFilePath() == nullptr) saveAsFileDialog();
@@ -777,67 +795,62 @@ void MainWindow::saveFileDefaultPath() {
     }
 }
 
-// IN PROGRESS
+bool MainWindow::saveFileDefaultPath(int documentId) {
+    if (documentId == -1) return false;
+    if (documents[documentId]->getFilePath() == nullptr) return saveAsFileDialog(documentId);
+    
+    const QString filePath = *documents[documentId]->getFilePath();
+    if (!filePath.isEmpty()) {
+        if (saveFile(filePath)) {
+            statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool MainWindow::maybeSave() {
     int openedDocumentsCount = documents.size();
-    QVector<QPair<int, QString>> unsavedDocuments;
 
     for (int documentIndex = 1; documentIndex <= openedDocumentsCount; ++documentIndex) {
         DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
         int documentId = displayGrid->getDocument()->getDocumentId();
 
         // Checks if the document has any unsaved changes
-        if (documents[documentId]->isModified() == true) {
+        if (documents[documentId]->isModified()) {
             QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
-            unsavedDocuments.push_back(qMakePair(documentId, pathName.fileName()));
+
+            QString info = "Do you want to save the changes you made to " + pathName.fileName() + " ?\n" +
+                "Your changes will be lost if you don't save them.";
+            QMessageBox::StandardButton ret = QMessageBox::warning(this, tr("Arbalest"), info,
+                QMessageBox::Save | QMessageBox::Cancel);
+
+            switch (ret) {
+            case QMessageBox::Save:
+                if (saveFileDefaultPath(documentId)) {
+                    if (documentIndex < openedDocumentsCount) {
+                        continue;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            case QMessageBox::Cancel:
+                if (documentIndex < openedDocumentsCount) {
+                    continue;
+                }
+
+                return false;
+            default:
+                break;
+            }
         }
-        //QMessageBox::information(this, "Documents Count", QString::number(activeDocumentId));
-    }
-
-    int unsavedDocumentsSize = unsavedDocuments.size();
-
-    if (unsavedDocumentsSize == 0) {
-        return false;
-    }
-
-    QMessageBox::StandardButton ret;
-
-    if (unsavedDocumentsSize > 1) {
-        QString unsavedFileNames;
-
-        for (QPair<int, QString> &fileName : unsavedDocuments) {
-            unsavedFileNames += fileName.second + "\n";
-        }
-
-        QString info = "Do you want to save the changes you made to the following " +
-            QString::number(unsavedDocumentsSize) + " files?\n" + unsavedFileNames +
-            "Your changes will be lost if you don't save them.";
-        ret = QMessageBox::warning(this, tr("Arbalest"), info,
-            QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel);
-    }
-    else {
-        QString info = "Do you want to save the changes you made to " + unsavedDocuments[0].second + "?\n" +
-            "Your changes will be lost if you don't save them.";
-        ret = QMessageBox::warning(this, tr("Arbalest"), info,
-            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    }
-
-    switch (ret) {
-    case QMessageBox::Save:
-        return true;
-    case QMessageBox::SaveAll:
-        return true;
-    case QMessageBox::Discard:
-        return false;
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        break;
     }
 
     return true;
 }
-
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
@@ -935,16 +948,7 @@ void MainWindow::changeEvent( QEvent* e ) {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if (documents.size() != 0) {
-        if (maybeSave()) {
-            // saveAsFileDialog();
-            event->accept();
-        }
-        else {
-            event->ignore();
-        }
-    }
-    else {
+    if (maybeSave()) {
         event->accept();
     }
 }
