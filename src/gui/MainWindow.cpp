@@ -102,13 +102,13 @@ void MainWindow::prepareUi() {
     QAction* saveAct = new QAction(tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
-    connect(saveAct, SIGNAL(QAction::triggered()), this, SLOT(MainWindow::saveFileDefaultPath()));
+    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
     fileMenu->addAction(saveAct);
 
     QAction* saveAsAct = new QAction(tr("Save As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save database as"));
-    connect(saveAsAct, SIGNAL(QAction::triggered()), this, SLOT(MainWindow::saveAsFileDialog()));
+    connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
     fileMenu->addAction(saveAsAct);
     
     fileMenu->addSeparator();
@@ -764,7 +764,7 @@ void MainWindow::saveAsFileDialog() {
     }
 }
 
-bool MainWindow::saveAsFileDialog(int documentId) {
+bool MainWindow::saveAsFileDialogId(int documentId) {
     if (documentId == -1) return false;
     const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()) {
@@ -795,9 +795,9 @@ void MainWindow::saveFileDefaultPath() {
     }
 }
 
-bool MainWindow::saveFileDefaultPath(int documentId) {
+bool MainWindow::saveFileDefaultPathId(int documentId) {
     if (documentId == -1) return false;
-    if (documents[documentId]->getFilePath() == nullptr) return saveAsFileDialog(documentId);
+    if (documents[documentId]->getFilePath() == nullptr) return saveAsFileDialogId(documentId);
     
     const QString filePath = *documents[documentId]->getFilePath();
     if (!filePath.isEmpty()) {
@@ -824,11 +824,11 @@ bool MainWindow::maybeSave() {
             QString info = "Do you want to save the changes you made to " + pathName.fileName() + " ?\n" +
                 "Your changes will be lost if you don't save them.";
             QMessageBox::StandardButton ret = QMessageBox::warning(this, tr("Arbalest"), info,
-                QMessageBox::Save | QMessageBox::Cancel);
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
             switch (ret) {
             case QMessageBox::Save:
-                if (saveFileDefaultPath(documentId)) {
+                if (saveFileDefaultPathId(documentId)) {
                     if (documentIndex < openedDocumentsCount) {
                         continue;
                     }
@@ -837,11 +837,13 @@ bool MainWindow::maybeSave() {
                 }
 
                 return false;
-            case QMessageBox::Cancel:
+            case QMessageBox::Discard:
                 if (documentIndex < openedDocumentsCount) {
                     continue;
                 }
 
+                return true;
+            case QMessageBox::Cancel:
                 return false;
             default:
                 break;
@@ -950,5 +952,8 @@ void MainWindow::changeEvent( QEvent* e ) {
 void MainWindow::closeEvent(QCloseEvent* event) {
     if (maybeSave()) {
         event->accept();
+    }
+    else {
+        event->ignore();
     }
 }

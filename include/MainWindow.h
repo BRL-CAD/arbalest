@@ -71,9 +71,9 @@ protected:
 public slots:
     void openFileDialog();
     void saveAsFileDialog();
-    bool saveAsFileDialog(int documentId);
+    bool saveAsFileDialogId(int documentId);
     void saveFileDefaultPath();
-    bool saveFileDefaultPath(int documentId);
+    bool saveFileDefaultPathId(int documentId);
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) ;
     void objectTreeWidgetSelectionChanged(int objectId);
