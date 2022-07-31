@@ -87,33 +87,48 @@ void MainWindow::prepareUi() {
 
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
-    QAction* newAct = new QAction(tr("&New"), this);
+    QIcon newActIcon;
+    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
+    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-Menu")), QIcon::Active);
+    QAction* newAct = new QAction(newActIcon, tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("New .g file"));
     connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
     fileMenu->addAction(newAct);
 
-    QAction* openAct = new QAction(tr("&Open"), this);
+    QIcon openActIcon;
+    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
+    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-Menu")), QIcon::Active);
+    QAction* openAct = new QAction(openActIcon, tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QAction* saveAct = new QAction(tr("Save"), this);
+    QIcon saveActIcon;
+    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
+    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-Menu")), QIcon::Active);
+    QAction* saveAct = new QAction(saveActIcon, tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
     fileMenu->addAction(saveAct);
 
-    QAction* saveAsAct = new QAction(tr("Save As..."), this);
-    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    QIcon saveAsActIcon;
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-MenuIconFile")), QIcon::Normal);
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-Menu")), QIcon::Active);
+    QAction* saveAsAct = new QAction(saveAsActIcon, tr("Save As..."), this);
+    saveAsAct->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
     fileMenu->addAction(saveAsAct);
     
     fileMenu->addSeparator();
 
-    QAction* quitAct = new QAction(tr("Quit"), this);
+    QIcon quitActIcon;
+    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-MenuIconQuit")), QIcon::Normal);
+    QAction* quitAct = new QAction(quitActIcon, tr("Quit"), this);
+    quitAct->setShortcut(QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit"));
     connect(quitAct, &QAction::triggered, this,[this](){
         QCoreApplication::quit();
@@ -177,7 +192,7 @@ void MainWindow::prepareUi() {
     createMenu->addAction(createEllipsoidAct);
 
 
-    QAction* createEllipticalTorusAct = new QAction(tr("EllipticalTorus"), this);
+    QAction* createEllipticalTorusAct = new QAction(tr("Elliptical Torus"), this);
     connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
@@ -215,7 +230,7 @@ void MainWindow::prepareUi() {
 
 
 
-    QAction* createHyperbolicCylinderAct = new QAction(tr("HyperbolicCylinder"), this);
+    QAction* createHyperbolicCylinderAct = new QAction(tr("Hyperbolic Cylinder"), this);
     connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
@@ -254,7 +269,7 @@ void MainWindow::prepareUi() {
 
 
 
-    QAction* createParabolicCylinderAct = new QAction(tr("ParabolicCylinder"), this);
+    QAction* createParabolicCylinderAct = new QAction(tr("Parabolic Cylinder"), this);
     connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
@@ -372,6 +387,7 @@ void MainWindow::prepareUi() {
     viewMenu->addAction(resetViewportAct);
 
     QAction* resetAllViewportsAct = new QAction("Reset all viewports", this);
+    resetAllViewportsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-MenuIconView")));
     resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
     connect(resetAllViewportsAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
@@ -382,6 +398,7 @@ void MainWindow::prepareUi() {
     viewMenu->addSeparator();
 
     QAction* autoViewAct = new QAction(tr("Focus visible objects (all viewports)"), this);
+    autoViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-MenuIconView")));
     autoViewAct->setShortcut(Qt::Key_F|Qt::CTRL);
     autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewAct, &QAction::triggered, this, [this](){
@@ -403,6 +420,7 @@ void MainWindow::prepareUi() {
     viewMenu->addAction(autoViewSingleAct);
 
     QAction* centerViewAct = new QAction(tr("Focus selected object"), this);
+    centerViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-MenuIconView")));
     centerViewAct->setStatusTip(tr("Resize and center the view based on the selected objects"));
     centerViewAct->setShortcut(Qt::Key_F);
     connect(centerViewAct, &QAction::triggered, this, [this](){
@@ -452,11 +470,24 @@ void MainWindow::prepareUi() {
     viewMenu->addSeparator();
     
     QAction* toggleGridAct = new QAction(tr("Toggle grid on/off"), this);
+    toggleGridAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-MenuIconView")));
+    toggleGridAct->setCheckable(true);
     toggleGridAct->setShortcut(Qt::Key_G);
-    connect(toggleGridAct, &QAction::triggered, this, [this](){
-        if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = 
-                !documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled;
+    connect(toggleGridAct, &QAction::toggled, this, [=]() {
+        if (activeDocumentId == -1) {
+            toggleGridAct->setChecked(false);
+            return;
+        }
+
+        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled == false) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = true;
+            toggleGridAct->setToolTip("Toggle grid OFF (G)");
+        }
+        else {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = false;
+            toggleGridAct->setToolTip("Toggle grid ON (G)");
+        }
+
         documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->forceRerenderFrame();
     });
     viewMenu->addAction(toggleGridAct);
@@ -491,6 +522,7 @@ void MainWindow::prepareUi() {
 
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
     QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
+    raytraceAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-MenuIconRaytrace")));
     raytraceAct->setStatusTip(tr("Raytrace current viewport"));
     raytraceAct->setShortcut(Qt::CTRL|Qt::Key_R);
     connect(raytraceAct, &QAction::triggered, this, [this](){
@@ -591,52 +623,66 @@ void MainWindow::prepareUi() {
 
     QToolButton* newButton = new QToolButton(menuTitleBar);
     newButton->setDefaultAction(newAct);
-    newButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-IconFile")));
     newButton->setObjectName("toolbarButton");
+    QIcon newButtonIcon;
+    newButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-IconFile")), QIcon::Normal);
+    newButton->setIcon(newButtonIcon);
     newButton->setToolTip("New (Ctrl+N)");
     mainTabBarCornerWidget->addWidget(newButton);
 
     QToolButton* openButton = new QToolButton(menuTitleBar);
     openButton->setDefaultAction(openAct);
-    openButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-IconFile")));
     openButton->setObjectName("toolbarButton");
+    QIcon openButtonIcon;
+    openButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-IconFile")), QIcon::Normal);
+    openButton->setIcon(openButtonIcon);
     openButton->setToolTip("Open (Ctrl+O)");
     mainTabBarCornerWidget->addWidget(openButton);
 
     QToolButton* saveButton = new QToolButton(menuTitleBar);
     saveButton->setDefaultAction(saveAct);
-    saveButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-IconFile")));
     saveButton->setObjectName("toolbarButton");
+    QIcon saveButtonIcon;
+    saveButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-IconFile")), QIcon::Normal);
+    saveButton->setIcon(saveButtonIcon);
     saveButton->setToolTip("Save (Ctrl+S)");
     mainTabBarCornerWidget->addWidget(saveButton);
 
-//    QPushButton* saveAsButton = new QPushButton(menuTitleBar);
-//    saveAsButton->setIcon(QPixmap::fromImage(QImage(":/icons/icons8-save-as-80.png")));
-//    saveAsButton->setObjectName("toolbarButton");
-//    saveAsButton->setToolTip("Save as..");
-//    //mainTabBarCornerWidget->addWidget(saveAsButton);
-//    connect(saveAsButton, &QPushButton::clicked, this, &MainWindow::saveAsFileDialog);
+    QToolButton* saveAsButton = new QToolButton(menuTitleBar);
+    saveAsButton->setDefaultAction(saveAsAct);
+    saveAsButton->setObjectName("toolbarButton");
+    QIcon saveAsButtonIcon;
+    saveAsButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-IconFile")), QIcon::Normal);
+    saveAsButton->setIcon(saveAsButtonIcon);
+    saveAsButton->setToolTip("Save as..");
+    mainTabBarCornerWidget->addWidget(saveAsButton);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* focusAll = new QToolButton(menuTitleBar);
     focusAll->setDefaultAction(autoViewAct);
-    focusAll->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-IconView")));
     focusAll->setObjectName("toolbarButton");
+    QIcon focusAllIcon;
+    focusAllIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-IconView")), QIcon::Normal);
+    focusAll->setIcon(focusAllIcon);
     focusAll->setToolTip("Focus on all visible objects (Ctrl+F)");
     mainTabBarCornerWidget->addWidget(focusAll);
 
     QToolButton* focusCurrent = new QToolButton(menuTitleBar);
     focusCurrent->setDefaultAction(centerViewAct);
-    focusCurrent->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-IconView")));
     focusCurrent->setObjectName("toolbarButton");
+    QIcon focusCurrentIcon;
+    focusCurrentIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-IconView")), QIcon::Normal);
+    focusCurrent->setIcon(focusCurrentIcon);
     focusCurrent->setToolTip("Focus on selected object (F)");
     mainTabBarCornerWidget->addWidget(focusCurrent);
 
     QToolButton* resetViewports = new QToolButton(menuTitleBar);
     resetViewports->setDefaultAction(resetAllViewportsAct);
-    resetViewports->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-IconView")));
     resetViewports->setObjectName("toolbarButton");
+     QIcon resetViewportsIcon;
+    resetViewportsIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-IconView")), QIcon::Normal);
+    resetViewports->setIcon(resetViewportsIcon);
     resetViewports->setToolTip("Reset the viewports and focus on the visible");
     mainTabBarCornerWidget->addWidget(resetViewports);
     
@@ -658,17 +704,20 @@ void MainWindow::prepareUi() {
 
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
     toggleGrid->setDefaultAction(toggleGridAct);
-    toggleGrid->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconView")));
     toggleGrid->setObjectName("toolbarButton");
-    toggleGrid->setToolTip("Toggle grid on/off (G)");
+    QIcon toggleGridIcon;
+    toggleGridIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconView")), QIcon::Normal);
+    toggleGrid->setIcon(toggleGridIcon);
     mainTabBarCornerWidget->addWidget(toggleGrid);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
-    raytraceButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-IconRaytrace")));
     raytraceButton->setObjectName("toolbarButton");
+    QIcon raytraceButtonIcon;
+    raytraceButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-IconRaytrace")), QIcon::Normal);
+    raytraceButton->setIcon(raytraceButtonIcon);
     raytraceButton->setToolTip("Raytrace current viewport (Ctrl+R)");
     mainTabBarCornerWidget->addWidget(raytraceButton);
 

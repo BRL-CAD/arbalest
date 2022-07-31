@@ -1,6 +1,10 @@
 $Color-Main                             : #3b3b3b;  // Used as the main background color. Used in main window,  etc.
 $Color-MainMenu                         : #3b3b3b;  //
 $Color-Menu                             : #3b3b3b;  //
+$Color-MenuIconFile                     : #586fad;  // Used as color for File menu items
+$Color-MenuIconView                     : #25a2c1;  // Used as color for View menu items
+$Color-MenuIconRaytrace                 : #d61d32;  // Used as color for Raytrace item
+$Color-MenuIconQuit                     : #d10f1c;  // Used as color for Quit item
 $Color-MenuText                         : #ffffff;  //
 $Color-MainMenuText                     : #ffffff;  //
 $Color-Secondary                        : #4e4e4e;  // Used as the background color for some main UI components like objects tree
