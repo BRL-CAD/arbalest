@@ -70,6 +70,7 @@ protected:
 	
 public slots:
     void openFileDialog();
+    bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
     bool saveAsFileDialogId(int documentId);
     void saveFileDefaultPath();

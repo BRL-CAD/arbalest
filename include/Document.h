@@ -30,6 +30,7 @@ private:
     const int documentId;
     ObjectTree* objectTree;
     GeometryRenderer * geometryRenderer;
+    bool modified;
 
 
 public:
@@ -89,7 +90,10 @@ public:
     }
 
     void modifyObjectNoSet(int objectId);
+    
     bool isModified();
+    bool Add(const BRLCAD::Object& object);
+    bool Save(const char* fileName);
 };
 
 

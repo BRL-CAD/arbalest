@@ -129,7 +129,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -146,7 +146,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Cone * object = new BRLCAD::Cone();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -166,7 +166,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -184,7 +184,7 @@ void MainWindow::prepareUi() {
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -203,7 +203,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -222,7 +222,7 @@ void MainWindow::prepareUi() {
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -241,7 +241,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -261,7 +261,7 @@ void MainWindow::prepareUi() {
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -281,7 +281,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -300,7 +300,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Particle * object = new BRLCAD::Particle();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -318,7 +318,7 @@ void MainWindow::prepareUi() {
         BRLCAD::Torus * object = new BRLCAD::Torus();
         QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->getDatabase()->Add(*object);
+        documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
         documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
@@ -738,7 +738,11 @@ bool MainWindow::saveFile(const QString& filePath) {
         return false;
     }
 
-    return documents[activeDocumentId]->getDatabase()->Save(filePath.toUtf8().data());
+    return documents[activeDocumentId]->Save(filePath.toUtf8().data());
+}
+
+bool MainWindow::saveFileId(const QString& filePath, int documentId) {
+    return documents[documentId]->Save(filePath.toUtf8().data());
 }
 
 void MainWindow::openFileDialog() 
@@ -765,15 +769,14 @@ void MainWindow::saveAsFileDialog() {
 }
 
 bool MainWindow::saveAsFileDialogId(int documentId) {
-    if (documentId == -1) return false;
     const QString filePath = QFileDialog::getSaveFileName(this, tr("Save BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()) {
-        if (saveFile(filePath))
+        if (saveFileId(filePath, documentId))
         {
-            documents[activeDocumentId]->setFilePath(filePath);
+            documents[documentId]->setFilePath(filePath);
             QString filename(QFileInfo(filePath).fileName());
             documentArea->setTabText(documentArea->currentIndex(), filename);
-            statusBarPathLabel->setText(*documents[activeDocumentId]->getFilePath());
+            statusBarPathLabel->setText(*documents[documentId]->getFilePath());
             statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
             return true;
         }
@@ -801,7 +804,7 @@ bool MainWindow::saveFileDefaultPathId(int documentId) {
     
     const QString filePath = *documents[documentId]->getFilePath();
     if (!filePath.isEmpty()) {
-        if (saveFile(filePath)) {
+        if (saveFileId(filePath, documentId)) {
             statusBar->showMessage("Saved to " + filePath, statusBarShortMessageDuration);
             return true;
         }
@@ -845,8 +848,6 @@ bool MainWindow::maybeSave() {
                 return true;
             case QMessageBox::Cancel:
                 return false;
-            default:
-                break;
             }
         }
     }

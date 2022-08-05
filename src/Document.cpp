@@ -17,6 +17,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
         }
     }
 
+    modified = false;
     objectTree = new ObjectTree(database);
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
@@ -33,6 +34,7 @@ Document::~Document() {
 }
 
 void Document::modifyObject(BRLCAD::Object *newObject) {
+    modified = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
@@ -49,6 +51,7 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
 
 
 void Document::modifyObjectNoSet(int objectId) {
+    modified = true;
     QString objectName = objectTree->getNameMap()[objectId];
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
                                              (int objectId){
@@ -63,8 +66,17 @@ void Document::modifyObjectNoSet(int objectId) {
 }
 
 bool Document::isModified() {
-    // TO DO
-    return true;
+    return modified;
+}
+
+bool Document::Add(const BRLCAD::Object& object) {
+    modified = true;
+    return database->Add(object);
+}
+
+bool Document::Save(const char* fileName) {
+    modified = false;
+    return database->Save(fileName);
 }
 
 
