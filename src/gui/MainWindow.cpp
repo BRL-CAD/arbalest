@@ -495,6 +495,7 @@ void MainWindow::prepareUi() {
     raytraceAct->setShortcut(Qt::CTRL|Qt::Key_R);
     connect(raytraceAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
+        if (!isObject(activeDocumentId)) return;
         statusBar->showMessage("Raytracing current viewport...", statusBarShortMessageDuration);
         QCoreApplication::processEvents();
         documents[activeDocumentId]->getRaytraceWidget()->raytrace();
@@ -739,6 +740,10 @@ bool MainWindow::saveFile(const QString& filePath) {
     }
 
     return documents[activeDocumentId]->Save(filePath.toUtf8().data());
+}
+
+bool MainWindow::isObject(int documentId) {
+    return documents[activeDocumentId]->isObject();
 }
 
 bool MainWindow::saveFileId(const QString& filePath, int documentId) {
