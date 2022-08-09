@@ -31,6 +31,7 @@ private:
     ObjectTree* objectTree;
     GeometryRenderer * geometryRenderer;
     bool modified;
+    bool objectPresent;
 
 
 public:
@@ -92,6 +93,7 @@ public:
     void modifyObjectNoSet(int objectId);
     
     bool isModified();
+    bool isObject();
     bool Add(const BRLCAD::Object& object);
     bool Save(const char* fileName);
 };
