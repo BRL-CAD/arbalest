@@ -27,11 +27,6 @@ public:
         return statusBar;
     }
 
-    bool isObject(int documentId);
-    bool saveFileId(const QString & filePath, int documentId);
-    bool saveAsFileDialogId(int documentId);
-    bool saveFileDefaultPathId(int documentId);
-
     const int statusBarShortMessageDuration = 7000;
 
 private:
@@ -75,8 +70,11 @@ protected:
 	
 public slots:
     void openFileDialog();
+    bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
+    bool saveAsFileDialogId(int documentId);
     void saveFileDefaultPath();
+    bool saveFileDefaultPathId(int documentId);
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) ;
     void objectTreeWidgetSelectionChanged(int objectId);

@@ -8,17 +8,13 @@
 
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
-    objectPresent = false;
-    database = new BRLCAD::MemoryDatabase();
-    
+    if (filePath != nullptr) this->filePath = new QString(*filePath);
+    database =  new BRLCAD::MemoryDatabase();
     if (filePath != nullptr) {
-        this->filePath = new QString(*filePath);
-            
         if (!database->Load(filePath->toUtf8().data()))
         {
             throw std::runtime_error("Failed to open file");
         }
-        objectPresent = true;
     }
 
     modified = false;
@@ -39,7 +35,6 @@ Document::~Document() {
 
 void Document::modifyObject(BRLCAD::Object *newObject) {
     modified = true;
-    objectPresent = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
@@ -57,7 +52,6 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
 
 void Document::modifyObjectNoSet(int objectId) {
     modified = true;
-    objectPresent = true;
     QString objectName = objectTree->getNameMap()[objectId];
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
                                              (int objectId){
@@ -75,13 +69,8 @@ bool Document::isModified() {
     return modified;
 }
 
-bool Document::isObject() {
-    return objectPresent;
-}
-
 bool Document::Add(const BRLCAD::Object& object) {
     modified = true;
-    objectPresent = true;
     return database->Add(object);
 }
 
