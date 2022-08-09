@@ -824,11 +824,14 @@ bool MainWindow::maybeSave() {
         if (documents[documentId]->isModified()) {
             QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
 
-            QString info = "Do you want to save the changes you made to " + pathName.fileName() + " ?\n" +
-                "Your changes will be lost if you don't save them.";
-            QMessageBox::StandardButton ret = QMessageBox::warning(this, tr("Arbalest"), info,
-                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setText("<font size=\"4\" color=\"#104FAB\">Do you want to save the changes you made to " + pathName.fileName() + " ?</font>");
+            msgBox.setInformativeText("Your changes will be lost if you don't save them.");
+            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Save);
+            
+            int ret = msgBox.exec();
             switch (ret) {
             case QMessageBox::Save:
                 if (saveFileDefaultPathId(documentId)) {
