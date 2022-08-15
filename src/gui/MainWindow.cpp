@@ -862,45 +862,34 @@ bool MainWindow::saveFileDefaultPathId(int documentId) {
     return false;
 }
 
-bool MainWindow::maybeSave() {
-    int openedDocumentsCount = documents.size();
+bool MainWindow::maybeSave(int documentId, bool cancel) {
+    // Checks if the document has any unsaved changes
+    if (documents[documentId]->isModified()) {
+        QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
 
-    for (int documentIndex = 1; documentIndex <= openedDocumentsCount; ++documentIndex) {
-        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
-        int documentId = displayGrid->getDocument()->getDocumentId();
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("<font size=\"4\" color=\"#104FAB\">Do you want to save the changes you made to " + pathName.fileName() + " ?</font>");
+        msgBox.setInformativeText("Your changes will be lost if you don't save them.");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
+        msgBox.setDefaultButton(QMessageBox::Save);
 
-        // Checks if the document has any unsaved changes
-        if (documents[documentId]->isModified()) {
-            QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
-
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("<font size=\"4\" color=\"#104FAB\">Do you want to save the changes you made to " + pathName.fileName() + " ?</font>");
-            msgBox.setInformativeText("Your changes will be lost if you don't save them.");
-            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Save);
+        if (cancel) {
+            msgBox.addButton(QMessageBox::Cancel);
+        }
             
-            int ret = msgBox.exec();
-            switch (ret) {
-            case QMessageBox::Save:
-                if (saveFileDefaultPathId(documentId)) {
-                    if (documentIndex < openedDocumentsCount) {
-                        continue;
-                    }
-
-                    return true;
-                }
-
-                return false;
-            case QMessageBox::Discard:
-                if (documentIndex < openedDocumentsCount) {
-                    continue;
-                }
-
+        int ret = msgBox.exec();
+        switch (ret) {
+        case QMessageBox::Save:
+            if (saveFileDefaultPathId(documentId)) {
                 return true;
-            case QMessageBox::Cancel:
-                return false;
             }
+
+            return false;
+        case QMessageBox::Discard:
+            return true;
+        case QMessageBox::Cancel:
+            return false;
         }
     }
 
@@ -940,6 +929,10 @@ void MainWindow::tabCloseRequested(const int i)
     
     if (displayGrid != nullptr) {
         documentId = displayGrid->getDocument()->getDocumentId();
+
+        if (!maybeSave(documentId)) {
+            return;
+        }
     }
     documentArea->removeTab(i);
     if (documentId != -1) {
@@ -1013,7 +1006,24 @@ void MainWindow::changeEvent( QEvent* e ) {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if (maybeSave()) {
+    int documentSize = documents.size();
+    bool checkExit = true;
+    DisplayGrid * displayGrid = nullptr;
+
+    for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
+        displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
+        int documentId = displayGrid->getDocument()->getDocumentId();
+        
+        if (maybeSave(documentId, true)) {
+            checkExit = true;
+        }
+        else {
+            checkExit = false;
+            break;
+        }
+    }
+    
+    if (checkExit) {
         event->accept();
     }
     else {
