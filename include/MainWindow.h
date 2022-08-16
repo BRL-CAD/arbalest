@@ -59,7 +59,7 @@ private:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
-    bool maybeSave(int documentId, bool cancel = false);
+    bool maybeSave(int documentId, bool *cancel = nullptr);
 
     QAction *themeAct[2];
 	

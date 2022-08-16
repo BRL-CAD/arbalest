@@ -862,20 +862,21 @@ bool MainWindow::saveFileDefaultPathId(int documentId) {
     return false;
 }
 
-bool MainWindow::maybeSave(int documentId, bool cancel) {
+bool MainWindow::maybeSave(int documentId, bool *cancel) {
     // Checks if the document has any unsaved changes
     if (documents[documentId]->isModified()) {
         QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
 
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("<font size=\"4\" color=\"#104FAB\">Do you want to save the changes you made to " + pathName.fileName() + " ?</font>");
+        msgBox.setText("Do you want to save the changes you made to " + pathName.fileName() + "?");
         msgBox.setInformativeText("Your changes will be lost if you don't save them.");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
         msgBox.setDefaultButton(QMessageBox::Save);
 
-        if (cancel) {
+        if (cancel != nullptr) {
             msgBox.addButton(QMessageBox::Cancel);
+            *cancel = false;
         }
             
         int ret = msgBox.exec();
@@ -889,6 +890,8 @@ bool MainWindow::maybeSave(int documentId, bool cancel) {
         case QMessageBox::Discard:
             return true;
         case QMessageBox::Cancel:
+            assert(cancel != nullptr);
+            *cancel = true;
             return false;
         }
     }
@@ -1007,26 +1010,25 @@ void MainWindow::changeEvent( QEvent* e ) {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
     int documentSize = documents.size();
-    bool checkExit = true;
+    bool* cancel = new bool(false);
     DisplayGrid * displayGrid = nullptr;
 
     for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
         displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
         int documentId = displayGrid->getDocument()->getDocumentId();
         
-        if (maybeSave(documentId, true)) {
-            checkExit = true;
+        if (maybeSave(documentId, cancel)) {
+            continue;
         }
         else {
-            checkExit = false;
             break;
         }
     }
-    
-    if (checkExit) {
-        event->accept();
+
+    if (*cancel == true) {
+        event->ignore();
     }
     else {
-        event->ignore();
+        event->accept();
     }
 }
