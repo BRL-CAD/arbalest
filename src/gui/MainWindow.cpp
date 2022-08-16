@@ -1010,14 +1010,14 @@ void MainWindow::changeEvent( QEvent* e ) {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
     int documentSize = documents.size();
-    bool* cancel = new bool(false);
+    bool cancel = false;
     DisplayGrid * displayGrid = nullptr;
 
     for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
         displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
         int documentId = displayGrid->getDocument()->getDocumentId();
         
-        if (maybeSave(documentId, cancel)) {
+        if (maybeSave(documentId, &cancel)) {
             continue;
         }
         else {
@@ -1025,7 +1025,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         }
     }
 
-    if (*cancel == true) {
+    if (cancel == true) {
         event->ignore();
     }
     else {
