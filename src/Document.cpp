@@ -84,3 +84,9 @@ Display* Document::getDisplay()
 {
     return displayGrid->getActiveDisplay();
 }
+
+void Document::getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func) {
+    BRLCADObjectCallback callback(func);
+    database->Get(objectName.toUtf8(), callback);
+    modified = true;
+}
