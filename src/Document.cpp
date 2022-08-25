@@ -51,7 +51,6 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
 
 
 void Document::modifyObjectNoSet(int objectId) {
-    modified = true;
     QString objectName = objectTree->getNameMap()[objectId];
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
                                              (int objectId){
