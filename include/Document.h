@@ -89,12 +89,10 @@ public:
         this->filePath = new QString(filePath);
     }
 
-    void modifyObjectNoSet(int objectId);
-    void getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func);
-
     bool isModified();
     bool Add(const BRLCAD::Object& object);
     bool Save(const char* fileName);
+    void getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func);
 };
 
 

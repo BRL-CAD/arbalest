@@ -74,7 +74,6 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
                 BRLCAD::Combination::TreeNode tree = dynamic_cast<BRLCAD::Combination *>(&object)->Tree();
                 setLeafMatrix(tree, childNodeName, newTransformationMatrix);
             });
-            document->modifyObjectNoSet(document->getObjectTree()->getParent()[childObjectId]);
         });
     }
 
