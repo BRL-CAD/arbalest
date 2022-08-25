@@ -31,6 +31,7 @@ set(arbalest_Sources
         src/gui/DataRow.cpp
         src/gui/DragEditLineEdit.cpp
         src/gui/ObjectTreeRowButtons.cpp
+        src/display/MouseAction.cpp
         src/utils/Utils.cpp
         src/gui/DisplayGrid.cpp
         src/gui/AboutWindow.cpp
