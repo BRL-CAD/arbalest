@@ -52,11 +52,6 @@ private:
     std::function<void(BRLCAD::Object&)> func;
 };
 
-inline void getBRLCADObject(BRLCAD::MemoryDatabase *database, const QString& objectName,const std::function<void(BRLCAD::Object&)>& func){
-    BRLCADObjectCallback callback(func);
-    database->Get(objectName.toUtf8(), callback);
-}
-
 
 template<typename T>
 inline void addPropertiesTitle(T* l, const QString &title, const QString indexText = "") {

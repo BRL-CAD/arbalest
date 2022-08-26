@@ -27,7 +27,7 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
     widgets[childObjectId] = this;
 
     double *transformationMatrix = new double[16]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    getBRLCADObject(document->getDatabase(), parentObjectName, [this, childNodeName, transformationMatrix](BRLCAD::Object &object) {
+    document->getBRLCADObject(parentObjectName, [this, childNodeName, transformationMatrix](BRLCAD::Object &object) {
         BRLCAD::Combination::TreeNode tree = dynamic_cast<BRLCAD::Combination *>(&object)->Tree();
         const double *transformationMatrixPtr = getLeafMatrix(tree, childNodeName);
         if (transformationMatrixPtr != nullptr) {
@@ -70,11 +70,10 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
             for (int i = 0; i < 16; ++i) newTransformationMatrix[i] = m.data()[i];
 
 
-            getBRLCADObject(document->getDatabase(), parentObjectName, [this, childNodeName,childObjectId, newTransformationMatrix,document](BRLCAD::Object &object) {
+            document->getBRLCADObject(parentObjectName, [this, childNodeName,childObjectId, newTransformationMatrix,document](BRLCAD::Object &object) {
                 BRLCAD::Combination::TreeNode tree = dynamic_cast<BRLCAD::Combination *>(&object)->Tree();
                 setLeafMatrix(tree, childNodeName, newTransformationMatrix);
             });
-            document->modifyObjectNoSet(document->getObjectTree()->getParent()[childObjectId]);
         });
     }
 
