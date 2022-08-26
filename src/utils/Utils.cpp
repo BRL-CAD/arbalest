@@ -49,15 +49,15 @@ QString breakStringAtCaps(const QString& in)
     return newName;
 }
 
-const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name) {
+const double * getLeafMatrix(BRLCAD::Combination::ConstTreeNode& node, const QString& name) {
     switch (node.Operation())
     {
         case BRLCAD::Combination::ConstTreeNode::Union:
         case BRLCAD::Combination::ConstTreeNode::Intersection:
         case BRLCAD::Combination::ConstTreeNode::Subtraction:
         case BRLCAD::Combination::ConstTreeNode::ExclusiveOr: {
-            BRLCAD::Combination::TreeNode left = node.LeftOperand();
-            BRLCAD::Combination::TreeNode right = node.RightOperand();
+            BRLCAD::Combination::ConstTreeNode left = node.LeftOperand();
+            BRLCAD::Combination::ConstTreeNode right = node.RightOperand();
             const double * resultLeft = getLeafMatrix(left, name);
             const double * resultRight = getLeafMatrix(right, name);
             if (resultLeft) return resultLeft;
@@ -65,7 +65,7 @@ const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString&
         }
 
         case BRLCAD::Combination::ConstTreeNode::Not: {
-            BRLCAD::Combination::TreeNode op = node.RightOperand();
+            BRLCAD::Combination::ConstTreeNode op = node.RightOperand();
             return getLeafMatrix(op, name);
         }
 
