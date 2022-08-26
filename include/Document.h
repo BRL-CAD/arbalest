@@ -30,6 +30,7 @@ private:
     const int documentId;
     ObjectTree* objectTree;
     GeometryRenderer * geometryRenderer;
+    bool modified;
 
 
 public:
@@ -49,7 +50,7 @@ public:
     {
         return raytraceWidget;
     }
-    BRLCAD::MemoryDatabase* getDatabase() const
+    BRLCAD::ConstDatabase* getDatabase() const
     {
         return database;
     }
@@ -88,7 +89,10 @@ public:
         this->filePath = new QString(filePath);
     }
 
-    void modifyObjectNoSet(int objectId);
+    bool isModified();
+    bool Add(const BRLCAD::Object& object);
+    bool Save(const char* fileName);
+    void getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func);
 };
 
 

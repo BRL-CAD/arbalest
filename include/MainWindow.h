@@ -59,18 +59,22 @@ private:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
+    bool maybeSave(int documentId, bool *cancel = nullptr);
 
     QAction *themeAct[2];
 	
 protected:
     void changeEvent(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
-
+    void closeEvent(QCloseEvent* event) override;
 	
 public slots:
     void openFileDialog();
+    bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
+    bool saveAsFileDialogId(int documentId);
     void saveFileDefaultPath();
+    bool saveFileDefaultPathId(int documentId);
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) ;
     void objectTreeWidgetSelectionChanged(int objectId);

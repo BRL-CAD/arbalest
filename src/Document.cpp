@@ -17,6 +17,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
         }
     }
 
+    modified = false;
     objectTree = new ObjectTree(database);
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
@@ -33,6 +34,7 @@ Document::~Document() {
 }
 
 void Document::modifyObject(BRLCAD::Object *newObject) {
+    modified = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
     getObjectTree()->traverseSubTree(0,false,[this, objectName]
@@ -47,20 +49,26 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     for (Display * display : displayGrid->getDisplays())display->forceRerenderFrame();
 }
 
-
-void Document::modifyObjectNoSet(int objectId) {
-    QString objectName = objectTree->getNameMap()[objectId];
-    getObjectTree()->traverseSubTree(0,false,[this, objectName]
-                                             (int objectId){
-                                         if (getObjectTree()->getNameMap()[objectId] == objectName){
-                                             geometryRenderer->clearObject(objectId);
-                                         }
-                                         return true;
-                                     }
-    );
-    geometryRenderer->refreshForVisibilityAndSolidChanges();
-    for (Display * display : displayGrid->getDisplays())display->forceRerenderFrame();
+bool Document::isModified() {
+    return modified;
 }
+
+bool Document::Add(const BRLCAD::Object& object) {
+    modified = true;
+    return database->Add(object);
+}
+
+bool Document::Save(const char* fileName) {
+    modified = false;
+    return database->Save(fileName);
+}
+
+void Document::getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func) {
+    BRLCADObjectCallback callback(func);
+    database->Get(objectName.toUtf8(), callback);
+    modified = true;
+}
+
 Display* Document::getDisplay()
 {
     return displayGrid->getActiveDisplay();
