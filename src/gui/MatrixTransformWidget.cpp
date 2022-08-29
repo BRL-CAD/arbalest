@@ -27,8 +27,8 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
     widgets[childObjectId] = this;
 
     double *transformationMatrix = new double[16]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    document->getBRLCADObject(parentObjectName, [this, childNodeName, transformationMatrix](BRLCAD::Object &object) {
-        BRLCAD::Combination::TreeNode tree = dynamic_cast<BRLCAD::Combination *>(&object)->Tree();
+    document->getBRLCADConstObject(parentObjectName, [this, childNodeName, transformationMatrix](const BRLCAD::Object &object) {
+        BRLCAD::Combination::ConstTreeNode tree = dynamic_cast<const BRLCAD::Combination *>(&object)->Tree();
         const double *transformationMatrixPtr = getLeafMatrix(tree, childNodeName);
         if (transformationMatrixPtr != nullptr) {
             for(int i=0;i<16;i++)transformationMatrix[i] = transformationMatrixPtr[i];

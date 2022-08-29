@@ -92,6 +92,7 @@ public:
     bool isModified();
     bool Add(const BRLCAD::Object& object);
     bool Save(const char* fileName);
+    void getBRLCADConstObject(const QString& objectName, const std::function<void(const BRLCAD::Object&)>& func);
     void getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func);
 };
 

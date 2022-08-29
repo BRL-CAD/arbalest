@@ -36,21 +36,8 @@ struct ColorInfo {
     }
 };
 
-const double * getLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name);
+const double * getLeafMatrix(BRLCAD::Combination::ConstTreeNode& node, const QString& name);
 void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, double * matrix);
-
-
-class BRLCADObjectCallback : public BRLCAD::Database::ObjectCallback {
-public:
-
-    inline explicit BRLCADObjectCallback(std::function<void(BRLCAD::Object&)> func): func(std::move(func)){}
-    inline void operator()(BRLCAD::Object& object) override {
-        func(object);
-    }
-
-private:
-    std::function<void(BRLCAD::Object&)> func;
-};
 
 
 template<typename T>
