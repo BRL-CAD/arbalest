@@ -2,6 +2,8 @@
 #include <QString>
 #include <include/Utils.h>
 #include <brlcad/Combination.h>
+#include <QInputDialog>
+#include <QMessageBox>
 #include "Globals.h"
 
 #include "cicommon.h"
@@ -137,4 +139,21 @@ QImage coloredIcon(QString path, QString colorKey){
         }
     }
     return image;
+}
+
+bool getObjectNameFromUser(QWidget* parent, QString& name) {
+    bool ok;
+
+    while (true) {
+        name = QInputDialog::getText(parent, QObject::tr("Object Name"), QObject::tr("Enter object name"), QLineEdit::Normal, "", &ok);
+    
+        if (name.isEmpty() && ok) {
+            QMessageBox::information(parent, QObject::tr("Object Name"), QObject::tr("Please enter an object name"), QMessageBox::Ok);
+        }
+        else {
+            break;
+        }
+    }
+
+    return ok ? true : false;
 }
