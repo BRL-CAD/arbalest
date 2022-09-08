@@ -141,14 +141,22 @@ QImage coloredIcon(QString path, QString colorKey){
     return image;
 }
 
-bool getObjectNameFromUser(QWidget* parent, QString& name) {
+bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name) {
     bool ok;
 
     while (true) {
         name = QInputDialog::getText(parent, QObject::tr("Object Name"), QObject::tr("Enter object name"), QLineEdit::Normal, "", &ok);
-    
-        if (name.isEmpty() && ok) {
-            QMessageBox::information(parent, QObject::tr("Object Name"), QObject::tr("Please enter an object name"), QMessageBox::Ok);
+
+        if (ok) {
+            if (name.isEmpty()) {
+                QMessageBox::information(parent, QObject::tr("Object Name"), QObject::tr("Please enter an object name"), QMessageBox::Ok);
+            }
+            else if (document.getDatabase()->Get(name.toUtf8().data())) {
+                QMessageBox::information(parent, QObject::tr("Object Name"), QObject::tr("Please enter an unique object name"), QMessageBox::Ok);
+            }
+            else {
+                break;
+            }
         }
         else {
             break;

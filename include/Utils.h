@@ -9,6 +9,7 @@
 #include "brlcad/cicommon.h"
 #include "QVBoxWidget.h"
 #include "QHBoxWidget.h"
+#include "Document.h"
 #include <chrono>
 #include <stack>
 #include <iostream>
@@ -96,7 +97,8 @@ inline void te(){
     <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< endl;
 }
 
-bool getObjectNameFromUser(QWidget* parent, QString& name);
+class Document;
+bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
 
 
 #endif // UTILS_ARBALEST_H

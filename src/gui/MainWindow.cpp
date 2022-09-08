@@ -142,7 +142,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -160,7 +160,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Cone * object = new BRLCAD::Cone();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -181,7 +181,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -200,7 +200,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -220,7 +220,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -240,7 +240,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -260,7 +260,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -281,7 +281,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -302,7 +302,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -322,7 +322,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Particle * object = new BRLCAD::Particle();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
@@ -341,7 +341,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
 
         QString name;
-        if (!getObjectNameFromUser(this, name)) return;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Torus * object = new BRLCAD::Torus();
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);

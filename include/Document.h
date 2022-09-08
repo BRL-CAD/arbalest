@@ -19,6 +19,7 @@ class GeometryRenderer;
 class DisplayGrid;
 class RaytraceView;
 class ObjectTreeWidget;
+class ObjectTree;
 
 class Document {
 private:
