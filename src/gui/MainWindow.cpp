@@ -141,8 +141,9 @@ void MainWindow::prepareUi() {
     connect(createArb8Act, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -158,8 +159,9 @@ void MainWindow::prepareUi() {
     connect(createConeAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Cone * object = new BRLCAD::Cone();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -178,8 +180,9 @@ void MainWindow::prepareUi() {
     connect(createEllipsoidAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -196,8 +199,9 @@ void MainWindow::prepareUi() {
     connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -215,8 +219,9 @@ void MainWindow::prepareUi() {
     connect(createHalfspaceAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -234,8 +239,9 @@ void MainWindow::prepareUi() {
     connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -253,8 +259,9 @@ void MainWindow::prepareUi() {
     connect(createHyperboloidAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -273,8 +280,9 @@ void MainWindow::prepareUi() {
     connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -293,8 +301,9 @@ void MainWindow::prepareUi() {
     connect(createParaboloidAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -312,8 +321,9 @@ void MainWindow::prepareUi() {
     connect(createParticleAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Particle * object = new BRLCAD::Particle();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
@@ -330,8 +340,9 @@ void MainWindow::prepareUi() {
     connect(createTorusAct, &QAction::triggered, this,[this](){
         if (activeDocumentId == -1) return;
 
+        QString name;
+        if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Torus * object = new BRLCAD::Torus();
-        QString name = QInputDialog::getText(this,"Object Name","Enter object name");
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);

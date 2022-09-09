@@ -96,5 +96,8 @@ inline void te(){
     <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< endl;
 }
 
+class Document;
+bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
+
 
 #endif // UTILS_ARBALEST_H
