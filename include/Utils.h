@@ -9,7 +9,6 @@
 #include "brlcad/cicommon.h"
 #include "QVBoxWidget.h"
 #include "QHBoxWidget.h"
-#include "Document.h"
 #include <chrono>
 #include <stack>
 #include <iostream>

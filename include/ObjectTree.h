@@ -27,8 +27,6 @@
  * multiple times in the tree like all.g\orb and ball.g\orb
  */
 
-struct ColorInfo;
-
 class ObjectTree {
 public:
     enum VisibilityState{
