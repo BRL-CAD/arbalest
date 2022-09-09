@@ -163,5 +163,5 @@ bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name) {
         }
     }
 
-    return ok ? true : false;
+    return ok;
 }
