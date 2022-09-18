@@ -7,10 +7,19 @@ class MouseAction : public QObject
 {
     Q_OBJECT
 public:
-    explicit MouseAction(QObject *parent = nullptr);
+    virtual ~MouseAction();
 
 signals:
+    void Done(MouseAction* myself);
 
+protected:
+    QObject* m_watched;
+
+    MouseAction(QObject* watched);
+    virtual bool eventFilter(QObject* watched, QEvent* event) = 0;
+
+private slots:
+    void WatchedDestroyed(QObject* watched);
 };
 
 #endif // MOUSEACTION_H

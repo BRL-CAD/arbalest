@@ -5,12 +5,12 @@
 #include <QPushButton>
 #include <QtWidgets/QMdiArea>
 #include <unordered_map>
-#include "Document.h"
 #include "Dockable.h"
 #include "QSSPreprocessor.h"
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QComboBox>
+#include "MouseAction.h"
 
 class Document;
 
@@ -41,6 +41,7 @@ private:
     QLabel *statusBarPathLabel;
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
+    MouseAction* m_mouseAction;
 	
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
@@ -65,8 +66,8 @@ private:
 	
 protected:
     void changeEvent(QEvent *e) override;
-    bool eventFilter(QObject *watched, QEvent *event) override;
     void closeEvent(QCloseEvent* event) override;
+    void DragWindowButtonAction(void);
 	
 public slots:
     void openFileDialog();

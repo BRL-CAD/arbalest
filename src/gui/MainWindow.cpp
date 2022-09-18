@@ -28,14 +28,14 @@
 #include <brlcad/HyperbolicCylinder.h>
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
-
+#include "DragWindowMouseAction.h"
 
 using namespace BRLCAD;
 using namespace std;
 
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr}
 {
     loadTheme();
     prepareUi();
@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
+    DragWindowButtonAction();
 }
 
 MainWindow::~MainWindow()
@@ -82,7 +83,6 @@ void MainWindow::prepareUi() {
     setWindowTitle("Arbalest");
 	// Menu bar -------------------------------------------------------------------------------------------------------------
     menuTitleBar = new QMenuBar(this);
-    menuTitleBar->installEventFilter(this);
     setMenuBar(menuTitleBar);
 
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
@@ -967,36 +967,6 @@ void MainWindow::maximizeButtonPressed() {
     else showNormal();
 }
 
-// drag window by holding from menu bar (now functioning as title bar too)
-bool MainWindow::eventFilter(QObject *watched, QEvent *event)
-{
-    static QPoint dragPosition{};
-    if (watched == menuTitleBar)
-    {
-        if (event->type() == QEvent::MouseButtonPress)
-        {
-            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-            if (mouse_event->button() == Qt::LeftButton)
-            {
-                dragPosition = mouse_event->globalPos() - frameGeometry().topLeft();
-                return false;
-            }
-        }
-        else if (event->type() == QEvent::MouseMove)
-        {
-            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-            if (mouse_event->buttons() & Qt::LeftButton)
-            {
-                if(isMaximized()) return false;//showNormal();
-                //todo showNormal when dragged
-                move(mouse_event->globalPos() - dragPosition);
-                return false;
-            }
-        }
-    }
-    return false;
-}
-
 void MainWindow::changeEvent( QEvent* e ) {
     if (e->type() == QEvent::WindowStateChange) {
         if (this->windowState() == Qt::WindowMaximized) {
@@ -1031,4 +1001,12 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     else {
         event->accept();
     }
+}
+
+void MainWindow::DragWindowButtonAction(void) {
+    if (m_mouseAction != nullptr)
+        delete m_mouseAction;
+
+    m_mouseAction = new DragWindowMouseAction(this, menuTitleBar);
+    menuTitleBar->installEventFilter(m_mouseAction);
 }
