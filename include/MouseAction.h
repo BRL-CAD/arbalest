@@ -14,8 +14,9 @@ signals:
 
 protected:
     QObject* m_watched;
+    QWidget* m_widget;
 
-    MouseAction(QObject* watched);
+    MouseAction(QObject* watched, QWidget* widget);
     virtual bool eventFilter(QObject* watched, QEvent* event) = 0;
 
 private slots:

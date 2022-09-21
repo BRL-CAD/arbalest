@@ -8,11 +8,10 @@
 class DragWindowMouseAction : public MouseAction
 {
 public:
-    DragWindowMouseAction(QMainWindow *mainWindow, QMenuBar* menuTitleBar);
+    DragWindowMouseAction(QObject *watched, QWidget* widget);
     virtual ~DragWindowMouseAction();
 
 protected:
-    QMainWindow* m_mainWindow;
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
 };
 

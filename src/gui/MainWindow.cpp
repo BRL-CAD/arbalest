@@ -1007,6 +1007,5 @@ void MainWindow::DragWindowButtonAction(void) {
     if (m_mouseAction != nullptr)
         delete m_mouseAction;
 
-    m_mouseAction = new DragWindowMouseAction(this, menuTitleBar);
-    menuTitleBar->installEventFilter(m_mouseAction);
+    m_mouseAction = new DragWindowMouseAction(menuTitleBar, this);
 }
