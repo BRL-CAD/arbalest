@@ -13,10 +13,9 @@ signals:
     void Done(MouseAction* myself);
 
 protected:
-    QObject* m_watched;
-    QWidget* m_widget;
+    QWidget* m_watched;
 
-    MouseAction(QObject* watched, QWidget* widget);
+    MouseAction(QWidget* widget, QObject* watched = nullptr);
     virtual bool eventFilter(QObject* watched, QEvent* event) = 0;
 
 private slots:

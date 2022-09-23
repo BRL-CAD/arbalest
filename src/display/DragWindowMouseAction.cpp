@@ -2,8 +2,8 @@
 #include <QMouseEvent>
 
 
-DragWindowMouseAction::DragWindowMouseAction(QObject* watched, QWidget* widget) 
-    : MouseAction(watched, widget) {
+DragWindowMouseAction::DragWindowMouseAction(QWidget* widget, QWidget* mainWindow, QObject* watched)
+    : MouseAction(widget, watched), m_mainWindow{mainWindow} {
     m_watched->installEventFilter(this);
 }
 
@@ -19,7 +19,7 @@ bool DragWindowMouseAction::eventFilter(QObject* watched, QEvent* event)
             QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
             if (mouse_event->button() == Qt::LeftButton)
             {
-                dragPosition = mouse_event->globalPos() - m_widget->frameGeometry().topLeft();
+                dragPosition = mouse_event->globalPos() - m_mainWindow->frameGeometry().topLeft();
                 return false;
             }
         }
@@ -28,9 +28,9 @@ bool DragWindowMouseAction::eventFilter(QObject* watched, QEvent* event)
             QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
             if (mouse_event->buttons() & Qt::LeftButton)
             {
-                if (m_widget->isMaximized()) return false;//showNormal();
+                if (m_mainWindow->isMaximized()) return false;//showNormal();
                 //todo showNormal when dragged
-                m_widget->move(mouse_event->globalPos() - dragPosition);
+                m_mainWindow->move(mouse_event->globalPos() - dragPosition);
                 return false;
             }
         }
