@@ -29,6 +29,7 @@
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
 #include "DragWindowMouseAction.h"
+#include "SelectObjectMouseAction.h"
 
 using namespace BRLCAD;
 using namespace std;
@@ -1009,3 +1010,11 @@ void MainWindow::DragWindowButtonAction(void) {
 
     m_mouseAction = new DragWindowMouseAction(menuTitleBar, this);
 }
+
+void MainWindow::SelectObjectButtonAction(void) {
+    if (m_mouseAction != nullptr)
+        delete m_mouseAction;
+
+    m_mouseAction = new SelectObjectMouseAction();
+}
+

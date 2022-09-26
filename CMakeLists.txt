@@ -33,6 +33,7 @@ set(arbalest_Sources
         src/gui/ObjectTreeRowButtons.cpp
         src/display/MouseAction.cpp
         src/display/DragWindowMouseAction.cpp
+        src/display/SelectObjectMouseAction.cpp
         src/utils/Utils.cpp
         src/gui/DisplayGrid.cpp
         src/gui/AboutWindow.cpp

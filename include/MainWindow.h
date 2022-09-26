@@ -68,6 +68,7 @@ protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent* event) override;
     void DragWindowButtonAction(void);
+    void SelectObjectButtonAction(void);
 	
 public slots:
     void openFileDialog();
