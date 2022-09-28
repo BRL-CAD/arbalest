@@ -22,6 +22,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
+    testsWidget = new TestsWidget(this);
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();

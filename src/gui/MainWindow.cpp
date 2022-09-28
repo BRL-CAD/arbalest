@@ -744,8 +744,8 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-    objectTestSuiteDockable = new Dockable("Test Suite", this, true, 300);
-    addDockWidget(Qt::BottomDockWidgetArea, objectTestSuiteDockable);
+    objectTestsWidgetDockable = new Dockable("Test Suite", this, true, 300);
+    addDockWidget(Qt::BottomDockWidgetArea, objectTestsWidgetDockable);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -918,6 +918,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            objectTestsWidgetDockable->setContent(documents[activeDocumentId]->getTestsWidget());
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
@@ -932,7 +933,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
-        objectTestSuiteDockable->clear();
+        objectTestsWidgetDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }

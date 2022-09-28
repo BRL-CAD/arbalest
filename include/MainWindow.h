@@ -33,7 +33,7 @@ private:
 	// UI components
     Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
-    Dockable *objectTestSuiteDockable;
+    Dockable *objectTestsWidgetDockable;
     Dockable *toolboxDockable;
     QStatusBar *statusBar;
     QMenuBar* menuTitleBar;

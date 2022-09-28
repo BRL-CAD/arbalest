@@ -11,6 +11,7 @@
 #include "Properties.h"
 #include "GeometryRenderer.h"
 #include "DisplayGrid.h"
+#include "TestsWidget.h"
 #include <include/RaytraceView.h>
 
 class Properties;
@@ -26,6 +27,7 @@ private:
     BRLCAD::MemoryDatabase *database;
     DisplayGrid *displayGrid;
     ObjectTreeWidget *objectTreeWidget;
+    TestsWidget* testsWidget;
     Properties *properties;
     const int documentId;
     ObjectTree* objectTree;
@@ -65,6 +67,10 @@ public:
     Properties* getProperties() const
     {
 	    return properties;
+    }
+
+    TestsWidget* getTestsWidget() const {
+        return testsWidget;
     }
 
     DisplayGrid *getDisplayGrid()  {
