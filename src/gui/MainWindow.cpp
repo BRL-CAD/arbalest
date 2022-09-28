@@ -744,7 +744,8 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-
+    objectTestSuiteDockable = new Dockable("Test Suite", this, true, 300);
+    addDockWidget(Qt::BottomDockWidgetArea, objectTestSuiteDockable);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -931,6 +932,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        objectTestSuiteDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
