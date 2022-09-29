@@ -1,3 +1,8 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(arbalest)
+
+
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -52,6 +57,7 @@ qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest
 qt5_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
 include_directories(${arbalest_Include_Dirs})
+link_directories(${BRLCAD_INCLUDE_DIRS}/../lib)
 
 add_executable(arbalest
         ${arbalest_Sources}
