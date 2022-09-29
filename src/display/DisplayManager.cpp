@@ -20,6 +20,7 @@
 /** @file DisplayManager.cpp */
 
 #include <QMatrix4x4>
+#include <QScreen>
 #include "DisplayManager.h"
 
 #define DM_SOLID_LINE 0
@@ -27,6 +28,7 @@
 
 DisplayManager::DisplayManager(Display &display) : display(display)
 {
+  /* FIXME: these curiously crash on Mac */
     setFGColor(0,0,0, 1);
     glLineStipple(1, 0xCF33);
 }
@@ -84,9 +86,11 @@ bool DisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::El
             glPushMatrix();
             glLoadIdentity();
             glTranslated(tlate[0], tlate[1], tlate[2]);
-            /* 96 dpi = 3.78 pixel/mm hardcoded */
-            glScaled(2. * 3.78 / displayManager->display.getW(),
-                     2. * 3.78 / displayManager->display.getH(),
+
+            double dpi = QGuiApplication::primaryScreen()->logicalDotsPerInch();
+
+            glScaled(2. * (dpi / 25.4) / displayManager->display.getW(),
+                     2. * (dpi / 25.4) / displayManager->display.getH(),
                      1.);
             break;
         }
