@@ -37,7 +37,9 @@ set(arbalest_Sources
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
         src/gui/MatrixTransformWidget.cpp
-        src/display/GridRenderer.cpp)
+        src/display/GridRenderer.cpp
+        src/display/MouseAction.cpp
+        src/display/MoveMouseAction.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface
