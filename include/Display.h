@@ -34,6 +34,8 @@
 #include "OrthographicCamera.h"
 #include "Globals.h"
 #include "QSSPreprocessor.h"
+#include "MouseAction.h"
+#include "MoveMouseAction.h"
 
 class Document;
 class DisplayManager;
@@ -67,6 +69,8 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *k) override ;
 
+    void moveMouseAction();
+
 private:
     Document * document;
     int w = 400;
@@ -76,6 +80,7 @@ private:
     bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     QColor bgColor;
+    MouseAction* m_mouseAction;
 
     Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
     Qt::MouseButton moveCameraMouseButton = Qt::RightButton;

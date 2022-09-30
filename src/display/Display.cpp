@@ -32,7 +32,8 @@
 using namespace std;
 
 
-Display::Display(Document*  document):document(document) {
+Display::Display(Document*  document)
+    :document(document), m_mouseAction{nullptr} {
     camera = new OrthographicCamera(document);
     displayManager = new DisplayManager(*this);
     axesRenderer = new AxesRenderer();
@@ -97,6 +98,15 @@ void Display::paintGL() {
     displayManager->loadPMatrix(orthoMtx.data());
     axesRenderer->render();
 }
+
+void Display::moveMouseAction() {
+    if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new MoveMouseAction();
+}
+
 
 void Display::mouseMoveEvent(QMouseEvent *event) {
 	const int x = event->x();

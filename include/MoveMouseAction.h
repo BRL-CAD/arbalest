@@ -12,7 +12,7 @@ public:
     virtual ~MoveMouseAction();
 
 protected:
-    virtual bool eventFilter(QObject* watched, QEvent* event) = 0;
+    virtual bool eventFilter(QObject* watched, QEvent* event) override;
 };
 
 #endif // MOVEMOUSEACTION_H
