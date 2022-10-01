@@ -19,7 +19,6 @@ public:
     explicit TestsWidget(Document* document, QWidget* parent = nullptr);
 private:
     Document* document;
-
 };
 
 
