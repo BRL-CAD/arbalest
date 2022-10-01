@@ -5,19 +5,21 @@
 #ifndef TESTSWIDGET_H
 #define TESTSWIDGET_H
 
-#include <qtreewidget.h>
+#include <iostream>
 #include <QTableView>
-#include <QSqlTableModel>
+#include <QtSql/QSqlTableModel>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
+#include <QtWidgets>
 
 class Document;
-class TestsWidget : public QWidget {
+class TestsWidget : public QTableWidget {
     Q_OBJECT
 public:
-    explicit TestsWidget(Document* document);
+    explicit TestsWidget(Document* document, QWidget* parent = nullptr);
 private:
     Document* document;
-    QTableView* resultTable;
-    QSqlTableModel* model;
+
 };
 
 

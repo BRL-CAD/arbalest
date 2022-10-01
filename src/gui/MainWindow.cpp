@@ -744,7 +744,7 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-    objectTestsWidgetDockable = new Dockable("Test Suite", this, true, 300);
+    objectTestsWidgetDockable = new Dockable("Tests", this, true, 300);
     addDockWidget(Qt::BottomDockWidgetArea, objectTestsWidgetDockable);
 
     // Toolbox
