@@ -28,32 +28,7 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
     QSqlQuery* qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)");
     qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')");
     qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')");
-    qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'");
-
-    /* PRINT ONE OF THEM TO CONSOLE */
-    if (qResult->first()) {
-        switch (qResult->value(1).toString().toStdString().c_str()[0]) {
-        case 'E':
-            std::cout << "ERROR: ";
-            break;
-        case 'W':
-            std::cout << "WARNING: ";
-            break;
-        case 'I':
-        default:
-            std::cout << "INFO: ";
-            break;
-        }
-        std::cout << qResult->value(0).toString().toStdString();
-        if (!qResult->value(2).toString().isEmpty())
-            std::cout << " " << qResult->value(2).toString().toStdString() << std::endl;
-        else
-            std::cout << std::endl;
-
-    }
-    else {
-        std::cout << "no errors found" << std::endl;
-    }
+    qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'");    
 
     //////
     setRowCount(10);
