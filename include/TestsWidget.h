@@ -17,8 +17,12 @@ class TestsWidget : public QTableWidget {
     Q_OBJECT
 public:
     explicit TestsWidget(Document* document, QWidget* parent = nullptr);
+
 private:
     Document* document;
+    QSqlDatabase db;
+    void dbInit();
+    QSqlQuery* dbExec(QString command);
 };
 
 
