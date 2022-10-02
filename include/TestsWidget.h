@@ -11,15 +11,18 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 #include <QtWidgets>
+#include <QHBoxWidget.h>
 
 class Document;
-class TestsWidget : public QTableWidget {
+class TestsWidget : public QHBoxWidget {
     Q_OBJECT
 public:
     explicit TestsWidget(Document* document, QWidget* parent = nullptr);
 
 private:
     Document* document;
+    QListWidget* list;
+    QTableWidget* table;
     QSqlDatabase db;
     void dbInit();
     QSqlQuery* dbExec(QString command);
