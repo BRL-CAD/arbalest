@@ -25,12 +25,16 @@ private:
     Document* document;
     QListWidget* list;
     QTableWidget* table;
+    QString dbName;
+    QString dbConnectionName;
     
-    QSqlDatabase* db;
     void dbInit();
     QSqlQuery* dbExec(QString command);
-
     void popupError(QString message);
+
+    QSqlDatabase getDatabase() const {
+        return QSqlDatabase::database(dbConnectionName);
+    }
 };
 
 

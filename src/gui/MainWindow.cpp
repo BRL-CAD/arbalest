@@ -959,6 +959,7 @@ void MainWindow::tabCloseRequested(const int i)
     if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        objectTestsWidgetDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }

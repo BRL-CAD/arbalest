@@ -3,8 +3,6 @@
 
 TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
     dbInit();
-    if (!db) return;
-
     QSqlQuery* qResult;
 
     if (!(qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)"))) return;
@@ -68,40 +66,52 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
 }
 
 TestsWidget::~TestsWidget() {
-    QSqlDatabase::removeDatabase(db->connectionName());
+    QSqlDatabase::removeDatabase(dbConnectionName);
 }
 
 void TestsWidget::dbInit() {
-    //const QString* DRIVER = new QString();
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         popupError("ERROR: sqlite is not available");
         return;
     }
 
+    //// TODO: open file -> close tab -> open file crashe
+    //// TODO: opening multiple new files crashes
+    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
+    dbName = "tmpfile.sqlite"; 
+    if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
+    dbConnectionName = dbName + "-connection";
+
+    // check if SQL connection already open
+    QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
+    // TODO: instead of throwing + popping up error, open correct document
+    if (db.isOpen())
+        throw "SQL connection already exists";
+
     // TODO: include connection name so can have multiple open at a time
     // TODO: on destructor, close sql connection
-    QString dbName = document->getFilePath()->split("/").last() + ".sqlite";
-    db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", dbName + "-connection")); // connectionName = <dbName>-connection
     if (!QFile::exists(dbName)) {
-        db->setDatabaseName(dbName);
-
-        if (!db->open() || !db->isOpen()) {
-            popupError("ERROR: " + db->lastError().text());
-            return;
-        }
+        db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
+        db.setDatabaseName(dbName);
     }
     else {
-        // TODO: open existing
+        db = getDatabase();
+    }
+
+    if (!db.open() || !db.isOpen()) {
+        popupError("ERROR: " + db.lastError().text());
+        return;
     }
 }
 
 QSqlQuery* TestsWidget::dbExec(QString command) {
-    QSqlQuery* query = new QSqlQuery(command, *db);
+    QSqlQuery* query = new QSqlQuery(command, getDatabase());
     if (!query->isActive()) {
         popupError("ERROR: " + query->lastError().text());
         return nullptr;
     }
-
+    /*query->finish();*/
+    /*query->clear();*/
     return query;
 }
 
