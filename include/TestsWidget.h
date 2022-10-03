@@ -11,6 +11,7 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 #include <QtWidgets>
+#include <QMessageBox>
 #include <QHBoxWidget.h>
 
 class Document;
@@ -18,14 +19,18 @@ class TestsWidget : public QHBoxWidget {
     Q_OBJECT
 public:
     explicit TestsWidget(Document* document, QWidget* parent = nullptr);
+    ~TestsWidget();
 
 private:
     Document* document;
     QListWidget* list;
     QTableWidget* table;
-    QSqlDatabase db;
+    
+    QSqlDatabase* db;
     void dbInit();
     QSqlQuery* dbExec(QString command);
+
+    void popupError(QString message);
 };
 
 

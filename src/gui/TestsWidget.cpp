@@ -3,25 +3,28 @@
 
 TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
     dbInit();
+    if (!db) return;
 
-    QSqlQuery* qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)");
-    qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')");
-    qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')");
-    qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'");    
+    QSqlQuery* qResult;
+
+    if (!(qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)"))) return;
+    if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')"))) return;
+    if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')"))) return;
+    if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'"))) return;
 
     //////
     table->setRowCount(10);
     table->setColumnCount(3);
-    QStringList columnLabels;
-    columnLabels << "Severity" << "Object Name" << "Description";
-    table->setHorizontalHeaderLabels(columnLabels);
+    QStringList* columnLabels = new QStringList();
+    *columnLabels << "Severity" << "Object Name" << "Description";
+    table->setHorizontalHeaderLabels(*columnLabels);
 
     /* LOOK UP ALL ISSUES */
-    qResult = dbExec("SELECT object_name, severity, description FROM issues");
+    if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues"))) return;
 
     /* INSERT ISSUES INTO A TABLE */
     size_t row = 0;
-    while (qResult->next()) {
+    while (qResult && qResult->next()) {
         char typechar = qResult->value(1).toString().toStdString().c_str()[0];
         const char* type = NULL;
         switch (typechar) {
@@ -46,9 +49,9 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
         row++;
     }
 
-    QStringList tests;
-    tests << "test 1" << "test 2" << "test 3" << "test 4";
-    list->addItems(tests);
+    QStringList* tests = new QStringList();
+    *tests << "test 1" << "test 2" << "test 3" << "test 4";
+    list->addItems(*tests);
 
     QListWidgetItem* item = 0;
     for (int i = 0; i < list->count(); i++) {
@@ -64,23 +67,46 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
     getBoxLayout()->setStretchFactor(table, 3);
 }
 
+TestsWidget::~TestsWidget() {
+    QSqlDatabase::removeDatabase(db->connectionName());
+}
+
 void TestsWidget::dbInit() {
-    const QString DRIVER("QSQLITE");
-    if (!QSqlDatabase::isDriverAvailable(DRIVER))
-        printf("TODO: popup error sqlite is NOT available\n");
+    //const QString* DRIVER = new QString();
+    if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
+        popupError("ERROR: sqlite is not available");
+        return;
+    }
 
-    db = QSqlDatabase::addDatabase(DRIVER);
-
+    // TODO: include connection name so can have multiple open at a time
+    // TODO: on destructor, close sql connection
     QString dbName = document->getFilePath()->split("/").last() + ".sqlite";
-    db.setDatabaseName(dbName);
+    db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", dbName + "-connection")); // connectionName = <dbName>-connection
+    if (!QFile::exists(dbName)) {
+        db->setDatabaseName(dbName);
 
-    if (!db.open())
-        std::cout << "TODO: popup ERROR: " << db.lastError().text().toStdString() << std::endl;
+        if (!db->open() || !db->isOpen()) {
+            popupError("ERROR: " + db->lastError().text());
+            return;
+        }
+    }
+    else {
+        // TODO: open existing
+    }
 }
 
 QSqlQuery* TestsWidget::dbExec(QString command) {
-    QSqlQuery* query = new QSqlQuery(command, db);
-    if (!query->isActive())
-        std::cout << "TODO: popup ERROR:" << query->lastError().text().toStdString() << std::endl;
+    QSqlQuery* query = new QSqlQuery(command, *db);
+    if (!query->isActive()) {
+        popupError("ERROR: " + query->lastError().text());
+        return nullptr;
+    }
+
     return query;
+}
+
+void TestsWidget::popupError(QString message) {
+    QMessageBox* msgBox = new QMessageBox();
+    msgBox->setText(message);
+    msgBox->exec();
 }
