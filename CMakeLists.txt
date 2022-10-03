@@ -1,4 +1,4 @@
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Sql REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
@@ -43,6 +43,7 @@ set(arbalest_Sources
 set(arbalest_Link_Libraries
         coreinterface
         Qt5::Widgets
+        Qt5::Sql
         OpenGL::GL)
 
 # Meta-Object Compiling
