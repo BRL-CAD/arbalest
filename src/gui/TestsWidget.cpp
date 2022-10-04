@@ -4,12 +4,6 @@
 TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
     dbInit();
     QSqlQuery* qResult;
-
-    // if (!(qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)"))) return;
-    // if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')"))) return;
-    // if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')"))) return;
-    // if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'"))) return;
-
     //////
     table->setRowCount(10);
     table->setColumnCount(3);
@@ -17,10 +11,14 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
     *columnLabels << "Severity" << "Object Name" << "Description";
     table->setHorizontalHeaderLabels(*columnLabels);
 
-    /* LOOK UP ALL ISSUES */
-    if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues"))) return;
+    if (!getDatabase().tables().contains("issues")) {
+        qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)");
+        qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')");
+        qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')");
+        qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'");
+    }
 
-    /* INSERT ISSUES INTO A TABLE */
+    qResult = dbExec("SELECT object_name, severity, description FROM issues");
     size_t row = 0;
     while (qResult && qResult->next()) {
         char typechar = qResult->value(1).toString().toStdString().c_str()[0];
@@ -85,6 +83,8 @@ void TestsWidget::dbInit() {
     if (db.isOpen())
         throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
     
+    //// TODO: opening multiple new files crashes
+    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
     db.setDatabaseName(dbName);
 
@@ -95,7 +95,7 @@ void TestsWidget::dbInit() {
 QSqlQuery* TestsWidget::dbExec(QString command) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
     if (!query->isActive())
-        throw std::runtime_error("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text().toStdString());
+        popupError("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
     return query;
 }
 
