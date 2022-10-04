@@ -23,7 +23,8 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
     try { testsWidget = new TestsWidget(this); }
-    catch (...) { throw "Failed to create TestsWidget"; };
+    catch (const std::runtime_error& e) { throw e; }
+    catch (...) { throw std::runtime_error("Failed to create TestsWidget"); };
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();

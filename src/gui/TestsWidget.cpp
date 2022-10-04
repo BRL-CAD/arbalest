@@ -5,10 +5,10 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
     dbInit();
     QSqlQuery* qResult;
 
-    if (!(qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)"))) return;
-    if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')"))) return;
-    if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')"))) return;
-    if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'"))) return;
+    // if (!(qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)"))) return;
+    // if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')"))) return;
+    // if (!(qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')"))) return;
+    // if (!(qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'"))) return;
 
     //////
     table->setRowCount(10);
@@ -71,13 +71,10 @@ TestsWidget::~TestsWidget() {
 
 void TestsWidget::dbInit() {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
-        popupError("ERROR: sqlite is not available");
+        throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
         return;
     }
 
-    //// TODO: open file -> close tab -> open file crashe
-    //// TODO: opening multiple new files crashes
-    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
     dbName = "tmpfile.sqlite"; 
     if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
     dbConnectionName = dbName + "-connection";
@@ -86,32 +83,19 @@ void TestsWidget::dbInit() {
     QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
     // TODO: instead of throwing + popping up error, open correct document
     if (db.isOpen())
-        throw "SQL connection already exists";
+        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
+    
+    db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
+    db.setDatabaseName(dbName);
 
-    // TODO: include connection name so can have multiple open at a time
-    // TODO: on destructor, close sql connection
-    if (!QFile::exists(dbName)) {
-        db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-        db.setDatabaseName(dbName);
-    }
-    else {
-        db = getDatabase();
-    }
-
-    if (!db.open() || !db.isOpen()) {
-        popupError("ERROR: " + db.lastError().text());
-        return;
-    }
+    if (!db.open() || !db.isOpen())
+        throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
 }
 
 QSqlQuery* TestsWidget::dbExec(QString command) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
-    if (!query->isActive()) {
-        popupError("ERROR: " + query->lastError().text());
-        return nullptr;
-    }
-    /*query->finish();*/
-    /*query->clear();*/
+    if (!query->isActive())
+        throw std::runtime_error("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text().toStdString());
     return query;
 }
 
