@@ -35,7 +35,7 @@ using namespace std;
 
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr}
 {
     loadTheme();
     prepareUi();
@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
+    
+    moveCameraButtonAction();
 }
 
 MainWindow::~MainWindow()
@@ -1042,4 +1044,12 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     else {
         event->accept();
     }
+}
+
+void MainWindow::moveCameraButtonAction() {
+    if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new MoveCameraMouseAction();
 }

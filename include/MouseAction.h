@@ -2,7 +2,6 @@
 #define MOUSEACTION_H
 
 #include <QObject>
-#include <QEvent>
 #include "Display.h"
 
 class MouseAction : public QObject
@@ -12,7 +11,7 @@ public:
     virtual ~MouseAction();
 
 protected:
-    QObject* m_watched;
+    Display* m_watched;
 
     explicit MouseAction(QObject* parent = nullptr, Display* watched = nullptr);
     virtual bool eventFilter(QObject* watched, QEvent* event) = 0;
