@@ -2,8 +2,8 @@
 // Created by isaacy13 on 09/28/2022.
 //
 
-#ifndef TESTSWIDGET_H
-#define TESTSWIDGET_H
+#ifndef VVWIDGET_H
+#define VVWIDGET_H
 
 #include <iostream>
 #include <QTableView>
@@ -15,11 +15,11 @@
 #include <QHBoxWidget.h>
 
 class Document;
-class TestsWidget : public QHBoxWidget {
+class VerificationValidationWidget : public QHBoxWidget {
     Q_OBJECT
 public:
-    explicit TestsWidget(Document* document, QWidget* parent = nullptr);
-    ~TestsWidget();
+    explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
+    ~VerificationValidationWidget();
 
 private:
     Document* document;
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif // TESTSWIDGET_H
+#endif // VVWIDGET_H

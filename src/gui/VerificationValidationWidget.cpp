@@ -1,7 +1,7 @@
-#include "TestsWidget.h"
+#include "VerificationValidationWidget.h"
 #include <Document.h>
 
-TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
+VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
     dbInit();
     QSqlQuery* qResult;
     //////
@@ -63,11 +63,11 @@ TestsWidget::TestsWidget(Document* document, QWidget* parent) : document(documen
     getBoxLayout()->setStretchFactor(table, 3);
 }
 
-TestsWidget::~TestsWidget() {
+VerificationValidationWidget::~VerificationValidationWidget() {
     QSqlDatabase::removeDatabase(dbConnectionName);
 }
 
-void TestsWidget::dbInit() {
+void VerificationValidationWidget::dbInit() {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
         return;
@@ -92,14 +92,14 @@ void TestsWidget::dbInit() {
         throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
 }
 
-QSqlQuery* TestsWidget::dbExec(QString command) {
+QSqlQuery* VerificationValidationWidget::dbExec(QString command) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
     if (!query->isActive())
         popupError("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
     return query;
 }
 
-void TestsWidget::popupError(QString message) {
+void VerificationValidationWidget::popupError(QString message) {
     QMessageBox* msgBox = new QMessageBox();
     msgBox->setText(message);
     msgBox->exec();

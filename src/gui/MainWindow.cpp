@@ -744,8 +744,8 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-    objectTestsWidgetDockable = new Dockable("Tests", this, true, 300);
-    addDockWidget(Qt::BottomDockWidgetArea, objectTestsWidgetDockable);
+    objectVerificationValidationDockable = new Dockable("Verification & Validation", this, true, 300);
+    addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -926,7 +926,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
-            objectTestsWidgetDockable->setContent(documents[activeDocumentId]->getTestsWidget());
+            objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
@@ -941,7 +941,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
-        objectTestsWidgetDockable->clear();
+        objectVerificationValidationDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
@@ -967,7 +967,7 @@ void MainWindow::tabCloseRequested(const int i)
     if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
-        objectTestsWidgetDockable->clear();
+        objectVerificationValidationDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }

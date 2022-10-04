@@ -22,9 +22,9 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
-    try { testsWidget = new TestsWidget(this); }
+    try { vvWidget = new VerificationValidationWidget(this); }
     catch (const std::runtime_error& e) { throw e; }
-    catch (...) { throw std::runtime_error("Failed to create TestsWidget"); };
+    catch (...) { throw std::runtime_error("Failed to create VerificationValidationWidget"); };
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();
@@ -33,7 +33,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 }
 
 Document::~Document() {
-    delete testsWidget; // remove sqlite connection
+    delete vvWidget; // remove sqlite connection
     delete database;
 }
 

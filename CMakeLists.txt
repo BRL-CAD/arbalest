@@ -37,7 +37,7 @@ set(arbalest_Sources
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
         src/gui/MatrixTransformWidget.cpp
-        src/gui/TestsWidget.cpp
+        src/gui/VerificationValidationWidget.cpp
         src/display/GridRenderer.cpp)
 
 set(arbalest_Link_Libraries
