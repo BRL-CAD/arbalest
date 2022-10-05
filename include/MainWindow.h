@@ -12,7 +12,6 @@
 #include <QMenuBar>
 #include <QComboBox>
 #include "MouseAction.h"
-#include "MoveCameraMouseAction.h"
 
 class Document;
 
@@ -72,6 +71,9 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 	
     void moveCameraButtonAction();
+    void mousePressButtonAction();
+    void mouseReleaseButtonAction();
+    void wheelButtonAction();
 
 public slots:
     void openFileDialog();

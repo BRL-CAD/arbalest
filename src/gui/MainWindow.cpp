@@ -28,6 +28,10 @@
 #include <brlcad/HyperbolicCylinder.h>
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
+#include "MoveCameraMouseAction.h"
+#include "PressMouseAction.h"
+#include "ReleaseMouseAction.h"
+#include "WheelMouseAction.h"
 
 
 using namespace BRLCAD;
@@ -1052,4 +1056,28 @@ void MainWindow::moveCameraButtonAction() {
     }
 
     m_mouseAction = new MoveCameraMouseAction();
+}
+
+void MainWindow::mousePressButtonAction() {
+    if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new PressMouseAction();
+}
+
+void MainWindow::mouseReleaseButtonAction() {
+    if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new ReleaseMouseAction();
+}
+
+void MainWindow::wheelButtonAction() {
+    if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new WheelMouseAction();
 }
