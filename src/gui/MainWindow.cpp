@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     Globals::mainWindow = this;
     
     moveCameraButtonAction();
+    mousePressButtonAction();
+    mouseReleaseButtonAction();
+    wheelButtonAction();
 }
 
 MainWindow::~MainWindow()
