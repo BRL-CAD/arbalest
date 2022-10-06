@@ -28,7 +28,8 @@ private:
     QString dbName;
     QString dbConnectionName;
     
-    void dbInit();
+    void dbConnect();
+    void dbInitTables();
     QSqlQuery* dbExec(QString command);
     void popupError(QString message);
 

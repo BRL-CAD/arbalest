@@ -2,48 +2,42 @@
 #include <Document.h>
 
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
-    dbInit();
-    QSqlQuery* qResult;
-    //////
+    dbConnect();
+    dbInitTables();
     table->setRowCount(10);
     table->setColumnCount(3);
-    QStringList* columnLabels = new QStringList();
-    *columnLabels << "Severity" << "Object Name" << "Description";
-    table->setHorizontalHeaderLabels(*columnLabels);
+    
+    // QStringList* columnLabels = new QStringList();
+    // *columnLabels << "Severity" << "Object Name" << "Description";
+    // table->setHorizontalHeaderLabels(*columnLabels);
 
-    if (!getDatabase().tables().contains("issues")) {
-        qResult = dbExec("CREATE TABLE issues (id INTEGER PRIMARY KEY, object_name TEXT NOT NULL, severity TEXT CHECK( severity in ('E', 'W', 'I') ) NOT NULL, description TEXT DEFAULT NULL)");
-        qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/foo.r', 'W', 'object name implies region, but is not a region')");
-        qResult = dbExec("INSERT INTO issues(object_name, severity, description) VALUES('/all.g/bar.r', 'E', 'null combination')");
-        qResult = dbExec("SELECT object_name, severity, description FROM issues WHERE severity = 'E'");
-    }
+    // QSqlQuery* qResult;
+    // qResult = dbExec("SELECT object_name, severity, description FROM issues");
+    // size_t row = 0;
+    // while (qResult && qResult->next()) {
+    //     char typechar = qResult->value(1).toString().toStdString().c_str()[0];
+    //     const char* type = NULL;
+    //     switch (typechar) {
+    //     case 'E':
+    //         type = "ERROR";
+    //         break;
+    //     case 'W':
+    //         type = "WARNING";
+    //         break;
+    //     case 'I':
+    //     default:
+    //         type = "INFO";
+    //         break;
+    //     }
+    //     QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(type));
+    //     table->setItem(row, 0, item0);
+    //     QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(qResult->value(0).toString().toStdString().c_str()));
+    //     table->setItem(row, 1, item1);
+    //     QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(qResult->value(2).toString().toStdString().c_str()));
+    //     table->setItem(row, 2, item2);
 
-    qResult = dbExec("SELECT object_name, severity, description FROM issues");
-    size_t row = 0;
-    while (qResult && qResult->next()) {
-        char typechar = qResult->value(1).toString().toStdString().c_str()[0];
-        const char* type = NULL;
-        switch (typechar) {
-        case 'E':
-            type = "ERROR";
-            break;
-        case 'W':
-            type = "WARNING";
-            break;
-        case 'I':
-        default:
-            type = "INFO";
-            break;
-        }
-        QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(type));
-        table->setItem(row, 0, item0);
-        QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(qResult->value(0).toString().toStdString().c_str()));
-        table->setItem(row, 1, item1);
-        QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(qResult->value(2).toString().toStdString().c_str()));
-        table->setItem(row, 2, item2);
-
-        row++;
-    }
+    //     row++;
+    // }
 
     QStringList* tests = new QStringList();
     *tests << "test 1" << "test 2" << "test 3" << "test 4";
@@ -63,11 +57,31 @@ VerificationValidationWidget::VerificationValidationWidget(Document* document, Q
     getBoxLayout()->setStretchFactor(table, 3);
 }
 
+void VerificationValidationWidget::dbInitTables() {
+    QSqlQuery* qResult;
+    if (!getDatabase().tables().contains("Model"))
+        qResult = dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL, modelTestResultID INTEGER NOT NULL)");
+    if (!getDatabase().tables().contains("ModelTestResults"))
+        qResult = dbExec("CREATE TABLE ModelTestResults (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL UNIQUE)");
+    if (!getDatabase().tables().contains("Tests"))
+        qResult = dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
+    if (!getDatabase().tables().contains("TestResults"))
+        qResult = dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
+    if (!getDatabase().tables().contains("Issues"))
+        qResult = dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
+    if (!getDatabase().tables().contains("ObjectIssue"))
+        qResult = dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
+    if (!getDatabase().tables().contains("TestsSuites"))
+        qResult = dbExec("CREATE TABLE TestsSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL)");
+    if (!getDatabase().tables().contains("TestsInSuite"))
+        qResult = dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
+}
+
 VerificationValidationWidget::~VerificationValidationWidget() {
     QSqlDatabase::removeDatabase(dbConnectionName);
 }
 
-void VerificationValidationWidget::dbInit() {
+void VerificationValidationWidget::dbConnect() {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
         return;
