@@ -30,7 +30,9 @@ private:
     
     void dbConnect();
     void dbInitTables();
-    QSqlQuery* dbExec(QString command);
+    void dbPopulateTables();
+    void dbInitDummyData();
+    QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
     void popupError(QString message);
 
     QSqlDatabase getDatabase() const {
