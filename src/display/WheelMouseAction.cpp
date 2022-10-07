@@ -13,9 +13,11 @@ bool WheelMouseAction::eventFilter(QObject* watched, QEvent* event) {
             QWheelEvent* wheelMouseEvent = static_cast<QWheelEvent*>(event);
 
             if (wheelMouseEvent->phase() == Qt::NoScrollPhase || wheelMouseEvent->phase() == Qt::ScrollUpdate || wheelMouseEvent->phase() == Qt::ScrollMomentum) {
-                camera->processZoomRequest(wheelMouseEvent->angleDelta().y() / 8);
+                m_watched->getCamera()->processZoomRequest(wheelMouseEvent->angleDelta().y() / 8);
                 m_watched->forceRerenderFrame();
             }
         }
     }
+
+    return false;
 }

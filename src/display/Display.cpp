@@ -66,7 +66,7 @@ int Display::getH() const {
     return h;
 }
 
-const Document* Display::getDocument() const
+Document* Display::getDocument() const
 {
     return document;
 }
@@ -74,6 +74,42 @@ const Document* Display::getDocument() const
 DisplayManager* Display::getDisplayManager() const
 {
 	return displayManager;
+}
+
+int Display::getPrevMouseX() const {
+    return prevMouseX;
+}
+
+int Display::getPrevMouseY() const {
+    return prevMouseY;
+}
+
+bool Display::getSkipNextMouseMoveEvent() const {
+    return skipNextMouseMoveEvent;
+}
+
+
+void Display::setPrevMouseX(int prevMouseX) {
+    this->prevMouseX = prevMouseX;
+}
+
+void Display::setPrevMouseY(int prevMouseY) {
+    this->prevMouseY = prevMouseY;
+}
+
+void Display::setSkipNextMouseMoveEvent(bool skipNextMouseMoveEvent) {
+    this->skipNextMouseMoveEvent = skipNextMouseMoveEvent;
+}
+
+
+Qt::MouseButton Display::getRotateCamera() const {
+    return rotateCameraMouseButton;
+}
+Qt::MouseButton Display::getMoveCamera() const {
+    return moveCameraMouseButton;
+}
+Qt::KeyboardModifier Display::getRotateAroundThirdAxisModifier() const {
+    return rotateAroundThirdAxisModifier;
 }
 
 void Display::resizeGL(const int w, const int h) {

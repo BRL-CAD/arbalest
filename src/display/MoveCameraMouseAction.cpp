@@ -19,17 +19,17 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
             bool resetX = false, resetY = false;
 
-            if (prevMouseX != -1 && prevMouseY != -1 && (moveCameraEvent->buttons() & (rotateCameraMouseButton | moveCameraMouseButton))) {
-                if (skipNextMouseMoveEvent) {
-                    skipNextMouseMoveEvent = false;
-                    return;
+            if (m_watched->getPrevMouseX() != -1 && m_watched->getPrevMouseY() != -1 && 
+                (moveCameraEvent->buttons() & (m_watched->getRotateCamera() | m_watched->getMoveCamera()))) {
+                if (m_watched->getSkipNextMouseMoveEvent()) {
+                    m_watched->setSkipNextMouseMoveEvent(false);
                 }
-                if (moveCameraEvent->buttons() & (rotateCameraMouseButton)) {
-                    const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
-                    camera->processRotateRequest(x - prevMouseX, y - prevMouseY, rotateThirdAxis);
+                if (moveCameraEvent->buttons() & (m_watched->getRotateCamera())) {
+                    const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(m_watched->getRotateAroundThirdAxisModifier());
+                    m_watched->getCamera()->processRotateRequest(x - m_watched->getPrevMouseX(), y - m_watched->getPrevMouseY(), rotateThirdAxis);
                 }
-                if (moveCameraEvent->buttons() & (moveCameraMouseButton)) {
-                    camera->processMoveRequest(x - prevMouseX, y - prevMouseY);
+                if (moveCameraEvent->buttons() & (m_watched->getMoveCamera())) {
+                    m_watched->getCamera()->processMoveRequest(x - m_watched->getPrevMouseX(), y - m_watched->getPrevMouseY());
                 }
 
                 m_watched->forceRerenderFrame();
@@ -58,17 +58,19 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 }
 
                 if (resetX || resetY) {
-                    prevMouseX = resetX ? m_watched->mapFromGlobal(QPoint(newX, newY)).x() : x;
-                    prevMouseY = resetY ? m_watched->mapFromGlobal(QPoint(newX, newY)).y() : y;
+                    m_watched->setPrevMouseX(resetX ? m_watched->mapFromGlobal(QPoint(newX, newY)).x() : x);
+                    m_watched->setPrevMouseY(resetY ? m_watched->mapFromGlobal(QPoint(newX, newY)).y() : y);
                     QCursor::setPos(resetX ? newX : globalX, resetY ? newY : globalY);
-                    skipNextMouseMoveEvent = true;
+                    m_watched->setSkipNextMouseMoveEvent(true);
                 }
             }
 
             if (!resetX && !resetY) {
-                prevMouseX = x;
-                prevMouseY = y;
+                m_watched->setPrevMouseX(x);
+                m_watched->setPrevMouseY(y);
             }
         }
     }
+
+    return false;
 }

@@ -10,8 +10,10 @@ ReleaseMouseAction::~ReleaseMouseAction() {}
 bool ReleaseMouseAction::eventFilter(QObject* watched, QEvent* event) {
     if (watched == m_watched) {
         if (event->type() == QEvent::MouseButtonRelease) {
-            prevMouseX = -1;
-            prevMouseY = -1;
+            m_watched->setPrevMouseX(-1);
+            m_watched->setPrevMouseY(-1);
         }
     }
+
+    return false;
 }

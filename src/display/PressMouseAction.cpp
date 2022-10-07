@@ -10,10 +10,13 @@ PressMouseAction::~PressMouseAction() {}
 bool PressMouseAction::eventFilter(QObject* watched, QEvent* event) {
     if (watched == m_watched) {
         if (event->type() == QEvent::MouseButtonPress) {
-            document->getDisplayGrid()->setActiveDisplay(this);
+            m_watched->getDocument()->getDisplayGrid()->setActiveDisplay(m_watched);
+            
             QMouseEvent* moveCameraEvent = static_cast<QMouseEvent*>(event);
-            prevMouseX = moveCameraEvent->x();
-            prevMouseY = moveCameraEvent->y();
+            m_watched->setPrevMouseX(moveCameraEvent->x());
+            m_watched->setPrevMouseY(moveCameraEvent->y());
         }
     }
+
+    return false;
 }

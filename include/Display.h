@@ -52,9 +52,21 @@ public:
 
     int getW() const;
     int getH() const;
-    const Document* getDocument() const;
+    Document* getDocument() const;
 	OrthographicCamera* getCamera() const;
 	DisplayManager* getDisplayManager() const;
+    int getPrevMouseX() const;
+    int getPrevMouseY() const;
+    bool getSkipNextMouseMoveEvent() const;
+
+    void setPrevMouseX(int prevMouseX);
+    void setPrevMouseY(int prevMouseY);
+    void setSkipNextMouseMoveEvent(bool skipNextMouseMoveEvent);
+
+    Qt::MouseButton getRotateCamera() const;
+    Qt::MouseButton getMoveCamera() const;
+    Qt::KeyboardModifier getRotateAroundThirdAxisModifier() const;
+
 	bool gridEnabled = false;
 
 protected:
