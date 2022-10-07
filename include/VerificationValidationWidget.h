@@ -22,13 +22,17 @@ public:
     ~VerificationValidationWidget();
 
 private:
+    // widget-specific data
     Document* document;
-    QListWidget* list;
-    QTableWidget* table;
     QString modelID;
     QString dbName;
     QString dbConnectionName;
     
+    // user interface
+    QListWidget* testList;
+    QTableWidget* resultTable;
+
+    // functions
     void dbConnect();
     void dbInitTables();
     void dbPopulateTables();

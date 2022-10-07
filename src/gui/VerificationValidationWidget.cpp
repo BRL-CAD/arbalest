@@ -1,9 +1,10 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
 
+#define SHOW_ERROR_POPUP true
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
+VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()) {
     dbConnect();
     dbInitTables();
     dbPopulateTables();
@@ -19,7 +20,7 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("TestResults"))
         dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
-        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
+        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
         dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestsSuites"))
@@ -29,8 +30,6 @@ void VerificationValidationWidget::dbInitTables() {
 }
 
 void VerificationValidationWidget::dbPopulateTables() {
-    const bool SHOW_ERROR_POPUP = true;
-
     QSqlQuery* qResult;
 
     // if Model table empty, assume new db and insert model info
@@ -45,6 +44,7 @@ void VerificationValidationWidget::dbPopulateTables() {
     // note: this doesn't repopulate deleted tests, unless all tests deleted
     qResult = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!qResult->next()) {
+        // TODO: default tests currently don't have suiteName... do we want this?
         const vector<pair<const QString, const QString>> defaultTests = {
             {"No mis-matched dupliate IDs", "lc -m all"},
             {"No nested regions", "search /all -type region -below -type region"},
@@ -78,7 +78,7 @@ void VerificationValidationWidget::dbPopulateTables() {
     qResult->next();
     modelID = qResult->value(0).toString();
 
-    qResult = dbExec("SELECT id FROM Tests WHERE NOT EXISTS (SELECT 1 FROM TestResults WHERE TestResults.testId=Tests.id)", !SHOW_ERROR_POPUP);
+    qResult = dbExec("SELECT id FROM Tests WHERE NOT EXISTS (SELECT * FROM TestResults WHERE TestResults.testID=Tests.id)", !SHOW_ERROR_POPUP);
     while (qResult && qResult->next()) {
         cmd = "INSERT INTO TestResults (modelID, testID) VALUES (" + modelID + ", " + qResult->value(0).toString() + ")";
         dbExec(cmd);
@@ -91,56 +91,81 @@ void VerificationValidationWidget::dbInitDummyData() {
 
 void VerificationValidationWidget::setupUI() {    
     QStringList columnLabels;
-    columnLabels << "Result Code" << "Problem Object/Region" << "Problem Description" << "Test ID" << "Test Suite" << "Test Name" << "Test Command" << "Terminal Output (TODO: move to popup?)";
-    table->setHorizontalHeaderLabels(columnLabels);
+    columnLabels << "Result Code" << "Problem Object/Region" << "Problem Description";
+    columnLabels << "Test ID" << "Test Suite" << "Test Name" << "Test Command";
+    columnLabels << "Terminal Output"; // TODO: move to popup?
+    resultTable->setColumnCount(columnLabels.size());
+    resultTable->setHorizontalHeaderLabels(columnLabels);
 
-    table->setColumnCount(columnLabels.size());
-    table->setRowCount(10);
+    // populate UI w/ db entries
+    QSqlQuery* qTestResults;
+    QString cmd = "SELECT resultCode, testID, terminalOutput FROM TestResults WHERE modelID=" + modelID;
+    qTestResults = dbExec(cmd);
+    int numRows = 0;
+    while (qTestResults && qTestResults->next()) {
+        QString resultCode = qTestResults->value(0).toString();
+        QString testID = qTestResults->value(1).toString();
+        QString terminalOutput = qTestResults->value(2).toString();
 
-    // QSqlQuery* qResult;
-    // qResult = dbExec("SELECT object_name, severity, description FROM issues");
-    // size_t row = 0;
-    // while (qResult && qResult->next()) {
-    //     char typechar = qResult->value(1).toString().toStdString().c_str()[0];
-    //     const char* type = NULL;
-    //     switch (typechar) {
-    //     case 'E':
-    //         type = "ERROR";
-    //         break;
-    //     case 'W':
-    //         type = "WARNING";
-    //         break;
-    //     case 'I':
-    //     default:
-    //         type = "INFO";
-    //         break;
-    //     }
-    //     QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(type));
-    //     table->setItem(row, 0, item0);
-    //     QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(qResult->value(0).toString().toStdString().c_str()));
-    //     table->setItem(row, 1, item1);
-    //     QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(qResult->value(2).toString().toStdString().c_str()));
-    //     table->setItem(row, 2, item2);
+        cmd = "SELECT testName, testCommand FROM Tests WHERE id=" + testID;
+        QSqlQuery* qResult = dbExec(cmd);
+        qResult->next();
+        
+        QString testName = qResult->value(0).toString();
+        QString testCommand = qResult->value(1).toString();
 
-    //     row++;
-    // }
+        cmd = "SELECT suiteName FROM TestsSuites INNER JOIN TestsInSuite WHERE TestsSuites.id=TestsInSuite.testSuiteID AND TestsInSuite.testID=" + testID;
+        qResult = dbExec(cmd);
+        QString suiteName = (qResult->next()) ? qResult->value(0).toString() : "";
 
+        cmd = "SELECT objectName, issueDescription FROM ObjectIssue INNER JOIN Issues WHERE Issues.testID=" + testID;
+        qResult = dbExec(cmd);
+        QString problemObjectName = "";
+        QString issueDescription = "";
+        if (qResult->next()) {
+            problemObjectName = qResult->value(0).toString();
+            issueDescription = qResult->value(1).toString();
+        }
+
+        resultTable->setRowCount(numRows + 1);
+        // put everything onto view
+        QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(resultCode));
+        resultTable->setItem(numRows, 0, item0);
+        QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(problemObjectName));
+        resultTable->setItem(numRows, 1, item1);
+        QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(issueDescription));
+        resultTable->setItem(numRows, 2, item2);
+        QTableWidgetItem* item3 = new QTableWidgetItem(tr("%1").arg(testID));
+        resultTable->setItem(numRows, 3, item3);
+        QTableWidgetItem* item4 = new QTableWidgetItem(tr("%1").arg(suiteName));
+        resultTable->setItem(numRows, 4, item4);
+        QTableWidgetItem* item5 = new QTableWidgetItem(tr("%1").arg(testName));
+        resultTable->setItem(numRows, 5, item5);
+        QTableWidgetItem* item6 = new QTableWidgetItem(tr("%1").arg(testCommand));
+        resultTable->setItem(numRows, 6, item6);
+        QTableWidgetItem* item7 = new QTableWidgetItem(tr("%1").arg(terminalOutput));
+        resultTable->setItem(numRows, 7, item7);
+        
+        ++numRows;
+    }
+
+    // TODO: make custom collapsible component (with check box)... consider reusing CollapsibleWidget... if not: https://stackoverflow.com/questions/11077793/is-there-a-standard-component-for-collapsible-panel-in-qt
     QStringList tests;
     tests << "test 1" << "test 2" << "test 3" << "test 4";
-    list->addItems(tests);
+    testList->addItems(tests);
 
     QListWidgetItem* item = 0;
-    for (int i = 0; i < list->count(); i++) {
-        item = list->item(i);
+    for (int i = 0; i < testList->count(); i++) {
+        item = testList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
     }
 
-    addWidget(list);
-    addWidget(table);
+    addWidget(testList);
+    addWidget(resultTable);
 
-    getBoxLayout()->setStretchFactor(list, 1);
-    getBoxLayout()->setStretchFactor(table, 3);
+    getBoxLayout()->setStretchFactor(testList, 1);
+    getBoxLayout()->setStretchFactor(resultTable, 3);
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
