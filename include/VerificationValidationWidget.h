@@ -25,6 +25,7 @@ private:
     Document* document;
     QListWidget* list;
     QTableWidget* table;
+    QString modelID;
     QString dbName;
     QString dbConnectionName;
     
@@ -32,8 +33,9 @@ private:
     void dbInitTables();
     void dbPopulateTables();
     void dbInitDummyData();
+    void setupUI();
     QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
-    void popupError(QString message);
+    void popup(QString message);
 
     QSqlDatabase getDatabase() const {
         return QSqlDatabase::database(dbConnectionName);

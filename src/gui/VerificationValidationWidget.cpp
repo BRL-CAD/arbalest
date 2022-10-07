@@ -1,63 +1,14 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
 
+// TODO: if checksum doesn't match current test file, notify user
+
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), list(new QListWidget()), table(new QTableWidget()) {
     dbConnect();
     dbInitTables();
     dbPopulateTables();
     dbInitDummyData();
-
-    table->setRowCount(10);
-    table->setColumnCount(3);
-    
-    // QStringList* columnLabels = new QStringList();
-    // *columnLabels << "Severity" << "Object Name" << "Description";
-    // table->setHorizontalHeaderLabels(*columnLabels);
-
-    // QSqlQuery* qResult;
-    // qResult = dbExec("SELECT object_name, severity, description FROM issues");
-    // size_t row = 0;
-    // while (qResult && qResult->next()) {
-    //     char typechar = qResult->value(1).toString().toStdString().c_str()[0];
-    //     const char* type = NULL;
-    //     switch (typechar) {
-    //     case 'E':
-    //         type = "ERROR";
-    //         break;
-    //     case 'W':
-    //         type = "WARNING";
-    //         break;
-    //     case 'I':
-    //     default:
-    //         type = "INFO";
-    //         break;
-    //     }
-    //     QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(type));
-    //     table->setItem(row, 0, item0);
-    //     QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(qResult->value(0).toString().toStdString().c_str()));
-    //     table->setItem(row, 1, item1);
-    //     QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(qResult->value(2).toString().toStdString().c_str()));
-    //     table->setItem(row, 2, item2);
-
-    //     row++;
-    // }
-
-    QStringList* tests = new QStringList();
-    *tests << "test 1" << "test 2" << "test 3" << "test 4";
-    list->addItems(*tests);
-
-    QListWidgetItem* item = 0;
-    for (int i = 0; i < list->count(); i++) {
-        item = list->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-    }
-
-    addWidget(list);
-    addWidget(table);
-
-    getBoxLayout()->setStretchFactor(list, 1);
-    getBoxLayout()->setStretchFactor(table, 3);
+    setupUI();
 }
 
 void VerificationValidationWidget::dbInitTables() {
@@ -125,7 +76,7 @@ void VerificationValidationWidget::dbPopulateTables() {
     cmd = "SELECT id FROM Model WHERE filePath='" + dbName + "'";
     qResult = dbExec(cmd);
     qResult->next();
-    QString modelID = qResult->value(0).toString();
+    modelID = qResult->value(0).toString();
 
     qResult = dbExec("SELECT id FROM Tests WHERE NOT EXISTS (SELECT 1 FROM TestResults WHERE TestResults.testId=Tests.id)", !SHOW_ERROR_POPUP);
     while (qResult && qResult->next()) {
@@ -136,6 +87,60 @@ void VerificationValidationWidget::dbPopulateTables() {
 
 void VerificationValidationWidget::dbInitDummyData() {
 
+}
+
+void VerificationValidationWidget::setupUI() {    
+    QStringList columnLabels;
+    columnLabels << "Result Code" << "Problem Object/Region" << "Problem Description" << "Test ID" << "Test Suite" << "Test Name" << "Test Command" << "Terminal Output (TODO: move to popup?)";
+    table->setHorizontalHeaderLabels(columnLabels);
+
+    table->setColumnCount(columnLabels.size());
+    table->setRowCount(10);
+
+    // QSqlQuery* qResult;
+    // qResult = dbExec("SELECT object_name, severity, description FROM issues");
+    // size_t row = 0;
+    // while (qResult && qResult->next()) {
+    //     char typechar = qResult->value(1).toString().toStdString().c_str()[0];
+    //     const char* type = NULL;
+    //     switch (typechar) {
+    //     case 'E':
+    //         type = "ERROR";
+    //         break;
+    //     case 'W':
+    //         type = "WARNING";
+    //         break;
+    //     case 'I':
+    //     default:
+    //         type = "INFO";
+    //         break;
+    //     }
+    //     QTableWidgetItem* item0 = new QTableWidgetItem(tr("%1").arg(type));
+    //     table->setItem(row, 0, item0);
+    //     QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(qResult->value(0).toString().toStdString().c_str()));
+    //     table->setItem(row, 1, item1);
+    //     QTableWidgetItem* item2 = new QTableWidgetItem(tr("%1").arg(qResult->value(2).toString().toStdString().c_str()));
+    //     table->setItem(row, 2, item2);
+
+    //     row++;
+    // }
+
+    QStringList tests;
+    tests << "test 1" << "test 2" << "test 3" << "test 4";
+    list->addItems(tests);
+
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < list->count(); i++) {
+        item = list->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+    }
+
+    addWidget(list);
+    addWidget(table);
+
+    getBoxLayout()->setStretchFactor(list, 1);
+    getBoxLayout()->setStretchFactor(table, 3);
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
@@ -170,12 +175,12 @@ void VerificationValidationWidget::dbConnect() {
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
     if (showErrorPopup && !query->isActive())
-        popupError("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
+        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
     return query;
 }
 
-void VerificationValidationWidget::popupError(QString message) {
-    QMessageBox* msgBox = new QMessageBox();
-    msgBox->setText(message);
-    msgBox->exec();
+void VerificationValidationWidget::popup(QString message) {
+    QMessageBox msgBox;
+    msgBox.setText(message);
+    msgBox.exec();
 }
