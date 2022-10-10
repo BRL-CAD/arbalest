@@ -39,10 +39,7 @@ set(arbalest_Sources
         src/gui/MatrixTransformWidget.cpp
         src/display/GridRenderer.cpp
         src/display/MouseAction.cpp
-        src/display/MoveCameraMouseAction.cpp
-        src/display/PressMouseAction.cpp
-        src/display/ReleaseMouseAction.cpp
-        src/display/WheelMouseAction.cpp)
+        src/display/MoveCameraMouseAction.cpp)
 
 set(arbalest_Link_Libraries
         coreinterface

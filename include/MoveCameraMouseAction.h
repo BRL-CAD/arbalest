@@ -11,6 +11,10 @@ public:
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
+
+private:
+    int prevMouseX = -1;
+    int prevMouseY = -1;
 };
 
 #endif // MOVECAMERAMOUSEACTION_H

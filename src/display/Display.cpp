@@ -76,25 +76,8 @@ DisplayManager* Display::getDisplayManager() const
 	return displayManager;
 }
 
-int Display::getPrevMouseX() const {
-    return prevMouseX;
-}
-
-int Display::getPrevMouseY() const {
-    return prevMouseY;
-}
-
 bool Display::getSkipNextMouseMoveEvent() const {
     return skipNextMouseMoveEvent;
-}
-
-
-void Display::setPrevMouseX(int prevMouseX) {
-    this->prevMouseX = prevMouseX;
-}
-
-void Display::setPrevMouseY(int prevMouseY) {
-    this->prevMouseY = prevMouseY;
 }
 
 void Display::setSkipNextMouseMoveEvent(bool skipNextMouseMoveEvent) {

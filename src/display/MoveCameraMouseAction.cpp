@@ -19,17 +19,17 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
             bool resetX = false, resetY = false;
 
-            if (m_watched->getPrevMouseX() != -1 && m_watched->getPrevMouseY() != -1 && 
+            if (prevMouseX != -1 && prevMouseY != -1 && 
                 (moveCameraEvent->buttons() & (m_watched->getRotateCamera() | m_watched->getMoveCamera()))) {
                 if (m_watched->getSkipNextMouseMoveEvent()) {
                     m_watched->setSkipNextMouseMoveEvent(false);
                 }
                 if (moveCameraEvent->buttons() & (m_watched->getRotateCamera())) {
                     const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(m_watched->getRotateAroundThirdAxisModifier());
-                    m_watched->getCamera()->processRotateRequest(x - m_watched->getPrevMouseX(), y - m_watched->getPrevMouseY(), rotateThirdAxis);
+                    m_watched->getCamera()->processRotateRequest(x - prevMouseX, y - prevMouseY, rotateThirdAxis);
                 }
                 if (moveCameraEvent->buttons() & (m_watched->getMoveCamera())) {
-                    m_watched->getCamera()->processMoveRequest(x - m_watched->getPrevMouseX(), y - m_watched->getPrevMouseY());
+                    m_watched->getCamera()->processMoveRequest(x - prevMouseX, y - prevMouseY);
                 }
 
                 m_watched->forceRerenderFrame();
@@ -58,16 +58,37 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 }
 
                 if (resetX || resetY) {
-                    m_watched->setPrevMouseX(resetX ? m_watched->mapFromGlobal(QPoint(newX, newY)).x() : x);
-                    m_watched->setPrevMouseY(resetY ? m_watched->mapFromGlobal(QPoint(newX, newY)).y() : y);
+                    prevMouseX = resetX ? m_watched->mapFromGlobal(QPoint(newX, newY)).x() : x;
+                    prevMouseY = resetY ? m_watched->mapFromGlobal(QPoint(newX, newY)).y() : y;
                     QCursor::setPos(resetX ? newX : globalX, resetY ? newY : globalY);
                     m_watched->setSkipNextMouseMoveEvent(true);
                 }
             }
 
             if (!resetX && !resetY) {
-                m_watched->setPrevMouseX(x);
-                m_watched->setPrevMouseY(y);
+                prevMouseX = x;
+                prevMouseY = y;
+            }
+        }
+        else if (event->type() == QEvent::MouseButtonPress) {
+            m_watched->getDocument()->getDisplayGrid()->setActiveDisplay(m_watched);
+
+            QMouseEvent* moveCameraEvent = static_cast<QMouseEvent*>(event);
+            prevMouseX = moveCameraEvent->x();
+            prevMouseY = moveCameraEvent->y();
+        }
+        else if (event->type() == QEvent::MouseButtonRelease) {
+            prevMouseX = -1;
+            prevMouseY = -1;
+        }
+        else if (event->type() == QEvent::Wheel) {
+            QWheelEvent* wheelMouseEvent = static_cast<QWheelEvent*>(event);
+
+            if (wheelMouseEvent->phase() == Qt::NoScrollPhase || 
+                wheelMouseEvent->phase() == Qt::ScrollUpdate || 
+                wheelMouseEvent->phase() == Qt::ScrollMomentum) {
+                m_watched->getCamera()->processZoomRequest(wheelMouseEvent->angleDelta().y() / 8);
+                m_watched->forceRerenderFrame();
             }
         }
     }
