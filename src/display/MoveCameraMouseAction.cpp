@@ -75,9 +75,9 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
         else if (event->type() == QEvent::MouseButtonPress) {
             m_watched->getDocument()->getDisplayGrid()->setActiveDisplay(m_watched);
 
-            QMouseEvent* moveCameraEvent = static_cast<QMouseEvent*>(event);
-            prevMouseX = moveCameraEvent->x();
-            prevMouseY = moveCameraEvent->y();
+            QMouseEvent* mouseButtonPressEvent = static_cast<QMouseEvent*>(event);
+            prevMouseX = mouseButtonPressEvent->x();
+            prevMouseY = mouseButtonPressEvent->y();
 
             return false;
         }
