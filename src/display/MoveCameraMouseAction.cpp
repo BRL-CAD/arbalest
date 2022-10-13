@@ -69,8 +69,6 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 prevMouseX = x;
                 prevMouseY = y;
             }
-
-            return false;
         }
         else if (event->type() == QEvent::MouseButtonPress) {
             m_watched->getDocument()->getDisplayGrid()->setActiveDisplay(m_watched);
@@ -78,14 +76,10 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
             QMouseEvent* mouseButtonPressEvent = static_cast<QMouseEvent*>(event);
             prevMouseX = mouseButtonPressEvent->x();
             prevMouseY = mouseButtonPressEvent->y();
-
-            return false;
         }
         else if (event->type() == QEvent::MouseButtonRelease) {
             prevMouseX = -1;
             prevMouseY = -1;
-
-            return false;
         }
         else if (event->type() == QEvent::Wheel) {
             QWheelEvent* wheelMouseEvent = static_cast<QWheelEvent*>(event);
@@ -95,8 +89,6 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 wheelMouseEvent->phase() == Qt::ScrollMomentum) {
                 m_watched->getCamera()->processZoomRequest(wheelMouseEvent->angleDelta().y() / 8);
                 m_watched->forceRerenderFrame();
-
-                return false;
             }
         }
     }

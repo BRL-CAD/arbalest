@@ -79,9 +79,11 @@ DisplayManager* Display::getDisplayManager() const
 Qt::MouseButton Display::getRotateCamera() const {
     return rotateCameraMouseButton;
 }
+
 Qt::MouseButton Display::getMoveCamera() const {
     return moveCameraMouseButton;
 }
+
 Qt::KeyboardModifier Display::getRotateAroundThirdAxisModifier() const {
     return rotateAroundThirdAxisModifier;
 }
