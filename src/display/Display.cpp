@@ -76,15 +76,6 @@ DisplayManager* Display::getDisplayManager() const
 	return displayManager;
 }
 
-bool Display::getSkipNextMouseMoveEvent() const {
-    return skipNextMouseMoveEvent;
-}
-
-void Display::setSkipNextMouseMoveEvent(bool skipNextMouseMoveEvent) {
-    this->skipNextMouseMoveEvent = skipNextMouseMoveEvent;
-}
-
-
 Qt::MouseButton Display::getRotateCamera() const {
     return rotateCameraMouseButton;
 }

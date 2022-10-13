@@ -15,6 +15,7 @@ protected:
 private:
     int prevMouseX = -1;
     int prevMouseY = -1;
+    bool skipNextMouseMoveEvent = false;
 };
 
 #endif // MOVECAMERAMOUSEACTION_H

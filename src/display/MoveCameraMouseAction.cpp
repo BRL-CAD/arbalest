@@ -21,8 +21,8 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
             if (prevMouseX != -1 && prevMouseY != -1 && 
                 (moveCameraEvent->buttons() & (m_watched->getRotateCamera() | m_watched->getMoveCamera()))) {
-                if (m_watched->getSkipNextMouseMoveEvent()) {
-                    m_watched->setSkipNextMouseMoveEvent(false);
+                if (skipNextMouseMoveEvent) {
+                    skipNextMouseMoveEvent = false;
                 }
                 if (moveCameraEvent->buttons() & (m_watched->getRotateCamera())) {
                     const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(m_watched->getRotateAroundThirdAxisModifier());
@@ -61,7 +61,7 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
                     prevMouseX = resetX ? m_watched->mapFromGlobal(QPoint(newX, newY)).x() : x;
                     prevMouseY = resetY ? m_watched->mapFromGlobal(QPoint(newX, newY)).y() : y;
                     QCursor::setPos(resetX ? newX : globalX, resetY ? newY : globalY);
-                    m_watched->setSkipNextMouseMoveEvent(true);
+                    skipNextMouseMoveEvent = true;
                 }
             }
 

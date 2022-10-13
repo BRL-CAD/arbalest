@@ -55,8 +55,6 @@ public:
     Document* getDocument() const;
 	OrthographicCamera* getCamera() const;
 	DisplayManager* getDisplayManager() const;
-    bool getSkipNextMouseMoveEvent() const;
-    void setSkipNextMouseMoveEvent(bool skipNextMouseMoveEvent);
 
     Qt::MouseButton getRotateCamera() const;
     Qt::MouseButton getMoveCamera() const;
@@ -74,7 +72,6 @@ private:
     Document * document;
     int w = 400;
     int h = 400;
-    bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     QColor bgColor;
 
