@@ -10,6 +10,46 @@ VerificationValidationWidget::VerificationValidationWidget(Document* document, Q
     setupUI();
 }
 
+VerificationValidationWidget::~VerificationValidationWidget() {
+    QSqlDatabase::removeDatabase(dbConnectionName);
+}
+
+
+void VerificationValidationWidget::showSelectTests() {
+    selectTestsDialog->exec();
+}
+
+void VerificationValidationWidget::popup(QString message) {
+    QMessageBox* msgBox = new QMessageBox();
+    msgBox->setText(message);
+    msgBox->exec();
+}
+
+void VerificationValidationWidget::dbConnect() {
+    if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
+        throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
+        return;
+    }
+
+    dbName = "tmpfile.sqlite"; 
+    if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
+    dbConnectionName = dbName + "-connection";
+
+    // check if SQL connection already open
+    QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
+    // TODO: instead of throwing + popping up error, open correct document
+    if (db.isOpen())
+        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
+    
+    //// TODO: opening multiple new files crashes
+    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
+    db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
+    db.setDatabaseName(dbName);
+
+    if (!db.open() || !db.isOpen())
+        throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
+}
+
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, sha256Checksum TEXT NOT NULL)");
@@ -61,11 +101,8 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     }
 }
 
-void VerificationValidationWidget::dbInitDummyData() {
-
-}
-
-void VerificationValidationWidget::setupUI() {    
+void VerificationValidationWidget::setupUI() {
+    // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "   " << "Test Name" << "Description" << "Object Path";
     resultTable->setColumnCount(columnLabels.size());
@@ -75,19 +112,35 @@ void VerificationValidationWidget::setupUI() {
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     addWidget(resultTable);
 
-    // TODO: make custom collapsible component (with check box)... consider reusing CollapsibleWidget... if not: https://stackoverflow.com/questions/11077793/is-there-a-standard-component-for-collapsible-panel-in-qt
-    // QStringList tests;
-    // tests << "test 1" << "test 2" << "test 3" << "test 4";
-    // testList->addItems(tests);
+    // populate checkbox list with tests
+    QStringList tests;
+    tests << "test 1" << "test 2" << "test 3" << "test 4";
+    testList->addItems(tests);
 
-    // QListWidgetItem* item = 0;
-    // for (int i = 0; i < testList->count(); i++) {
-    //     item = testList->item(i);
-    //     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    //     item->setCheckState(Qt::Unchecked);
-    // }
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < testList->count(); i++) {
+        item = testList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+    }
 
-    // addWidget(testList);
+    // format and populate Select Tests dialog box
+    selectTestsDialog->setModal(true);
+    selectTestsDialog->setWindowTitle("Select Tests");
+    selectTestsDialog->setLayout(new QVBoxLayout);
+    selectTestsDialog->layout()->addWidget(testList);
+
+    QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    selectTestsDialog->layout()->addWidget(buttonOptions);
+    connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
+    connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
+}
+
+QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
+    QSqlQuery* query = new QSqlQuery(command, getDatabase());
+    if (showErrorPopup && !query->isActive())
+        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
+    return query;
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
@@ -98,46 +151,4 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(4, this->width() * 0.25);
 
     QHBoxWidget::resizeEvent(event);
-}
-
-VerificationValidationWidget::~VerificationValidationWidget() {
-    QSqlDatabase::removeDatabase(dbConnectionName);
-}
-
-void VerificationValidationWidget::dbConnect() {
-    if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
-        throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
-        return;
-    }
-
-    dbName = "tmpfile.sqlite"; 
-    if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
-    dbConnectionName = dbName + "-connection";
-
-    // check if SQL connection already open
-    QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
-    // TODO: instead of throwing + popping up error, open correct document
-    if (db.isOpen())
-        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
-    
-    //// TODO: opening multiple new files crashes
-    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
-    db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-    db.setDatabaseName(dbName);
-
-    if (!db.open() || !db.isOpen())
-        throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
-}
-
-QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
-    QSqlQuery* query = new QSqlQuery(command, getDatabase());
-    if (showErrorPopup && !query->isActive())
-        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
-    return query;
-}
-
-void VerificationValidationWidget::popup(QString message) {
-    QMessageBox msgBox;
-    msgBox.setText(message);
-    msgBox.exec();
 }

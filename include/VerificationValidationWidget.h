@@ -27,6 +27,10 @@ public:
     explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
     ~VerificationValidationWidget();
 
+    // UI functions
+    void showSelectTests();
+    void popup(QString message);
+
 private:
     // widget-specific data
     Document* document;
@@ -34,15 +38,15 @@ private:
     QString dbName;
     QString dbConnectionName;
 
-    // user interface
-    QListWidget* testList;
+    // user interface data
     QTableWidget* resultTable;
+    QListWidget* testList;
+    QDialog* selectTestsDialog = new QDialog();
 
     // init functions
     void dbConnect();
     void dbInitTables();
     void dbPopulateDefaults();
-    void dbInitDummyData();
     void setupUI();
 
     // database functions
@@ -50,9 +54,6 @@ private:
     QSqlDatabase getDatabase() const {
         return QSqlDatabase::database(dbConnectionName);
     }
-
-    // UI functions
-    void popup(QString message);
 
     // events
     void resizeEvent(QResizeEvent* event) override;

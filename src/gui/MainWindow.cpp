@@ -562,7 +562,8 @@ void MainWindow::prepareUi() {
     connect(verificationValidationAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
         statusBar->showMessage("Select tests to run...", statusBarShortMessageDuration);
-        objectVerificationValidationDockable->setVisible(!objectVerificationValidationDockable->isVisible());
+        documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
+        objectVerificationValidationDockable->setVisible(true);
         statusBar->showMessage("TODO: do message here", statusBarShortMessageDuration);
     });
     verificationValidation->addAction(verificationValidationAct);
