@@ -12,7 +12,7 @@ VerificationValidationWidget::VerificationValidationWidget(Document* document, Q
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
+        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, sha256Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
         dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
@@ -34,7 +34,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     QString cmd = "SELECT id FROM Model WHERE filePath='" + dbName + "'";
     qResult = dbExec(cmd, !SHOW_ERROR_POPUP);
     if (!qResult->next()) {
-        cmd = "INSERT INTO Model (filepath, md5Checksum) VALUES ('" + dbName + "', '" + "TODO: DECIDE IF NEED HASH" + "')";
+        cmd = "INSERT INTO Model (filepath, sha256Checksum) VALUES ('" + dbName + "', '" + "TODO: DECIDE IF NEED HASH" + "')";
         dbExec(cmd);
     }
 
