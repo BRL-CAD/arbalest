@@ -45,7 +45,7 @@ void VerificationValidationWidget::dbPopulateTables() {
     qResult = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!qResult->next()) {
         for (int i = 0; i < defaultTests.size(); i++) {
-            cmd = "INSERT INTO Tests (testName, testCommand) VALUES ('" + defaultTests[i][0] + "', '" + defaultTests[i][1] + "')";
+            cmd = "INSERT INTO Tests (testName, testCommand) VALUES ('" + defaultTests[i].testName + "', '" + defaultTests[i].testCommand + "')";
             dbExec(cmd);
         }
     }
