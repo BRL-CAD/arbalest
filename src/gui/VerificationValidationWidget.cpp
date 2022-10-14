@@ -7,6 +7,7 @@
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()) {
     dbConnect();
     dbInitTables();
+    dbPopulateDefaults();
     setupUI();
 }
 
@@ -74,7 +75,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     QString cmd = "SELECT id FROM Model WHERE filePath='" + dbName + "'";
     qResult = dbExec(cmd, !SHOW_ERROR_POPUP);
     if (!qResult->next()) {
-        cmd = "INSERT INTO Model (filepath, sha256Checksum) VALUES ('" + dbName + "', '" + "TODO: DECIDE IF NEED HASH" + "')";
+        cmd = "INSERT INTO Model (filepath, sha256Checksum) VALUES ('" + dbName + "', '" + "TODO: HASH SHA256 FROM OPENSSL" + "')";
         dbExec(cmd);
     }
 
@@ -84,6 +85,16 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     if (!qResult->next()) {
         for (int i = 0; i < defaultTests.size(); i++) {
             cmd = "INSERT INTO Tests (testName, testCommand) VALUES ('" + defaultTests[i].testName + "', '" + defaultTests[i].testCommand + "')";
+            qResult = dbExec(cmd);
+
+            QString testID = qResult->lastInsertId().toString();
+
+            cmd = "INSERT INTO TestsSuites (suiteName) VALUES ('" + defaultTests[i].suiteName + "')";
+            qResult = dbExec(cmd);
+
+            QString testSuiteID = qResult->lastInsertId().toString();
+
+            cmd = "INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (" + testID + "," + testSuiteID + ")";
             dbExec(cmd);
         }
     }
