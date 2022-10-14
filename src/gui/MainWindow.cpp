@@ -561,9 +561,9 @@ void MainWindow::prepareUi() {
     verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
     connect(verificationValidationAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        statusBar->showMessage("Showing verification and validation widget...", statusBarShortMessageDuration);
+        statusBar->showMessage("Select tests to run...", statusBarShortMessageDuration);
         objectVerificationValidationDockable->setVisible(!objectVerificationValidationDockable->isVisible());
-        statusBar->showMessage("V&V widget showed.", statusBarShortMessageDuration);
+        statusBar->showMessage("TODO: do message here", statusBarShortMessageDuration);
     });
     verificationValidation->addAction(verificationValidationAct);
 

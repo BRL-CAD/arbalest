@@ -7,8 +7,6 @@
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()) {
     dbConnect();
     dbInitTables();
-    dbPopulateTables();
-    dbInitDummyData();
     setupUI();
 }
 
@@ -29,7 +27,7 @@ void VerificationValidationWidget::dbInitTables() {
         dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
 }
 
-void VerificationValidationWidget::dbPopulateTables() {
+void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* qResult;
 
     // if Model table empty, assume new db and insert model info

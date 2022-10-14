@@ -41,7 +41,7 @@ private:
     // init functions
     void dbConnect();
     void dbInitTables();
-    void dbPopulateTables();
+    void dbPopulateDefaults();
     void dbInitDummyData();
     void setupUI();
 
