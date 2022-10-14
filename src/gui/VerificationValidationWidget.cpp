@@ -100,18 +100,6 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             dbExec(cmd);
         }
     }
-
-    // create TestResult entry for every Test that doesn't have a corresponding TestResult
-    cmd = "SELECT id FROM Model WHERE filePath='" + dbName + "'";
-    qResult = dbExec(cmd);
-    qResult->next();
-    modelID = qResult->value(0).toString();
-
-    qResult = dbExec("SELECT id FROM Tests WHERE NOT EXISTS (SELECT * FROM TestResults WHERE TestResults.testID=Tests.id)", !SHOW_ERROR_POPUP);
-    while (qResult && qResult->next()) {
-        cmd = "INSERT INTO TestResults (modelID, testID) VALUES (" + modelID + ", " + qResult->value(0).toString() + ")";
-        dbExec(cmd);
-    }
 }
 
 void VerificationValidationWidget::setupUI() {
