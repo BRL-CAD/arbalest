@@ -556,7 +556,7 @@ void MainWindow::prepareUi() {
 
     QMenu* verificationValidation = menuTitleBar->addMenu(tr("&Verify/Validate"));
     QAction* verificationValidationAct = new QAction(tr("Verify and validate current viewport"), this);
-    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconRaytrace")));
+    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
     verificationValidationAct->setStatusTip(tr("Verify and validate current viewport"));
     verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
     connect(verificationValidationAct, &QAction::triggered, this, [this](){
@@ -725,15 +725,6 @@ void MainWindow::prepareUi() {
     });
     mainTabBarCornerWidget->addWidget(currentViewport);
 
-    QToolButton* verifyValidate = new QToolButton(menuTitleBar);
-    verifyValidate->setDefaultAction(verificationValidationAct);
-    verifyValidate->setObjectName("toolbarButton");
-    QIcon verifyValidateIcon;
-    verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);
-    verifyValidate->setIcon(verifyValidateIcon);
-    verifyValidate->setToolTip("Verify and validate current viewport");
-    mainTabBarCornerWidget->addWidget(verifyValidate);
-
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
     toggleGrid->setDefaultAction(toggleGridAct);
     toggleGrid->setObjectName("toolbarButton");
@@ -743,6 +734,15 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toggleGrid);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
+
+    QToolButton* verifyValidate = new QToolButton(menuTitleBar);
+    verifyValidate->setDefaultAction(verificationValidationAct);
+    verifyValidate->setObjectName("toolbarButton");
+    QIcon verifyValidateIcon;
+    verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);
+    verifyValidate->setIcon(verifyValidateIcon);
+    verifyValidate->setToolTip("Verify and validate current viewport");
+    mainTabBarCornerWidget->addWidget(verifyValidate);
 
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
