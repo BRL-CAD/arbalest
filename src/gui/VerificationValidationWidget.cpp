@@ -17,21 +17,15 @@ VerificationValidationWidget::~VerificationValidationWidget() {
 
 
 void VerificationValidationWidget::showSelectTests() {
-    statusBar->showMessage("Select tests to run...", MainWindow::statusBarShortMessageDuration);
+    statusBar->showMessage("Select tests to run...");
     selectTestsDialog->exec();
 }
 
 void VerificationValidationWidget::runTests() {
-    statusBar->showMessage("Finished running 0/XXX tests", MainWindow::statusBarShortMessageDuration);
+    statusBar->showMessage("Finished running 0/XXX tests");
     // TODO: run tests
     // TODO: update statusBar to tell how many tests finished
     // TODO: update GUI to show results of test
-}
-
-void VerificationValidationWidget::popup(QString message) {
-    QMessageBox* msgBox = new QMessageBox();
-    msgBox->setText(message);
-    msgBox->exec();
 }
 
 void VerificationValidationWidget::dbConnect() {

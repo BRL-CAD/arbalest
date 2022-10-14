@@ -13,6 +13,7 @@
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
+#include "Utils.h"
 
 struct VerificationValidationTest {
     QString testName;
@@ -28,6 +29,7 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     void runTests();
+    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
 private:
     // widget-specific data
@@ -78,9 +80,6 @@ private:
         // TODO: missing "Ground plane at z=0"
         {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "General"}
     };
-
-    // UI functions
-    void popup(QString message);
 };
 
 #endif // VVWIDGET_H

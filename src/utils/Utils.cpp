@@ -165,3 +165,9 @@ bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name) {
 
     return ok;
 }
+
+void popup(const QString& message) {
+    QMessageBox* msgBox = new QMessageBox();
+    msgBox->setText(message);
+    msgBox->exec();
+}

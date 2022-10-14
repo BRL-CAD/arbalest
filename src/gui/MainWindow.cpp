@@ -561,7 +561,7 @@ void MainWindow::prepareUi() {
     verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
     connect(verificationValidationAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getVerificationValidationWidget()->statusBar = statusBar;
+        documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
         documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
         objectVerificationValidationDockable->setVisible(true);
         documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
@@ -799,18 +799,12 @@ void MainWindow::openFile(const QString& filePath) {
     catch (const std::runtime_error& e) { 
         QString msg = e.what();
         statusBar->showMessage(msg, statusBarShortMessageDuration);
-
-        QMessageBox msgBox;
-        msgBox.setText(msg);
-        msgBox.exec();
+        popup(msg);
     }
     catch (...) {
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);
-
-        QMessageBox msgBox;
-        msgBox.setText(msg);
-        msgBox.exec();
+        popup(msg);
     }
 
     if (document != nullptr) {
