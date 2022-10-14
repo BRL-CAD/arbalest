@@ -554,6 +554,18 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
+    QMenu* verificationValidation = menuTitleBar->addMenu(tr("&Verify/Validate"));
+    QAction* verificationValidationAct = new QAction(tr("Verify and validate current viewport"), this);
+    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconRaytrace")));
+    verificationValidationAct->setStatusTip(tr("Verify and validate current viewport"));
+    verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
+    connect(verificationValidationAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        statusBar->showMessage("Showing verification and validation widget...", statusBarShortMessageDuration);
+        objectVerificationValidationDockable->setVisible(!objectVerificationValidationDockable->isVisible());
+        statusBar->showMessage("V&V widget showed.", statusBarShortMessageDuration);
+    });
+    verificationValidation->addAction(verificationValidationAct);
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -713,6 +725,15 @@ void MainWindow::prepareUi() {
     });
     mainTabBarCornerWidget->addWidget(currentViewport);
 
+    QToolButton* verifyValidate = new QToolButton(menuTitleBar);
+    verifyValidate->setDefaultAction(verificationValidationAct);
+    verifyValidate->setObjectName("toolbarButton");
+    QIcon verifyValidateIcon;
+    verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);
+    verifyValidate->setIcon(verifyValidateIcon);
+    verifyValidate->setToolTip("Verify and validate current viewport");
+    mainTabBarCornerWidget->addWidget(verifyValidate);
+
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
     toggleGrid->setDefaultAction(toggleGridAct);
     toggleGrid->setObjectName("toolbarButton");
@@ -746,6 +767,7 @@ void MainWindow::prepareDockables(){
 
     objectVerificationValidationDockable = new Dockable("Verification & Validation", this, true, 300);
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
+    objectVerificationValidationDockable->setVisible(false);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
