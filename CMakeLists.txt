@@ -36,6 +36,7 @@ set(arbalest_Sources
         src/gui/AboutWindow.cpp
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
+        src/utils/VerificationValidationParser.cpp
         src/gui/MatrixTransformWidget.cpp
         src/display/GridRenderer.cpp)
 
