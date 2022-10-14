@@ -561,10 +561,10 @@ void MainWindow::prepareUi() {
     verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
     connect(verificationValidationAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        statusBar->showMessage("Select tests to run...", statusBarShortMessageDuration);
+        documents[activeDocumentId]->getVerificationValidationWidget()->statusBar = statusBar;
         documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
         objectVerificationValidationDockable->setVisible(true);
-        statusBar->showMessage("TODO: do message here", statusBarShortMessageDuration);
+        documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
     });
     verificationValidation->addAction(verificationValidationAct);
 

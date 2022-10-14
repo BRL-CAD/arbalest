@@ -4,7 +4,7 @@
 #define SHOW_ERROR_POPUP true
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()) {
+VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
     dbConnect();
     dbInitTables();
     dbPopulateDefaults();
@@ -17,7 +17,15 @@ VerificationValidationWidget::~VerificationValidationWidget() {
 
 
 void VerificationValidationWidget::showSelectTests() {
+    statusBar->showMessage("Select tests to run...", MainWindow::statusBarShortMessageDuration);
     selectTestsDialog->exec();
+}
+
+void VerificationValidationWidget::runTests() {
+    statusBar->showMessage("Finished running 0/XXX tests", MainWindow::statusBarShortMessageDuration);
+    // TODO: run tests
+    // TODO: update statusBar to tell how many tests finished
+    // TODO: update GUI to show results of test
 }
 
 void VerificationValidationWidget::popup(QString message) {

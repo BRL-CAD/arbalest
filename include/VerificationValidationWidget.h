@@ -26,10 +26,8 @@ class VerificationValidationWidget : public QHBoxWidget {
 public:
     explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
     ~VerificationValidationWidget();
-
-    // UI functions
     void showSelectTests();
-    void popup(QString message);
+    void runTests();
 
 private:
     // widget-specific data
@@ -41,7 +39,8 @@ private:
     // user interface data
     QTableWidget* resultTable;
     QListWidget* testList;
-    QDialog* selectTestsDialog = new QDialog();
+    QDialog* selectTestsDialog;
+    QStatusBar* statusBar;
 
     // init functions
     void dbConnect();
@@ -79,6 +78,9 @@ private:
         // TODO: missing "Ground plane at z=0"
         {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "General"}
     };
+
+    // UI functions
+    void popup(QString message);
 };
 
 #endif // VVWIDGET_H
