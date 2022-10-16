@@ -8,36 +8,43 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
     VerificationValidationResult* r = new VerificationValidationResult;
     r->testID = testID;
     r->terminalOutput = terminalOutput.trimmed();
+    r->resultCode = VerificationValidationResult::Code::PASSED;
 
-    // catch usage errors
-    QString errorIdentifier = "usage:";
-    int res = r->terminalOutput.indexOf(errorIdentifier, Qt::CaseInsensitive);
-    if (res != -1) {
-        r->resultCode = VerificationValidationResult::Code::FAILED;
-        r->issues.push_back({"SYNTAX ERROR", r->terminalOutput.mid(res)});
-        return r;
-    }
+    QString errorIdentifier;
+    int res;
+    QStringList lines = r->terminalOutput.split('\n');
+    for (size_t i = 0; i < lines.size(); i++) {
+        QString currentLine = lines[i];
 
-    // catch not in DB errors
-    errorIdentifier = "not found in database";
-    res = r->terminalOutput.indexOf(errorIdentifier, Qt::CaseInsensitive);
-    if (res != -1) {
-        res = r->terminalOutput.indexOf("'", res, Qt::CaseInsensitive) + 1; // find what wasn't found in DB
-        r->resultCode = VerificationValidationResult::Code::FAILED;
-        r->issues.push_back({, r->terminalOutput.mid(res)});
-        return r;
+        // catch usage errors
+        errorIdentifier = "usage:";
+        res = currentLine.indexOf(errorIdentifier, Qt::CaseInsensitive);
+        if (res != -1) {
+            r->resultCode = VerificationValidationResult::Code::FAILED;
+            r->issues.push_back({"SYNTAX ERROR", currentLine.mid(res)});
+        }
+
+        // catch not in DB errors
+        errorIdentifier = "not found in database";
+        res = currentLine.indexOf(errorIdentifier, Qt::CaseInsensitive);
+        if (res != -1) {
+            // TODO: this is currently incorrect; rfind this, not find
+            int msgStart = currentLine.indexOf("'", res, Qt::CaseInsensitive) + 1; // find what wasn't found in DB
+            r->resultCode = VerificationValidationResult::Code::FAILED;
+            r->issues.push_back({"TODO: put object name here", currentLine.mid(msgStart)});
+        }        
     }
 
     // final defense: find any errors
-    errorIdentifier = "error";
-    res = r->terminalOutput.indexOf(errorIdentifier, Qt::CaseInsensitive);
-    if (res != -1) {
-        r->resultCode = VerificationValidationResult::Code::FAILED;
-        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(res)});
-        return r;
+    if (r->issues.size() == 0) {
+        errorIdentifier = "error";
+        res = r->terminalOutput.indexOf(errorIdentifier, Qt::CaseInsensitive);
+        if (res != -1) {
+            r->resultCode = VerificationValidationResult::Code::FAILED;
+            r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(res)});
+        }
     }
 
-    r->resultCode = VerificationValidationResult::Code::PASSED;
     return r; // TODO: implement
 }
 
