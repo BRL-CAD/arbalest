@@ -98,12 +98,13 @@ bool DisplayGrid::inQuadDisplayMode() {
 }
 
 void DisplayGrid::setMoveCameraMouseAction() {
-    for (int i = 0; i < displays.size(); ++i) {
-        if (mouseActions[i] != nullptr) {
-            delete mouseActions[i];
+    int displaysSize = displays.size();
+    for (int index = 0; index < displaysSize; ++index) {
+        if (mouseActions[index] != nullptr) {
+            delete mouseActions[index];
         }
 
-        mouseActions[i] = new MoveCameraMouseAction(this, displays[i]);
+        mouseActions[index] = new MoveCameraMouseAction(this, displays[index]);
     }
 }
 
