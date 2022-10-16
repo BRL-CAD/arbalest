@@ -8,6 +8,7 @@
 #include "Utils.h"
 
 class VerificationValidationResult {
+public:
     enum Code {
         PASSED,
         WARNING,
@@ -27,9 +28,9 @@ class VerificationValidationResult {
 };
 
 class VerificationValidationParser {
-    static VerificationValidationResult* search(const QString& input);
-    static VerificationValidationResult* lc(const QString& input);
-    static VerificationValidationResult* gqa(const QString& input);
+    static VerificationValidationResult* search(const QString& testID, const QString& terminalOutput);
+    static VerificationValidationResult* lc(const QString& testID, const QString& terminalOutput);
+    static VerificationValidationResult* gqa(const QString& testID, const QString& terminalOutput);
 };
 
 #endif
