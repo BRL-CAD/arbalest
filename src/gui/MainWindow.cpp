@@ -48,7 +48,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     }
     Globals::mainWindow = this;
     
-    moveCameraButtonAction();
 }
 
 MainWindow::~MainWindow()
@@ -1048,9 +1047,17 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 }
 
 void MainWindow::moveCameraButtonAction() {
-    if (m_mouseAction != nullptr) {
+    /*if (m_mouseAction != nullptr) {
         delete m_mouseAction;
     }
 
-    m_mouseAction = new MoveCameraMouseAction();
+    m_mouseAction = new MoveCameraMouseAction();*/
+
+    if (activeDocumentId != -1) {
+        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid *>(documentArea->widget(activeDocumentId));
+
+        if (displayGrid != nullptr) {
+            displayGrid->setMoveCameraMouseAction();
+        }
+    }
 }
