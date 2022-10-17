@@ -51,28 +51,28 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 
 void VerificationValidationWidget::runTests() {
     QString totalTests = 0;
-    QSqlQuery* result = dbExec("SELECT COUNT(*) FROM Tests");
-    if (result && result->next())
-        totalTests = result->value(0).toString();
+    QSqlQuery* q = dbExec("SELECT COUNT(*) FROM Tests");
+    if (q && q->next())
+        totalTests = q->value(0).toString();
 
     size_t testsRun = 0;
     QString status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
-    result = dbExec("SELECT id, testCommand FROM Tests");
-    while(result && result->next()) {
+    q = dbExec("SELECT id, testCommand FROM Tests");
+    while(q && q->next()) {
         statusBar->showMessage(status);
-        QString testID = result->value(0).toString();
-        QString testCommand = result->value(1).toString();
+        QString testID = q->value(0).toString();
+        QString testCommand = q->value(1).toString();
         QString* terminalOutput = runTest(testCommand);
 
         if (!terminalOutput) {
             // TODO: run through parser to get resultCode
-            QSqlQuery query(getDatabase());
-            query.prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
-            query.addBindValue(modelID);
-            query.addBindValue(testID);
-            query.addBindValue("TODO: add result code");
-            query.addBindValue(*terminalOutput);
-            dbExec(&query);   
+            QSqlQuery* q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
+            q2->addBindValue(modelID);
+            q2->addBindValue(testID);
+            q2->addBindValue("TODO: add result code");
+            q2->addBindValue(*terminalOutput);
+            dbExec(q2);   
         }
 
         status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
@@ -123,36 +123,47 @@ void VerificationValidationWidget::dbInitTables() {
 }
 
 void VerificationValidationWidget::dbPopulateDefaults() {
-    QSqlQuery* qResult;
+    QSqlQuery* q;
+    QString sha256Checksum = "TODO: HASH SHA256 FROM OPENSSL";
 
     // if Model table empty, assume new db and insert model info
-    QString cmd = "SELECT id FROM Model WHERE filePath='" + dbName + "'";
-    qResult = dbExec(cmd, !SHOW_ERROR_POPUP);
-    if (!qResult->next()) {
-        cmd = "INSERT INTO Model (filepath, sha256Checksum) VALUES ('" + dbName + "', '" + "TODO: HASH SHA256 FROM OPENSSL" + "')";
-        qResult = dbExec(cmd);
-        modelID = qResult->lastInsertId().toString();
+    q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id FROM Model WHERE filePath=?");
+    q->addBindValue(dbName);
+    dbExec(q, !SHOW_ERROR_POPUP);
+    if (!q->next()) {
+        q = new QSqlQuery(getDatabase());
+        q->prepare("INSERT INTO Model (filepath, sha256Checksum) VALUES (?, ?)");
+        q->addBindValue(dbName);
+        q->addBindValue(sha256Checksum);
+        dbExec(q);   
+        modelID = q->lastInsertId().toString();
     } else {
-        modelID = qResult->value(0).toString();
+        modelID = q->value(0).toString();
     }
 
     // if Tests table empty, new db and insert tests
     // note: this doesn't repopulate deleted tests, unless all tests deleted
-    qResult = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
-    if (!qResult->next()) {
+    q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
+    if (!q->next()) {
         for (int i = 0; i < defaultTests.size(); i++) {
-            cmd = "INSERT INTO Tests (testName, testCommand) VALUES ('" + defaultTests[i].testName + "', '" + defaultTests[i].testCommand + "')";
-            qResult = dbExec(cmd);
+            q->prepare("INSERT INTO Tests (testName, testCommand) VALUES (?, ?)");
+            q->addBindValue(defaultTests[i].testName);
+            q->addBindValue(defaultTests[i].testCommand);
+            dbExec(q);
 
-            QString testID = qResult->lastInsertId().toString();
+            QString testID = q->lastInsertId().toString();
 
-            cmd = "INSERT INTO TestsSuites (suiteName) VALUES ('" + defaultTests[i].suiteName + "')";
-            qResult = dbExec(cmd);
+            q->prepare("INSERT INTO TestsSuites (suiteName) VALUES (?)");
+            q->addBindValue(defaultTests[i].suiteName);
+            dbExec(q);
 
-            QString testSuiteID = qResult->lastInsertId().toString();
+            QString testSuiteID = q->lastInsertId().toString();
 
-            cmd = "INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (" + testID + "," + testSuiteID + ")";
-            dbExec(cmd);
+            q->prepare("INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (?,?)");
+            q->addBindValue(testID);
+            q->addBindValue(testSuiteID);
+            dbExec(q);
         }
     }
 }
@@ -199,11 +210,10 @@ QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorP
     return query;
 }
 
-QSqlQuery* VerificationValidationWidget::dbExec(QSqlQuery* query, bool showErrorPopup) {
+void VerificationValidationWidget::dbExec(QSqlQuery*& query, bool showErrorPopup) {
     query->exec();
     if (showErrorPopup && !query->isActive())
         popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
-    return query;
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {

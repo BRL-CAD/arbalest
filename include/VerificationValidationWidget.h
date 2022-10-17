@@ -55,7 +55,7 @@ private:
 
     // database functions
     QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
-    QSqlQuery* dbExec(QSqlQuery* query, bool showErrorPopup = true);
+    void dbExec(QSqlQuery*& query, bool showErrorPopup = true);
     QSqlDatabase getDatabase() const {
         return QSqlDatabase::database(dbConnectionName);
     }
