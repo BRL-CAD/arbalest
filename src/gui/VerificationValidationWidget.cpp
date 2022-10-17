@@ -21,32 +21,62 @@ void VerificationValidationWidget::showSelectTests() {
     selectTestsDialog->exec();
 }
 
-void VerificationValidationWidget::runTest(const QString& cmd) {
+QString* VerificationValidationWidget::runTest(const QString& cmd) {
     struct ged *dbp;
-    const QStringList tmp = cmd.split(' ', Qt::SkipEmptyParts);
+    const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
 
     const char* cmdList[tmp.size() + 1];
-    for (int i = 0; i < tmp.size(); i++)
-        cmdList[i] = tmp[i].toStdString().c_str();
+    for (int i = 0; i < tmp.size(); i++) {
+        char* cmdBuf = new char[tmp[i].size() + 1];
+        strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
+        cmdBuf[tmp[i].size()] = '\0';
+        cmdList[i] = cmdBuf;
+    }
     cmdList[tmp.size()] = NULL;
     
-    const char* filename = document->getFilePath()->split("/").last().toStdString().c_str();
-    if (!bu_file_exists(filename, NULL)) {
-        printf("ERROR: [%s] does not exist, expecting .g file\n", filename);
-        return;
+    QString filepath = *(document->getFilePath());
+    if (!bu_file_exists((filepath).toStdString().c_str(), NULL)) {
+        QString errorMsg = "[Verification & Validation] ERROR: [" + filepath + "] does not exist\n";
+        popup(errorMsg);
+        return nullptr;
     }
 
-    dbp = ged_open("db", filename, 1);
-    ged_exec(dbp, 2, cmdList);
-    printf("%s\n", bu_vls_addr(dbp->ged_result_str));
+    dbp = ged_open("db", filepath.toStdString().c_str(), 1);
+    ged_exec(dbp, tmp.size(), cmdList);
+    QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
     ged_close(dbp);
+
+    return result;
 }
 
 void VerificationValidationWidget::runTests() {
-    statusBar->showMessage("Finished running 0/XXX tests");
-    // TODO: grab all tests from DB
-    // TODO: run tests
-    // TODO: update statusBar to tell how many tests finished
+    QString totalTests = 0;
+    QSqlQuery* result = dbExec("SELECT COUNT(*) FROM Tests");
+    if (result && result->next())
+        totalTests = result->value(0).toString();
+
+    size_t testsRun = 0;
+    QString status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
+    result = dbExec("SELECT id, testCommand FROM Tests");
+    while(result && result->next()) {
+        statusBar->showMessage(status);
+        QString testID = result->value(0).toString();
+        QString testCommand = result->value(1).toString();
+        QString* terminalOutput = runTest(testCommand);
+
+        if (!terminalOutput) {
+            // TODO: run through parser to get resultCode
+            QSqlQuery query(getDatabase());
+            query.prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
+            query.addBindValue(modelID);
+            query.addBindValue(testID);
+            query.addBindValue("TODO: add result code");
+            query.addBindValue(*terminalOutput);
+            dbExec(&query);   
+        }
+
+        status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
+    }
     // TODO: update GUI to show results of test
 }
 
@@ -100,7 +130,10 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     qResult = dbExec(cmd, !SHOW_ERROR_POPUP);
     if (!qResult->next()) {
         cmd = "INSERT INTO Model (filepath, sha256Checksum) VALUES ('" + dbName + "', '" + "TODO: HASH SHA256 FROM OPENSSL" + "')";
-        dbExec(cmd);
+        qResult = dbExec(cmd);
+        modelID = qResult->lastInsertId().toString();
+    } else {
+        modelID = qResult->value(0).toString();
     }
 
     // if Tests table empty, new db and insert tests
@@ -161,6 +194,13 @@ void VerificationValidationWidget::setupUI() {
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
+    if (showErrorPopup && !query->isActive())
+        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
+    return query;
+}
+
+QSqlQuery* VerificationValidationWidget::dbExec(QSqlQuery* query, bool showErrorPopup) {
+    query->exec();
     if (showErrorPopup && !query->isActive())
         popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
     return query;

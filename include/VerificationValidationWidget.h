@@ -30,7 +30,7 @@ public:
     explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
-    void runTest(const QString& cmd);
+    QString* runTest(const QString& cmd);
     void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
@@ -55,6 +55,7 @@ private:
 
     // database functions
     QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
+    QSqlQuery* dbExec(QSqlQuery* query, bool showErrorPopup = true);
     QSqlDatabase getDatabase() const {
         return QSqlDatabase::database(dbConnectionName);
     }
