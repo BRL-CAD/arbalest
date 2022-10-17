@@ -21,8 +21,30 @@ void VerificationValidationWidget::showSelectTests() {
     selectTestsDialog->exec();
 }
 
+void VerificationValidationWidget::runTest(const QString& cmd) {
+    struct ged *dbp;
+    const QStringList tmp = cmd.split(' ', Qt::SkipEmptyParts);
+
+    const char* cmdList[tmp.size() + 1];
+    for (int i = 0; i < tmp.size(); i++)
+        cmdList[i] = tmp[i].toStdString().c_str();
+    cmdList[tmp.size()] = NULL;
+    
+    const char* filename = document->getFilePath()->split("/").last().toStdString().c_str();
+    if (!bu_file_exists(filename, NULL)) {
+        printf("ERROR: [%s] does not exist, expecting .g file\n", filename);
+        return;
+    }
+
+    dbp = ged_open("db", filename, 1);
+    ged_exec(dbp, 2, cmdList);
+    printf("%s\n", bu_vls_addr(dbp->ged_result_str));
+    ged_close(dbp);
+}
+
 void VerificationValidationWidget::runTests() {
     statusBar->showMessage("Finished running 0/XXX tests");
+    // TODO: grab all tests from DB
     // TODO: run tests
     // TODO: update statusBar to tell how many tests finished
     // TODO: update GUI to show results of test

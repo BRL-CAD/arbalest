@@ -5,6 +5,8 @@
 #ifndef VVWIDGET_H
 #define VVWIDGET_H
 
+#include <ged.h>
+#include <bu.h>
 #include <iostream>
 #include <QTableView>
 #include <QtSql/QSqlTableModel>
@@ -28,6 +30,7 @@ public:
     explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
+    void runTest(const QString& cmd);
     void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
