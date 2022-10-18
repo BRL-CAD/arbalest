@@ -9,6 +9,7 @@
 #include "brlcad/cicommon.h"
 #include "QVBoxWidget.h"
 #include "QHBoxWidget.h"
+#include <QMessageBox>
 #include <chrono>
 #include <stack>
 #include <iostream>
@@ -99,5 +100,6 @@ inline void te(){
 class Document;
 bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
 
+void popup(const QString& message);
 
 #endif // UTILS_ARBALEST_H

@@ -554,6 +554,19 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
+    QMenu* verificationValidation = menuTitleBar->addMenu(tr("&Verify/Validate"));
+    QAction* verificationValidationAct = new QAction(tr("Verify and validate current viewport"), this);
+    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationAct->setStatusTip(tr("Verify and validate current viewport"));
+    verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
+    connect(verificationValidationAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
+        documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
+        objectVerificationValidationDockable->setVisible(true);
+        documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
+    });
+    verificationValidation->addAction(verificationValidationAct);
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -723,6 +736,15 @@ void MainWindow::prepareUi() {
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
+    QToolButton* verifyValidate = new QToolButton(menuTitleBar);
+    verifyValidate->setDefaultAction(verificationValidationAct);
+    verifyValidate->setObjectName("toolbarButton");
+    QIcon verifyValidateIcon;
+    verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);
+    verifyValidate->setIcon(verifyValidateIcon);
+    verifyValidate->setToolTip("Verify and validate current viewport");
+    mainTabBarCornerWidget->addWidget(verifyValidate);
+
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
     raytraceButton->setObjectName("toolbarButton");
@@ -744,7 +766,9 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-
+    objectVerificationValidationDockable = new Dockable("Verification & Validation", this, true, 300);
+    addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
+    objectVerificationValidationDockable->setVisible(false);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -772,13 +796,15 @@ void MainWindow::openFile(const QString& filePath) {
     try {
         document = new Document(documentsCount, &filePath);
     }
+    catch (const std::runtime_error& e) { 
+        QString msg = e.what();
+        statusBar->showMessage(msg, statusBarShortMessageDuration);
+        popup(msg);
+    }
     catch (...) {
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);
-
-        QMessageBox msgBox;
-        msgBox.setText(msg);
-        msgBox.exec();
+        popup(msg);
     }
 
     if (document != nullptr) {
@@ -917,6 +943,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
@@ -931,6 +958,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        objectVerificationValidationDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
@@ -956,6 +984,7 @@ void MainWindow::tabCloseRequested(const int i)
     if (documentArea->currentIndex() == -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        objectVerificationValidationDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }

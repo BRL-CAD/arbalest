@@ -11,6 +11,7 @@
 #include "Properties.h"
 #include "GeometryRenderer.h"
 #include "DisplayGrid.h"
+#include "VerificationValidationWidget.h"
 #include <include/RaytraceView.h>
 
 class Properties;
@@ -26,6 +27,7 @@ private:
     BRLCAD::MemoryDatabase *database;
     DisplayGrid *displayGrid;
     ObjectTreeWidget *objectTreeWidget;
+    VerificationValidationWidget* vvWidget;
     Properties *properties;
     const int documentId;
     ObjectTree* objectTree;
@@ -65,6 +67,10 @@ public:
     Properties* getProperties() const
     {
 	    return properties;
+    }
+
+    VerificationValidationWidget* getVerificationValidationWidget() const {
+        return vvWidget;
     }
 
     DisplayGrid *getDisplayGrid()  {
