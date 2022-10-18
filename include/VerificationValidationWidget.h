@@ -15,6 +15,7 @@
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
+#include "VerificationValidationParser.h"
 #include "Utils.h"
 
 struct VerificationValidationTest {

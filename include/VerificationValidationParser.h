@@ -21,16 +21,16 @@ public:
         QString issueDescription;
     };
 
-    QString testID;
     QString terminalOutput;
     Code resultCode;
     std::vector<ObjectIssue> issues;
 };
 
 class VerificationValidationParser {
-    static VerificationValidationResult* search(const QString& testID, const QString& terminalOutput);
-    static VerificationValidationResult* lc(const QString& testID, const QString& terminalOutput);
-    static VerificationValidationResult* gqa(const QString& testID, const QString& terminalOutput);
+public:
+    static VerificationValidationResult* search(const QString* terminalOutput);
+    static VerificationValidationResult* lc(const QString* terminalOutput);
+    static VerificationValidationResult* gqa(const QString* terminalOutput);
 };
 
 #endif

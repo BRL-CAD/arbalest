@@ -62,18 +62,19 @@ void VerificationValidationWidget::runTests() {
         statusBar->showMessage(status);
         QString testID = q->value(0).toString();
         QString testCommand = q->value(1).toString();
-        QString* terminalOutput = runTest(testCommand);
+        const QString* terminalOutput = runTest(testCommand);
+        VerificationValidationResult* result = VerificationValidationParser::search(terminalOutput);
+        QString resultCode = QString::number(result->resultCode);
+        
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
+        q2->addBindValue(modelID);
+        q2->addBindValue(testID);
+        q2->addBindValue(resultCode);
+        q2->addBindValue((terminalOutput) ? *terminalOutput : "");
+        dbExec(q2);
 
-        if (terminalOutput) {
-            // TODO: run through parser to get resultCode
-            QSqlQuery* q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
-            q2->addBindValue(modelID);
-            q2->addBindValue(testID);
-            q2->addBindValue("TODO: add result code");
-            q2->addBindValue(*terminalOutput);
-            dbExec(q2);   
-        }
+        // TODO: add bad objects
 
         status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
     }
