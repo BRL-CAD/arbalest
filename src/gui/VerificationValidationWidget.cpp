@@ -64,7 +64,7 @@ void VerificationValidationWidget::runTests() {
         QString testCommand = q->value(1).toString();
         QString* terminalOutput = runTest(testCommand);
 
-        if (!terminalOutput) {
+        if (terminalOutput) {
             // TODO: run through parser to get resultCode
             QSqlQuery* q2 = new QSqlQuery(getDatabase());
             q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
