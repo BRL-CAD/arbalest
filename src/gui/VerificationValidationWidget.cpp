@@ -66,7 +66,18 @@ void VerificationValidationWidget::runTests() {
         QString testCommand = q->value(1).toString();
         const QString* terminalOutput = runTest(testCommand);
 
-        VerificationValidationResult* result = VerificationValidationParser::search(terminalOutput);
+        QString executableName = testCommand.split(' ').first();
+        VerificationValidationResult* result = nullptr;
+        // find proper parser
+        if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
+            result = VerificationValidationParser::search(terminalOutput);
+
+        // if parser hasn't been implemented, default
+        if (!result) {
+            result = new VerificationValidationResult;
+            result->resultCode = VerificationValidationResult::Code::UNPARSEABLE;
+        }
+
         QString resultCode = QString::number(result->resultCode);
         
         // insert results into db
