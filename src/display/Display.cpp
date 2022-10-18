@@ -66,7 +66,7 @@ int Display::getH() const {
     return h;
 }
 
-Document* Display::getDocument() const
+const Document* Display::getDocument() const
 {
     return document;
 }
@@ -74,18 +74,6 @@ Document* Display::getDocument() const
 DisplayManager* Display::getDisplayManager() const
 {
 	return displayManager;
-}
-
-Qt::MouseButton Display::getRotateCamera() const {
-    return rotateCameraMouseButton;
-}
-
-Qt::MouseButton Display::getMoveCamera() const {
-    return moveCameraMouseButton;
-}
-
-Qt::KeyboardModifier Display::getRotateAroundThirdAxisModifier() const {
-    return rotateAroundThirdAxisModifier;
 }
 
 void Display::resizeGL(const int w, const int h) {

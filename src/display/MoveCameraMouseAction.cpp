@@ -20,15 +20,15 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
             bool resetX = false, resetY = false;
 
             if (prevMouseX != -1 && prevMouseY != -1 && 
-                (moveCameraEvent->buttons() & (m_watched->getRotateCamera() | m_watched->getMoveCamera()))) {
+                (moveCameraEvent->buttons() & (rotateCameraMouseButton | moveCameraMouseButton))) {
                 if (skipNextMouseMoveEvent) {
                     skipNextMouseMoveEvent = false;
                 }
-                if (moveCameraEvent->buttons() & (m_watched->getRotateCamera())) {
-                    const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(m_watched->getRotateAroundThirdAxisModifier());
+                if (moveCameraEvent->buttons() & (rotateCameraMouseButton)) {
+                    const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
                     m_watched->getCamera()->processRotateRequest(x - prevMouseX, y - prevMouseY, rotateThirdAxis);
                 }
-                if (moveCameraEvent->buttons() & (m_watched->getMoveCamera())) {
+                if (moveCameraEvent->buttons() & (moveCameraMouseButton)) {
                     m_watched->getCamera()->processMoveRequest(x - prevMouseX, y - prevMouseY);
                 }
 
