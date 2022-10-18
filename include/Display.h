@@ -75,10 +75,6 @@ private:
     float keyPressSimulatedMouseMoveDistance = 8;
     QColor bgColor;
 
-    Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
-    Qt::MouseButton moveCameraMouseButton = Qt::RightButton;
-    Qt::KeyboardModifier rotateAroundThirdAxisModifier = Qt::ShiftModifier;
-
 	OrthographicCamera  *camera;
     DisplayManager *displayManager;
     AxesRenderer * axesRenderer;
