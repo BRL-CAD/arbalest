@@ -50,11 +50,13 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
+    // get the number of tests from db
     QString totalTests = 0;
     QSqlQuery* q = dbExec("SELECT COUNT(*) FROM Tests");
     if (q && q->next())
         totalTests = q->value(0).toString();
 
+    // run through every test
     size_t testsRun = 0;
     QString status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
     q = dbExec("SELECT id, testCommand FROM Tests");
@@ -63,9 +65,11 @@ void VerificationValidationWidget::runTests() {
         QString testID = q->value(0).toString();
         QString testCommand = q->value(1).toString();
         const QString* terminalOutput = runTest(testCommand);
+
         VerificationValidationResult* result = VerificationValidationParser::search(terminalOutput);
         QString resultCode = QString::number(result->resultCode);
         
+        // insert results into db
         QSqlQuery* q2 = new QSqlQuery(getDatabase());
         q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
         q2->addBindValue(modelID);
@@ -74,7 +78,22 @@ void VerificationValidationWidget::runTests() {
         q2->addBindValue((terminalOutput) ? *terminalOutput : "");
         dbExec(q2);
 
-        // TODO: add bad objects
+        // insert issues into db
+        for (int i = 0; i < result->issues.size(); i++) {
+            VerificationValidationResult::ObjectIssue currentIssue = result->issues[i];
+            q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
+            q2->addBindValue(currentIssue.objectName);
+            q2->addBindValue(currentIssue.issueDescription);
+            dbExec(q2);
+
+            QString objectIssueID = q2->lastInsertId().toString();
+            q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO Issues (testID, objectIssueID) VALUES (?,?)");
+            q2->addBindValue(testID);
+            q2->addBindValue(objectIssueID);
+            dbExec(q2);
+        }
 
         status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
     }
