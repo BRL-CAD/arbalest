@@ -170,6 +170,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
 void VerificationValidationWidget::setupUI() {
 	// Branch testDialog
+	std::cout << "Branch: testDialog" << std::endl;
 	
     // setup result table's column headers
     QStringList columnLabels;
