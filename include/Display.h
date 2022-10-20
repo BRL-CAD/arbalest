@@ -52,15 +52,11 @@ public:
 
     int getW() const;
     int getH() const;
-    Document* getDocument() const;
-	OrthographicCamera* getCamera() const;
-	DisplayManager* getDisplayManager() const;
+    const Document* getDocument() const;
+    OrthographicCamera* getCamera() const;
+    DisplayManager* getDisplayManager() const;
 
-    Qt::MouseButton getRotateCamera() const;
-    Qt::MouseButton getMoveCamera() const;
-    Qt::KeyboardModifier getRotateAroundThirdAxisModifier() const;
-
-	bool gridEnabled = false;
+    bool gridEnabled = false;
 
 protected:
     void resizeGL(int w, int h) override;
@@ -75,10 +71,10 @@ private:
     float keyPressSimulatedMouseMoveDistance = 8;
     QColor bgColor;
 
-	OrthographicCamera  *camera;
+    OrthographicCamera  *camera;
     DisplayManager *displayManager;
     AxesRenderer * axesRenderer;
-	GridRenderer * gridRenderer;
+    GridRenderer * gridRenderer;
 };
 
 
