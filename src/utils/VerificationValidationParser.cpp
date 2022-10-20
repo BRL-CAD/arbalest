@@ -41,7 +41,7 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
 
     // final defense: find any errors
     if (r->resultCode == VerificationValidationResult::Code::PASSED) {
-        msgStart = r->terminalOutput.indexOf(QRegExp("[eE][rR][rR][oO][rR]", Qt::CaseInsensitive));
+        msgStart = r->terminalOutput.indexOf(QRegExp("[eE][rR][rR][oO][rR][: ]", Qt::CaseInsensitive));
         if (msgStart != -1) {
             r->resultCode = VerificationValidationResult::Code::FAILED;
             r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
