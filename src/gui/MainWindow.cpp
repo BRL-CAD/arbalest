@@ -28,6 +28,7 @@
 #include <brlcad/HyperbolicCylinder.h>
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
+#include "MoveCameraMouseAction.h"
 
 
 using namespace BRLCAD;
@@ -35,7 +36,7 @@ using namespace std;
 
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr}
 {
     loadTheme();
     prepareUi();
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
+    
 }
 
 MainWindow::~MainWindow()
@@ -1041,5 +1043,21 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     }
     else {
         event->accept();
+    }
+}
+
+void MainWindow::moveCameraButtonAction() {
+    /*if (m_mouseAction != nullptr) {
+        delete m_mouseAction;
+    }
+
+    m_mouseAction = new MoveCameraMouseAction();*/
+
+    if (activeDocumentId != -1) {
+        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid *>(documentArea->widget(activeDocumentId));
+
+        if (displayGrid != nullptr) {
+            displayGrid->setMoveCameraMouseAction();
+        }
     }
 }

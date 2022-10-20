@@ -2,6 +2,7 @@
 #include <QtOpenGL/QtOpenGL>
 #include <include/Display.h>
 #include "DisplayGrid.h"
+#include "MoveCameraMouseAction.h"
 
 DisplayGrid::DisplayGrid(Document*  document) : document(document) {
     verticalSplitter = new QSplitter(this);
@@ -16,6 +17,13 @@ DisplayGrid::DisplayGrid(Document*  document) : document(document) {
     displays.append(new Display(document));
     displays.append(new Display(document));
     displays.append(new Display(document));
+
+    mouseActions.append(nullptr);
+    mouseActions.append(nullptr);
+    mouseActions.append(nullptr);
+    mouseActions.append(nullptr);
+
+    setMoveCameraMouseAction();
 
     horizontalSplitter1->addWidget(displays[0]);
     horizontalSplitter1->addWidget(displays[1]);
@@ -88,3 +96,15 @@ int DisplayGrid::getActiveDisplayId() {
 bool DisplayGrid::inQuadDisplayMode() {
     return !displays[0]->isHidden() && !displays[1]->isHidden();
 }
+
+void DisplayGrid::setMoveCameraMouseAction() {
+    int displaysSize = displays.size();
+    for (int index = 0; index < displaysSize; ++index) {
+        if (mouseActions[index] != nullptr) {
+            delete mouseActions[index];
+        }
+
+        mouseActions[index] = new MoveCameraMouseAction(this, displays[index]);
+    }
+}
+

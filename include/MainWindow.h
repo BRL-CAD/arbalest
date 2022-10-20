@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QComboBox>
+#include "MouseAction.h"
 
 class Document;
 
@@ -41,6 +42,7 @@ private:
     QLabel *statusBarPathLabel;
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
+    MouseAction *m_mouseAction;
 	
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
@@ -68,6 +70,8 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void closeEvent(QCloseEvent* event) override;
 	
+    void moveCameraButtonAction();
+
 public slots:
     void openFileDialog();
     bool saveFileId(const QString& filePath, int documentId);

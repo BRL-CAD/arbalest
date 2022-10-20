@@ -32,7 +32,8 @@
 using namespace std;
 
 
-Display::Display(Document*  document):document(document) {
+Display::Display(Document*  document)
+    :document(document) {
     camera = new OrthographicCamera(document);
     displayManager = new DisplayManager(*this);
     axesRenderer = new AxesRenderer();
@@ -96,85 +97,6 @@ void Display::paintGL() {
     orthoMtx.ortho(-100.f, 100.f, -100.0f, 100.0f, -1000.f,1000.f);
     displayManager->loadPMatrix(orthoMtx.data());
     axesRenderer->render();
-}
-
-void Display::mouseMoveEvent(QMouseEvent *event) {
-	const int x = event->x();
-	const int y = event->y();
-    int globalX = event->globalX();
-    int globalY = event->globalY();
-
-    bool resetX = false, resetY = false;
-
-    if(prevMouseX != -1 && prevMouseY != -1 && (event->buttons() & (rotateCameraMouseButton|moveCameraMouseButton))) {
-        if (skipNextMouseMoveEvent) {
-            skipNextMouseMoveEvent = false;
-            return;
-        }
-        if(event->buttons() & (rotateCameraMouseButton)) {
-	        const bool rotateThirdAxis = QApplication::keyboardModifiers().testFlag(rotateAroundThirdAxisModifier);
-            camera->processRotateRequest(x- prevMouseX, y - prevMouseY,rotateThirdAxis);
-        }
-        if(event->buttons() & (moveCameraMouseButton)){
-            camera->processMoveRequest(x- prevMouseX, y - prevMouseY);
-        }
-
-        forceRerenderFrame();
-
-        const QPoint topLeft = mapToGlobal(QPoint(0,0));
-        const QPoint bottomRight = mapToGlobal(QPoint(size().width(),size().height()));
-
-        int newX = -1;
-        int newY = -1;
-
-        if (globalX <= topLeft.x()) {
-            newX = bottomRight.x()-1;
-            resetX = true;
-        }
-        if (globalX >= bottomRight.x()) {
-            newX = topLeft.x()+1;
-            resetX = true;
-        }
-        if (globalY <= topLeft.y()) {
-            newY = bottomRight.y()-1;
-            resetY = true;
-        }
-        if (globalY >= bottomRight.y()) {
-            newY = topLeft.y()+1;
-            resetY = true;
-        }
-
-        if (resetX || resetY) {
-            prevMouseX = resetX ? mapFromGlobal(QPoint(newX,newY)).x() : x;
-            prevMouseY = resetY ? mapFromGlobal(QPoint(newX,newY)).y() : y;
-            QCursor::setPos(resetX ? newX : globalX, resetY ? newY : globalY);
-            skipNextMouseMoveEvent = true;
-        }
-    }
-
-    if(!resetX && !resetY) {
-        prevMouseX = x;
-        prevMouseY = y;
-    }
-}
-
-void Display::mousePressEvent(QMouseEvent *event) {
-    document->getDisplayGrid()->setActiveDisplay(this);
-    prevMouseX = event->x();
-    prevMouseY = event->y();
-}
-
-void Display::mouseReleaseEvent(QMouseEvent *event) {
-    prevMouseX = -1;
-    prevMouseY = -1;
-}
-
-void Display::wheelEvent(QWheelEvent *event) {
-
-    if (event->phase() == Qt::NoScrollPhase || event->phase() == Qt::ScrollUpdate || event->phase() == Qt::ScrollMomentum) {
-        camera->processZoomRequest(event->angleDelta().y() / 8);
-        forceRerenderFrame();
-    }
 }
 
 void Display::keyPressEvent( QKeyEvent *k ) {

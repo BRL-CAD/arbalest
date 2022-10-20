@@ -53,38 +53,28 @@ public:
     int getW() const;
     int getH() const;
     const Document* getDocument() const;
-	OrthographicCamera* getCamera() const;
-	DisplayManager* getDisplayManager() const;
-	bool gridEnabled = false;
+    OrthographicCamera* getCamera() const;
+    DisplayManager* getDisplayManager() const;
+
+    bool gridEnabled = false;
 
 protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *k) override ;
 
 private:
     Document * document;
     int w = 400;
     int h = 400;
-    int prevMouseX = -1;
-    int prevMouseY = -1;
-    bool skipNextMouseMoveEvent = false;
     float keyPressSimulatedMouseMoveDistance = 8;
     QColor bgColor;
 
-    Qt::MouseButton rotateCameraMouseButton = Qt::LeftButton;
-    Qt::MouseButton moveCameraMouseButton = Qt::RightButton;
-    Qt::KeyboardModifier rotateAroundThirdAxisModifier = Qt::ShiftModifier;
-
-	OrthographicCamera  *camera;
+    OrthographicCamera  *camera;
     DisplayManager *displayManager;
     AxesRenderer * axesRenderer;
-	GridRenderer * gridRenderer;
+    GridRenderer * gridRenderer;
 };
 
 

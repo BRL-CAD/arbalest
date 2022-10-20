@@ -7,9 +7,10 @@
 #include <include/Document.h>
 #include <include/Display.h>
 #include <QSplitter>
+//#include "MouseAction.h"
 
 class Display;
-
+class MouseAction;
 
 
 class DisplayGrid : public QVBoxWidget {
@@ -41,6 +42,8 @@ public:
 
     void resetViewPort(int displayId);
     void resetAllViewPorts();
+
+    void setMoveCameraMouseAction();
 private:
     double defaultDisplayCameraRotation[4][3] = {
             {0, 0, 270},
@@ -50,6 +53,7 @@ private:
     };
     Document*  document;
     QVector<Display *> displays;
+    QVector<MouseAction *> mouseActions;
     Display *activeDisplay;
     QSplitter *verticalSplitter;
     QSplitter *horizontalSplitter1;
