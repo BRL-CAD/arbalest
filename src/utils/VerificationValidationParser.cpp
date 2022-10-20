@@ -15,7 +15,7 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
         QString currentLine = lines[i];
 
         // catch usage errors
-        msgStart = r->terminalOutput.indexOf(QRegExp("/usage:/g", Qt::CaseInsensitive));
+        msgStart = r->terminalOutput.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
         if (msgStart != -1) {
             r->resultCode = VerificationValidationResult::Code::FAILED;
             r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
@@ -39,12 +39,18 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
         }        
     }
 
-    // final defense: find any errors
+    // final defense: find any errors / warnings
     if (r->resultCode == VerificationValidationResult::Code::PASSED) {
-        msgStart = r->terminalOutput.indexOf(QRegExp("[eE][rR][rR][oO][rR][: ]", Qt::CaseInsensitive));
+        msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
         if (msgStart != -1) {
-            r->resultCode = VerificationValidationResult::Code::FAILED;
+            r->resultCode = VerificationValidationResult::Code::UNPARSEABLE;
             r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
+        }
+
+        msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
+        if (msgStart != -1) {
+            r->resultCode = VerificationValidationResult::Code::UNPARSEABLE;
+            r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
         }
     }
 
