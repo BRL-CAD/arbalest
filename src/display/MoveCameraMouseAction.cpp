@@ -1,4 +1,4 @@
-/*                       D I S P L A Y . H
+/*         M O V E C A M E R A M O U S E A C T I O N . C P P
  * BRL-CAD
  *
  * Copyright (c) 2022 United States Government as represented by
