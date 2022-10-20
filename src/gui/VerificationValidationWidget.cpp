@@ -169,6 +169,8 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 }
 
 void VerificationValidationWidget::setupUI() {
+	// Branch testDialog
+	
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "   " << "Test Name" << "Description" << "Object Path";
