@@ -3,12 +3,19 @@
 //
 
 #include "VerificationValidationParser.h"
+using DefaultTests = VerificationValidationWidget::DefaultTests;
 
-VerificationValidationResult* VerificationValidationParser::search(const QString* terminalOutput) {
+VerificationValidationResult* VerificationValidationParser::search(const QString& cmd, const QString* terminalOutput) {
     VerificationValidationResult* r = new VerificationValidationResult;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = VerificationValidationResult::Code::PASSED;
 
+    // // default checks
+    // for (int i = 0; i < DefaultTests::allTests.size(); i++) {
+
+    // }
+
+    //// general checks
     int msgStart;
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {

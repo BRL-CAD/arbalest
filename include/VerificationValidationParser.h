@@ -23,12 +23,12 @@ public:
 
     QString terminalOutput;
     Code resultCode;
-    std::vector<ObjectIssue> issues;
+    std::list<ObjectIssue> issues; // used list for O(1) push_back, O(N) access; since need to display all issues in GUI anyways
 };
 
 class VerificationValidationParser {
 public:
-    static VerificationValidationResult* search(const QString* terminalOutput);
+    static VerificationValidationResult* search(const QString& cmd, const QString* terminalOutput);
     static VerificationValidationResult* lc(const QString* terminalOutput);
     static VerificationValidationResult* gqa(const QString* terminalOutput);
 };
