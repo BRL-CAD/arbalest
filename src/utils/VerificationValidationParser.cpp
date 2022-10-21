@@ -63,52 +63,52 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
 
 void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Test* type) {
     if (currentLine.trimmed().isEmpty()) return;
-    QStringList objectPath = currentLine.split('/');
-    QString objectName = objectPath.last();
+    QString objectPath = currentLine;
+    QString objectName = currentLine.split('/').last();
 
     if (type == &DefaultTests::NO_NESTED_REGIONS) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Nested region at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Nested region at '" + objectName + "'"});
     } 
     
     else if (type == &DefaultTests::NO_EMPTY_COMBOS) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Empty combo at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Empty combo at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Solid outside of region at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Solid outside of region at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_BOTS_VOLUME_MODE) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "BoT not volume mode at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "BoT not volume mode at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_BOTS_LH_ORIENT) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Left-hand oriented BoT at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Left-hand oriented BoT at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_MAT) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Obj/region doesn't have material at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Obj/region doesn't have material at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_LOS) {
         r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objectName, "Obj/region doesn't have LOS at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Obj/region doesn't have LOS at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_MATRICES) {
         r->resultCode = Result::Code::WARNING;
-        r->issues.push_back({objectName, "Matrix at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Matrix at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_INVALID_AIRCODE_REGIONS) {
         r->resultCode = Result::Code::WARNING;
-        r->issues.push_back({objectName, "Obj/region has aircode at '" + currentLine + "'"});
+        r->issues.push_back({objectPath, "Obj/region has aircode at '" + objectName + "'"});
     }
 }
 
