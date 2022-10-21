@@ -62,8 +62,8 @@ namespace VerificationValidation {
     public:
         static Result* search(const QString& cmd, const QString* terminalOutput);
         static void searchSpecificTest(Result* r, const QString& currentLine, const Test* type);
-        static void searchCatchUsageErrors(Result* r, const QString& currentLine);
-        static void searchDBNotFoundErrors(Result* r, const QString& currentLine);
+        static bool searchCatchUsageErrors(Result* r, const QString& currentLine);
+        static bool searchDBNotFoundErrors(Result* r);
         static void searchFinalDefense(Result* r);
 
         static Result* lc(const QString* terminalOutput);
