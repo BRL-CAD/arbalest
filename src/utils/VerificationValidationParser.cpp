@@ -64,52 +64,61 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
 }
 
 void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Test* type) {
-    if (type == &DefaultTests::NO_NESTED_REGIONS) {
-        if (currentLine.trimmed().isEmpty()) return;
-        r->resultCode = Result::Code::FAILED;
-        QStringList objectPath = currentLine.split('/');
-        
-        // if bad result
-        if (objectPath.size() < 2) {
-            r->resultCode = Result::Code::UNPARSEABLE;
-            r->issues.push_back({"search parser", "failed to parse results"});
-            return;
-        }
+    if (currentLine.trimmed().isEmpty()) return;
+    QStringList objectPath = currentLine.split('/');
+    
+    // if bad result
+    if (objectPath.size() < 2) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"search parser failed to parse result", currentLine});
+        return;
+    }
 
-        QString objectName = objectPath.last();
+    QString objectName = objectPath.last();
+
+    if (type == &DefaultTests::NO_NESTED_REGIONS) {
+        r->resultCode = Result::Code::FAILED;
         r->issues.push_back({objectName, "nested region at " + currentLine});
     } 
     
     else if (type == &DefaultTests::NO_EMPTY_COMBOS) {
-
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "empty combo at " + currentLine});
     }
 
     else if (type == &DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "solid outside of region at " + currentLine});
     }
 
     else if (type == &DefaultTests::ALL_BOTS_VOLUME_MODE) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "BoT not volume mode at " + currentLine});
     }
 
     else if (type == &DefaultTests::NO_BOTS_LH_ORIENT) {
-
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "Left-hand oriented BoT at " + currentLine});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_MAT) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "obj/region doesn't have material at " + currentLine});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_LOS) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectName, "obj/region doesn't have LOS at " + currentLine});
     }
 
     else if (type == &DefaultTests::NO_MATRICES) {
-        
+        r->resultCode = Result::Code::WARNING;
+        r->issues.push_back({objectName, "matrix at " + currentLine});
     }
 
     else if (type == &DefaultTests::NO_INVALID_AIRCODE_REGIONS) {
-        
+        r->resultCode = Result::Code::WARNING;
+        r->issues.push_back({objectName, "obj/region has aircode at " + currentLine});
     }
 }
 
@@ -129,7 +138,7 @@ void Parser::searchDBNotFoundErrors(Result* r, const QString& currentLine) {
 
         if (objNameStartIdx >= currentLine.size() || objNameEndIdx == -1) {
             r->resultCode = Result::Code::UNPARSEABLE;
-            r->issues.push_back({"search parser", "failed to parse results"});
+            r->issues.push_back({"search parser failed to parse results", currentLine});
         } else {
             int objNameSz = objNameEndIdx - objNameStartIdx;
             QString objName = currentLine.mid(objNameStartIdx, objNameSz);
