@@ -6,26 +6,7 @@
 #define VVPARSER_H
 
 #include "Utils.h"
-#include "VerificationValidationWidget.h"
-
-class VerificationValidationResult {
-public:
-    enum Code {
-        PASSED,
-        WARNING,
-        FAILED,
-        UNPARSEABLE
-    };
-
-    struct ObjectIssue {
-        QString objectName;
-        QString issueDescription;
-    };
-
-    QString terminalOutput;
-    Code resultCode;
-    std::list<ObjectIssue> issues; // used list for O(1) push_back, O(N) access; since need to display all issues in GUI anyways
-};
+#include "VerificationValidation.h"
 
 class VerificationValidationParser {
 public:
@@ -33,10 +14,10 @@ public:
     static VerificationValidationResult* lc(const QString* terminalOutput);
     static VerificationValidationResult* gqa(const QString* terminalOutput);
 private:
-    static void searchSpecificTest(VerificationValidationResult*& r, const QString& currentLine, const VerificationValidationTest*& type);
-    static void searchCatchUsageErrors(VerificationValidationResult*& r, const QString& currentLine);
-    static void searchDBNotFoundErrors(VerificationValidationResult*& r, const QString& currentLine);
-    static void searchFinalDefense(VerificationValidationResult*& r);
+    static void searchSpecificTest(VerificationValidationResult* r, const QString& currentLine, const VerificationValidationTest* type);
+    static void searchCatchUsageErrors(VerificationValidationResult* r, const QString& currentLine);
+    static void searchDBNotFoundErrors(VerificationValidationResult* r, const QString& currentLine);
+    static void searchFinalDefense(VerificationValidationResult* r);
 };
 
 #endif

@@ -2,7 +2,6 @@
 #include <Document.h>
 
 #define SHOW_ERROR_POPUP true
-using DefaultTests = VerificationValidationWidget::DefaultTests;
 
 // TODO: if checksum doesn't match current test file, notify user
 
@@ -178,16 +177,16 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     // note: this doesn't repopulate deleted tests, unless all tests deleted
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
-        for (int i = 0; i < DefaultTests::allTests.size(); i++) {
+        for (int i = 0; i < VerificationValidationDefaultTests::allTests.size(); i++) {
             q->prepare("INSERT INTO Tests (testName, testCommand) VALUES (?, ?)");
-            q->addBindValue(DefaultTests::allTests[i].testName);
-            q->addBindValue(DefaultTests::allTests[i].testCommand);
+            q->addBindValue(VerificationValidationDefaultTests::allTests[i].testName);
+            q->addBindValue(VerificationValidationDefaultTests::allTests[i].testCommand);
             dbExec(q);
 
             QString testID = q->lastInsertId().toString();
 
             q->prepare("INSERT INTO TestsSuites (suiteName) VALUES (?)");
-            q->addBindValue(DefaultTests::allTests[i].suiteName);
+            q->addBindValue(VerificationValidationDefaultTests::allTests[i].suiteName);
             dbExec(q);
 
             QString testSuiteID = q->lastInsertId().toString();
@@ -257,33 +256,3 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
 
     QHBoxWidget::resizeEvent(event);
 }
-
-const VerificationValidationTest DefaultTests::MISMATCHED_DUP_IDS          = {"No mis-matched duplicate IDs", "lc -m all", "General"};
-const VerificationValidationTest DefaultTests::NO_NESTED_REGIONS           = {"No nested regions", "search /all -type region -below -type region", "General"};
-const VerificationValidationTest DefaultTests::NO_EMPTY_COMBOS             = {"No empty combos", "search /all -nnodes 0", "General"};
-const VerificationValidationTest DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS   = {"No solids outside of regions", "search /all ! -below -type region -type shape", "General"};
-const VerificationValidationTest DefaultTests::ALL_BOTS_VOLUME_MODE        = {"All BoTs are volume mode (should return nothing)", "search all -type bot ! -type volume", "General"};
-const VerificationValidationTest DefaultTests::NO_BOTS_LH_ORIENT           = {"No BoTs are left hand orientation", "search all -type bot -param orient=lh", "General"}; // TODO: this command can run faster if use unix
-const VerificationValidationTest DefaultTests::ALL_REGIONS_MAT             = {"All regions have material", "search /all -type region ! -attr aircode ! -attr material_id", "General"};
-const VerificationValidationTest DefaultTests::ALL_REGIONS_LOS             = {"All regions have LOS", "search /all -type region ! -attr aircode ! -attr los", "General"};
-const VerificationValidationTest DefaultTests::NO_NULL_REGIONS             = {"No null region", "gqa -Ao -g4mm,4mm -t0.3mm all", "General"};
-const VerificationValidationTest DefaultTests::NO_OVERLAPS                 = {"Overlaps cleaned to 4mm gridsize with 0.3mm tolerance", "gqa -Ao -g32mm,4mm -t0.3mm all", "General"};
-const VerificationValidationTest DefaultTests::NO_DUPLICATE_ID             = {"Duplicate ID check", "lc -d all","General"};
-const VerificationValidationTest DefaultTests::NO_MATRICES                 = {"No matrices", "search /all ! -matrix IDN", "General"};
-const VerificationValidationTest DefaultTests::NO_INVALID_AIRCODE_REGIONS  = {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "General"};
-
-const std::vector<VerificationValidationTest> DefaultTests::allTests = {
-    DefaultTests::MISMATCHED_DUP_IDS,
-    DefaultTests::NO_NESTED_REGIONS,
-    DefaultTests::NO_EMPTY_COMBOS,
-    DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS,
-    DefaultTests::ALL_BOTS_VOLUME_MODE,
-    DefaultTests::NO_BOTS_LH_ORIENT,
-    DefaultTests::ALL_REGIONS_MAT,
-    DefaultTests::ALL_REGIONS_LOS,
-    DefaultTests::NO_NULL_REGIONS,
-    DefaultTests::NO_OVERLAPS,
-    DefaultTests::NO_DUPLICATE_ID,
-    DefaultTests::NO_MATRICES,
-    DefaultTests::NO_INVALID_AIRCODE_REGIONS
-};

@@ -3,7 +3,6 @@
 //
 
 #include "VerificationValidationParser.h"
-using DefaultTests = VerificationValidationWidget::DefaultTests;
 
 VerificationValidationResult* VerificationValidationParser::search(const QString& cmd, const QString* terminalOutput) {
     VerificationValidationResult* r = new VerificationValidationResult;
@@ -12,32 +11,32 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
     VerificationValidationTest* type = nullptr;
 
     // default checks
-    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_NESTED_REGIONS);
+    if (QString::compare(VerificationValidationDefaultTests::NO_NESTED_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_NESTED_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_EMPTY_COMBOS);
+    else if (QString::compare(VerificationValidationDefaultTests::NO_EMPTY_COMBOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_EMPTY_COMBOS);
 
-    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
+    else if (QString::compare(VerificationValidationDefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
 
-    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::ALL_BOTS_VOLUME_MODE);
+    else if (QString::compare(VerificationValidationDefaultTests::ALL_BOTS_VOLUME_MODE.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::ALL_BOTS_VOLUME_MODE);
 
-    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_BOTS_LH_ORIENT);
+    else if (QString::compare(VerificationValidationDefaultTests::NO_BOTS_LH_ORIENT.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_BOTS_LH_ORIENT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::ALL_REGIONS_MAT);
+    else if (QString::compare(VerificationValidationDefaultTests::ALL_REGIONS_MAT.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::ALL_REGIONS_MAT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::ALL_REGIONS_LOS);
+    else if (QString::compare(VerificationValidationDefaultTests::ALL_REGIONS_LOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::ALL_REGIONS_LOS);
 
-    else if (QString::compare(DefaultTests::NO_MATRICES.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_MATRICES);
+    else if (QString::compare(VerificationValidationDefaultTests::NO_MATRICES.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_MATRICES);
 
-    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
-        type = (VerificationValidationTest*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
+    else if (QString::compare(VerificationValidationDefaultTests::NO_INVALID_AIRCODE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (VerificationValidationTest*) &(VerificationValidationDefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {
@@ -58,8 +57,8 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
     return r; // TODO: implement
 }
 
-void VerificationValidationParser::searchSpecificTest(VerificationValidationResult*& r, const QString& currentLine, const VerificationValidationTest*& type) {
-    if (*type == DefaultTests::NO_NESTED_REGIONS) {
+void VerificationValidationParser::searchSpecificTest(VerificationValidationResult* r, const QString& currentLine, const VerificationValidationTest* type) {
+    if (type == &VerificationValidationDefaultTests::NO_NESTED_REGIONS) {
         if (currentLine.trimmed().isEmpty()) return;
         r->resultCode = VerificationValidationResult::Code::FAILED;
         QStringList objectPath = currentLine.split('/');
@@ -75,40 +74,40 @@ void VerificationValidationParser::searchSpecificTest(VerificationValidationResu
         r->issues.push_back({objectName, "nested region at " + currentLine});
     } 
     
-    else if (*type == DefaultTests::NO_EMPTY_COMBOS) {
+    else if (type == &VerificationValidationDefaultTests::NO_EMPTY_COMBOS) {
 
     }
 
-    else if (*type == DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS) {
+    else if (type == &VerificationValidationDefaultTests::NO_SOLIDS_OUTSIDE_REGIONS) {
         
     }
 
-    else if (*type == DefaultTests::ALL_BOTS_VOLUME_MODE) {
+    else if (type == &VerificationValidationDefaultTests::ALL_BOTS_VOLUME_MODE) {
         
     }
 
-    else if (*type == DefaultTests::NO_BOTS_LH_ORIENT) {
+    else if (type == &VerificationValidationDefaultTests::NO_BOTS_LH_ORIENT) {
 
     }
 
-    else if (*type == DefaultTests::ALL_REGIONS_MAT) {
+    else if (type == &VerificationValidationDefaultTests::ALL_REGIONS_MAT) {
         
     }
 
-    else if (*type == DefaultTests::ALL_REGIONS_LOS) {
+    else if (type == &VerificationValidationDefaultTests::ALL_REGIONS_LOS) {
         
     }
 
-    else if (*type == DefaultTests::NO_MATRICES) {
+    else if (type == &VerificationValidationDefaultTests::NO_MATRICES) {
         
     }
 
-    else if (*type == DefaultTests::NO_INVALID_AIRCODE_REGIONS) {
+    else if (type == &VerificationValidationDefaultTests::NO_INVALID_AIRCODE_REGIONS) {
         
     }
 }
 
-void VerificationValidationParser::searchCatchUsageErrors(VerificationValidationResult*& r, const QString& currentLine) {
+void VerificationValidationParser::searchCatchUsageErrors(VerificationValidationResult* r, const QString& currentLine) {
     int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
     if (msgStart != -1) {
         r->resultCode = VerificationValidationResult::Code::FAILED;
@@ -116,7 +115,7 @@ void VerificationValidationParser::searchCatchUsageErrors(VerificationValidation
     }
 }
 
-void VerificationValidationParser::searchDBNotFoundErrors(VerificationValidationResult*& r, const QString& currentLine) {
+void VerificationValidationParser::searchDBNotFoundErrors(VerificationValidationResult* r, const QString& currentLine) {
     int msgStart = currentLine.indexOf(QRegExp("input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
     if (msgStart != -1) {
         int objNameStartIdx = msgStart + 8; // skip over "input: '"
@@ -134,7 +133,7 @@ void VerificationValidationParser::searchDBNotFoundErrors(VerificationValidation
     }        
 }
 
-void VerificationValidationParser::searchFinalDefense(VerificationValidationResult*& r) {
+void VerificationValidationParser::searchFinalDefense(VerificationValidationResult* r) {
     int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
     if (msgStart != -1) {
         r->resultCode = VerificationValidationResult::Code::UNPARSEABLE;
