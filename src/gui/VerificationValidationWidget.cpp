@@ -1,7 +1,11 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
+using Result = VerificationValidation::Result;
+using DefaultTests = VerificationValidation::DefaultTests;
+using Parser = VerificationValidation::Parser;
 
 #define SHOW_ERROR_POPUP true
+
 // TODO: if checksum doesn't match current test file, notify user
 
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
@@ -50,11 +54,13 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
+    // get the number of tests from db
     QString totalTests = 0;
     QSqlQuery* q = dbExec("SELECT COUNT(*) FROM Tests");
     if (q && q->next())
         totalTests = q->value(0).toString();
 
+    // run through every test
     size_t testsRun = 0;
     QString status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
     q = dbExec("SELECT id, testCommand FROM Tests");
@@ -62,17 +68,45 @@ void VerificationValidationWidget::runTests() {
         statusBar->showMessage(status);
         QString testID = q->value(0).toString();
         QString testCommand = q->value(1).toString();
-        QString* terminalOutput = runTest(testCommand);
+        const QString* terminalOutput = runTest(testCommand);
 
-        if (!terminalOutput) {
-            // TODO: run through parser to get resultCode
-            QSqlQuery* q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
-            q2->addBindValue(modelID);
+        QString executableName = testCommand.split(' ').first();
+        Result* result = nullptr;
+        // find proper parser
+        if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
+            result = Parser::search(testCommand, terminalOutput);
+
+        // if parser hasn't been implemented, default
+        if (!result) {
+            result = new Result;
+            result->resultCode = Result::Code::UNPARSEABLE;
+        }
+
+        QString resultCode = QString::number(result->resultCode);
+        
+        // insert results into db
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
+        q2->addBindValue(modelID);
+        q2->addBindValue(testID);
+        q2->addBindValue(resultCode);
+        q2->addBindValue((terminalOutput) ? *terminalOutput : "");
+        dbExec(q2);
+
+        // insert issues into db
+        for (Result::ObjectIssue currentIssue : result->issues) {
+            q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
+            q2->addBindValue(currentIssue.objectName);
+            q2->addBindValue(currentIssue.issueDescription);
+            dbExec(q2);
+
+            QString objectIssueID = q2->lastInsertId().toString();
+            q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO Issues (testID, objectIssueID) VALUES (?,?)");
             q2->addBindValue(testID);
-            q2->addBindValue("TODO: add result code");
-            q2->addBindValue(*terminalOutput);
-            dbExec(q2);   
+            q2->addBindValue(objectIssueID);
+            dbExec(q2);
         }
 
         status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
@@ -146,16 +180,16 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     // note: this doesn't repopulate deleted tests, unless all tests deleted
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
-        for (int i = 0; i < defaultTests.size(); i++) {
+        for (int i = 0; i < DefaultTests::allTests.size(); i++) {
             q->prepare("INSERT INTO Tests (testName, testCommand) VALUES (?, ?)");
-            q->addBindValue(defaultTests[i].testName);
-            q->addBindValue(defaultTests[i].testCommand);
+            q->addBindValue(DefaultTests::allTests[i].testName);
+            q->addBindValue(DefaultTests::allTests[i].testCommand);
             dbExec(q);
 
             QString testID = q->lastInsertId().toString();
 
             q->prepare("INSERT INTO TestsSuites (suiteName) VALUES (?)");
-            q->addBindValue(defaultTests[i].suiteName);
+            q->addBindValue(DefaultTests::allTests[i].suiteName);
             dbExec(q);
 
             QString testSuiteID = q->lastInsertId().toString();
