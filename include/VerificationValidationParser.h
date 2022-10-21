@@ -6,6 +6,7 @@
 #define VVPARSER_H
 
 #include "Utils.h"
+#include "VerificationValidationWidget.h"
 
 class VerificationValidationResult {
 public:

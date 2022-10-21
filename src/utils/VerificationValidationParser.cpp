@@ -10,10 +10,42 @@ VerificationValidationResult* VerificationValidationParser::search(const QString
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = VerificationValidationResult::Code::PASSED;
 
-    // // default checks
-    // for (int i = 0; i < DefaultTests::allTests.size(); i++) {
+    // default checks
+    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+        
+    } 
+    
+    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.testCommand, cmd, Qt::CaseInsensitive) == 0) {
 
-    // }
+    }
+
+    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::NO_MATRICES.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
+
+    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0) {
+
+    }
 
     //// general checks
     int msgStart;
