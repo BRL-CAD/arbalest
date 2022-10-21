@@ -32,6 +32,11 @@ public:
     static VerificationValidationResult* search(const QString& cmd, const QString* terminalOutput);
     static VerificationValidationResult* lc(const QString* terminalOutput);
     static VerificationValidationResult* gqa(const QString* terminalOutput);
+private:
+    static void searchSpecificTest(VerificationValidationResult*& r, const QString& currentLine, const VerificationValidationTest*& type);
+    static void searchCatchUsageErrors(VerificationValidationResult*& r, const QString& currentLine);
+    static void searchDBNotFoundErrors(VerificationValidationResult*& r, const QString& currentLine);
+    static void searchFinalDefense(VerificationValidationResult*& r);
 };
 
 #endif

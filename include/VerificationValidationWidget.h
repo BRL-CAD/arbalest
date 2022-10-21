@@ -18,14 +18,15 @@
 #include "VerificationValidationParser.h"
 #include "Utils.h"
 
+#ifndef VVTEST_H
+#define VVTEST_H
 class VerificationValidationTest {
 public:
     QString testName;
     QString testCommand;
     QString suiteName;
-
-    VerificationValidationTest(QString testName, QString testCommand, QString suiteName) : testName(testName), testCommand(testCommand), suiteName(suiteName) {}    
 };
+#endif
 
 class Document;
 class VerificationValidationWidget : public QHBoxWidget {
