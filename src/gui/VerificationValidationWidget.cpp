@@ -62,7 +62,7 @@ void VerificationValidationWidget::runTests() {
 
     // run through every test
     size_t testsRun = 0;
-    QString status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
+    QString status = "Finished running and parsing " + QString::number(++testsRun) + "/" + totalTests + " tests";
     q = dbExec("SELECT id, testCommand FROM Tests");
     while(q && q->next()) {
         statusBar->showMessage(status);
@@ -93,6 +93,8 @@ void VerificationValidationWidget::runTests() {
         q2->addBindValue((terminalOutput) ? *terminalOutput : "");
         dbExec(q2);
 
+        QString testResultID = q2->lastInsertId().toString();
+
         // insert issues into db
         for (Result::ObjectIssue currentIssue : result->issues) {
             q2 = new QSqlQuery(getDatabase());
@@ -103,15 +105,16 @@ void VerificationValidationWidget::runTests() {
 
             QString objectIssueID = q2->lastInsertId().toString();
             q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO Issues (testID, objectIssueID) VALUES (?,?)");
-            q2->addBindValue(testID);
+            q2->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
+            q2->addBindValue(testResultID);
             q2->addBindValue(objectIssueID);
             dbExec(q2);
         }
 
+        showResult(testResultID);
+
         status = "Finished running " + QString::number(++testsRun) + "/" + totalTests + " tests";
     }
-    // TODO: update GUI to show results of test
 }
 
 void VerificationValidationWidget::dbConnect() {
@@ -141,13 +144,13 @@ void VerificationValidationWidget::dbConnect() {
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, sha256Checksum TEXT NOT NULL)");
+        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
         dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
         dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
-        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
+        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
         dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestsSuites"))
@@ -158,7 +161,7 @@ void VerificationValidationWidget::dbInitTables() {
 
 void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* q;
-    QString sha256Checksum = "TODO: HASH SHA256 FROM OPENSSL";
+    QString md5Checksum = "TODO: HASH USING BRLCAD INTERFACE";
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
@@ -167,9 +170,9 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     dbExec(q, !SHOW_ERROR_POPUP);
     if (!q->next()) {
         q = new QSqlQuery(getDatabase());
-        q->prepare("INSERT INTO Model (filepath, sha256Checksum) VALUES (?, ?)");
+        q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
         q->addBindValue(dbName);
-        q->addBindValue(sha256Checksum);
+        q->addBindValue(md5Checksum);
         dbExec(q);   
         modelID = q->lastInsertId().toString();
     } else {
@@ -258,4 +261,51 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(4, this->width() * 0.25);
 
     QHBoxWidget::resizeEvent(event);
+}
+
+void VerificationValidationWidget::showResult(const QString& testResultID) {
+    QSqlQuery q;
+    q.prepare("SELECT resultCode, terminalOutput FROM TestResults WHERE id = ?");
+    q.addBindValue(testResultID);
+    dbExec(&q);
+
+    if (!q.next()) {
+        popup("Failed to show Test Result #" + testResultID);
+        return;
+    }
+
+    QString resultCode = q.value(0).toString();
+    QString terminalOutput = q.value(1).toString();
+
+    QSqlQuery q2;
+    q2.prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+    q2.addBindValue(testResultID);
+    dbExec(&q2, !SHOW_ERROR_POPUP);
+
+    while (q2.next()) {
+        QString objectIssueID = q2.value(0).toString();
+
+        QSqlQuery q3;
+        q3.prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE objectIssueID = ?");
+        q3.addBindValue(objectIssueID);
+        dbExec(&q3);
+
+        if (!q3.next()) {
+            popup("Failed to retrieve Object Issue #" + objectIssueID);
+            return;
+        }
+
+        QString objectName = q3.value(0).toString();
+        QString issueDescription = q3.value(1).toString();
+
+        // TODO: put image depending on code in RESULT_CODE_COLUMN
+        resultTable->insertRow(resultTable->rowCount());
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(TODO:));
+
+        resultTable->insertRow(resultTable->rowCount());
+        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(TODO:));
+
+        resultTable->insertRow(resultTable->rowCount());
+        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(TODO:));
+    }
 }
