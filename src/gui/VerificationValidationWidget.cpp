@@ -1,5 +1,8 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
+using Result = VerificationValidation::Result;
+using DefaultTests = VerificationValidation::DefaultTests;
+using Parser = VerificationValidation::Parser;
 
 #define SHOW_ERROR_POPUP true
 
@@ -68,15 +71,15 @@ void VerificationValidationWidget::runTests() {
         const QString* terminalOutput = runTest(testCommand);
 
         QString executableName = testCommand.split(' ').first();
-        VerificationValidationResult* result = nullptr;
+        Result* result = nullptr;
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
-            result = VerificationValidationParser::search(testCommand, terminalOutput);
+            result = Parser::search(testCommand, terminalOutput);
 
         // if parser hasn't been implemented, default
         if (!result) {
-            result = new VerificationValidationResult;
-            result->resultCode = VerificationValidationResult::Code::UNPARSEABLE;
+            result = new Result;
+            result->resultCode = Result::Code::UNPARSEABLE;
         }
 
         QString resultCode = QString::number(result->resultCode);
@@ -91,7 +94,7 @@ void VerificationValidationWidget::runTests() {
         dbExec(q2);
 
         // insert issues into db
-        for (VerificationValidationResult::ObjectIssue currentIssue : result->issues) {
+        for (Result::ObjectIssue currentIssue : result->issues) {
             q2 = new QSqlQuery(getDatabase());
             q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
             q2->addBindValue(currentIssue.objectName);
@@ -177,16 +180,16 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     // note: this doesn't repopulate deleted tests, unless all tests deleted
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
-        for (int i = 0; i < VerificationValidationDefaultTests::allTests.size(); i++) {
+        for (int i = 0; i < DefaultTests::allTests.size(); i++) {
             q->prepare("INSERT INTO Tests (testName, testCommand) VALUES (?, ?)");
-            q->addBindValue(VerificationValidationDefaultTests::allTests[i].testName);
-            q->addBindValue(VerificationValidationDefaultTests::allTests[i].testCommand);
+            q->addBindValue(DefaultTests::allTests[i].testName);
+            q->addBindValue(DefaultTests::allTests[i].testCommand);
             dbExec(q);
 
             QString testID = q->lastInsertId().toString();
 
             q->prepare("INSERT INTO TestsSuites (suiteName) VALUES (?)");
-            q->addBindValue(VerificationValidationDefaultTests::allTests[i].suiteName);
+            q->addBindValue(DefaultTests::allTests[i].suiteName);
             dbExec(q);
 
             QString testSuiteID = q->lastInsertId().toString();

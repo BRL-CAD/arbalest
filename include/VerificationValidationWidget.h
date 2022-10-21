@@ -16,7 +16,6 @@
 #include <QMessageBox>
 #include <QHBoxWidget.h>
 #include "VerificationValidation.h"
-#include "VerificationValidationParser.h"
 #include "Utils.h"
 
 class Document;
