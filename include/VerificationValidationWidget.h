@@ -18,10 +18,10 @@
 #include "VerificationValidation.h"
 #include "Utils.h"
 
-#define RESULT_CODE_COLUMN  1
-#define TEST_NAME_COLUMN    2
-#define DESCRIPTION_COLUMN  3
-#define OBJPATH_COLUMN      4
+#define RESULT_CODE_COLUMN  0
+#define TEST_NAME_COLUMN    1
+#define DESCRIPTION_COLUMN  2
+#define OBJPATH_COLUMN      3
 
 class Document;
 class VerificationValidationWidget : public QHBoxWidget {

@@ -208,7 +208,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 void VerificationValidationWidget::setupUI() {
     // setup result table's column headers
     QStringList columnLabels;
-    columnLabels << "   " << "   " << "Test Name" << "Description" << "Object Path";
+    columnLabels << "   " << "Test Name" << "Description" << "Object Path";
     resultTable->setColumnCount(columnLabels.size());
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
@@ -243,69 +243,76 @@ void VerificationValidationWidget::setupUI() {
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
     QSqlQuery* query = new QSqlQuery(command, getDatabase());
     if (showErrorPopup && !query->isActive())
-        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
+        popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + command);
     return query;
 }
 
 void VerificationValidationWidget::dbExec(QSqlQuery*& query, bool showErrorPopup) {
     query->exec();
     if (showErrorPopup && !query->isActive())
-        popup("[Verification & Validation] ERROR: query failed to execute: " + query->lastError().text());
+        popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + query->lastQuery());
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(0, this->width() * 0.025);
-    resultTable->setColumnWidth(1, this->width() * 0.025);
-    resultTable->setColumnWidth(2, this->width() * 0.10);
-    resultTable->setColumnWidth(3, this->width() * 0.60);
-    resultTable->setColumnWidth(4, this->width() * 0.25);
+    resultTable->setColumnWidth(1, this->width() * 0.125);
+    resultTable->setColumnWidth(2, this->width() * 0.60);
+    resultTable->setColumnWidth(3, this->width() * 0.25);
 
     QHBoxWidget::resizeEvent(event);
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
-    QSqlQuery q;
-    q.prepare("SELECT resultCode, terminalOutput FROM TestResults WHERE id = ?");
-    q.addBindValue(testResultID);
-    dbExec(&q);
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT Tests.testName, TestResults.resultCode, TestResults.terminalOutput FROM Tests INNER JOIN TestResults ON Tests.id=TestResults.testID WHERE TestResults.id = ?");
+    q->addBindValue(testResultID);
+    dbExec(q);
 
-    if (!q.next()) {
+    if (!q->next()) {
         popup("Failed to show Test Result #" + testResultID);
         return;
     }
 
-    QString resultCode = q.value(0).toString();
-    QString terminalOutput = q.value(1).toString();
+    QString testName = q->value(0).toString();
+    int resultCode = q->value(1).toInt();
+    QString terminalOutput = q->value(2).toString();
 
-    QSqlQuery q2;
-    q2.prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
-    q2.addBindValue(testResultID);
-    dbExec(&q2, !SHOW_ERROR_POPUP);
+    QSqlQuery* q2 = new QSqlQuery(getDatabase());
+    q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+    q2->addBindValue(testResultID);
+    dbExec(q2, !SHOW_ERROR_POPUP);
 
-    while (q2.next()) {
-        QString objectIssueID = q2.value(0).toString();
+    while (q2->next()) {
+        QString objectIssueID = q2->value(0).toString();
 
-        QSqlQuery q3;
-        q3.prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE objectIssueID = ?");
-        q3.addBindValue(objectIssueID);
-        dbExec(&q3);
+        QSqlQuery* q3 = new QSqlQuery(getDatabase());
+        q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
+        q3->addBindValue(objectIssueID);
+        dbExec(q3);
 
-        if (!q3.next()) {
+        if (!q3->next()) {
             popup("Failed to retrieve Object Issue #" + objectIssueID);
             return;
         }
 
-        QString objectName = q3.value(0).toString();
-        QString issueDescription = q3.value(1).toString();
-
-        // TODO: put image depending on code in RESULT_CODE_COLUMN
-        resultTable->insertRow(resultTable->rowCount());
-        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(TODO:));
+        QString objectName = q3->value(0).toString();
+        QString issueDescription = q3->value(1).toString();
 
         resultTable->insertRow(resultTable->rowCount());
-        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(TODO:));
 
-        resultTable->insertRow(resultTable->rowCount());
-        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(TODO:));
+        QString iconPath = "";
+        if (resultCode == VerificationValidation::Result::Code::UNPARSEABLE)
+            iconPath = ":/icons/unparseable.png";
+        else if (resultCode == VerificationValidation::Result::Code::FAILED)
+            iconPath = ":/icons/error.png";
+        else if (resultCode == VerificationValidation::Result::Code::WARNING)
+            iconPath = ":/icons/warning.png";
+        else if (resultCode == VerificationValidation::Result::Code::PASSED)
+            iconPath = ":/icons/passed.png";
+
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), iconPath));
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
+        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
     }
 }
