@@ -155,6 +155,60 @@ void Parser::searchFinalDefense(Result* r) {
 Result* Parser::lc(const QString* terminalOutput) {
     return nullptr; // TODO: implement
 }
-Result* Parser::gqa(const QString* terminalOutput) {
-    return nullptr; // TODO: implement
+
+Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
+    Result* r = new Result;
+    r->terminalOutput = terminalOutput->trimmed();
+    r->resultCode = Result::Code::PASSED;
+    Test* type = nullptr;
+
+    if (QString::compare(DefaultTests::NO_NULL_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
+    
+    else if (QString::compare(DefaultTests::NO_OVERLAPS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+        type = (Test*) &(DefaultTests::NO_OVERLAPS);
+
+    // search for DB errors (if found, return)
+    if (Parser::gqaDBNotFoundErrors(r)) return r;
+    
+    QStringList lines = r->terminalOutput.split('\n');
+    for (size_t i = 0; i < lines.size(); i++) {
+        // if no usage errors, run specific test
+        if (!Parser::gqaCatchUsageErrors(r, lines[i]) && type)
+            Parser::gqaSpecificTest(r, lines[i], type);
+    }
+
+    // final defense: find any errors / warnings
+    if (r->resultCode == Result::Code::PASSED)
+        Parser::gqaFinalDefense(r);
+
+    return r;
+}
+
+void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* type) {
+    if (currentLine.trimmed().isEmpty()) return;
+    if (currentLine.trimmed().startsWith("Trying initial grid spacing", Qt::CaseInsensitive) == true || 
+        currentLine.trimmed().startsWith("Using grid spacing lower limit", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("Processing with grid spacing", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("overlap tolerance to", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("NOTE: Stopped, grid spacing refined to", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("Trying initial grid spacing", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("Summary", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().startsWith("list Overlaps", Qt::CaseInsensitive) == true) return;
+    
+    QString objectPath1 = currentLine.split(' ')[0];
+    QString objectPath2 = currentLine.split(' ')[1];
+}
+
+
+bool Parser::gqaCatchUsageErrors(Result* r, const QString& currentLine) {
+    return false;
+}
+
+bool Parser::gqaDBNotFoundErrors(Result* r) {
+    return false;
+}
+
+void Parser::gqaFinalDefense(Result* r) {
+
 }

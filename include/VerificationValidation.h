@@ -67,7 +67,12 @@ namespace VerificationValidation {
         static void searchFinalDefense(Result* r);
 
         static Result* lc(const QString* terminalOutput);
-        static Result* gqa(const QString* terminalOutput);
+        
+        static Result* gqa(const QString& cmd, const QString* terminalOutput);
+        static void gqaSpecificTest(Result* r, const QString& currentLine, const Test* type);
+        static bool gqaCatchUsageErrors(Result* r, const QString& currentLine);
+        static bool gqaDBNotFoundErrors(Result* r);
+        static void gqaFinalDefense(Result* r);
     };
 }
 
