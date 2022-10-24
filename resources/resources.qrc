@@ -44,6 +44,11 @@
     <!-- Menu close -->
     <file>icons/quitIcon.png</file>
 
+    <!-- Verification & Validation Dock -->
+    <file>icons/passed.png</file>
+    <file>icons/warning.png</file>
+    <file>icons/error.png</file>
+    <file>icons/unparseable.png</file>
   </qresource>
 
 </RCC>

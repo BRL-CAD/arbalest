@@ -18,6 +18,11 @@
 #include "VerificationValidation.h"
 #include "Utils.h"
 
+#define RESULT_CODE_COLUMN  0
+#define TEST_NAME_COLUMN    1
+#define DESCRIPTION_COLUMN  2
+#define OBJPATH_COLUMN      3
+
 class Document;
 class VerificationValidationWidget : public QHBoxWidget {
     Q_OBJECT
@@ -57,6 +62,9 @@ private:
 
     // events
     void resizeEvent(QResizeEvent* event) override;
+
+    // ui stuff
+    void showResult(const QString& testResultID);
 };
 
 #endif // VVWIDGET_H
