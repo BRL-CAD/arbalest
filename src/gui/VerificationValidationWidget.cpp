@@ -4,7 +4,7 @@
 #define SHOW_ERROR_POPUP true
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
+VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new  QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
     dbConnect();
     dbInitTables();
     dbPopulateDefaults();
@@ -116,8 +116,8 @@ void VerificationValidationWidget::dbInitTables() {
         dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
         dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
-    if (!getDatabase().tables().contains("TestsSuites"))
-        dbExec("CREATE TABLE TestsSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL)");
+    if (!getDatabase().tables().contains("TestSuites"))
+        dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
         dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
 }
@@ -153,14 +153,18 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             dbExec(q);
 
             QString testID = q->lastInsertId().toString();
-
-            q->prepare("INSERT INTO TestsSuites (suiteName) VALUES (?)");
+			
+            q->prepare("INSERT OR IGNORE INTO TestSuites VALUES (NULL, ?)");
             q->addBindValue(defaultTests[i].suiteName);
             dbExec(q);
+			
+			q->exec(QString("SELECT id FROM TestSuites WHERE suiteName = '%1'").arg(defaultTests[i].suiteName));
+			QString testSuiteID;
+			while (q->next()){
+				testSuiteID = q->value(0).toString();
+			}
 
-            QString testSuiteID = q->lastInsertId().toString();
-
-            q->prepare("INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (?,?)");
+            q->prepare("INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (?, ?)");
             q->addBindValue(testID);
             q->addBindValue(testSuiteID);
             dbExec(q);
@@ -168,7 +172,12 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     }
 }
 
+void VerificationValidationWidget::updateUI() {
+	std::cout << "Updating UI" << std::endl;
+}
+
 void VerificationValidationWidget::setupUI() {
+	updateUI();
 	// Branch testDialog
 	std::cout << "Branch: testDialog" << std::endl;
 	
@@ -182,26 +191,108 @@ void VerificationValidationWidget::setupUI() {
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     addWidget(resultTable);
 
-    // populate checkbox list with tests
+    // Get test list from db
+    QSqlDatabase db = getDatabase();
+    QSqlQuery query(db);
+    query.exec("Select testName from Tests ORDER BY id ASC");
     QStringList tests;
-    tests << "test 1" << "test 2" << "test 3" << "test 4";
+    while(query.next()){
+    	tests << query.value(0).toString();
+    }
+    // Insert test list into tests checklist widget
     testList->addItems(tests);
-
     QListWidgetItem* item = 0;
     for (int i = 0; i < testList->count(); i++) {
         item = testList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
     }
-
+    // Tests checklist add to dialog
+   	testList->setMinimumWidth(testList->sizeHintForColumn(0)+40);
+    
+    // Get suite list from db
+    query.exec("Select suiteName from TestSuites ORDER by id ASC");
+    QStringList  testSuites;
+    while(query.next()){
+    	testSuites << query.value(0).toString();
+    }
+    // Insert suite list into suites checklist widget
+    suiteList->addItems(testSuites);
+    for (int i = 0; i < suiteList->count(); i++) {
+        item = suiteList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+    }
+    
+    // Select ALL Suites
+   	QListWidgetItem* suite_sa_item = new QListWidgetItem("Select All Suites");
+   	suite_sa_item->setFlags(suite_sa_item->flags() | Qt::ItemIsUserCheckable);
+   	suite_sa_item->setCheckState(Qt::Unchecked);
+   	suite_sa->addItem(suite_sa_item);
+   	suite_sa->setFixedHeight(20); // Hard coded list height --> change(?
+   	
+   	// Select ALL Tests
+   	QListWidgetItem* test_sa_item = new QListWidgetItem("Select All Tests");
+   	test_sa_item->setFlags(test_sa_item->flags() | Qt::ItemIsUserCheckable);
+   	test_sa_item->setCheckState(Qt::Unchecked);
+   	test_sa->addItem(test_sa_item);
+   	test_sa->setFixedHeight(20); // Hard coded list height --> change(?
+   	
+   	// Popuulate Search bar
+    /*
+    QHBoxLayout *searchBar = new QHBoxLayout();
+    QLineEdit *searchBox = new QLineEdit("");
+    QPushButton *btn = new QPushButton("Search");
+    searchBar->addWidget(searchBox);
+    searchBar->addWidget(btn);
+    
+    dialog->addLayout(searchBar);
+    selectTestsDialog->setLayout(dialog);
+    
+   	dialog->addSpacing(15);
+   	
+   	// Populate Test suite dropdown menu
+   	QComboBox *testSuiteMenu = new QComboBox();
+   	QStringList menu;
+   	menu << "Test Suite 1" << "Test Suite 2" << "Test Suite 3" << "Test Suite 4";
+   	testSuiteMenu->addItems(menu);
+   	testSuiteMenu->setStyleSheet("border: 1px solid black");
+   	selectTestsDialog->layout()->addWidget(testSuiteMenu);
+   	
+   	dialog->addSpacing(15);
+   	*/
+	
     // format and populate Select Tests dialog box
     selectTestsDialog->setModal(true);
     selectTestsDialog->setWindowTitle("Select Tests");
-    selectTestsDialog->setLayout(new QVBoxLayout);
-    selectTestsDialog->layout()->addWidget(testList);
-
+    QGridLayout* grid = new QGridLayout();
+	
+    QGroupBox* groupbox1 = new QGroupBox("Select Test Categories");
+    QVBoxLayout* l_vbox = new QVBoxLayout();
+    l_vbox->addWidget(suite_sa);
+    l_vbox->addSpacing(10);
+    l_vbox->addWidget(suiteList);
+    groupbox1->setLayout(l_vbox);
+    
+    QGroupBox* groupbox2 = new QGroupBox("Test List");
+    QVBoxLayout* r_vbox = new QVBoxLayout();
+    r_vbox->addWidget(test_sa);
+    r_vbox->addSpacing(10);
+    r_vbox->addWidget(testList);
+    groupbox2->setLayout(r_vbox);
+    
+    QGroupBox* groupbox3 = new QGroupBox();
     QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    selectTestsDialog->layout()->addWidget(buttonOptions);
+    QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addWidget(buttonOptions);
+    groupbox3->setLayout(hbox);
+    
+    grid->addWidget(groupbox1, 0, 0);
+    grid->addWidget(groupbox2, 0, 1);
+    grid->addWidget(groupbox3, 1, 0, 1, 2);
+    selectTestsDialog->setLayout(grid);
+	
+    connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateUI()));
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
 }

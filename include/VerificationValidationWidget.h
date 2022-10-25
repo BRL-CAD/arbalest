@@ -33,7 +33,8 @@ public:
     QString* runTest(const QString& cmd);
     void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
-
+private slots:
+	void updateUI();
 private:
     // widget-specific data
     Document* document;
@@ -44,6 +45,9 @@ private:
     // user interface data
     QTableWidget* resultTable;
     QListWidget* testList;
+    QListWidget* suiteList;
+    QListWidget* test_sa;
+    QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
 
@@ -66,10 +70,10 @@ private:
     // constant defaults
     const std::vector<VerificationValidationTest> defaultTests = {
         {"No mis-matched dupliate IDs", "lc -m all", "General"},
-        {"No nested regions", "search /all -type region -below -type region", "General"},
+        {"No nested regions", "search /all -type region -below -type region", "File"},
         {"No empty combos", "search /all -nnodes 0", "General"},
         {"No solids outside of regions", "search /all ! -below -type region -type shape", "General"},
-        {"All BoTs are volume mode (should return nothing)", "search all -type bot ! -type volume", "General"},
+        {"All BoTs are volume mode (should return nothing)", "search all -type bot ! -type volume", "Analysis"},
         {"No BoTs are left hand orientation", "search all -type bot -param orient=lh", "General"}, // TODO: this command can run faster if use unix
         {"All regions have material & LOS", "search /all -type region ! -attr aircode ! -attr material_id", "General"}, // TODO: same category of test, different test
         {"All regions have material & LOS", "search /all -type region ! -attr aircode ! -attr los", "General"}, // TODO: same category of test, different test
@@ -78,11 +82,11 @@ private:
         // TODO: missing "BoTs are valid"
         // TODO: missing "Air does not stick out"
         {"Overlaps cleaned to 4mm gridsize with 0.3mm tolerance", "gqa -Ao -g32mm,4mm -t0.3mm all", "General"},
-        {"Duplicate ID check", "lc -d all", "General"},
-        {"No matrices", "search /all ! -matrix IDN", "General"},
+        {"Duplicate ID check", "lc -d all", "Gaming"},
+        {"No matrices", "search /all ! -matrix IDN", "Gaming"},
         // TODO: missing "Title"
         // TODO: missing "Ground plane at z=0"
-        {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "General"}
+        {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "File"}
     };
 };
 
