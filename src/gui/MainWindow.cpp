@@ -388,6 +388,16 @@ void MainWindow::prepareUi() {
     });
     editMenu->addAction(relativeRotateAct);
 
+    QIcon selectObjectActIcon;
+    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")), QIcon::Normal);
+    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-Menu")), QIcon::Active);
+    QAction* selectObjectAct = new QAction(selectObjectActIcon, tr("Select object"), this);
+    selectObjectAct->setStatusTip(tr("Select object."));
+    connect(selectObjectAct, &QAction::triggered, this, [this]() {
+        if (activeDocumentId == -1) return;
+    });
+    editMenu->addAction(selectObjectAct);
+
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
@@ -722,6 +732,17 @@ void MainWindow::prepareUi() {
     toggleGridIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-IconView")), QIcon::Normal);
     toggleGrid->setIcon(toggleGridIcon);
     mainTabBarCornerWidget->addWidget(toggleGrid);
+
+    mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
+
+    QToolButton* selectObjectButton = new QToolButton(menuTitleBar);
+    selectObjectButton->setDefaultAction(selectObjectAct);
+    selectObjectButton->setObjectName("toolbarButton");
+    QIcon selectObjectButtonIcon;
+    selectObjectButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-IconSelectObject")), QIcon::Normal);
+    selectObjectButton->setIcon(selectObjectButtonIcon);
+    selectObjectButton->setToolTip("Select object");
+    mainTabBarCornerWidget->addWidget(selectObjectButton);
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 

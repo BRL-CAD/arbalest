@@ -2,6 +2,7 @@ $Color-Main                             : #3b3b3b;  // Used as the main backgrou
 $Color-MainMenu                         : #3b3b3b;  //
 $Color-Menu                             : #3b3b3b;  //
 $Color-MenuIconFile                     : #586fad;  // Used as color for File menu items
+$Color-MenuIconEdit                     : #000000;  // Used as color for Edit menu items
 $Color-MenuIconView                     : #25a2c1;  // Used as color for View menu items
 $Color-MenuIconRaytrace                 : #d61d32;  // Used as color for Raytrace item
 $Color-MenuIconQuit                     : #d10f1c;  // Used as color for Quit item
@@ -33,6 +34,7 @@ $Color-ColorText                        : #9fc1ff;  // for colorful text
 $Color-IconFile                         : #7b14e3;
 $Color-IconView                         : #25a2c1;
 $Color-IconRaytrace                     : #d61d32;
+$Color-IconSelectObject                 : #000000;
 $Color-Cell                             : #606060;
 $Color-WindowTitleButtons               : #ffffff;
 
