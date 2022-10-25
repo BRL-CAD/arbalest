@@ -186,7 +186,6 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
 }
 
 void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* type) {
-    if (currentLine.trimmed().isEmpty()) return;
     if (currentLine.trimmed().startsWith("Trying initial grid spacing", Qt::CaseInsensitive) == true || 
         currentLine.trimmed().startsWith("Using grid spacing lower limit", Qt::CaseInsensitive) == true ||
         currentLine.trimmed().startsWith("Processing with grid spacing", Qt::CaseInsensitive) == true ||
@@ -194,10 +193,38 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
         currentLine.trimmed().startsWith("NOTE: Stopped, grid spacing refined to", Qt::CaseInsensitive) == true ||
         currentLine.trimmed().startsWith("Trying initial grid spacing", Qt::CaseInsensitive) == true ||
         currentLine.trimmed().startsWith("Summary", Qt::CaseInsensitive) == true ||
-        currentLine.trimmed().startsWith("list Overlaps", Qt::CaseInsensitive) == true) return;
+        currentLine.trimmed().startsWith("list Overlaps", Qt::CaseInsensitive) == true ||
+        currentLine.trimmed().isEmpty()) return;
     
-    QString objectPath1 = currentLine.split(' ')[0];
-    QString objectPath2 = currentLine.split(' ')[1];
+    if(type == &DefaultTests::NO_NULL_REGIONS)
+    {
+        QString objectPath1 = currentLine.split(' ')[0];
+        QString objectName1 = objectPath1.mid(objectPath1.lastIndexOf('/'), objectPath1.size() - objectPath1.lastIndexOf('/'));
+
+        if(currentLine.contains("was not hit"))
+        {
+            r->resultCode = Result::Code::FAILED;
+            r->issues.push_back({objectName1, "Was not hit"});
+        }
+    }
+
+    if(type == &DefaultTests::NO_OVERLAPS)
+    {
+        if(currentLine.contains("was not hit")) return;
+
+        r->resultCode = Result::Code::WARNING;
+        // [NOTE] Have not checked this yet, assuming similar parse
+        QString objectPath1 = currentLine.split(' ')[0];
+        QString objectName1 = objectPath1.mid(objectPath1.lastIndexOf('/'), objectPath1.size() - objectPath1.lastIndexOf('/'));
+        QString objectPath2 = currentLine.split(' ')[1];
+        QString objectName2 = objectPath1.mid(objectPath2.lastIndexOf('/'), objectPath2.size() - objectPath2.lastIndexOf('/'));
+        QString countString = currentLine.split(' ')[2];
+        QString distanceString = currentLine.split(' ')[3];
+        QString locationString = currentLine.mid(currentLine.indexOf('('), currentLine.size() - currentLine.indexOf('('));
+
+        r->issues.push_back({objectName1, "Overlaps with '" + objectName2 + "' " + countString});
+    }
+    
 }
 
 
@@ -210,5 +237,5 @@ bool Parser::gqaDBNotFoundErrors(Result* r) {
 }
 
 void Parser::gqaFinalDefense(Result* r) {
-
+    
 }
