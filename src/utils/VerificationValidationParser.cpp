@@ -160,7 +160,7 @@ Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
 	Result final;
 	final.terminalOutput = *terminalOutput;
 	final.cmd = *cmd;
-	Result* ptr_final = final;
+	Result* ptr_final = &final;
 
 	/* Convert terminal output and cmd into string for ease of parsing */
 	string s_terminalOutput = terminalOutput->toStdString();
@@ -168,7 +168,7 @@ Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
 
 	/* Check if length of list is zero, aka does it warnings or errors*/
 	if(stoi(s_terminalOutput.substr(s_terminalOutput.find(":") + 1)) == 0) { // Contains no issues
-		final.resultCode = PASSED;
+		final.resultCode = Result::PASSED;
 		return ptr_final;
 	}
 
@@ -176,33 +176,33 @@ Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
 	string issueDescription;
 	/* Is it an error or warning? */
 	if(s_cmd.find("-d") != string::npos) { // This is a Warning
-		final.resultCode = WARNING;
+		final.resultCode = Result::WARNING;
 		issueDescription = "Contains duplicated ID's";
 
 	}
 	else if(s_cmd.find("-m") != string::npos) { // This is an Error
-		final.resultCode = FAILURE; 
+		final.resultCode = Result::FAILED; 
 		issueDescription = "Contains mismatched ID's";
 	}
 	else { // If this is neither, assuming it is unparsable
-		final.resultCode = UNPARSABLE;
+		final.resultCode = Result::UNPARSEABLE;
 		return ptr_final;
 	}
 
 	/* Start adding the issues to list */
-	std::list<ObjectIssue> temp_issues; // List for issues
+	std::list<Result::ObjectIssue> temp_issues; // List for issues
 	string temp; // Variable used for storing line of entry
 	istringstream iss(s_terminalOutput);
 	getline(iss, temp); // Gets rid of length line
 	getline(iss, temp); // Gets rid of column description
-	
+	int count;	
 	/* Parse through the results */ 
 	for(int i = 0; i < stoi(s_terminalOutput.substr(s_terminalOutput.find(":")+1)); i++) {
 		getline(iss, temp);
 		istringstream ess(temp);
 		count = 5; // This is where the name of object is stored
 		while(count-- > 0 && (ess >> temp)); // Get to the name of object
-		ObjectIssue tempObject;
+		Result::ObjectIssue tempObject;
 		tempObject.objectName = QString::fromStdString(temp.substr(0, temp.find(".")));
 		tempObject.issueDescription = QString::fromStdString(issueDescription);
 		temp_issues.push_back(tempObject);
