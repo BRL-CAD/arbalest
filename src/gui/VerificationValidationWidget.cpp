@@ -1,5 +1,6 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
+#include <string>
 
 #define SHOW_ERROR_POPUP true
 // TODO: if checksum doesn't match current test file, notify user
@@ -172,12 +173,61 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     }
 }
 
-void VerificationValidationWidget::updateUI() {
-	std::cout << "Updating UI" << std::endl;
+void VerificationValidationWidget::updateSuiteSelectAll(QListWidgetItem* sa_option) {
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < suiteList->count(); i++) {
+		item = suiteList->item(i);
+		if(sa_option->checkState()){
+			item->setCheckState(Qt::Checked);
+		} else {
+			item->setCheckState(Qt::Unchecked);
+		}
+	}
+}
+
+void VerificationValidationWidget::updateTestSelectAll(QListWidgetItem* sa_option) {
+	QListWidgetItem* item = 0;
+    for (int i = 0; i < testList->count(); i++) {
+		item = testList->item(i);
+		if(sa_option->checkState()){
+			item->setCheckState(Qt::Checked);
+		} else {
+			item->setCheckState(Qt::Unchecked);
+		}
+	}
+}
+
+void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_clicked) {
+	testList->clear();
+	
+	QSqlDatabase db = getDatabase();
+    QSqlQuery q1(db);
+	
+	QListWidgetItem* suite_item = 0;
+    for (int i = 0; i < suiteList->count(); i++) {
+		suite_item = suiteList->item(i);
+		if(suite_item->checkState()){
+			int suiteID = suiteList->row(suite_item)+1;
+			q1.exec(QString("Select testName from Tests where id IN (Select testID from TestsInSuite Where testSuiteID = %1)").arg(suiteID));
+			QStringList tests;
+			while(q1.next()){
+				std::cout << q1.value(0).toString().toStdString() << std::endl;
+				tests << q1.value(0).toString();
+			}
+			
+			testList->addItems(tests);
+		}
+	}
+	
+	QListWidgetItem* item = 0;
+	for (int i = 0; i < testList->count(); i++) {
+		item = testList->item(i);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(Qt::Unchecked);
+	}
 }
 
 void VerificationValidationWidget::setupUI() {
-	updateUI();
 	// Branch testDialog
 	std::cout << "Branch: testDialog" << std::endl;
 	
@@ -292,7 +342,11 @@ void VerificationValidationWidget::setupUI() {
     grid->addWidget(groupbox3, 1, 0, 1, 2);
     selectTestsDialog->setLayout(grid);
 	
-    connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateUI()));
+    connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
+    connect(test_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestSelectAll(QListWidgetItem *)));
+    
+    connect(suiteList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestListWidget(QListWidgetItem *)));
+    
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
 }

@@ -34,7 +34,9 @@ public:
     void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 private slots:
-	void updateUI();
+	void updateSuiteSelectAll(QListWidgetItem*);
+	void updateTestSelectAll(QListWidgetItem*);
+	void updateTestListWidget(QListWidgetItem*);
 private:
     // widget-specific data
     Document* document;
