@@ -31,6 +31,7 @@ namespace VerificationValidation {
         };
 
         QString terminalOutput;
+	QString cmd;
         Code resultCode;
         std::list<ObjectIssue> issues; // used list for O(1) push_back, O(N) access; since need to display all issues in GUI anyways
     };
@@ -66,7 +67,7 @@ namespace VerificationValidation {
         static void searchDBNotFoundErrors(Result* r, const QString& currentLine);
         static void searchFinalDefense(Result* r);
 
-        static Result* lc(const QString* terminalOutput);
+        static Result* lc(const QString* cmd, const QString* terminalOutput);
         static Result* gqa(const QString* terminalOutput);
     };
 }
