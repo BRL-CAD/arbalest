@@ -211,7 +211,6 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
 			q1.exec(QString("Select testName from Tests where id IN (Select testID from TestsInSuite Where testSuiteID = %1)").arg(suiteID));
 			QStringList tests;
 			while(q1.next()){
-				std::cout << q1.value(0).toString().toStdString() << std::endl;
 				tests << q1.value(0).toString();
 			}
 			
