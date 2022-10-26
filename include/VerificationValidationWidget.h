@@ -37,6 +37,7 @@ private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
+    void setupDetailedResult(int row, int  column);
 private:
     // widget-specific data
     Document* document;

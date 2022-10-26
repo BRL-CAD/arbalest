@@ -195,7 +195,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             q->addBindValue(DefaultTests::allTests[i].suiteName);
             dbExec(q);
 			
-			q->exec(QString("SELECT id FROM TestSuites WHERE suiteName = '%1'").arg(defaultTests[i].suiteName));
+			q->exec(QString("SELECT id FROM TestSuites WHERE suiteName = '%1'").arg(DefaultTests::allTests[i].suiteName));
 			QString testSuiteID;
 			while (q->next()){
 				testSuiteID = q->value(0).toString();
@@ -408,6 +408,11 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     QHBoxWidget::resizeEvent(event);
 }
 
+void VerificationValidationWidget::setupDetailedResult(int row, int column) {
+    std::cout << row << std::endl;
+    std::cout << column << std::endl;
+}
+
 void VerificationValidationWidget::showResult(const QString& testResultID) {
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT Tests.testName, TestResults.resultCode, TestResults.terminalOutput FROM Tests INNER JOIN TestResults ON Tests.id=TestResults.testID WHERE TestResults.id = ?");
@@ -456,9 +461,22 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         else if (resultCode == VerificationValidation::Result::Code::PASSED)
             iconPath = ":/icons/passed.png";
 
-        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), iconPath));
+        // Change to hide icon image path from showing
+        QTableWidgetItem* icon_item = new QTableWidgetItem;
+        QIcon icon(iconPath);
+        icon_item->setIcon(icon);
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
+
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
         resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+
+        // Only select rows, disable edit
+        resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+        // Double click event signal trigger
+        //connect(resultTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(setupDetailedResult()));
+        connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
     }
 }
