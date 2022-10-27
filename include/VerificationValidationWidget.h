@@ -31,13 +31,20 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString* runTest(const QString& cmd);
-    void runTests();
+    //void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
+    //QDialog* getDialog() {return selectTestsDialog;};
+
+public slots:
+    void runTests();
+
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
     void setupDetailedResult(int row, int  column);
+    void searchTests(const QString &input);
+
 private:
     // widget-specific data
     Document* document;
@@ -51,6 +58,7 @@ private:
     QListWidget* suiteList;
     QListWidget* test_sa;
     QListWidget* suite_sa;
+    QLineEdit* searchBox;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
 
