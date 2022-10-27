@@ -42,8 +42,10 @@ private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
+    void testListSelection(QListWidgetItem*);
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
+    void userInputDialogUI(QListWidgetItem*);
 
 private:
     // widget-specific data

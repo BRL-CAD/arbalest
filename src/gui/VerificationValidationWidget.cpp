@@ -67,13 +67,16 @@ void VerificationValidationWidget::runTests() {
             selected_tests.push_back(item);
         }
     }
-    
+
     // Run tests
-    size_t testsRun = 0;
     int totalTests = selected_tests.count();
-    QString status = "Finished running " + QString::number(++testsRun) + "/" + QString(totalTests) + " tests";
+    if(totalTests ==  0){
+        return;
+    }
+
+    QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
-        statusBar->showMessage(status);
+        statusBar->showMessage(status.arg(i+1).arg(totalTests));
         int testID = testList->row(selected_tests[i]) + 1;
         QString testCommand = selected_tests[i]->toolTip();
         const QString* terminalOutput = runTest(testCommand);
@@ -152,6 +155,7 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
+        // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE, hasValArgs BOOL NOT NULL, Category TEXT NOT NULL)");
         dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
         dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
@@ -163,6 +167,8 @@ void VerificationValidationWidget::dbInitTables() {
         dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
         dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
+    // if (!getDatabase().tables().contains("TestArgs"))
+    //     dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
 
 void VerificationValidationWidget::dbPopulateDefaults() {
@@ -226,11 +232,6 @@ void VerificationValidationWidget::updateSuiteSelectAll(QListWidgetItem* sa_opti
 		}
         updateTestListWidget(item);
 	}
-    // if(sa_option->checkState()){
-    //     sa_option->setText("Unselect All Suites");
-    // } else {
-    //     sa_option->setText("Select All Suites");
-    // }
 }
 
 void VerificationValidationWidget::updateTestSelectAll(QListWidgetItem* sa_option) {
@@ -243,11 +244,6 @@ void VerificationValidationWidget::updateTestSelectAll(QListWidgetItem* sa_optio
 			item->setCheckState(Qt::Unchecked);
 		}
 	}
-    // if(sa_option->checkState()){
-    //     sa_option->setText("Unselect All Tests");
-    // } else {
-    //     sa_option->setText("Select All Tests");
-    // }
 }
 
 void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_clicked) {
@@ -270,7 +266,6 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
 
     if(!suite_clicked->checkState()){
         suite_sa->item(0)->setCheckState(Qt::Unchecked);
-        // suite_sa->item(0)->setText("Select All Tests");
     }
 }
 
@@ -286,7 +281,34 @@ void VerificationValidationWidget::searchTests(const QString &input)  {
     }
 }
 
+void VerificationValidationWidget::testListSelection(QListWidgetItem* test_clicked) {
+    if(!test_clicked->checkState()){
+        test_sa->item(0)->setCheckState(Qt::Unchecked);
+        QSqlDatabase db = getDatabase();
+        QSqlQuery q(db);
+        QString q_str = "Select testSuiteID from TestsInSuite Where testID = (SELECT id FROM Tests WHERE testName = '%1')";
+        q_str = q_str.arg(test_clicked->text());
+        q.exec(q_str);
+        while(q.next()){
+            QListWidgetItem* suite = suiteList->item(q.value(0).toInt()-1);
+            if(suite->checkState()){
+                suite->setCheckState(Qt::Unchecked);
+            }
+        }
+    }
+}
+
+void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
+    std::cout << test->text().toStdString() << std::endl;
+    QDialog* userInputDialog = new QDialog();
+    userInputDialog->exec();
+}
+
 void VerificationValidationWidget::setupUI() {
+    // TODO: allow input
+    // TODO: select tops
+    // TODO: add test categories in test lists
+
 	// Branch testDialog
 	std::cout << "Branch: testDialog" << std::endl;
 	
@@ -314,11 +336,16 @@ void VerificationValidationWidget::setupUI() {
     // Insert test list into tests checklist widget
     testList->addItems(tests);
     QListWidgetItem* item = 0;
+    QIcon edit_icon(":/icons/editIcon.png");
     for (int i = 0; i < testList->count(); i++) {
         item = testList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
         item->setToolTip(testCmds[i]);
+
+        // TODO: change to gqa cmd only
+        item->setIcon(edit_icon);
+        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
     }
 
     // Tests checklist add to dialog
@@ -332,10 +359,12 @@ void VerificationValidationWidget::setupUI() {
     }
     // Insert suite list into suites checklist widget
     suiteList->addItems(testSuites);
+    
     for (int i = 0; i < suiteList->count(); i++) {
         item = suiteList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
+        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
     }
     
     // Select ALL Suites
@@ -343,15 +372,17 @@ void VerificationValidationWidget::setupUI() {
    	suite_sa_item->setFlags(suite_sa_item->flags() | Qt::ItemIsUserCheckable);
    	suite_sa_item->setCheckState(Qt::Unchecked);
    	suite_sa->addItem(suite_sa_item);
-   	suite_sa->setFixedHeight(20); // Hard coded list height --> change(?
+   	suite_sa->setFixedHeight(20);
+    suite_sa_item->setFlags(suite_sa_item->flags() &  ~Qt::ItemIsSelectable);
    	
    	// Select ALL Tests
    	QListWidgetItem* test_sa_item = new QListWidgetItem("Select All Tests");
    	test_sa_item->setFlags(test_sa_item->flags() | Qt::ItemIsUserCheckable);
    	test_sa_item->setCheckState(Qt::Unchecked);
    	test_sa->addItem(test_sa_item);
-   	test_sa->setFixedHeight(20); // Hard coded list height --> change(?
-   	
+   	test_sa->setFixedHeight(20);
+   	test_sa_item->setFlags(test_sa_item->flags() &  ~Qt::ItemIsSelectable);
+
    	// Popuulate Search bar
     QHBoxLayout* searchBar = new QHBoxLayout();
     QLabel* searchLabel = new QLabel("Search: ");
@@ -397,9 +428,14 @@ void VerificationValidationWidget::setupUI() {
     
     // Suite select signal connect function
     connect(suiteList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestListWidget(QListWidgetItem *)));
+    // Test select signal connect function
+    connect(testList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(testListSelection(QListWidgetItem*)));
 
     // Search button pressed signal select function
     connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests(const QString &)));
+
+    // Test input for gqa
+    connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
     
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
