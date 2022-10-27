@@ -176,7 +176,10 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
     for (size_t i = 0; i < lines.size(); i++) {
         // if no usage errors, run specific test
         if(lines[i].startsWith("list Overlaps"))
+        {
             startParsing = true;
+            continue;
+        }
         if (!Parser::gqaCatchUsageErrors(r, lines[i]) && type && startParsing)
             Parser::gqaSpecificTest(r, lines[i], type);
     }
@@ -195,8 +198,9 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
     {
         QString objectPath1 = currentLine.split(' ')[0];
         QString objectName1 = objectPath1;
-        if(objectPath1.indexOf('/') != -1)
-            objectName1 = objectPath1.mid(objectPath1.lastIndexOf('/'), objectPath1.size() - objectPath1.lastIndexOf('/'));
+        int slashIdx1 = objectPath1.lastIndexOf('/');
+        if(slashIdx1 != -1)
+            objectName1 = objectPath1.mid(slashIdx1 + 1, objectPath1.size() - slashIdx1 - 1);
 
         if(currentLine.contains("was not hit"))
         {
@@ -210,22 +214,24 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
         if(currentLine.contains("was not hit")) return;
 
         r->resultCode = Result::Code::WARNING;
-        // [NOTE] Have not checked this yet, assuming similar parse
         QStringList splitLine = currentLine.split(' ');
 
         QString objectPath1 = splitLine[0];
         QString objectName1 = objectPath1;
-        if(objectPath1.indexOf('/') != -1)
-            objectName1 = objectPath1.mid(objectPath1.lastIndexOf('/'), objectPath1.size() - objectPath1.lastIndexOf('/'));
+        int slashIdx1 = objectPath1.lastIndexOf('/');
+        if(slashIdx1 != -1)
+            objectName1 = objectPath1.mid(slashIdx1 + 1, objectPath1.size() - slashIdx1 - 1);
 
         QString objectPath2 = splitLine[1];
         QString objectName2 = objectPath2;
-        if(objectPath2.indexOf('/') != -1)
-            objectName2 = objectPath2.mid(objectPath2.lastIndexOf('/'), objectPath2.size() - objectPath2.lastIndexOf('/'));
+        int slashIdx2 = objectPath2.lastIndexOf('/');
+        if(slashIdx2 != -1)
+            objectName2 = objectPath2.mid(slashIdx2 + 1, objectPath2.size() - slashIdx2 - 1);
 
         QString countString = splitLine[2];
         QString distanceString = splitLine[3];
-        QString locationString = currentLine.mid(currentLine.indexOf('('), currentLine.size() - currentLine.indexOf('('));
+        int parenthIdx = currentLine.indexOf('(');
+        QString locationString = currentLine.mid(parenthIdx + 1, currentLine.size() - parenthIdx - 1);
 
         r->issues.push_back({objectName1, "Overlaps with '" + objectName2 + "' " + countString});
     }
