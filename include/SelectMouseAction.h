@@ -24,14 +24,16 @@
 
 #include "MouseAction.h"
 
-
 class SelectMouseAction : public MouseAction
 {
 public:
     explicit SelectMouseAction(DisplayGrid* parent = nullptr, Display* watched = nullptr);
     virtual ~SelectMouseAction();
 
+    QString getSelected() const;
+
 protected:
+    QString m_selected;
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
 };
 

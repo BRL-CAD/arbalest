@@ -30,7 +30,35 @@ SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
 
 SelectMouseAction::~SelectMouseAction() {}
 
+QString SelectMouseAction::getSelected() const {
+    return m_selected;
+}
+
 bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
-    // Will add later
-    return false;
+    bool ret = false;
+    
+    if (watched == m_watched) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+
+            if (mouseEvent->button() == Qt::LeftButton) {
+                const int x = mouseEvent->x();
+                const int y = mouseEvent->y();
+
+                // Shoot a ray
+
+                // Check if a ray intersects or hit
+
+                // Dynamically cast BRLCAD::ConstDatabase to BRLCAD::ConstDatabase::Hit and return region Name
+
+                emit Done(this);
+
+                ret = true;
+            }
+
+            ret = false;
+        }
+    }
+
+    return ret;
 }
