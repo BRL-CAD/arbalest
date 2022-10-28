@@ -49,8 +49,7 @@ private:
     QStatusBar* statusBar;
 
     // init functions
-    QString defaultDBName = "tmpfile.atr";
-    void dbConnect(const QString dbName = defaultDBName);
+    void dbConnect(QString dbName);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();

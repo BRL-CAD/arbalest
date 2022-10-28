@@ -568,12 +568,12 @@ void MainWindow::prepareUi() {
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
     QAction* verifyValidateOpenResultsAct = new QAction(tr("Open result file"), this);
-    verifyValidateOpenResultsAct->setIcon();
+    // verifyValidateOpenResultsAct->setIcon(); // TODO: find an icon for opening
     verifyValidateOpenResultsAct->setStatusTip(tr("Opens and shows verification & validation test results"));
     connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
         const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
-        documents[activeDocumentId]->getVerificationValidationWidget()->loadATRFile(filepath);
+        documents[activeDocumentId]->getVerificationValidationWidget()->loadATRFile(filePath);
     });
 
 

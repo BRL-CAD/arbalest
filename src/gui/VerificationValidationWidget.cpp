@@ -9,7 +9,8 @@ using Parser = VerificationValidation::Parser;
 // TODO: if checksum doesn't match current test file, notify user
 
 VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
-    dbConnect();
+    QString dbName = "untitled" + QString::number(document->getDocumentId()) + ".atr";
+    try { dbConnect(dbName); } catch (std::runtime_error& e) { popup(e.what()); }
     dbInitTables();
     dbPopulateDefaults();
     setupUI();
@@ -123,24 +124,19 @@ void VerificationValidationWidget::loadATRFile(const QString& filepath) {
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbName) {
-    if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
+    if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
-        return;
-    }
 
     this->dbName = dbName;
-    if (this->dbName == defaultDBName && document->getFilePath()) 
-        this->dbName = document->getFilePath()->split("/").last() + ".atr";
+    QString* fp = document->getFilePath();
+    if (fp) this->dbName = fp->split("/").last() + ".atr";
     dbConnectionName = this->dbName + "-connection";
 
     // check if SQL connection already open
     QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
     // TODO: instead of throwing + popping up error, open correct document
-    if (db.isOpen())
-        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
+    if (db.isOpen()) throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
     
-    //// TODO: opening multiple new files crashes
-    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
     db.setDatabaseName(this->dbName);
 
