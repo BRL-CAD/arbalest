@@ -554,19 +554,28 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
-    QMenu* verificationValidation = menuTitleBar->addMenu(tr("&Verify/Validate"));
-    QAction* verificationValidationAct = new QAction(tr("Verify and validate current viewport"), this);
-    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
-    verificationValidationAct->setStatusTip(tr("Verify and validate current viewport"));
-    verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
-    connect(verificationValidationAct, &QAction::triggered, this, [this](){
+    QMenu* verifyValidateMenu = menuTitleBar->addMenu(tr("&Verify/Validate"));
+    QAction* verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
+    verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verifyValidateViewportAct->setStatusTip(tr("Verify and validate current viewport"));
+    verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
+    connect(verifyValidateViewportAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
         documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
         documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
         objectVerificationValidationDockable->setVisible(true);
         documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
     });
-    verificationValidation->addAction(verificationValidationAct);
+    verifyValidateMenu->addAction(verifyValidateViewportAct);
+    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open result file"), this);
+    verifyValidateOpenResultsAct->setIcon();
+    verifyValidateOpenResultsAct->setStatusTip(tr("Opens and shows verification & validation test results"));
+    connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
+        documents[activeDocumentId]->getVerificationValidationWidget()->loadATRFile(filepath);
+    });
+
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -737,7 +746,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* verifyValidate = new QToolButton(menuTitleBar);
-    verifyValidate->setDefaultAction(verificationValidationAct);
+    verifyValidate->setDefaultAction(verifyValidateViewportAct);
     verifyValidate->setObjectName("toolbarButton");
     QIcon verifyValidateIcon;
     verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);

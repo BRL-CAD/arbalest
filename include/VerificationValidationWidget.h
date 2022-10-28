@@ -32,6 +32,7 @@ public:
     void showSelectTests();
     QString* runTest(const QString& cmd);
     void runTests();
+    void loadATRFile(const QString& filepath);
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
 private:
@@ -48,7 +49,8 @@ private:
     QStatusBar* statusBar;
 
     // init functions
-    void dbConnect();
+    QString defaultDBName = "tmpfile.atr";
+    void dbConnect(const QString dbName = defaultDBName);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();

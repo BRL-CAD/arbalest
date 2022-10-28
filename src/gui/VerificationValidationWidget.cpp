@@ -117,15 +117,21 @@ void VerificationValidationWidget::runTests() {
     }
 }
 
-void VerificationValidationWidget::dbConnect() {
+void VerificationValidationWidget::loadATRFile(const QString& filepath) {
+    dbConnect(filepath);
+
+}
+
+void VerificationValidationWidget::dbConnect(const QString dbName) {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
         return;
     }
 
-    dbName = "tmpfile.sqlite"; 
-    if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
-    dbConnectionName = dbName + "-connection";
+    this->dbName = dbName;
+    if (this->dbName == defaultDBName && document->getFilePath()) 
+        this->dbName = document->getFilePath()->split("/").last() + ".atr";
+    dbConnectionName = this->dbName + "-connection";
 
     // check if SQL connection already open
     QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
@@ -136,7 +142,7 @@ void VerificationValidationWidget::dbConnect() {
     //// TODO: opening multiple new files crashes
     //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-    db.setDatabaseName(dbName);
+    db.setDatabaseName(this->dbName);
 
     if (!db.open() || !db.isOpen())
         throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
@@ -166,12 +172,12 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
     q->prepare("SELECT id FROM Model WHERE filePath=?");
-    q->addBindValue(dbName);
+    q->addBindValue(this->dbName);
     dbExec(q, !SHOW_ERROR_POPUP);
     if (!q->next()) {
         q = new QSqlQuery(getDatabase());
         q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
-        q->addBindValue(dbName);
+        q->addBindValue(this->dbName);
         q->addBindValue(md5Checksum);
         dbExec(q);   
         modelID = q->lastInsertId().toString();
