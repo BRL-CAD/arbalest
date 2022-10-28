@@ -366,7 +366,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     QLineEdit* input2 = new QLineEdit();
     
     formLayout->addRow(QString("Input 1:  "), input1);
-    formLayout->addRow(QString("Input 1:  "), input2);
+    formLayout->addRow(QString("Input 2:  "), input2);
     
     vLayout->addLayout(formLayout);
     

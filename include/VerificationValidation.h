@@ -9,11 +9,27 @@
 #include <QString>
 
 namespace VerificationValidation {
+    class Arg {
+    public:
+        QString argument;
+        bool isVariable;
+        QString defaultValue;
+
+        Arg(QString argument, bool isVariable, QString defaultValue){
+            this->argument = argument;
+            this->isVariable = isVariable;
+            this->defaultValue = defaultValue;
+        }
+    };
+
     class Test {
     public:
         QString testName;
         QString testCommand;
         QString suiteName;
+        QString category;
+        bool hasVariable;
+        std::list<Arg> ArgList;
     };
 
     class Result {
@@ -51,6 +67,7 @@ namespace VerificationValidation {
         const static VerificationValidation::Test NO_MATRICES;
         const static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
         const static std::vector<VerificationValidation::Test> allTests;
+
         // TODO: missing "No errors when top level drawn"
         // TODO: missing "BoTs are valid"
         // TODO: missing "Air does not stick out"
