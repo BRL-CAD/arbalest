@@ -35,6 +35,10 @@ public:
         return &documents;
     }
 
+    Dockable *getVerificationValidationDockable() const {
+        return objectVerificationValidationDockable;
+    }
+
     const int statusBarShortMessageDuration = 7000;
 
 private:

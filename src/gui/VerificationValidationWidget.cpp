@@ -9,12 +9,20 @@ using Parser = VerificationValidation::Parser;
 
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow) {
+VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION) {
     QString dbName = "untitled" + QString::number(document->getDocumentId()) + ".atr";
     try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
     setupUI();
+
+    if (msgBoxRes == OPEN) {
+        showAllResults();
+        msgBoxRes = NO_SELECTION;
+    } else if (msgBoxRes == DISCARD) {
+        resultTable->clear();
+        setupUI();
+    }
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
@@ -120,8 +128,9 @@ void VerificationValidationWidget::runTests() {
 }
 
 void VerificationValidationWidget::loadATRFile(const QString& filepath) {
-    dbConnect(filepath);
-
+    // TODO: open associated .g file; if doesn't exist, ask user to find it
+    // TODO: load results into table
+    // TODO: put more thought into how you want user to open and stuff
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbName) {
@@ -131,11 +140,11 @@ void VerificationValidationWidget::dbConnect(const QString dbName) {
     this->dbName = dbName;
     QString* fp = document->getFilePath();
     if (fp) this->dbName = fp->split("/").last() + ".atr";
-    dbConnectionName = this->dbName + "-connection";
 
-    // check if SQL connection already open
+    dbConnectionName = this->dbName + "-connection";
     QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
-    // TODO: instead of throwing + popping up error, open correct document
+
+    // if SQL connection already open, just switch to that tab
     if (db.isOpen()) {
         const std::unordered_map<int, Document*>* documents = mainWindow->getDocuments();
         Document* correctDocument = nullptr;
@@ -148,10 +157,34 @@ void VerificationValidationWidget::dbConnect(const QString dbName) {
             }
         }
         if (correctDocument) mainWindow->getDocumentArea()->setCurrentIndex(correctDocument->getTabIndex());
-         // TODO: close this Document
-         // TODO: think about what happens whenever you open untitled files, close arbalest, reopen untitled files
-        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
+        throw std::runtime_error("[Verification & Validation] Document already open");
     }
+
+    // if file exists, prompt before overwriting
+    if (QFile::exists(this->dbName)) {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Detected existing test results in " + this->dbName + ".\nDo you want to open or discard the results?");
+        msgBox.setInformativeText("Changes cannot be reverted.");
+        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+        QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
+        discardButton->setIcon(QIcon(":/icons/warning.png"));
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+
+        int res = msgBox.exec();
+        if (res == QMessageBox::Open) {
+            msgBoxRes = OPEN;
+            parentDockable->setVisible(true);
+        }
+        else if (msgBox.clickedButton() == discardButton) { 
+            msgBoxRes = DISCARD;
+        }
+        else {
+            msgBoxRes = CANCEL;
+            throw std::runtime_error("No changes were made.");
+        }
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
     db.setDatabaseName(this->dbName);
 
@@ -270,6 +303,12 @@ void VerificationValidationWidget::dbExec(QSqlQuery*& query, bool showErrorPopup
         popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + query->lastQuery());
 }
 
+void VerificationValidationWidget::dbClearResults() {
+    dbExec("DELETE FROM TestResults");
+    dbExec("DELETE FROM Issues");
+    dbExec("DELETE FROM ObjectIssue");
+}
+
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(0, this->width() * 0.025);
     resultTable->setColumnWidth(1, this->width() * 0.125);
@@ -331,5 +370,18 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
         resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+    }
+}
+
+void VerificationValidationWidget::showAllResults() {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id FROM TestResults WHERE modelID = ?");
+    q->addBindValue(modelID);
+    dbExec(q);
+
+    QString testResultID;
+    while (q && q->next()) {
+        testResultID = q->value(0).toString();
+        showResult(testResultID);
     }
 }

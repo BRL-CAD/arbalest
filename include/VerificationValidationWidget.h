@@ -18,42 +18,52 @@
 #include "VerificationValidation.h"
 #include "Utils.h"
 
-#define RESULT_CODE_COLUMN  0
-#define TEST_NAME_COLUMN    1
-#define DESCRIPTION_COLUMN  2
-#define OBJPATH_COLUMN      3
+#define RESULT_CODE_COLUMN 0
+#define TEST_NAME_COLUMN 1
+#define DESCRIPTION_COLUMN 2
+#define OBJPATH_COLUMN 3
+
+#define NO_SELECTION -1
+#define OPEN 0
+#define DISCARD 1
+#define CANCEL 2
 
 class MainWindow;
 class Document;
-class VerificationValidationWidget : public QHBoxWidget {
+class Dockable;
+class VerificationValidationWidget : public QHBoxWidget
+{
     Q_OBJECT
 public:
-    explicit VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent = nullptr);
+    explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
-    QString* runTest(const QString& cmd);
+    QString *runTest(const QString &cmd);
     void runTests();
-    void loadATRFile(const QString& filepath);
-    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
+    void loadATRFile(const QString &filepath);
+    void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
 
-    QString getDBConnectionName() const {
+    QString getDBConnectionName() const
+    {
         return dbConnectionName;
     }
 
 private:
-    MainWindow* mainWindow;
+    MainWindow *mainWindow;
+    Dockable *parentDockable;
+    int msgBoxRes;
 
     // widget-specific data
-    Document* document;
+    Document *document;
     QString modelID;
     QString dbName;
     QString dbConnectionName;
 
     // user interface data
-    QTableWidget* resultTable;
-    QListWidget* testList;
-    QDialog* selectTestsDialog;
-    QStatusBar* statusBar;
+    QTableWidget *resultTable;
+    QListWidget *testList;
+    QDialog *selectTestsDialog;
+    QStatusBar *statusBar;
 
     // init functions
     void dbConnect(QString dbName);
@@ -62,17 +72,21 @@ private:
     void setupUI();
 
     // database functions
-    QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
-    void dbExec(QSqlQuery*& query, bool showErrorPopup = true);
-    QSqlDatabase getDatabase() const {
+    QSqlQuery *dbExec(QString command, bool showErrorPopup = true);
+    void dbExec(QSqlQuery *&query, bool showErrorPopup = true);
+    QSqlDatabase getDatabase() const
+    {
         return QSqlDatabase::database(dbConnectionName);
     }
 
+    void dbClearResults();
+
     // events
-    void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
     // ui stuff
-    void showResult(const QString& testResultID);
+    void showResult(const QString &testResultID);
+    void showAllResults();
 };
 
 #endif // VVWIDGET_H
