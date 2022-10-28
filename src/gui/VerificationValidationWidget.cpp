@@ -1,5 +1,6 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
+#include "MainWindow.h"
 using Result = VerificationValidation::Result;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
@@ -8,9 +9,9 @@ using Parser = VerificationValidation::Parser;
 
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
+VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow) {
     QString dbName = "untitled" + QString::number(document->getDocumentId()) + ".atr";
-    try { dbConnect(dbName); } catch (std::runtime_error& e) { popup(e.what()); }
+    try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
     setupUI();
@@ -135,8 +136,22 @@ void VerificationValidationWidget::dbConnect(const QString dbName) {
     // check if SQL connection already open
     QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
     // TODO: instead of throwing + popping up error, open correct document
-    if (db.isOpen()) throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
-    
+    if (db.isOpen()) {
+        const std::unordered_map<int, Document*>* documents = mainWindow->getDocuments();
+        Document* correctDocument = nullptr;
+        Document* doc;
+        for (auto it = documents->begin(); it != documents->end(); it++) {
+            doc = it->second;
+            if (doc && doc != this->document && doc->getVerificationValidationWidget()->getDBConnectionName() == dbConnectionName) {
+                correctDocument = doc;
+                break;
+            }
+        }
+        if (correctDocument) mainWindow->getDocumentArea()->setCurrentIndex(correctDocument->getTabIndex());
+         // TODO: close this Document
+         // TODO: think about what happens whenever you open untitled files, close arbalest, reopen untitled files
+        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
+    }
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
     db.setDatabaseName(this->dbName);
 

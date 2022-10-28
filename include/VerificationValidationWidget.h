@@ -23,11 +23,12 @@
 #define DESCRIPTION_COLUMN  2
 #define OBJPATH_COLUMN      3
 
+class MainWindow;
 class Document;
 class VerificationValidationWidget : public QHBoxWidget {
     Q_OBJECT
 public:
-    explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
+    explicit VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
     QString* runTest(const QString& cmd);
@@ -35,7 +36,13 @@ public:
     void loadATRFile(const QString& filepath);
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
+    QString getDBConnectionName() const {
+        return dbConnectionName;
+    }
+
 private:
+    MainWindow* mainWindow;
+
     // widget-specific data
     Document* document;
     QString modelID;

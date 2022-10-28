@@ -27,6 +27,14 @@ public:
         return statusBar;
     }
 
+    QTabWidget *getDocumentArea() const {
+        return documentArea;
+    }
+
+    const std::unordered_map<int, Document*> *getDocuments() const {
+        return &documents;
+    }
+
     const int statusBarShortMessageDuration = 7000;
 
 private:

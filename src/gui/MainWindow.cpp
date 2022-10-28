@@ -787,7 +787,7 @@ void MainWindow::prepareDockables(){
 
 // empty new file
 void MainWindow::newFile() {
-    Document* document = new Document(documentsCount);
+    Document* document = new Document(this, documentsCount);
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
@@ -801,16 +801,17 @@ void MainWindow::newFile() {
 
 void MainWindow::openFile(const QString& filePath) {
     Document* document = nullptr;
-
     try {
-        document = new Document(documentsCount, &filePath);
+        document = new Document(this, documentsCount, &filePath);
     }
-    catch (const std::runtime_error& e) { 
+    catch (const std::runtime_error& e) {
+        document = nullptr;
         QString msg = e.what();
         statusBar->showMessage(msg, statusBarShortMessageDuration);
         popup(msg);
     }
     catch (...) {
+        document = nullptr;
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);
         popup(msg);
