@@ -82,7 +82,5 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
-
-
 };
 #endif // MAINWINDOW_H

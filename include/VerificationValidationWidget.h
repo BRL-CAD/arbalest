@@ -82,6 +82,10 @@ private:
 
     // ui stuff
     void showResult(const QString& testResultID);
+
+    // Other
+    void checkSuiteSA();
+    void checkTestSA();
 };
 
 #endif // VVWIDGET_H
