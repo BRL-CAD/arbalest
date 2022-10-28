@@ -10,6 +10,46 @@ using Test = VerificationValidation::Test;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
 
+bool Parser::catchUsageErrors(Result* r, const QString& currentLine) {
+    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
+        return true;
+    }
+    return false;
+}
+
+bool Parser::dbNotFoundErrors(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
+        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
+        
+        int objNameSz = objNameEndIdx - objNameStartIdx;
+        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
+
+        return true;
+    }
+    return false; 
+}
+
+void Parser::finalDefense(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
+    }
+
+    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
+    }
+}
+
 Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
@@ -45,18 +85,18 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)
-    if (Parser::searchDBNotFoundErrors(r)) return r;
+    if (Parser::dbNotFoundErrors(r)) return r;
     
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {
         // if no usage errors, run specific test
-        if (!Parser::searchCatchUsageErrors(r, lines[i]) && type)
+        if (!Parser::catchUsageErrors(r, lines[i]) && type)
             Parser::searchSpecificTest(r, lines[i], type);
     }
 
     // final defense: find any errors / warnings
     if (r->resultCode == Result::Code::PASSED)
-        Parser::searchFinalDefense(r);
+        Parser::finalDefense(r);
 
     return r;
 }
@@ -112,46 +152,6 @@ void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Tes
     }
 }
 
-bool Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
-    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
-        return true;
-    }
-    return false;
-}
-
-bool Parser::searchDBNotFoundErrors(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
-        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
-        
-        int objNameSz = objNameEndIdx - objNameStartIdx;
-        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
-
-        return true;
-    }
-    return false; 
-}
-
-void Parser::searchFinalDefense(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
-    }
-
-    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
-    }
-}
-
 Result* Parser::lc(const QString* terminalOutput) {
     return nullptr; // TODO: implement
 }
@@ -169,7 +169,7 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
 
     // search for DB errors (if found, return)
-    if (Parser::gqaDBNotFoundErrors(r)) return r;
+    if (Parser::dbNotFoundErrors(r)) return r;
     
     QStringList lines = r->terminalOutput.split('\n');
     bool startParsing = false;
@@ -180,13 +180,13 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
             startParsing = true;
             continue;
         }
-        if (!Parser::gqaCatchUsageErrors(r, lines[i]) && type && startParsing)
+        if (!Parser::catchUsageErrors(r, lines[i]) && type && startParsing)
             Parser::gqaSpecificTest(r, lines[i], type);
     }
 
     // final defense: find any errors / warnings
     if (r->resultCode == Result::Code::PASSED)
-        Parser::gqaFinalDefense(r);
+        Parser::finalDefense(r);
 
     return r;
 }
@@ -235,18 +235,5 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
 
         r->issues.push_back({objectName1, "Overlaps with '" + objectName2 + "' " + countString});
     }
-    
-}
-
-
-bool Parser::gqaCatchUsageErrors(Result* r, const QString& currentLine) {
-    return false;
-}
-
-bool Parser::gqaDBNotFoundErrors(Result* r) {
-    return false;
-}
-
-void Parser::gqaFinalDefense(Result* r) {
     
 }
