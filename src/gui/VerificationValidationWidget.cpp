@@ -14,7 +14,7 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
     try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
-    setupUI();
+    if (msgBoxRes != DISCARD) setupUI();
 
     if (msgBoxRes == OPEN) {
         showAllResults();
@@ -432,9 +432,6 @@ void VerificationValidationWidget::setupUI() {
     // TODO: allow input
     // TODO: select tops
     // TODO: add test categories in test lists
-
-	// Branch testDialog
-	std::cout << "Branch: testDialog" << std::endl;
 	
     // setup result table's column headers
     QStringList columnLabels;

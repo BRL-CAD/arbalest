@@ -46,7 +46,6 @@ public:
     {
         return dbConnectionName;
     }
-    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
 
 public slots:
     void runTests();
