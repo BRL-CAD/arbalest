@@ -18,14 +18,13 @@ parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SE
     try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
-    if (msgBoxRes != DISCARD) setupUI();
+    setupUI();
 
     if (msgBoxRes == OPEN) {
         showAllResults();
         msgBoxRes = NO_SELECTION;
     } else if (msgBoxRes == DISCARD) {
-        resultTable->clear();
-        setupUI();
+        dbClearResults();
     }
 }
 
