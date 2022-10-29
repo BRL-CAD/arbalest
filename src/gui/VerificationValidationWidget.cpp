@@ -29,6 +29,8 @@ parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SE
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
+    std::cout << "closing " << dbConnectionName.toStdString() << std::endl;
+    getDatabase().close();
     QSqlDatabase::removeDatabase(dbConnectionName);
 }
 
@@ -139,10 +141,18 @@ void VerificationValidationWidget::runTests() {
     }
 }
 
-void VerificationValidationWidget::loadATRFile(const QString& filepath) {
-    // TODO: open associated .g file; if doesn't exist, ask user to find it
-    // TODO: load results into table
-    // TODO: put more thought into how you want user to open and stuff
+void VerificationValidationWidget::openATRFile() {
+    // TODO: if .g not open, file opening will crash
+    const QString filePath = QFileDialog::getOpenFileName(mainWindow->getDocumentArea(), tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
+    if (!filePath.isEmpty()) {
+        try { dbConnect(filePath); } 
+        catch (const std::runtime_error& e) { popup(e.what()); }
+        catch (...) { popup("Failed to create a database connection for the .atr file"); }
+        // TODO: open associated .g file; if doesn't exist, ask user to find it
+        // TODO: load results into table
+        // TODO: put more thought into how you want user to open and stuff
+        // TODO: think about errors from opening multiple times without closing; also if already open
+    }
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbName) {

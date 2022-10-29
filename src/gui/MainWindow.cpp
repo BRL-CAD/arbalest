@@ -105,6 +105,14 @@ void MainWindow::prepareUi() {
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
+    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open arbalest test result file"), this);
+    verifyValidateOpenResultsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/openVerifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verifyValidateOpenResultsAct->setStatusTip(tr("Opens a .atr file"));
+    connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
+        documents[activeDocumentId]->getVerificationValidationWidget()->openATRFile();
+    });
+    fileMenu->addAction(verifyValidateOpenResultsAct);
+
     QIcon saveActIcon;
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-Menu")), QIcon::Active);
@@ -567,14 +575,6 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
-    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open result file"), this);
-    // verifyValidateOpenResultsAct->setIcon(); // TODO: find an icon for opening
-    verifyValidateOpenResultsAct->setStatusTip(tr("Opens and shows verification & validation test results"));
-    connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
-        if (activeDocumentId == -1) return;
-        const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
-        documents[activeDocumentId]->getVerificationValidationWidget()->loadATRFile(filePath);
-    });
 
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));

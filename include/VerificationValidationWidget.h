@@ -39,7 +39,7 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString *runTest(const QString &cmd);
-    void loadATRFile(const QString &filepath);
+    void openATRFile();
     void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
 
     QString getDBConnectionName() const
