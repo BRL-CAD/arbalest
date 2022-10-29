@@ -13,9 +13,11 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
 document(document), testList(new QListWidget()), resultTable(new QTableWidget()), 
 selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new  QListWidget()),
-parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION) {
-    QString dbName = "untitled" + QString::number(document->getDocumentId()) + ".atr";
-    try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
+parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION), folderName("atr"),
+dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
+{
+    if (!QDir(folderName).exists() && !QDir().mkdir(folderName)) popup("Failed to create " + folderName + " folder");
+    try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
     setupUI();
@@ -29,9 +31,7 @@ parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SE
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
-    std::cout << "closing " << dbConnectionName.toStdString() << std::endl;
-    getDatabase().close();
-    QSqlDatabase::removeDatabase(dbConnectionName);
+    dbClose();
 }
 
 
@@ -141,33 +141,23 @@ void VerificationValidationWidget::runTests() {
     }
 }
 
-void VerificationValidationWidget::openATRFile() {
-    // TODO: if .g not open, file opening will crash
-    const QString filePath = QFileDialog::getOpenFileName(mainWindow->getDocumentArea(), tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
-    if (!filePath.isEmpty()) {
-        try { dbConnect(filePath); } 
-        catch (const std::runtime_error& e) { popup(e.what()); }
-        catch (...) { popup("Failed to create a database connection for the .atr file"); }
-        // TODO: open associated .g file; if doesn't exist, ask user to find it
-        // TODO: load results into table
-        // TODO: put more thought into how you want user to open and stuff
-        // TODO: think about errors from opening multiple times without closing; also if already open
-    }
-}
-
-void VerificationValidationWidget::dbConnect(const QString dbName) {
+void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
 
-    this->dbName = dbName;
+    this->dbName = dbFilePath;
     QString* fp = document->getFilePath();
-    if (fp) this->dbName = fp->split("/").last() + ".atr";
+    if (fp) {
+        QStringList fpList = fp->split("/");
+        this->dbName = folderName + "/" + fpList.last() + ".atr";
+        this->dbFilePath = QDir(this->dbName).absolutePath();
+    }
 
     dbConnectionName = this->dbName + "-connection";
-    QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
+    QSqlDatabase db = getDatabase();
 
     // if SQL connection already open, just switch to that tab
-    if (db.isOpen()) {
+    if (dbIsAlive(db)) {
         const std::unordered_map<int, Document*>* documents = mainWindow->getDocuments();
         Document* correctDocument = nullptr;
         Document* doc;
@@ -179,7 +169,7 @@ void VerificationValidationWidget::dbConnect(const QString dbName) {
             }
         }
         if (correctDocument) mainWindow->getDocumentArea()->setCurrentIndex(correctDocument->getTabIndex());
-        throw std::runtime_error("[Verification & Validation] Document already open");
+        throw std::runtime_error("");
     }
 
     // if file exists, prompt before overwriting
@@ -218,7 +208,6 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE, hasValArgs BOOL NOT NULL, Category TEXT NOT NULL)");
         delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
         delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
@@ -240,15 +229,20 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT id FROM Model WHERE filePath=?");
-    q->addBindValue(this->dbName);
+    q->prepare("SELECT COUNT(id) FROM Model WHERE filePath=?");
+    q->addBindValue(QDir(*document->getFilePath()).absolutePath());
     dbExec(q, !SHOW_ERROR_POPUP);
-    if (!q->next()) {
+
+    int numEntries = 0;
+    if (q->next()) numEntries = q->value(0).toInt();
+
+    if (!numEntries) {
+        delete q;
         q = new QSqlQuery(getDatabase());
         q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
-        q->addBindValue(this->dbName);
+        q->addBindValue(QDir(*document->getFilePath()).absolutePath());
         q->addBindValue(md5Checksum);
-        dbExec(q);   
+        dbExec(q);
         modelID = q->lastInsertId().toString();
     } else {
         modelID = q->value(0).toString();

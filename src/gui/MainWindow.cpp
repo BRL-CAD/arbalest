@@ -43,7 +43,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     documentArea->addTab(new HelpWidget(), "Quick Start");
     if(QCoreApplication::arguments().length()>1){
-        openFile(QString(QCoreApplication::arguments().at(1)));
+        QString filePath = QString(QCoreApplication::arguments().at(1));
+        if (filePath.endsWith(".atr")) openATRFile(filePath);
+        else openFile(filePath);
     }
     Globals::mainWindow = this;
 }
@@ -105,11 +107,11 @@ void MainWindow::prepareUi() {
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open arbalest test result file"), this);
-    verifyValidateOpenResultsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/openVerifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
-    verifyValidateOpenResultsAct->setStatusTip(tr("Opens a .atr file"));
+    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open .atr file"), this);
+    verifyValidateOpenResultsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/openVerifyValidateIcon.png", "$Color-MenuIconFile")));
+    verifyValidateOpenResultsAct->setStatusTip(tr("Opens an arbalest test results file"));
     connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
-        documents[activeDocumentId]->getVerificationValidationWidget()->openATRFile();
+        openATRFileDialog();
     });
     fileMenu->addAction(verifyValidateOpenResultsAct);
 
@@ -807,8 +809,10 @@ void MainWindow::openFile(const QString& filePath) {
     catch (const std::runtime_error& e) {
         document = nullptr;
         QString msg = e.what();
-        statusBar->showMessage(msg, statusBarShortMessageDuration);
-        popup(msg);
+        if (!msg.isEmpty()) {
+            statusBar->showMessage(msg, statusBarShortMessageDuration);
+            popup(msg);
+        }
     }
     catch (...) {
         document = nullptr;
@@ -829,6 +833,40 @@ void MainWindow::openFile(const QString& filePath) {
     }
 }
 
+void MainWindow::openATRFile(const QString& atrFilePath) {
+    QString gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
+    if (!QFile::exists(atrFilePath)) popup("File " + atrFilePath + " doesn't exist.");
+    else {
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+            db.setDatabaseName(atrFilePath);
+
+            if (!db.open()) popup("Failed to open " + atrFilePath);
+
+            if (db.isOpen()) {
+                QSqlQuery q("SELECT filePath, md5Checksum from Model", db);
+                if (!q.isActive() || !q.next()) 
+                    popup("Failed to fetch filepath from " + atrFilePath);
+                else {
+                    gFilePath = q.value(0).toString();
+                    md5Checksum = q.value(1).toString();
+                }
+                db.close();
+            }
+        }
+        QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
+    }
+
+    if (gFilePath.isEmpty()) return;
+    if (!QFile::exists(gFilePath)) { 
+        // TODO: if associated .g doesn't exist/was moved, ask user to find it and update
+        popup(gFilePath + " does not exist."); 
+        return;
+    }
+
+    openFile(gFilePath);
+}
+
 bool MainWindow::saveFile(const QString& filePath) {
     if (!documents[activeDocumentId]->isModified()) {
         return false;
@@ -846,6 +884,13 @@ void MainWindow::openFileDialog()
 	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
     if (!filePath.isEmpty()){
         openFile(filePath);
+    }
+}
+
+void MainWindow::openATRFileDialog() {
+    const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
+    if (!filePath.isEmpty()) {
+        openATRFile(filePath);
     }
 }
 

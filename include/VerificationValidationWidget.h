@@ -39,7 +39,6 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString *runTest(const QString &cmd);
-    void openATRFile();
     void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
 
     QString getDBConnectionName() const
@@ -63,10 +62,12 @@ private:
     MainWindow *mainWindow;
     Dockable *parentDockable;
     int msgBoxRes;
+    QString folderName;
 
     // widget-specific data
     Document *document;
     QString modelID;
+    QString dbFilePath;
     QString dbName;
     QString dbConnectionName;
 
@@ -81,7 +82,7 @@ private:
     QStatusBar* statusBar;
 
     // init functions
-    void dbConnect(QString dbName);
+    void dbConnect(QString dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
@@ -89,9 +90,24 @@ private:
     // database functions
     QSqlQuery *dbExec(QString command, bool showErrorPopup = true);
     void dbExec(QSqlQuery *&query, bool showErrorPopup = true);
+    void dbClose() {
+        { 
+            QSqlDatabase db = getDatabase();
+            if (db.isOpen()) db.close();
+        }
+        QSqlDatabase::removeDatabase(dbConnectionName);
+    }
+
     QSqlDatabase getDatabase() const
     {
-        return QSqlDatabase::database(dbConnectionName);
+        return QSqlDatabase::database(dbConnectionName, false);
+    }
+
+    bool dbIsAlive(QSqlDatabase db) {
+        if (!db.isOpen()) return false;
+        QSqlQuery q("SELECT 1 FROM Tests", db);
+        if (!q.isActive()) return false;
+        return true;
     }
 
     void dbClearResults();

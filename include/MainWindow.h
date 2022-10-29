@@ -71,6 +71,7 @@ private:
 
     void newFile(); // empty new file
     void openFile(const QString& filePath);
+    void openATRFile(const QString& atrFilePath);
     bool saveFile(const QString& filePath);
     bool maybeSave(int documentId, bool *cancel = nullptr);
 
@@ -83,6 +84,7 @@ protected:
 	
 public slots:
     void openFileDialog();
+    void openATRFileDialog();
     bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
     bool saveAsFileDialogId(int documentId);
