@@ -216,20 +216,20 @@ void VerificationValidationWidget::dbConnect(const QString dbName) {
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
         // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE, hasValArgs BOOL NOT NULL, Category TEXT NOT NULL)");
-        dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
+        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
-        dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
+        delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
-        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
+        delete dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
-        dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestSuites"))
-        dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
+        delete dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
-        dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
+        delete dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
     // if (!getDatabase().tables().contains("TestArgs"))
     //     dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
@@ -253,6 +253,8 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     } else {
         modelID = q->value(0).toString();
     }
+
+    delete q;
 
     // if Tests table empty, new db and insert tests
     // note: this doesn't repopulate deleted tests, unless all tests deleted
@@ -284,6 +286,8 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             dbExec(q);
         }
     }
+
+    delete q;
 }
 
 void VerificationValidationWidget::searchTests(const QString &input)  {
@@ -376,6 +380,7 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
         suite_sa->item(0)->setCheckState(Qt::Unchecked);
     }
     checkSuiteSA();
+    delete q;
 }
 
 void VerificationValidationWidget::testListSelection(QListWidgetItem* test_clicked) {
@@ -413,6 +418,9 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     }
     checkSuiteSA();
     checkTestSA();
+
+    delete q1;
+    delete q2;
 }
 
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
@@ -589,9 +597,9 @@ void VerificationValidationWidget::dbExec(QSqlQuery*& query, bool showErrorPopup
 }
 
 void VerificationValidationWidget::dbClearResults() {
-    dbExec("DELETE FROM TestResults");
-    dbExec("DELETE FROM Issues");
-    dbExec("DELETE FROM ObjectIssue");
+    delete dbExec("DELETE FROM TestResults");
+    delete dbExec("DELETE FROM Issues");
+    delete dbExec("DELETE FROM ObjectIssue");
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
@@ -674,7 +682,12 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         // Double click event signal trigger
         //connect(resultTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(setupDetailedResult()));
         connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
+
+        delete q3;
     }
+
+    delete q;
+    delete q2;
 }
 
 void VerificationValidationWidget::showAllResults() {
@@ -688,4 +701,6 @@ void VerificationValidationWidget::showAllResults() {
         testResultID = q->value(0).toString();
         showResult(testResultID);
     }
+
+    delete q;
 }
