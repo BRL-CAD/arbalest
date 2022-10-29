@@ -39,7 +39,6 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString *runTest(const QString &cmd);
-    void runTests();
     void loadATRFile(const QString &filepath);
     void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
 
@@ -47,6 +46,19 @@ public:
     {
         return dbConnectionName;
     }
+    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
+
+public slots:
+    void runTests();
+
+private slots:
+	void updateSuiteSelectAll(QListWidgetItem*);
+	void updateTestSelectAll(QListWidgetItem*);
+	void updateTestListWidget(QListWidgetItem*);
+    void testListSelection(QListWidgetItem*);
+    void setupDetailedResult(int row, int  column);
+    void searchTests(const QString &input);
+    void userInputDialogUI(QListWidgetItem*);
 
 private:
     MainWindow *mainWindow;
@@ -60,10 +72,14 @@ private:
     QString dbConnectionName;
 
     // user interface data
-    QTableWidget *resultTable;
-    QListWidget *testList;
-    QDialog *selectTestsDialog;
-    QStatusBar *statusBar;
+    QTableWidget* resultTable;
+    QListWidget* testList;
+    QListWidget* suiteList;
+    QListWidget* test_sa;
+    QListWidget* suite_sa;
+    QLineEdit* searchBox;
+    QDialog* selectTestsDialog;
+    QStatusBar* statusBar;
 
     // init functions
     void dbConnect(QString dbName);
@@ -87,6 +103,10 @@ private:
     // ui stuff
     void showResult(const QString &testResultID);
     void showAllResults();
+
+    // Other
+    void checkSuiteSA();
+    void checkTestSA();
 };
 
 #endif // VVWIDGET_H
