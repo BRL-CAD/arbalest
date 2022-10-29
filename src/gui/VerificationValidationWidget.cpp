@@ -9,7 +9,11 @@ using Parser = VerificationValidation::Parser;
 
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : document(document), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION) {
+VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
+document(document), testList(new QListWidget()), resultTable(new QTableWidget()), 
+selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow),
+suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new  QListWidget()),
+parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION) {
     QString dbName = "untitled" + QString::number(document->getDocumentId()) + ".atr";
     try { dbConnect(dbName); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
@@ -474,7 +478,7 @@ void VerificationValidationWidget::setupUI() {
     
     // Get suite list from db
     query.exec("Select suiteName from TestSuites ORDER by id ASC");
-    QStringList  testSuites;
+    QStringList testSuites;
     while(query.next()){
     	testSuites << query.value(0).toString();
     }
