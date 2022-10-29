@@ -31,8 +31,21 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString* runTest(const QString& cmd);
-    void runTests();
+    //void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
+    //QDialog* getDialog() {return selectTestsDialog;};
+
+public slots:
+    void runTests();
+
+private slots:
+	void updateSuiteSelectAll(QListWidgetItem*);
+	void updateTestSelectAll(QListWidgetItem*);
+	void updateTestListWidget(QListWidgetItem*);
+    void testListSelection(QListWidgetItem*);
+    void setupDetailedResult(int row, int  column);
+    void searchTests(const QString &input);
+    void userInputDialogUI(QListWidgetItem*);
 
 private:
     // widget-specific data
@@ -44,6 +57,10 @@ private:
     // user interface data
     QTableWidget* resultTable;
     QListWidget* testList;
+    QListWidget* suiteList;
+    QListWidget* test_sa;
+    QListWidget* suite_sa;
+    QLineEdit* searchBox;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
 
@@ -65,6 +82,10 @@ private:
 
     // ui stuff
     void showResult(const QString& testResultID);
+
+    // Other
+    void checkSuiteSA();
+    void checkTestSA();
 };
 
 #endif // VVWIDGET_H
