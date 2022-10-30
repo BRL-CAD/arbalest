@@ -72,8 +72,7 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
-    //clear result table
-    resultTable->setRowCount(0);
+    dbClearResults();
 
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
