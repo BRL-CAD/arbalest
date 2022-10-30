@@ -36,6 +36,7 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QPainter>
+#include <bu.h>
 class Document;
 class ObjectTreeWidget : public QTreeWidget {
     Q_OBJECT

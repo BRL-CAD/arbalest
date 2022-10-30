@@ -35,6 +35,10 @@ public:
         return &documents;
     }
 
+    int getActiveDocumentId() const {
+        return activeDocumentId;
+    }
+
     Dockable *getVerificationValidationDockable() const {
         return objectVerificationValidationDockable;
     }

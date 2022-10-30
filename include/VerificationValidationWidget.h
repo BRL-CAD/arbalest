@@ -5,8 +5,6 @@
 #ifndef VVWIDGET_H
 #define VVWIDGET_H
 
-#include <ged.h>
-#include <bu.h>
 #include <iostream>
 #include <QTableView>
 #include <QtSql/QSqlTableModel>

@@ -130,12 +130,21 @@ void ObjectTreeWidget::refreshItemTextColors() {
 
 QStringList ObjectTreeWidget::getSelectedObjects(const Name& name, const Level& level) {
     QStringList ans;
+    // if top, only traverse children of root
     if (level == Level::TOP) {
-
+        for (int childObjectId : document->getObjectTree()->getChildren()[0]) {
+            if (document->getObjectTree()->getObjectVisibility()[childObjectId] == ObjectTree::VisibilityState::FullyVisible)
+                ans << objectIdTreeWidgetItemMap[childObjectId]->text(0);
+        }
     } 
     
+    // otherwise check entire tree
     else {
-        
+        for (QHash<int, QTreeWidgetItem*>::iterator i = objectIdTreeWidgetItemMap.begin(); i != objectIdTreeWidgetItemMap.end(); i++) {
+            int objectId = i.key();
+            if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::VisibilityState::FullyVisible)
+                ans << objectIdTreeWidgetItemMap[objectId]->text(0);
+        }
     }
 
     if (name == Name::BASENAME) {

@@ -13,6 +13,8 @@
 #include <chrono>
 #include <stack>
 #include <iostream>
+#include <ged.h>
+#include <bu.h>
 using namespace std::chrono;
 using namespace std;
 

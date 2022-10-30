@@ -53,6 +53,17 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
+    const std::unordered_map<int, Document*> documents = *(mainWindow->getDocuments());
+    QStringList objects = documents.at(mainWindow->getActiveDocumentId())->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+    // TODO: pathname doesn't work right now
+    
+    std::cout << "----" << std::endl;
+    for (QString s : objects) {
+        std::cout << s.toStdString() << std::endl;
+    }
+    std::cout << "----" << std::endl;
+
+
     //clear result table
     resultTable->setRowCount(0);
 
