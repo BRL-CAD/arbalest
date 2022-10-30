@@ -44,27 +44,8 @@ void VerificationValidationWidget::showSelectTests() {
 }
 
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
-    struct ged *dbp;
-    const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
-
-    const char* cmdList[tmp.size() + 1];
-    for (int i = 0; i < tmp.size(); i++) {
-        char* cmdBuf = new char[tmp[i].size() + 1];
-        strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
-        cmdBuf[tmp[i].size()] = '\0';
-        cmdList[i] = cmdBuf;
-    }
-    cmdList[tmp.size()] = NULL;
-    
     QString filepath = *(document->getFilePath());
-    if (!bu_file_exists((filepath).toStdString().c_str(), NULL)) {
-        QString errorMsg = "[Verification & Validation] ERROR: [" + filepath + "] does not exist\n";
-        popup(errorMsg);
-        return nullptr;
-    }
-
-    dbp = ged_open("db", filepath.toStdString().c_str(), 1);
-    ged_exec(dbp, tmp.size(), cmdList);
+    struct ged* dbp = mgedRun(cmd, filepath);
     QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
     ged_close(dbp);
 

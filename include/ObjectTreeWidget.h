@@ -44,6 +44,11 @@ public:
     void refreshItemTextColors();
     const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
+
+    enum Name { PATHNAME, BASENAME };
+    enum Level { TOP, ALL };
+    QStringList getSelectedObjects(const Name& name, const Level& level);
+    
 private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;

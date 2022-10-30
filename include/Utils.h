@@ -101,5 +101,6 @@ class Document;
 bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
 
 void popup(const QString& message);
+struct ged* mgedRun(const QString& cmd, const QString& gFilePath);
 
 #endif // UTILS_ARBALEST_H

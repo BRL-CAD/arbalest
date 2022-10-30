@@ -171,3 +171,27 @@ void popup(const QString& message) {
     msgBox->setText(message);
     msgBox->exec();
 }
+
+struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
+    struct ged* dbp;
+    const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
+
+    const char* cmdList[tmp.size() + 1];
+    for (int i = 0; i < tmp.size(); i++) {
+        char* cmdBuf = new char[tmp[i].size() + 1];
+        strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
+        cmdBuf[tmp[i].size()] = '\0';
+        cmdList[i] = cmdBuf;
+    }
+    cmdList[tmp.size()] = NULL;
+    
+    if (!bu_file_exists((gFilePath).toStdString().c_str(), NULL)) {
+        QString errorMsg = "[mgedRun] ERROR: [" + gFilePath + "] does not exist\n";
+        popup(errorMsg);
+        return nullptr;
+    }
+
+    dbp = ged_open("db", gFilePath.toStdString().c_str(), 1);
+    ged_exec(dbp, tmp.size(), cmdList);
+    return dbp;
+}

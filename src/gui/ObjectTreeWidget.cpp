@@ -127,3 +127,21 @@ void ObjectTreeWidget::refreshItemTextColors() {
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
 }
+
+QStringList ObjectTreeWidget::getSelectedObjects(const Name& name, const Level& level) {
+    QStringList ans;
+    if (level == Level::TOP) {
+
+    } 
+    
+    else {
+        
+    }
+
+    if (name == Name::BASENAME) {
+        for (int i = 0; i < ans.size(); i++) 
+            ans[i] = bu_path_basename(ans[i].toStdString().c_str(), NULL);
+    }
+
+    return ans;
+}
