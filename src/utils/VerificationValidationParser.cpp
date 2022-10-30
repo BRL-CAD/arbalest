@@ -47,99 +47,98 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
     else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
+    // search for DB errors (if found, return)
+    if (Parser::searchDBNotFoundErrors(r)) return r;
+    
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {
-        // run tests specifically for default tests
-        if (type) Parser::searchSpecificTest(r, lines[i], type);
-
-        // catch usage errors
-        Parser::searchCatchUsageErrors(r, lines[i]);
-
-        // catch not in DB errors
-        Parser::searchDBNotFoundErrors(r, lines[i]);
+        // if no usage errors, run specific test
+        if (!Parser::searchCatchUsageErrors(r, lines[i]) && type)
+            Parser::searchSpecificTest(r, lines[i], type);
     }
 
     // final defense: find any errors / warnings
     if (r->resultCode == Result::Code::PASSED)
         Parser::searchFinalDefense(r);
 
-    return r; // TODO: implement
+    return r;
 }
 
 void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Test* type) {
-    if (type == &DefaultTests::NO_NESTED_REGIONS) {
-        if (currentLine.trimmed().isEmpty()) return;
-        r->resultCode = Result::Code::FAILED;
-        QStringList objectPath = currentLine.split('/');
-        
-        // if bad result
-        if (objectPath.size() < 2) {
-            r->resultCode = Result::Code::UNPARSEABLE;
-            r->issues.push_back({"search parser", "failed to parse results"});
-            return;
-        }
+    if (currentLine.trimmed().isEmpty()) return;
+    QString objectPath = currentLine;
+    QString objectName = currentLine.split('/').last();
 
-        QString objectName = objectPath.last();
-        r->issues.push_back({objectName, "nested region at " + currentLine});
+    if (type == &DefaultTests::NO_NESTED_REGIONS) {
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Nested region at '" + objectName + "'"});
     } 
     
     else if (type == &DefaultTests::NO_EMPTY_COMBOS) {
-
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Empty combo at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Solid outside of region at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_BOTS_VOLUME_MODE) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "BoT not volume mode at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_BOTS_LH_ORIENT) {
-
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Left-hand oriented BoT at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_MAT) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Obj/region doesn't have material at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::ALL_REGIONS_LOS) {
-        
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objectPath, "Obj/region doesn't have LOS at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_MATRICES) {
-        
+        r->resultCode = Result::Code::WARNING;
+        r->issues.push_back({objectPath, "Matrix at '" + objectName + "'"});
     }
 
     else if (type == &DefaultTests::NO_INVALID_AIRCODE_REGIONS) {
-        
+        r->resultCode = Result::Code::WARNING;
+        r->issues.push_back({objectPath, "Obj/region has aircode at '" + objectName + "'"});
     }
 }
 
-void Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
+bool Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
     int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
     if (msgStart != -1) {
         r->resultCode = Result::Code::FAILED;
         r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
+        return true;
     }
+    return false;
 }
 
-void Parser::searchDBNotFoundErrors(Result* r, const QString& currentLine) {
-    int msgStart = currentLine.indexOf(QRegExp("input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
+bool Parser::searchDBNotFoundErrors(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
     if (msgStart != -1) {
-        int objNameStartIdx = msgStart + 8; // skip over "input: '"
-        int objNameEndIdx = currentLine.indexOf("'", objNameStartIdx);
+        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
+        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
+        
+        int objNameSz = objNameEndIdx - objNameStartIdx;
+        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
 
-        if (objNameStartIdx >= currentLine.size() || objNameEndIdx == -1) {
-            r->resultCode = Result::Code::UNPARSEABLE;
-            r->issues.push_back({"search parser", "failed to parse results"});
-        } else {
-            int objNameSz = objNameEndIdx - objNameStartIdx;
-            QString objName = currentLine.mid(objNameStartIdx, objNameSz);
-            r->resultCode = Result::Code::FAILED;
-            r->issues.push_back({objName, currentLine.mid(msgStart)});
-        }
-    }        
+        return true;
+    }
+    return false; 
 }
 
 void Parser::searchFinalDefense(Result* r) {
