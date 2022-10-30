@@ -118,6 +118,7 @@ void Document::loadVerificationValidationWidget() {
             QString msg = e.what();
             if (msg == "No changes were made.") throw e;
             if (!msg.isEmpty()) popup(msg);
+            else throw e;
         }
         catch (...) { popup("Failed to create a VerificationValidationWidget"); }
     }
