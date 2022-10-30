@@ -77,6 +77,8 @@ public:
         return vvWidget;
     }
 
+    void loadVerificationValidationWidget();
+
     DisplayGrid *getDisplayGrid()  {
         return displayGrid;
     }
