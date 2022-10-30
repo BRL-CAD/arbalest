@@ -29,6 +29,7 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
         msgBoxRes = NO_SELECTION;
     } else if (msgBoxRes == DISCARD) {
         dbClearResults();
+        resultTable->setRowCount(0);
     }
 }
 
@@ -73,6 +74,7 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 
 void VerificationValidationWidget::runTests() {
     dbClearResults();
+    resultTable->setRowCount(0);
 
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
