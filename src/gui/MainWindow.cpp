@@ -571,10 +571,26 @@ void MainWindow::prepareUi() {
     verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
     connect(verifyValidateViewportAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
-        documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
+        Document* currentDocument = documents[activeDocumentId];
+        VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
+        // verification and validation needs persistent .g file
+        if (!vvWidget) {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setText("You must save this file before running tests.");
+            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+
+            if (msgBox.exec() == QMessageBox::Ok && !saveAsFileDialogId(currentDocument->getDocumentId()))  {
+                popup("Failed to save.");
+                return;
+            }
+            else return;
+        }
         objectVerificationValidationDockable->setVisible(true);
-        documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
+        vvWidget->setStatusBar(statusBar);
+        vvWidget->showSelectTests();
+        vvWidget->runTests();
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
@@ -798,29 +814,23 @@ void MainWindow::newFile() {
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
             this, &MainWindow::objectTreeWidgetSelectionChanged);
-    
 }
 
 void MainWindow::openFile(const QString& filePath) {
     Document* document = nullptr;
+
     try {
         document = new Document(this, documentsCount, &filePath);
     }
-    catch (const std::runtime_error& e) {
-        document = nullptr;
-        QString msg = e.what();
-        if (!msg.isEmpty()) {
-            statusBar->showMessage(msg, statusBarShortMessageDuration);
-            popup(msg);
-        }
-    }
     catch (...) {
-        document = nullptr;
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);
-        popup(msg);
-    }
 
+        QMessageBox msgBox;
+        msgBox.setText(msg);
+        msgBox.exec();
+    }
+    
     if (document != nullptr) {
         document->getObjectTreeWidget()->setObjectName("dockableContent");
         document->getProperties()->setObjectName("dockableContent");

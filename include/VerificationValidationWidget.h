@@ -38,15 +38,11 @@ public:
     explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
-    QString *runTest(const QString &cmd);
     void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
-
-    QString getDBConnectionName() const
-    {
-        return dbConnectionName;
-    }
+    QString getDBConnectionName() const { return dbConnectionName; }
 
 public slots:
+    QString *runTest(const QString &cmd);
     void runTests();
 
 private slots:

@@ -10,13 +10,15 @@ using Parser = VerificationValidation::Parser;
 // TODO: if checksum doesn't match current test file, notify user
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
-document(document), testList(new QListWidget()), resultTable(new QTableWidget()), 
-selectTestsDialog(new QDialog()), statusBar(nullptr), mainWindow(mainWindow),
-suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new  QListWidget()),
-parentDockable(mainWindow->getVerificationValidationDockable()), msgBoxRes(NO_SELECTION), folderName("atr"),
+document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
+testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
+msgBoxRes(NO_SELECTION), folderName("atr"), dbConnectionName(""),
 dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
 {
+    if (!dbConnectionName.isEmpty()) return;
     if (!QDir(folderName).exists() && !QDir().mkdir(folderName)) popup("Failed to create " + folderName + " folder");
+    
     try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
@@ -229,7 +231,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT COUNT(id) FROM Model WHERE filePath=?");
+    q->prepare("SELECT COUNT(id) FROM Model WHERE filepath=?");
     q->addBindValue(QDir(*document->getFilePath()).absolutePath());
     dbExec(q, !SHOW_ERROR_POPUP);
 

@@ -23,9 +23,15 @@ Document::Document(MainWindow* mainWindow, const int documentId, const QString *
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
-    try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
-    catch (const std::runtime_error& e) { throw e; }
-    catch (...) { throw std::runtime_error("Failed to create VerificationValidationWidget"); };
+    vvWidget = nullptr;
+    if (filePath) {
+        try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
+        catch (const std::runtime_error& e) { 
+            QString msg = e.what();
+            if (!msg.isEmpty()) popup(msg);
+        }
+        catch (...) { popup("Failed to create a VerificationValidationWidget"); }
+    }
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();
