@@ -593,7 +593,10 @@ void MainWindow::prepareUi() {
                 return;
             }
 
-            if (currentDocument->getFilePath()) currentDocument->loadVerificationValidationWidget();
+            if (currentDocument->getFilePath()) { 
+                currentDocument->loadVerificationValidationWidget();
+                vvWidget = currentDocument->getVerificationValidationWidget();
+            }
         }
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);
