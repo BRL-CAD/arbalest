@@ -116,6 +116,7 @@ void Document::loadVerificationValidationWidget() {
         try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
         catch (const std::runtime_error& e) { 
             QString msg = e.what();
+            if (msg == "No changes were made.") throw e;
             if (!msg.isEmpty()) popup(msg);
         }
         catch (...) { popup("Failed to create a VerificationValidationWidget"); }
