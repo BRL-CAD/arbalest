@@ -581,11 +581,19 @@ void MainWindow::prepareUi() {
             msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             msgBox.setDefaultButton(QMessageBox::Ok);
 
-            if (msgBox.exec() == QMessageBox::Ok && !saveAsFileDialogId(currentDocument->getDocumentId()))  {
-                popup("Failed to save.");
+            if (msgBox.exec() == QMessageBox::Ok)  {
+                if (!saveAsFileDialogId(currentDocument->getDocumentId())) {
+                    popup("Failed to save.");
+                    return;
+                }
+                statusBar->showMessage("Loading Verification & Validation widget", statusBarShortMessageDuration);
+            }
+            else {
+                statusBar->showMessage("No changes were made.", statusBarShortMessageDuration);
                 return;
             }
-            else return;
+
+            if (currentDocument->getFilePath()) currentDocument->loadVerificationValidationWidget();
         }
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);

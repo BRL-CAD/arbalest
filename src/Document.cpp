@@ -24,14 +24,7 @@ Document::Document(MainWindow* mainWindow, const int documentId, const QString *
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
     vvWidget = nullptr;
-    if (filePath) {
-        try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
-        catch (const std::runtime_error& e) { 
-            QString msg = e.what();
-            if (!msg.isEmpty()) popup(msg);
-        }
-        catch (...) { popup("Failed to create a VerificationValidationWidget"); }
-    }
+    if (filePath) loadVerificationValidationWidget();
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();
@@ -116,4 +109,15 @@ Display* Document::getDisplay()
 
 int Document::getTabIndex() {
     return mainWindow->getDocumentArea()->indexOf(getDisplayGrid());
+}
+
+void Document::loadVerificationValidationWidget() {
+    if (!vvWidget) {
+        try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
+        catch (const std::runtime_error& e) { 
+            QString msg = e.what();
+            if (!msg.isEmpty()) popup(msg);
+        }
+        catch (...) { popup("Failed to create a VerificationValidationWidget"); }
+    }
 }
