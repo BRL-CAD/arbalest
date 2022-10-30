@@ -833,38 +833,54 @@ void MainWindow::openFile(const QString& filePath) {
     }
 }
 
-void MainWindow::openATRFile(const QString& atrFilePath) {
-    QString gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
-    if (!QFile::exists(atrFilePath)) popup("File " + atrFilePath + " doesn't exist.");
-    else {
-        {
-            QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-            db.setDatabaseName(atrFilePath);
+void MainWindow::openATRFile(const QString& atrFilePath) {    
+    {
+        QString modelID = "", gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
+        if (!QFile::exists(atrFilePath)) { popup("File " + atrFilePath + " doesn't exist."); return; }
 
-            if (!db.open()) popup("Failed to open " + atrFilePath);
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(atrFilePath);
 
-            if (db.isOpen()) {
-                QSqlQuery q("SELECT filePath, md5Checksum from Model", db);
-                if (!q.isActive() || !q.next()) 
-                    popup("Failed to fetch filepath from " + atrFilePath);
-                else {
-                    gFilePath = q.value(0).toString();
-                    md5Checksum = q.value(1).toString();
+        if (!db.open() || !db.isOpen()) { popup("Failed to open " + atrFilePath); return; }
+
+        QSqlQuery q("SELECT id, filePath, md5Checksum from Model", db);
+        if (!q.isActive() || !q.next())  { popup("Failed to fetch filepath from " + atrFilePath); return; }
+        else {
+            modelID = q.value(0).toString();
+            gFilePath = q.value(1).toString();
+            md5Checksum = q.value(2).toString();
+        }
+
+        if (!gFilePath.isEmpty()) {
+            // if associated .g doesn't exist/was moved, ask user to find it and update
+            QMessageBox msgBox;
+            QString newGFilePath;
+            while (!QFile::exists(gFilePath)) { 
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("The file associated with these test results no longer exists at " + gFilePath + ".\nPlease update the file location.");
+                msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Open);
+
+                if (msgBox.exec() == QMessageBox::Open) {
+                    newGFilePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+                    if (!newGFilePath.isEmpty()) gFilePath = newGFilePath;
                 }
-                db.close();
+                else break;
+            }
+
+            if (QFile::exists(gFilePath)) {
+                q.prepare("UPDATE Model SET filepath = ? WHERE id = ?"); // TODO: also update checksum here
+                q.addBindValue(gFilePath);
+                q.addBindValue(modelID);
+                q.exec();
+                if (!q.isActive()) { popup("Failed to update filepath to " + gFilePath + ".\n" + q.lastError().text()); return; }
+                openFile(gFilePath);
             }
         }
-        QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
-    }
 
-    if (gFilePath.isEmpty()) return;
-    if (!QFile::exists(gFilePath)) { 
-        // TODO: if associated .g doesn't exist/was moved, ask user to find it and update
-        popup(gFilePath + " does not exist."); 
-        return;
+        if (db.isOpen()) db.close();
     }
-
-    openFile(gFilePath);
+    QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
 }
 
 bool MainWindow::saveFile(const QString& filePath) {
