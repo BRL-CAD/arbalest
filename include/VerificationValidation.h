@@ -31,7 +31,6 @@ namespace VerificationValidation {
         };
 
         QString terminalOutput;
-	QString cmd;
         Code resultCode;
         std::list<ObjectIssue> issues; // used list for O(1) push_back, O(N) access; since need to display all issues in GUI anyways
     };

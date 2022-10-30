@@ -157,58 +157,43 @@ void Parser::searchFinalDefense(Result* r) {
 }
 
 Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
-	Result final;
-	final.terminalOutput = *terminalOutput;
-	final.cmd = *cmd;
-	Result* ptr_final = &final;
+	Result* final = new Result;
+	final->terminalOutput = terminalOutput->trimmed();
 
-	/* Convert terminal output and cmd into string for ease of parsing */
-	string s_terminalOutput = terminalOutput->toStdString();
-	string s_cmd = cmd->toStdString();
-
-	/* Check if length of list is zero, aka does it warnings or errors*/
-	if(stoi(s_terminalOutput.substr(s_terminalOutput.find(":") + 1)) == 0) { // Contains no issues
-		final.resultCode = Result::PASSED;
-		return ptr_final;
+	/* Check whether it contains any errors or warnings */
+	QStringList lines = final->terminalOutput.split("\n");
+	if(lines.size() >= 2) {
+		final->resultCode = Result::PASSED;
+		return final;
 	}
 
 
-	string issueDescription;
+	QString issueDescription;
 	/* Is it an error or warning? */
-	if(s_cmd.find("-d") != string::npos) { // This is a Warning
-		final.resultCode = Result::WARNING;
+	if(cmd->indexOf("-d") != -1) { // This is a Warning
+		final->resultCode = Result::WARNING;
 		issueDescription = "Contains duplicated ID's";
 
 	}
-	else if(s_cmd.find("-m") != string::npos) { // This is an Error
-		final.resultCode = Result::FAILED; 
+	else if(cmd->indexOf("-m") != -1) { // This is an Error
+		final->resultCode = Result::FAILED; 
 		issueDescription = "Contains mismatched ID's";
 	}
 	else { // If this is neither, assuming it is unparsable
-		final.resultCode = Result::UNPARSEABLE;
-		return ptr_final;
+		final->resultCode = Result::UNPARSEABLE;
+		return final;
 	}
 
 	/* Start adding the issues to list */
-	std::list<Result::ObjectIssue> temp_issues; // List for issues
-	string temp; // Variable used for storing line of entry
-	istringstream iss(s_terminalOutput);
-	getline(iss, temp); // Gets rid of length line
-	getline(iss, temp); // Gets rid of column description
-	int count;	
-	/* Parse through the results */ 
-	for(int i = 0; i < stoi(s_terminalOutput.substr(s_terminalOutput.find(":")+1)); i++) {
-		getline(iss, temp);
-		istringstream ess(temp);
-		count = 5; // This is where the name of object is stored
-		while(count-- > 0 && (ess >> temp)); // Get to the name of object
+	for(size_t i = 0; i < lines.size()-2; i++) {
+		/* The +2 is to ignore the list length and list details */
+		QStringList temp_parser = lines[i+2].split("  "); // Retrieve data into lists
 		Result::ObjectIssue tempObject;
-		tempObject.objectName = QString::fromStdString(temp.substr(0, temp.find(".")));
-		tempObject.issueDescription = QString::fromStdString(issueDescription);
-		temp_issues.push_back(tempObject);
+		tempObject.objectName = temp_parser[3].left(temp_parser[3].indexOf('.'));
+		tempObject.issueDescription = issueDescription;
+		final->issues.push_back(tempObject);
 	}
-	final.issues = temp_issues;
-	return ptr_final;
+	return final;
 
 
 }
