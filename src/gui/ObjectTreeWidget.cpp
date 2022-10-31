@@ -130,21 +130,31 @@ void ObjectTreeWidget::refreshItemTextColors() {
 
 QStringList ObjectTreeWidget::getSelectedObjects(const Name& name, const Level& level) {
     QStringList ans;
+    ObjectTree* objTree = document->getObjectTree();
+
     // if top, only traverse children of root
     if (level == Level::TOP) {
-        for (int childObjectId : document->getObjectTree()->getChildren()[0]) {
-            if (document->getObjectTree()->getObjectVisibility()[childObjectId] == ObjectTree::VisibilityState::FullyVisible)
-                ans << objectIdTreeWidgetItemMap[childObjectId]->text(0);
+        for (int childObjectId : objTree->getChildren()[0]) {
+            if (objTree->getObjectVisibility()[childObjectId] == ObjectTree::VisibilityState::FullyVisible)
+                ans << objTree->getFullPathMap()[childObjectId];
         }
     } 
     
     // otherwise check entire tree
     else {
-        for (QHash<int, QTreeWidgetItem*>::iterator i = objectIdTreeWidgetItemMap.begin(); i != objectIdTreeWidgetItemMap.end(); i++) {
-            int objectId = i.key();
-            if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::VisibilityState::FullyVisible)
-                ans << objectIdTreeWidgetItemMap[objectId]->text(0);
+        document->getObjectTree()->traverseSubTree(0,false,[this, &ans, objTree]
+        (int objectId){
+            if (objTree->getObjectVisibility()[objectId] != ObjectTree::VisibilityState::FullyVisible) return true;
+
+            for (int childObjectId : document->getObjectTree()->getChildren()[objectId]) {
+                if (objTree->getObjectVisibility()[childObjectId] != ObjectTree::VisibilityState::FullyVisible) return true;
+            }
+            
+            ans << objTree->getFullPathMap()[objectId];
+            return false;
         }
+        );
+
     }
 
     if (name == Name::BASENAME) {

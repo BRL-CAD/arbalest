@@ -57,16 +57,6 @@ void VerificationValidationWidget::runTests() {
     dbClearResults();
     resultTable->setRowCount(0);
 
-    const std::unordered_map<int, Document*> documents = *(mainWindow->getDocuments());
-    QStringList objects = documents.at(mainWindow->getActiveDocumentId())->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-    // TODO: pathname doesn't work right now
-    
-    std::cout << "----" << std::endl;
-    for (QString s : objects) {
-        std::cout << s.toStdString() << std::endl;
-    }
-    std::cout << "----" << std::endl;
-
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
     QListWidgetItem* item = 0;
