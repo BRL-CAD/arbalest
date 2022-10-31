@@ -29,7 +29,7 @@ namespace VerificationValidation {
         QString suiteName;
         QString category;
         bool hasVariable;
-        std::list<Arg> ArgList;
+        std::vector<Arg> ArgList;
     };
 
     class Result {

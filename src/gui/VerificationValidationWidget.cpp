@@ -155,8 +155,8 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE, hasValArgs BOOL NOT NULL, Category TEXT NOT NULL)");
-        dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
+        dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasValArgs BOOL NOT NULL, category TEXT NOT NULL)");
+        // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
         dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
@@ -167,8 +167,8 @@ void VerificationValidationWidget::dbInitTables() {
         dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
         dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
-    // if (!getDatabase().tables().contains("TestArgs"))
-    //     dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
+    if (!getDatabase().tables().contains("TestArgs"))
+        dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
 
 void VerificationValidationWidget::dbPopulateDefaults() {
@@ -196,9 +196,12 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
         for (int i = 0; i < DefaultTests::allTests.size(); i++) {
-            q->prepare("INSERT INTO Tests (testName, testCommand) VALUES (?, ?)");
-            q->addBindValue(DefaultTests::allTests[i].testName);
-            q->addBindValue(DefaultTests::allTests[i].testCommand);
+            std::cout << i << std::endl;
+            q->prepare("INSERT INTO Tests (testName, testCommand, hasValArgs, category) VALUES (:testName, :testCommand, :hasValArgs, :category)");
+            q->bindValue(":testName", DefaultTests::allTests[i].testName);
+            q->bindValue(":testCommand", DefaultTests::allTests[i].testCommand);
+            q->bindValue(":hasValArgs", DefaultTests::allTests[i].hasVariable);
+            q->bindValue(":category", DefaultTests::allTests[i].category);
             dbExec(q);
 
             QString testID = q->lastInsertId().toString();
@@ -206,6 +209,16 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             q->prepare("INSERT OR IGNORE INTO TestSuites VALUES (NULL, ?)");
             q->addBindValue(DefaultTests::allTests[i].suiteName);
             dbExec(q);
+
+            for (int j = 0; j < DefaultTests::allTests[i].ArgList.size(); j++){
+                q->prepare("INSERT INTO TestArg (testID, argIdx, arg, isVarArg, defaultVal) VALUES (:testID, :argIdx, :arg, :isVarArg, :defaultVal)");
+                q->bindValue(":testID", testID);
+                q->bindValue(":argIdx", j+1);
+                q->bindValue(":arg", DefaultTests::allTests[i].ArgList[j].argument);
+                q->bindValue(":isVarArg", DefaultTests::allTests[i].ArgList[j].isVariable);
+                q->bindValue(":defaultVal", DefaultTests::allTests[i].ArgList[j].defaultValue);
+                dbExec(q);
+            } 
 			
 			q->prepare("SELECT id FROM TestSuites WHERE suiteName = ?");
             q->addBindValue(DefaultTests::allTests[i].suiteName);
@@ -383,8 +396,8 @@ void VerificationValidationWidget::setupUI() {
     // TODO: select tops
     // TODO: add test categories in test lists
 
-	// Branch testDialog
-	std::cout << "Branch: testDialog" << std::endl;
+	// Branch cmdWithVariables
+	std::cout << "Branch: cmdWithVariables" << std::endl;
 	
     // setup result table's column headers
     QStringList columnLabels;

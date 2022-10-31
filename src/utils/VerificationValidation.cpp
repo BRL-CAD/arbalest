@@ -38,16 +38,16 @@ const Test DefaultTests::NO_INVALID_AIRCODE_REGIONS  = {"No regions have aircode
 
 const std::vector<Test> DefaultTests::allTests = {
     DefaultTests::MISMATCHED_DUP_IDS,
-    // DefaultTests::NO_NESTED_REGIONS,
-    // DefaultTests::NO_EMPTY_COMBOS,
-    // DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS,
-    // DefaultTests::ALL_BOTS_VOLUME_MODE,
-    // DefaultTests::NO_BOTS_LH_ORIENT,
-    // DefaultTests::ALL_REGIONS_MAT,
-    // DefaultTests::ALL_REGIONS_LOS,
-    // DefaultTests::NO_NULL_REGIONS,
-    // DefaultTests::NO_OVERLAPS,
-    // DefaultTests::NO_DUPLICATE_ID,
-    // DefaultTests::NO_MATRICES,
-    // DefaultTests::NO_INVALID_AIRCODE_REGIONS
+    DefaultTests::NO_NESTED_REGIONS,
+    DefaultTests::NO_EMPTY_COMBOS,
+    DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS,
+    DefaultTests::ALL_BOTS_VOLUME_MODE,
+    DefaultTests::NO_BOTS_LH_ORIENT,
+    DefaultTests::ALL_REGIONS_MAT,
+    DefaultTests::ALL_REGIONS_LOS,
+    DefaultTests::NO_NULL_REGIONS,
+    DefaultTests::NO_OVERLAPS,
+    DefaultTests::NO_DUPLICATE_ID,
+    DefaultTests::NO_MATRICES,
+    DefaultTests::NO_INVALID_AIRCODE_REGIONS
 };
