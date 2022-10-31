@@ -86,6 +86,8 @@ void VerificationValidationWidget::runTests() {
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
             result = Parser::search(testCommand, terminalOutput);
+	else if (QString::compare(executableName, "lc", Qt::CaseInsensitive) == 0)
+	    result = Parser::lc(testCommand, terminalOutput);
 
         // if parser hasn't been implemented, default
         if (!result) {

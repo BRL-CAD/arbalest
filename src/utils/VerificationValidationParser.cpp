@@ -155,31 +155,30 @@ void Parser::searchFinalDefense(Result* r) {
     }
 }
 
-Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
+Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	Result* final = new Result;
 	final->terminalOutput = terminalOutput->trimmed();
 
 	/* Check whether it contains any errors or warnings */
 	QStringList lines = final->terminalOutput.split("\n");
 	if(lines.size() >= 2) {
-		final->resultCode = Result::PASSED;
+		final->resultCode = Result::Code::PASSED;
 		return final;
 	}
 
 
 	QString issueDescription;
 	/* Is it an error or warning? */
-	if(cmd->indexOf("-d") != -1) { // This is a Warning
-		final->resultCode = Result::WARNING;
+	if(cmd.indexOf("-d") != -1) { // This is a Warning
+		final->resultCode = Result::Code::WARNING;
 		issueDescription = "Contains duplicated ID's";
 
 	}
-	else if(cmd->indexOf("-m") != -1) { // This is an Error
-		final->resultCode = Result::FAILED; 
+	else if(cmd.indexOf("-m") != -1) { // This is an Error
+		final->resultCode = Result::Code::FAILED; 
 		issueDescription = "Contains mismatched ID's";
 	}
 	else { // If this is neither, assuming it is unparsable
-		final->resultCode = Result::UNPARSEABLE;
 		return final;
 	}
 
@@ -192,6 +191,7 @@ Result* Parser::lc(const QString* cmd, const QString* terminalOutput) {
 		tempObject.issueDescription = issueDescription;
 		final->issues.push_back(tempObject);
 	}
+	cout << "Testing, hello" << endl;
 	return final;
 
 
