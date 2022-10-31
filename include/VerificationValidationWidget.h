@@ -17,6 +17,7 @@
 #include <QHBoxWidget.h>
 #include "VerificationValidation.h"
 #include "Utils.h"
+#include "map"
 
 #define RESULT_CODE_COLUMN  0
 #define TEST_NAME_COLUMN    1
@@ -24,6 +25,19 @@
 #define OBJPATH_COLUMN      3
 
 class Document;
+
+class TestItem : public QListWidgetItem {
+public:
+    QListWidgetItem* testWidgetItem;
+    int id;
+    QString testName;
+    QString testCommand;
+    bool hasValArgs;
+    QString category;
+
+    TestItem(QListWidgetItem* _testWidgetItem, int id, QString _testName, QString testCommand, bool _hasValArgs, QString _category);    
+};
+
 class VerificationValidationWidget : public QHBoxWidget {
     Q_OBJECT
 public:
@@ -34,7 +48,7 @@ public:
     //void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     //QDialog* getDialog() {return selectTestsDialog;};
-
+    
 public slots:
     void runTests();
 
@@ -46,6 +60,8 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    // void updateVarArgs(QString testName, int index, QString input);
+    void updateVarArgs();
 
 private:
     // widget-specific data
@@ -63,6 +79,8 @@ private:
     QLineEdit* searchBox;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    std::map<QListWidgetItem*, TestItem> testItemMap;
+    std::map<int, QListWidgetItem*> testIdMap;
 
     // init functions
     void dbConnect();
@@ -86,6 +104,7 @@ private:
     // Other
     void checkSuiteSA();
     void checkTestSA();
+    QString constructTestCommand(TestItem item);
 };
 
 #endif // VVWIDGET_H
