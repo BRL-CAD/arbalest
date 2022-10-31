@@ -833,6 +833,10 @@ void MainWindow::openFile(const QString& filePath) {
     try {
         document = new Document(this, documentsCount, &filePath);
     }
+    catch (const std::runtime_error& e) {
+        QString msg = e.what();
+        if (!msg.isEmpty()) popup(msg);
+    }
     catch (...) {
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);

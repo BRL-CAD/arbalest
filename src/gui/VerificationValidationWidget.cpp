@@ -29,6 +29,7 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
         msgBoxRes = NO_SELECTION;
     } else if (msgBoxRes == DISCARD) {
         dbClearResults();
+        resultTable->setRowCount(0);
     }
 }
 
@@ -53,6 +54,9 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
+    dbClearResults();
+    resultTable->setRowCount(0);
+
     const std::unordered_map<int, Document*> documents = *(mainWindow->getDocuments());
     QStringList objects = documents.at(mainWindow->getActiveDocumentId())->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
     // TODO: pathname doesn't work right now
@@ -62,10 +66,6 @@ void VerificationValidationWidget::runTests() {
         std::cout << s.toStdString() << std::endl;
     }
     std::cout << "----" << std::endl;
-
-
-    //clear result table
-    resultTable->setRowCount(0);
 
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
