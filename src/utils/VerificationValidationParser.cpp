@@ -158,12 +158,35 @@ void Parser::searchFinalDefense(Result* r) {
 Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	Result* final = new Result;
 	final->terminalOutput = terminalOutput->trimmed();
-
-	/* Check whether it contains any errors or warnings */
-	QStringList lines = final->terminalOutput.split("\n");
-	if(lines.size() >= 2) {
-		final->resultCode = Result::Code::PASSED;
+	
+	/* Check if database exists */
+	if(final->terminalOutput.indexOf("does not exist.") != -1) {
+		final->resultCode = Result::Code::UNPARSEABLE;
 		return final;
+	}
+
+	/* Check if its just usage */
+	if(cmd.trimmed() == "lc") {
+		final->resultCode = Result::Code::UNPARSEABLE;
+		return final;
+	}
+
+
+	QStringList lines = final->terminalOutput.split("\n");
+	/* Retreieve the list length */
+	QStringList number = lines[0].split(" ");
+	int list_length = 0;
+	QRegExp re("\\d");
+	for(int i = 0; i < number.size(); i++) {
+		if(re.exactMatch(number[i])) {
+			if(number[i].toInt() == 0) {
+				final->resultCode = Result::Code::PASSED;
+				return final;
+			}
+			else {
+				list_length = number[i].toInt();
+			}
+		}
 	}
 
 
@@ -179,19 +202,19 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 		issueDescription = "Contains mismatched ID's";
 	}
 	else { // If this is neither, assuming it is unparsable
+		final->resultCode = Result::Code::UNPARSEABLE;
 		return final;
 	}
 
 	/* Start adding the issues to list */
-	for(size_t i = 0; i < lines.size()-2; i++) {
+	for(size_t i = 0; i < list_length; i++) {
 		/* The +2 is to ignore the list length and list details */
-		QStringList temp_parser = lines[i+2].split("  "); // Retrieve data into lists
+		QStringList temp_parser = lines[i+2].split(QRegExp("\\s+"), QString::SkipEmptyParts); // Retrieve data into lists
 		Result::ObjectIssue tempObject;
-		tempObject.objectName = temp_parser[3].left(temp_parser[3].indexOf('.'));
-		tempObject.issueDescription = issueDescription;
+		tempObject.objectName = temp_parser[4].left(temp_parser[4].indexOf('.'));
+		tempObject.issueDescription = issueDescription ;
 		final->issues.push_back(tempObject);
 	}
-	cout << "Testing, hello" << endl;
 	return final;
 
 
