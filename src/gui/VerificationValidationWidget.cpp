@@ -140,8 +140,6 @@ void VerificationValidationWidget::runTests() {
     QLabel *title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     parentDockable->setTitleBarWidget(title);
-
-    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -578,6 +576,8 @@ void VerificationValidationWidget::setupUI() {
     
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
+
+    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
