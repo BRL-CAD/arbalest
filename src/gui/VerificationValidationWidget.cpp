@@ -717,7 +717,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         }
 
         QString objectName = q3->value(0).toString();
-        QString issueDescription = q3->value(1).toString();
+        QString issueDescription = q3->value(1).toString().replace("\n", "");
 
         resultTable->insertRow(resultTable->rowCount());
 
