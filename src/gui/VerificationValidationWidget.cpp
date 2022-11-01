@@ -119,7 +119,7 @@ void VerificationValidationWidget::runTests() {
         }
 
         QString resultCode = QString::number(result->resultCode);
-        
+
         // insert results into db
         QSqlQuery* q2 = new QSqlQuery(getDatabase());
         q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
@@ -246,7 +246,7 @@ void VerificationValidationWidget::dbInitTables() {
         delete dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
         dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
-    if (!getDatabase().tables().contains("TestArgs"))
+    if (!getDatabase().tables().contains("TestArg"))
         dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
 
