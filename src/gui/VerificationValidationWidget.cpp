@@ -698,56 +698,69 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     int resultCode = q->value(1).toInt();
     QString terminalOutput = q->value(2).toString();
 
-    QSqlQuery* q2 = new QSqlQuery(getDatabase());
-    q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
-    q2->addBindValue(testResultID);
-    dbExec(q2, !SHOW_ERROR_POPUP);
+    QString iconPath = "";
+    QString objectName;
+    QString issueDescription;
 
-    while (q2->next()) {
-        QString objectIssueID = q2->value(0).toString();
-
-        QSqlQuery* q3 = new QSqlQuery(getDatabase());
-        q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
-        q3->addBindValue(objectIssueID);
-        dbExec(q3);
-
-        if (!q3->next()) {
-            popup("Failed to retrieve Object Issue #" + objectIssueID);
-            return;
-        }
-
-        QString objectName = q3->value(0).toString();
-        QString issueDescription = q3->value(1).toString();
-
+    if (resultCode == Result::Code::PASSED) {
         resultTable->insertRow(resultTable->rowCount());
-
-        QString iconPath = "";
-        if (resultCode == VerificationValidation::Result::Code::UNPARSEABLE)
-            iconPath = ":/icons/unparseable.png";
-        else if (resultCode == VerificationValidation::Result::Code::FAILED)
-            iconPath = ":/icons/error.png";
-        else if (resultCode == VerificationValidation::Result::Code::WARNING)
-            iconPath = ":/icons/warning.png";
-        else if (resultCode == VerificationValidation::Result::Code::PASSED)
-            iconPath = ":/icons/passed.png";
-
-        // Change to hide icon image path from showing
-        QTableWidgetItem* icon_item = new QTableWidgetItem;
-        QIcon icon(iconPath);
-        icon_item->setIcon(icon);
-        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
+        iconPath = ":/icons/passed.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
-        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
-        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+    } 
 
-        delete q3;
+    else if (resultCode == Result::Code::UNPARSEABLE) {
+        resultTable->insertRow(resultTable->rowCount());
+        iconPath = ":/icons/unparseable.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
     }
+
+    else {
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+        q2->addBindValue(testResultID);
+        dbExec(q2, !SHOW_ERROR_POPUP);
+
+        while (q2->next()) {
+            QString objectIssueID = q2->value(0).toString();
+
+            QSqlQuery* q3 = new QSqlQuery(getDatabase());
+            q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
+            q3->addBindValue(objectIssueID);
+            dbExec(q3);
+
+            if (!q3->next()) {
+                popup("Failed to retrieve Object Issue #" + objectIssueID);
+                return;
+            }
+
+            objectName = q3->value(0).toString();
+            issueDescription = q3->value(1).toString();
+
+            resultTable->insertRow(resultTable->rowCount());
+
+            if (resultCode == VerificationValidation::Result::Code::FAILED)
+                iconPath = ":/icons/error.png";
+            else if (resultCode == VerificationValidation::Result::Code::WARNING)
+                iconPath = ":/icons/warning.png";                
+
+            // Change to hide icon image path from showing
+            resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+            resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+            resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
+            resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+
+            delete q3;
+        }
+        delete q2;
+    }
+    
     // Only select rows, disable edit
     resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     delete q;
-    delete q2;
 }
 
 void VerificationValidationWidget::showAllResults() {
