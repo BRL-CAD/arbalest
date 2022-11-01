@@ -103,8 +103,9 @@ void VerificationValidationWidget::runTests() {
     QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
         statusBar->showMessage(status.arg(i+1).arg(totalTests));
-        int testID = testList->row(selected_tests[i]) + 1;
-        QString testCommand = selected_tests[i]->toolTip();
+        int testID = testItemMap.at(selected_tests[i]).id;
+        QString testCommand = constructTestCommand(testItemMap.at(selected_tests[i]));
+
         const QString* terminalOutput = runTest(testCommand);
                 
         QString executableName = testCommand.split(' ').first();
@@ -368,6 +369,9 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
 }
 
 void VerificationValidationWidget::testListSelection(QListWidgetItem* test_clicked) {
+    if(test_clicked->toolTip() == "Category"){
+        return;
+    }
     QSqlQuery* q1 = new QSqlQuery(getDatabase());
     QSqlQuery* q2 = new QSqlQuery(getDatabase());
     
@@ -406,19 +410,8 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     checkTestSA();
 }
 
-// void VerificationValidationWidget::updateVarArgs(QString testName, int index, QString input){
-//     std::cout << "called"  << std::endl;
-//     std::cout << testName.toStdString() << std::endl;
-//     std::cout << index << std::endl;
-//     std::cout << input.toStdString() << std::endl;
-// }
-
-void VerificationValidationWidget::updateVarArgs() {
-    std::cout << "called"  << std::endl;
-}
-
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
-    if(testItemMap.find(test) != testItemMap.end()){
+    if(test->toolTip() !=  "Category"){
         if(testItemMap.at(test).hasValArgs) {
             QDialog* userInputDialog = new QDialog();
             userInputDialog->setModal(true);
@@ -433,12 +426,15 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addSpacing(15);
 
             QSqlQuery* q = new QSqlQuery(getDatabase());
-            q->prepare("Select arg, defaultVal from TestArg Where testID = :id AND isVarArg = 1 ORDER by argIdx");
+            q->prepare("Select id, arg, defaultVal from TestArg Where testID = :id AND isVarArg = 1 ORDER by argIdx");
             q->bindValue(":id", testItemMap.at(test).id);
             dbExec(q);
-
+            std::vector<QLineEdit*> input_vec;
+            std::vector<QString> argId_vec;
             while(q->next()){
-                formLayout->addRow(q->value(0).toString(), new QLineEdit(q->value(1).toString()));
+                argId_vec.push_back(q->value(0).toString());
+                input_vec.push_back(new QLineEdit(q->value(2).toString()));
+                formLayout->addRow(q->value(1).toString(), input_vec.back());
                 formLayout->setSpacing(10);
             }
             
@@ -452,12 +448,20 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(setBtn);
 
             userInputDialog->setLayout(vLayout);
-            userInputDialog->exec();
-            
-            // NEED HELP: send lineqdit input from fromlayout to updateVarArgs (C++11 lambda expressions)
-            // Get input with formLayout-> itemAt -> widget (?)
 
-            connect(setBtn, SIGNAL(clicked()), this, SLOT(updateVarArgs()));
+            connect(setBtn, &QPushButton::clicked, [this, argId_vec, input_vec](){
+                QSqlQuery* q = new QSqlQuery(getDatabase());
+                for(int i =  0; i < argId_vec.size(); i++){
+                    q->prepare("UPDATE TestArg SET DefaultVal = :input WHERE id = :id");
+                    q->bindValue(":id", argId_vec[i]);
+                    q->bindValue(":input", input_vec[i]->text());
+                    dbExec(q);
+                }
+            });
+            
+            connect(setBtn, &QPushButton::clicked, userInputDialog, &QDialog::accept);
+
+            userInputDialog->exec();
         }
     }
 }

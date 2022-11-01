@@ -60,8 +60,6 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
-    // void updateVarArgs(QString testName, int index, QString input);
-    void updateVarArgs();
 
 private:
     // widget-specific data
