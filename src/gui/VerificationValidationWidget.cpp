@@ -1,5 +1,6 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
+#include "MainWindow.h"
 using Result = VerificationValidation::Result;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
@@ -8,15 +9,32 @@ using Parser = VerificationValidation::Parser;
 
 // TODO: if checksum doesn't match current test file, notify user
 
-VerificationValidationWidget::VerificationValidationWidget(Document* document, QWidget* parent) : document(document), testList(new QListWidget()), suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new  QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()), statusBar(nullptr) {
-    dbConnect();
+VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
+document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
+testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
+msgBoxRes(NO_SELECTION), folderName("atr"), dbConnectionName(""),
+dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
+{
+    if (!dbConnectionName.isEmpty()) return;
+    if (!QDir(folderName).exists() && !QDir().mkdir(folderName)) popup("Failed to create " + folderName + " folder");
+    
+    try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
     setupUI();
+
+    if (msgBoxRes == OPEN) {
+        showAllResults();
+        msgBoxRes = NO_SELECTION;
+    } else if (msgBoxRes == DISCARD) {
+        dbClearResults();
+        resultTable->setRowCount(0);
+    }
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
-    QSqlDatabase::removeDatabase(dbConnectionName);
+    dbClose();
 }
 
 
@@ -27,27 +45,8 @@ void VerificationValidationWidget::showSelectTests() {
 }
 
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
-    struct ged *dbp;
-    const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
-
-    const char* cmdList[tmp.size() + 1];
-    for (int i = 0; i < tmp.size(); i++) {
-        char* cmdBuf = new char[tmp[i].size() + 1];
-        strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
-        cmdBuf[tmp[i].size()] = '\0';
-        cmdList[i] = cmdBuf;
-    }
-    cmdList[tmp.size()] = NULL;
-    
     QString filepath = *(document->getFilePath());
-    if (!bu_file_exists((filepath).toStdString().c_str(), NULL)) {
-        QString errorMsg = "[Verification & Validation] ERROR: [" + filepath + "] does not exist\n";
-        popup(errorMsg);
-        return nullptr;
-    }
-
-    dbp = ged_open("db", filepath.toStdString().c_str(), 1);
-    ged_exec(dbp, tmp.size(), cmdList);
+    struct ged* dbp = mgedRun(cmd, filepath);
     QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
     ged_close(dbp);
 
@@ -55,7 +54,7 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
-    //clear result table
+    dbClearResults();
     resultTable->setRowCount(0);
 
     // Get list of checked tests
@@ -124,28 +123,85 @@ void VerificationValidationWidget::runTests() {
 
         showResult(testResultID);
     }
-}
 
-void VerificationValidationWidget::dbConnect() {
-    if (!QSqlDatabase::isDriverAvailable("QSQLITE")) {
-        throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
+    q->addBindValue(modelID);
+    dbExec(q);
+    if (!q->next()) {
+        popup("Failed to show modelID " + modelID);
         return;
     }
 
-    dbName = "tmpfile.sqlite"; 
-    if (document->getFilePath()) dbName = document->getFilePath()->split("/").last() + ".sqlite";
-    dbConnectionName = dbName + "-connection";
+    QString md5 = q->value(0).toString();
+    QString filePath = q->value(1).toString();
+    delete q;
+    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
+    QLabel *title = new QLabel(dockableTitle);
+    title->setObjectName("dockableHeader");
+    parentDockable->setTitleBarWidget(title);
 
-    // check if SQL connection already open
-    QSqlDatabase db = QSqlDatabase::database(dbConnectionName, false);
-    // TODO: instead of throwing + popping up error, open correct document
-    if (db.isOpen())
-        throw std::runtime_error("[Verification & Validation] ERROR: SQL connection already exists");
-    
-    //// TODO: opening multiple new files crashes
-    //// TODO: whenever user saves, sqlite file name should be updated from tmpfile.sqlite to <newfilename>.sqlite
+    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
+}
+
+void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
+    if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
+        throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
+
+    this->dbName = dbFilePath;
+    QString* fp = document->getFilePath();
+    if (fp) {
+        QStringList fpList = fp->split("/");
+        this->dbName = folderName + "/" + fpList.last() + ".atr";
+        this->dbFilePath = QDir(this->dbName).absolutePath();
+    }
+
+    dbConnectionName = this->dbName + "-connection";
+    QSqlDatabase db = getDatabase();
+
+    // if SQL connection already open, just switch to that tab
+    if (dbIsAlive(db)) {
+        const std::unordered_map<int, Document*>* documents = mainWindow->getDocuments();
+        Document* correctDocument = nullptr;
+        Document* doc;
+        for (auto it = documents->begin(); it != documents->end(); it++) {
+            doc = it->second;
+            if (doc && doc != this->document && doc->getVerificationValidationWidget()->getDBConnectionName() == dbConnectionName) {
+                correctDocument = doc;
+                break;
+            }
+        }
+        if (correctDocument) mainWindow->getDocumentArea()->setCurrentIndex(correctDocument->getTabIndex());
+        throw std::runtime_error("");
+    }
+
+    // if file exists, prompt before overwriting
+    if (QFile::exists(this->dbName)) {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Detected existing test results in " + this->dbName + ".\nDo you want to open or discard the results?");
+        msgBox.setInformativeText("Changes cannot be reverted.");
+        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+        QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
+        discardButton->setIcon(QIcon(":/icons/warning.png"));
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+
+        int res = msgBox.exec();
+        if (res == QMessageBox::Open) {
+            msgBoxRes = OPEN;
+            parentDockable->setVisible(true);
+        }
+        else if (msgBox.clickedButton() == discardButton) { 
+            msgBoxRes = DISCARD;
+        }
+        else {
+            msgBoxRes = CANCEL;
+            throw std::runtime_error("No changes were made.");
+        }
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-    db.setDatabaseName(dbName);
+    db.setDatabaseName(this->dbName);
 
     if (!db.open() || !db.isOpen())
         throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
@@ -153,20 +209,19 @@ void VerificationValidationWidget::dbConnect() {
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        // dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE, hasValArgs BOOL NOT NULL, Category TEXT NOT NULL)");
-        dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
+        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL UNIQUE)");
     if (!getDatabase().tables().contains("TestResults"))
-        dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
+        delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
-        dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
+        delete dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
-        dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE ObjectIssue (id INTEGER PRIMARY KEY, objectName TEXT NOT NULL, issueDescription TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestSuites"))
-        dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
+        delete dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
-        dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
+        delete dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
     // if (!getDatabase().tables().contains("TestArgs"))
     //     dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
@@ -177,19 +232,26 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT id FROM Model WHERE filePath=?");
-    q->addBindValue(dbName);
+    q->prepare("SELECT COUNT(id) FROM Model WHERE filepath=?");
+    q->addBindValue(QDir(*document->getFilePath()).absolutePath());
     dbExec(q, !SHOW_ERROR_POPUP);
-    if (!q->next()) {
+
+    int numEntries = 0;
+    if (q->next()) numEntries = q->value(0).toInt();
+
+    if (!numEntries) {
+        delete q;
         q = new QSqlQuery(getDatabase());
         q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
-        q->addBindValue(dbName);
+        q->addBindValue(QDir(*document->getFilePath()).absolutePath());
         q->addBindValue(md5Checksum);
-        dbExec(q);   
+        dbExec(q);
         modelID = q->lastInsertId().toString();
     } else {
         modelID = q->value(0).toString();
     }
+
+    delete q;
 
     // if Tests table empty, new db and insert tests
     // note: this doesn't repopulate deleted tests, unless all tests deleted
@@ -221,6 +283,8 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             dbExec(q);
         }
     }
+
+    delete q;
 }
 
 void VerificationValidationWidget::searchTests(const QString &input)  {
@@ -313,6 +377,7 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
         suite_sa->item(0)->setCheckState(Qt::Unchecked);
     }
     checkSuiteSA();
+    delete q;
 }
 
 void VerificationValidationWidget::testListSelection(QListWidgetItem* test_clicked) {
@@ -350,6 +415,9 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     }
     checkSuiteSA();
     checkTestSA();
+
+    delete q1;
+    delete q2;
 }
 
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
@@ -382,9 +450,6 @@ void VerificationValidationWidget::setupUI() {
     // TODO: allow input
     // TODO: select tops
     // TODO: add test categories in test lists
-
-	// Branch testDialog
-	std::cout << "Branch: testDialog" << std::endl;
 	
     // setup result table's column headers
     QStringList columnLabels;
@@ -427,7 +492,7 @@ void VerificationValidationWidget::setupUI() {
     
     // Get suite list from db
     query.exec("Select suiteName from TestSuites ORDER by id ASC");
-    QStringList  testSuites;
+    QStringList testSuites;
     while(query.next()){
     	testSuites << query.value(0).toString();
     }
@@ -528,6 +593,12 @@ void VerificationValidationWidget::dbExec(QSqlQuery*& query, bool showErrorPopup
         popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + query->lastQuery());
 }
 
+void VerificationValidationWidget::dbClearResults() {
+    delete dbExec("DELETE FROM TestResults");
+    delete dbExec("DELETE FROM Issues");
+    delete dbExec("DELETE FROM ObjectIssue");
+}
+
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(0, this->width() * 0.025);
     resultTable->setColumnWidth(1, this->width() * 0.125);
@@ -538,9 +609,77 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
 }
 
 void VerificationValidationWidget::setupDetailedResult(int row, int column) {
-    // QDialog* result_dialog = new QDialog();
-    // result_dialog->exec();
-    // result_dialog->setModal(true);
+    QDialog* detail_dialog = new QDialog();
+    detail_dialog->setModal(true);
+    detail_dialog->setWindowTitle("Details");
+
+    QVBoxLayout* mainLayout = new QVBoxLayout();
+    QVBoxLayout* detailLayout = new QVBoxLayout();
+    QWidget* viewport = new QWidget();
+    QScrollArea* scrollArea = new QScrollArea();
+    QString resultCode;
+    QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
+    QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
+    QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id, testCommand FROM Tests WHERE testName = ?");
+    q->addBindValue(testName);
+    dbExec(q);
+    if (!q->next()) {
+        popup("Failed to show testName: " + testName);
+        return;
+    }
+
+    int testID = q->value(0).toInt();
+    QString testCommand = q->value(1).toString();
+
+    QSqlQuery* q2 = new QSqlQuery(getDatabase());
+    q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
+    q2->addBindValue(testID);
+    dbExec(q2);
+    if (!q2->next()) {
+        popup("Failed to show testID: " + testID);
+        return;
+    }
+
+    QString terminalOutput = q2->value(0).toString();
+    int code = q2->value(1).toInt();
+    if(code == Result::Code::PASSED)
+        resultCode = "Passed";
+    else if(code == Result::Code::WARNING)
+        resultCode = "Warning";
+    else if(code == Result::Code::FAILED)
+        resultCode = "Failed";
+    else
+        resultCode = "Unparseable";
+
+    QLabel *testNameHeader = new QLabel("Test Name:");
+    testNameHeader->setStyleSheet("font-weight: bold");
+    QLabel *commandHeader = new QLabel("Command:");
+    commandHeader->setStyleSheet("font-weight: bold");
+    QLabel *resultCodeHeader = new QLabel("Result Code:");
+    resultCodeHeader->setStyleSheet("font-weight: bold");
+    QLabel *descriptionHeader = new QLabel("Description:");
+    descriptionHeader->setStyleSheet("font-weight: bold");
+    QLabel *rawOutputHeader = new QLabel("Raw Output:");
+    rawOutputHeader->setStyleSheet("font-weight: bold");
+
+    detailLayout->addWidget(testNameHeader);
+    detailLayout->addWidget(new QLabel(testName+"\n"));
+    detailLayout->addWidget(commandHeader);
+    detailLayout->addWidget(new QLabel(testCommand+"\n"));
+    detailLayout->addWidget(resultCodeHeader);
+    detailLayout->addWidget(new QLabel(resultCode+"\n"));
+    detailLayout->addWidget(descriptionHeader);
+    detailLayout->addWidget(new QLabel(description+"\n"));
+    detailLayout->addWidget(rawOutputHeader);
+    detailLayout->addWidget(new QLabel(terminalOutput));
+    viewport->setLayout(detailLayout);
+    scrollArea->setWidget(viewport);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mainLayout->addWidget(scrollArea);
+    detail_dialog->setLayout(mainLayout);
+    detail_dialog->exec();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
@@ -596,17 +735,31 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         QIcon icon(iconPath);
         icon_item->setIcon(icon);
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
-
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
         resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
 
-        // Only select rows, disable edit
-        resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-        resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        // Double click event signal trigger
-        //connect(resultTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(setupDetailedResult()));
-        connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
+        delete q3;
     }
+    // Only select rows, disable edit
+    resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    delete q;
+    delete q2;
+}
+
+void VerificationValidationWidget::showAllResults() {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id FROM TestResults WHERE modelID = ?");
+    q->addBindValue(modelID);
+    dbExec(q);
+
+    QString testResultID;
+    while (q && q->next()) {
+        testResultID = q->value(0).toString();
+        showResult(testResultID);
+    }
+
+    delete q;
 }

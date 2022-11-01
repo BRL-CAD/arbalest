@@ -22,6 +22,7 @@ Dockable::Dockable(const QString &dockableTitle, QWidget *mainWindow, bool scrol
 }
 
 void Dockable::setContent(QWidget *content) {
+    if (!content) return;
     if(widget())widget()->setVisible(false);
     if (scrollable) { // use scroll areas
         QScrollArea *scrollArea;

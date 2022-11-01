@@ -36,6 +36,7 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QPainter>
+#include <bu.h>
 class Document;
 class ObjectTreeWidget : public QTreeWidget {
     Q_OBJECT
@@ -44,6 +45,11 @@ public:
     void refreshItemTextColors();
     const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
+
+    enum Name { PATHNAME, BASENAME };
+    enum Level { TOP, ALL };
+    QStringList getSelectedObjects(const Name& name, const Level& level);
+    
 private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
