@@ -601,7 +601,6 @@ void MainWindow::prepareUi() {
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
-        vvWidget->runTests();
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
