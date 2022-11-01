@@ -124,6 +124,20 @@ void VerificationValidationWidget::runTests() {
 
         showResult(testResultID);
     }
+    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
+
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
+    q->addBindValue(modelID);
+    dbExec(q);
+    if (!q->next()) {
+        popup("Failed to show modelID " + modelID);
+        return;
+    }
+
+    QString md5 = q->value(0).toString();
+    QString filePath = q->value(1).toString();
+    this->setWindowTitle("Verification & Validation -- File Path: "+filePath+", MD5: "+md5+", Model ID: "+modelID);
 }
 
 void VerificationValidationWidget::dbConnect() {
@@ -538,9 +552,61 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
 }
 
 void VerificationValidationWidget::setupDetailedResult(int row, int column) {
-    // QDialog* result_dialog = new QDialog();
-    // result_dialog->exec();
-    // result_dialog->setModal(true);
+    QDialog* detail_dialog = new QDialog();
+    detail_dialog->setModal(true);
+    detail_dialog->setWindowTitle("Details");
+
+    QVBoxLayout* mainLayout = new QVBoxLayout();
+    QVBoxLayout* detailLayout = new QVBoxLayout();
+    QWidget* viewport = new QWidget();
+    QScrollArea* scrollArea = new QScrollArea();
+    QString resultCode;
+    QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
+    QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
+    QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id, testCommand FROM Tests WHERE testName = ?");
+    q->addBindValue(testName);
+    dbExec(q);
+    if (!q->next()) {
+        popup("Failed to show testName: " + testName);
+        return;
+    }
+
+    int testID = q->value(0).toInt();
+    QString testCommand = q->value(1).toString();
+
+    QSqlQuery* q2 = new QSqlQuery(getDatabase());
+    q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
+    q2->addBindValue(testID);
+    dbExec(q2);
+    if (!q2->next()) {
+        popup("Failed to show testID: " + testID);
+        return;
+    }
+
+    QString terminalOutput = q2->value(0).toString();
+    int code = q2->value(1).toInt();
+    if(code == Result::Code::PASSED)
+        resultCode = "Passed";
+    else if(code == Result::Code::WARNING)
+        resultCode = "Warning";
+    else if(code == Result::Code::FAILED)
+        resultCode = "Failed";
+    else
+        resultCode = "Unparseable";
+
+    detailLayout->addWidget(new QLabel("Test Name: "+testName));
+    detailLayout->addWidget(new QLabel("Command: "+testCommand));
+    detailLayout->addWidget(new QLabel("Result Code: "+resultCode));
+    detailLayout->addWidget(new QLabel("Description: "+description));
+    detailLayout->addWidget(new QLabel("Raw Output: \n"+terminalOutput));
+    viewport->setLayout(detailLayout);
+    scrollArea->setWidget(viewport);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mainLayout->addWidget(scrollArea);
+    detail_dialog->setLayout(mainLayout);
+    detail_dialog->exec();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
@@ -596,17 +662,11 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         QIcon icon(iconPath);
         icon_item->setIcon(icon);
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
-
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
         resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
-
-        // Only select rows, disable edit
-        resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-        resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        // Double click event signal trigger
-        //connect(resultTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(setupDetailedResult()));
-        connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
     }
+
+    resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
