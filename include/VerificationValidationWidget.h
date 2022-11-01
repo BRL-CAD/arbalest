@@ -45,12 +45,7 @@ public:
     ~VerificationValidationWidget();
     void showSelectTests();
     QString* runTest(const QString& cmd);
-    //void runTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
-    //QDialog* getDialog() {return selectTestsDialog;};
-    
-public slots:
-    void runTests();
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
@@ -60,6 +55,7 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void runTests();
 
 private:
     // widget-specific data

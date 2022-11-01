@@ -564,7 +564,6 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
         documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
         objectVerificationValidationDockable->setVisible(true);
-        documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
     });
     verificationValidation->addAction(verificationValidationAct);
 

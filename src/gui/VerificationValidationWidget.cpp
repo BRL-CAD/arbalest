@@ -31,7 +31,6 @@ VerificationValidationWidget::~VerificationValidationWidget() {
 void VerificationValidationWidget::showSelectTests() {
     statusBar->showMessage("Select tests to run...");
     selectTestsDialog->exec();
-    //connect(selectTestsDialog, SIGNAL(accepted()), this, SLOT(runTests()));
 }
 
 QString VerificationValidationWidget::constructTestCommand(TestItem item){
@@ -439,10 +438,6 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             
             vLayout->addLayout(formLayout);
             
-
-            // QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-            // vLayout->addWidget(buttonOptions);
-            
             QPushButton* setBtn = new QPushButton("Set");
             vLayout->addWidget(setBtn);
 
@@ -622,8 +617,10 @@ void VerificationValidationWidget::setupUI() {
 
     // Test input for gqa
     connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
-
+    
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
+    connect(buttonOptions, &QDialogButtonBox::accepted, this, &VerificationValidationWidget::runTests);
+
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
 }
 
