@@ -123,7 +123,6 @@ void VerificationValidationWidget::runTests() {
 
         showResult(testResultID);
     }
-    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
@@ -136,7 +135,13 @@ void VerificationValidationWidget::runTests() {
 
     QString md5 = q->value(0).toString();
     QString filePath = q->value(1).toString();
-    this->setWindowTitle("Verification & Validation -- File Path: "+filePath+", MD5: "+md5+", Model ID: "+modelID);
+    delete q;
+    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
+    QLabel *title = new QLabel(dockableTitle);
+    title->setObjectName("dockableHeader");
+    parentDockable->setTitleBarWidget(title);
+
+    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -648,11 +653,27 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     else
         resultCode = "Unparseable";
 
-    detailLayout->addWidget(new QLabel("Test Name: "+testName));
-    detailLayout->addWidget(new QLabel("Command: "+testCommand));
-    detailLayout->addWidget(new QLabel("Result Code: "+resultCode));
-    detailLayout->addWidget(new QLabel("Description: "+description));
-    detailLayout->addWidget(new QLabel("Raw Output: \n"+terminalOutput));
+    QLabel *testNameHeader = new QLabel("Test Name:");
+    testNameHeader->setStyleSheet("font-weight: bold");
+    QLabel *commandHeader = new QLabel("Command:");
+    commandHeader->setStyleSheet("font-weight: bold");
+    QLabel *resultCodeHeader = new QLabel("Result Code:");
+    resultCodeHeader->setStyleSheet("font-weight: bold");
+    QLabel *descriptionHeader = new QLabel("Description:");
+    descriptionHeader->setStyleSheet("font-weight: bold");
+    QLabel *rawOutputHeader = new QLabel("Raw Output:");
+    rawOutputHeader->setStyleSheet("font-weight: bold");
+
+    detailLayout->addWidget(testNameHeader);
+    detailLayout->addWidget(new QLabel(testName+"\n"));
+    detailLayout->addWidget(commandHeader);
+    detailLayout->addWidget(new QLabel(testCommand+"\n"));
+    detailLayout->addWidget(resultCodeHeader);
+    detailLayout->addWidget(new QLabel(resultCode+"\n"));
+    detailLayout->addWidget(descriptionHeader);
+    detailLayout->addWidget(new QLabel(description+"\n"));
+    detailLayout->addWidget(rawOutputHeader);
+    detailLayout->addWidget(new QLabel(terminalOutput));
     viewport->setLayout(detailLayout);
     scrollArea->setWidget(viewport);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -718,16 +739,11 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
         resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
 
-        // Only select rows, disable edit
-        resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-        resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-        // Double click event signal trigger
-        //connect(resultTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(setupDetailedResult()));
-        connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
-
         delete q3;
     }
+    // Only select rows, disable edit
+    resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     delete q;
     delete q2;
