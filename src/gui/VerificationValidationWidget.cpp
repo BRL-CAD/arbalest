@@ -48,6 +48,7 @@ QString VerificationValidationWidget::constructTestCommand(TestItem item){
         }
     }
     
+    delete q;
     return cmd;
 }
 
@@ -258,6 +259,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
             dbExec(q);
         }
     }
+    delete q;
 }
 
 void VerificationValidationWidget::searchTests(const QString &input)  {
@@ -364,6 +366,7 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
         suite_sa->item(0)->setCheckState(Qt::Unchecked);
     }
     checkSuiteSA();
+    delete q;
 }
 
 void VerificationValidationWidget::testListSelection(QListWidgetItem* test_clicked) {
@@ -406,6 +409,9 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     }
     checkSuiteSA();
     checkTestSA();
+
+    delete q1;
+    delete q2;
 }
 
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
