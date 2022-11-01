@@ -21,6 +21,7 @@
     <file>icons/baseline_refresh_black_48dp.png</file>
     <file>icons/sharp_grid_on_black_48dp.png</file>
     <file>icons/verifyValidateIcon.png</file>
+    <file>icons/openVerifyValidateIcon.png</file>
 
     <!-- Toolbar raytrace -->
     <file>icons/baseline_filter_vintage_black_48dp.png</file>

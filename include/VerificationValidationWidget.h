@@ -5,8 +5,6 @@
 #ifndef VVWIDGET_H
 #define VVWIDGET_H
 
-#include <ged.h>
-#include <bu.h>
 #include <iostream>
 #include <QTableView>
 #include <QtSql/QSqlTableModel>
@@ -19,12 +17,19 @@
 #include "Utils.h"
 #include "map"
 
-#define RESULT_CODE_COLUMN  0
-#define TEST_NAME_COLUMN    1
-#define DESCRIPTION_COLUMN  2
-#define OBJPATH_COLUMN      3
+#define RESULT_CODE_COLUMN 0
+#define TEST_NAME_COLUMN 1
+#define DESCRIPTION_COLUMN 2
+#define OBJPATH_COLUMN 3
 
+#define NO_SELECTION -1
+#define OPEN 0
+#define DISCARD 1
+#define CANCEL 2
+
+class MainWindow;
 class Document;
+class Dockable;
 
 class TestItem : public QListWidgetItem {
 public:
@@ -38,14 +43,19 @@ public:
     TestItem(QListWidgetItem* _testWidgetItem, int id, QString _testName, QString testCommand, bool _hasValArgs, QString _category);    
 };
 
-class VerificationValidationWidget : public QHBoxWidget {
+class VerificationValidationWidget : public QHBoxWidget
+{
     Q_OBJECT
 public:
-    explicit VerificationValidationWidget(Document* document, QWidget* parent = nullptr);
+    explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
-    QString* runTest(const QString& cmd);
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
+    QString getDBConnectionName() const { return dbConnectionName; }
+
+public slots:
+    QString *runTest(const QString &cmd);
+    void runTests();
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
@@ -55,12 +65,17 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
-    void runTests();
 
 private:
+    MainWindow *mainWindow;
+    Dockable *parentDockable;
+    int msgBoxRes;
+    QString folderName;
+
     // widget-specific data
-    Document* document;
+    Document *document;
     QString modelID;
+    QString dbFilePath;
     QString dbName;
     QString dbConnectionName;
 
@@ -77,23 +92,42 @@ private:
     std::map<int, QListWidgetItem*> testIdMap;
 
     // init functions
-    void dbConnect();
+    void dbConnect(QString dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
 
     // database functions
-    QSqlQuery* dbExec(QString command, bool showErrorPopup = true);
-    void dbExec(QSqlQuery*& query, bool showErrorPopup = true);
-    QSqlDatabase getDatabase() const {
-        return QSqlDatabase::database(dbConnectionName);
+    QSqlQuery *dbExec(QString command, bool showErrorPopup = true);
+    void dbExec(QSqlQuery *&query, bool showErrorPopup = true);
+    void dbClose() {
+        { 
+            QSqlDatabase db = getDatabase();
+            if (db.isOpen()) db.close();
+        }
+        QSqlDatabase::removeDatabase(dbConnectionName);
     }
 
+    QSqlDatabase getDatabase() const
+    {
+        return QSqlDatabase::database(dbConnectionName, false);
+    }
+
+    bool dbIsAlive(QSqlDatabase db) {
+        if (!db.isOpen()) return false;
+        QSqlQuery q("SELECT 1 FROM Tests", db);
+        if (!q.isActive()) return false;
+        return true;
+    }
+
+    void dbClearResults();
+
     // events
-    void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
     // ui stuff
-    void showResult(const QString& testResultID);
+    void showResult(const QString &testResultID);
+    void showAllResults();
 
     // Other
     void checkSuiteSA();
