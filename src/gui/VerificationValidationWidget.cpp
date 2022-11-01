@@ -105,9 +105,8 @@ void VerificationValidationWidget::runTests() {
         statusBar->showMessage(status.arg(i+1).arg(totalTests));
         int testID = testItemMap.at(selected_tests[i]).id;
         QString testCommand = constructTestCommand(testItemMap.at(selected_tests[i]));
-
         const QString* terminalOutput = runTest(testCommand);
-                
+        
         QString executableName = testCommand.split(' ').first();
         Result* result = nullptr;
         // find proper parser
@@ -448,8 +447,8 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(setBtn);
 
             userInputDialog->setLayout(vLayout);
-
-            connect(setBtn, &QPushButton::clicked, [this, argId_vec, input_vec](){
+            int testID = testItemMap.at(test).id;
+            connect(setBtn, &QPushButton::clicked, [this, argId_vec, input_vec, testID](){
                 QSqlQuery* q = new QSqlQuery(getDatabase());
                 for(int i =  0; i < argId_vec.size(); i++){
                     q->prepare("UPDATE TestArg SET DefaultVal = :input WHERE id = :id");
@@ -457,6 +456,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
                     q->bindValue(":input", input_vec[i]->text());
                     dbExec(q);
                 }
+                testIdMap.at(testID)->setToolTip(constructTestCommand(testItemMap.at(testIdMap.at(testID))));
             });
             
             connect(setBtn, &QPushButton::clicked, userInputDialog, &QDialog::accept);
