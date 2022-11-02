@@ -31,18 +31,6 @@ class MainWindow;
 class Document;
 class Dockable;
 
-class TestItem : public QListWidgetItem {
-public:
-    QListWidgetItem* testWidgetItem;
-    int id;
-    QString testName;
-    QString testCommand;
-    bool hasValArgs;
-    QString category;
-
-    TestItem(QListWidgetItem* _testWidgetItem, int id, QString _testName, QString testCommand, bool _hasValArgs, QString _category);    
-};
-
 class VerificationValidationWidget : public QHBoxWidget
 {
     Q_OBJECT
@@ -54,7 +42,6 @@ public:
     QString getDBConnectionName() const { return dbConnectionName; }
 
 public slots:
-    QString *runTest(const QString &cmd);
     void runTests();
 
 private slots:
@@ -85,11 +72,11 @@ private:
     QListWidget* suiteList;
     QListWidget* test_sa;
     QListWidget* suite_sa;
-    QLineEdit* searchBox;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
-    std::map<QListWidgetItem*, TestItem> testItemMap;
-    std::map<int, QListWidgetItem*> testIdMap;
+    
+    std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
+    std::map<int, QListWidgetItem*> idToItemMap;
 
     // init functions
     void dbConnect(QString dbFilePath);
@@ -132,7 +119,8 @@ private:
     // Other
     void checkSuiteSA();
     void checkTestSA();
-    QString constructTestCommand(TestItem item);
+    QString constructTestCommand(int id, VerificationValidation::Test test);
+    QString *runTest(const QString &cmd);
 };
 
 #endif // VVWIDGET_H

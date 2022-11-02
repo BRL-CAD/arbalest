@@ -7,15 +7,6 @@ using Parser = VerificationValidation::Parser;
 
 #define SHOW_ERROR_POPUP true
 
-TestItem::TestItem(QListWidgetItem* _testWidgetItem, int _id, QString _testName, QString _testCommand, bool _hasValArgs, QString _category){
-    this->testWidgetItem = _testWidgetItem;
-    this->id = _id;
-    this->testName = _testName;
-    this->testCommand = _testCommand;
-    this->hasValArgs = _hasValArgs;
-    this->category = _category;
-}
-
 // TODO: if checksum doesn't match current test file, notify user
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
@@ -51,18 +42,18 @@ void VerificationValidationWidget::showSelectTests() {
     selectTestsDialog->exec();
 }
 
-QString VerificationValidationWidget::constructTestCommand(TestItem item){
-    QString cmd = item.testCommand;
+QString VerificationValidationWidget::constructTestCommand(int id, VerificationValidation::Test test){
+    QString cmd = test.testCommand;
     QSqlQuery* q = new QSqlQuery(getDatabase());
     
     q->prepare("Select arg, defaultVal from TestArg Where testID = :id ORDER by argIdx");
-    q->bindValue(":id", item.id);
+    q->bindValue(":id", id);
     dbExec(q);
 
     while(q->next()){
         cmd = cmd + " " + q->value(0).toString();
         if(q->value(1).toString() != NULL){
-            cmd = cmd + " " + q->value(1).toString();
+            cmd = cmd + q->value(1).toString();
         }
     }
     
@@ -102,8 +93,8 @@ void VerificationValidationWidget::runTests() {
     QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
         statusBar->showMessage(status.arg(i+1).arg(totalTests));
-        int testID = testItemMap.at(selected_tests[i]).id;
-        QString testCommand = constructTestCommand(testItemMap.at(selected_tests[i]));
+        int testID = itemToTestMap.at(selected_tests[i]).first;
+        QString testCommand = constructTestCommand(testID, itemToTestMap.at(selected_tests[i]).second);
         const QString* terminalOutput = runTest(testCommand);
         
         QString executableName = testCommand.split(' ').first();
@@ -245,9 +236,9 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("TestSuites"))
         delete dbExec("CREATE TABLE TestSuites (id INTEGER PRIMARY KEY, suiteName TEXT NOT NULL, UNIQUE(suiteName))");
     if (!getDatabase().tables().contains("TestsInSuite"))
-        dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
+        delete dbExec("CREATE TABLE TestsInSuite (id INTEGER PRIMARY KEY, testSuiteID INTEGER NOT NULL, testID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("TestArg"))
-        dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
+        delete dbExec("CREATE TABLE TestArg (id INTEGER PRIMARY KEY, testID INTEGER NOT NULL, argIdx INTEGER NOT NULL, arg TEXT NOT NULL, isVarArg BOOL NOT NULL, defaultVal TEXT)");
 }
 
 void VerificationValidationWidget::dbPopulateDefaults() {
@@ -334,7 +325,7 @@ void VerificationValidationWidget::searchTests(const QString &input)  {
         QListWidgetItem* item = 0;
         for (int i = 0; i < testList->count(); i++) {
             item = testList->item(i);
-            if(!tests.contains(item) || item->toolTip() == "category")
+            if(!tests.contains(item) || item->toolTip() == "Category")
                 item->setHidden(true);
             else
                 item->setHidden(false);
@@ -357,8 +348,8 @@ void VerificationValidationWidget::updateSuiteSelectAll(QListWidgetItem* sa_opti
 
 void VerificationValidationWidget::updateTestSelectAll(QListWidgetItem* sa_option) {
     QListWidgetItem* item = 0;
-    for (int i = 0; i < testItemMap.size(); i++) {
-        auto it = testItemMap.begin();
+    for (int i = 0; i < itemToTestMap.size(); i++) {
+        auto it = itemToTestMap.begin();
         std::advance(it, i);
         item = it->first;
 		if(sa_option->checkState()){
@@ -389,10 +380,9 @@ void VerificationValidationWidget::checkSuiteSA() {
 }
 
 void VerificationValidationWidget::checkTestSA() {
-    // Check if all checked
     QListWidgetItem* item = 0;
-    for (int i = 0; i < testItemMap.size(); i++) {
-        auto it = testItemMap.begin();
+    for (int i = 0; i < itemToTestMap.size(); i++) {
+        auto it = itemToTestMap.begin();
         std::advance(it, i);
         item = it->first;
         if(!item->checkState()){
@@ -411,8 +401,7 @@ void VerificationValidationWidget::updateTestListWidget(QListWidgetItem* suite_c
     QListWidgetItem* item = 0;
     while(q->next()){
         int id = q->value(0).toInt();
-        // item = testList->item(row);
-        item = testIdMap.at(id);
+        item = idToItemMap.at(id);
 
         if(suite_clicked->checkState()){
             item->setCheckState(Qt::Checked);
@@ -437,7 +426,7 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     QSqlQuery* q2 = new QSqlQuery(getDatabase());
     
     q1->prepare("Select testSuiteID from TestsInSuite Where testID = :id");
-    q1->bindValue(":id", testItemMap.at(test_clicked).id);
+    q1->bindValue(":id", itemToTestMap.at(test_clicked).first);
     dbExec(q1);
     while(q1->next()){
         QListWidgetItem* suite = suiteList->item(q1->value(0).toInt()-1);
@@ -453,8 +442,7 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
             q2->bindValue(":suiteID", q1->value(0).toInt());
             dbExec(q2);
             while(q2->next()){
-                // QListWidgetItem* test = testList->item(q2->value(0).toInt()-1);
-                QListWidgetItem* test = testIdMap.at(q2->value(0).toInt());
+                QListWidgetItem* test = idToItemMap.at(q2->value(0).toInt());
 
                 if(!test->checkState()){
                     return;
@@ -476,22 +464,22 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
 
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     if(test->toolTip() !=  "Category"){
-        if(testItemMap.at(test).hasValArgs) {
+        if(itemToTestMap.at(test).second.hasVariable) {
             QDialog* userInputDialog = new QDialog();
             userInputDialog->setModal(true);
-            userInputDialog->setWindowTitle("Custom Inputs");
+            userInputDialog->setWindowTitle("Custom Argument Value");
 
             QVBoxLayout* vLayout = new QVBoxLayout();
             QFormLayout* formLayout = new QFormLayout();
 
             vLayout->addWidget(new QLabel("Test Name: "+ test->text()));
-            vLayout->addWidget(new QLabel("Test Command: "+ constructTestCommand(testItemMap.at(test))));
-            
+            vLayout->addSpacing(5);
+            vLayout->addWidget(new QLabel("Test Command: "+ constructTestCommand(itemToTestMap.at(test).first, itemToTestMap.at(test).second)));
             vLayout->addSpacing(15);
 
             QSqlQuery* q = new QSqlQuery(getDatabase());
             q->prepare("Select id, arg, defaultVal from TestArg Where testID = :id AND isVarArg = 1 ORDER by argIdx");
-            q->bindValue(":id", testItemMap.at(test).id);
+            q->bindValue(":id", itemToTestMap.at(test).first);
             dbExec(q);
             std::vector<QLineEdit*> input_vec;
             std::vector<QString> argId_vec;
@@ -508,7 +496,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(setBtn);
 
             userInputDialog->setLayout(vLayout);
-            int testID = testItemMap.at(test).id;
+            int testID = itemToTestMap.at(test).first;
             connect(setBtn, &QPushButton::clicked, [this, argId_vec, input_vec, testID](){
                 QSqlQuery* q = new QSqlQuery(getDatabase());
                 for(int i =  0; i < argId_vec.size(); i++){
@@ -517,7 +505,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
                     q->bindValue(":input", input_vec[i]->text());
                     dbExec(q);
                 }
-                testIdMap.at(testID)->setToolTip(constructTestCommand(testItemMap.at(testIdMap.at(testID))));
+                idToItemMap.at(testID)->setToolTip(constructTestCommand(testID, itemToTestMap.at(idToItemMap.at(testID)).second));
             });
             
             connect(setBtn, &QPushButton::clicked, userInputDialog, &QDialog::accept);
@@ -527,12 +515,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     }
 }
 
-void VerificationValidationWidget::setupUI() {
-    // TODO: select tops
-
-	// Branch cmdWithVariables
-	std::cout << "Branch: cmdWithVariables" << std::endl;
-	
+void VerificationValidationWidget::setupUI() {	
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "Test Name" << "Description" << "Object Path";
@@ -575,10 +558,9 @@ void VerificationValidationWidget::setupUI() {
         if(hasValArgs) {
             item->setIcon(edit_icon);
         }
-        testItemMap.insert({item, TestItem(new QListWidgetItem(tests[i]), id, tests[i], testCmds[i], hasValArgs, categoryList[i])});
-        testIdMap.insert(make_pair(id, item));
-        // TODO: rebuild command with args
-        item->setToolTip(constructTestCommand(testItemMap.at(item)));
+        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasValArgs, {}}))));
+        idToItemMap.insert(make_pair(id, item));
+        item->setToolTip(constructTestCommand(id, itemToTestMap.at(item).second));
         testList->addItem(item);
     }
 
@@ -590,6 +572,9 @@ void VerificationValidationWidget::setupUI() {
             QListWidgetItem* item = new QListWidgetItem(categoryList[i]);
             item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
             item->setToolTip("Category");
+            QFont itemFont = item->font();
+            itemFont.setWeight(QFont::Bold);
+            item->setFont(itemFont);
             testList->insertItem(i+offset, item);
             offset += 1;
         }
@@ -633,7 +618,7 @@ void VerificationValidationWidget::setupUI() {
    	// Popuulate Search bar
     QHBoxLayout* searchBar = new QHBoxLayout();
     QLabel* searchLabel = new QLabel("Search: ");
-    searchBox = new QLineEdit("");
+    QLineEdit* searchBox = new QLineEdit("");
     searchBar->addWidget(searchLabel);
     searchBar->addWidget(searchBox);
 	
@@ -672,21 +657,19 @@ void VerificationValidationWidget::setupUI() {
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
     connect(test_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestSelectAll(QListWidgetItem *)));
-    
     // Suite select signal connect function
     connect(suiteList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestListWidget(QListWidgetItem *)));
     // Test select signal connect function
     connect(testList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(testListSelection(QListWidgetItem*)));
-
     // Search button pressed signal select function
     connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests(const QString &)));
-
     // Test input for gqa
     connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
-    
+    // Run test & exit
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
     connect(buttonOptions, &QDialogButtonBox::accepted, this, &VerificationValidationWidget::runTests);
-
+    connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
+    // Open details dialog
     connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 }
 
