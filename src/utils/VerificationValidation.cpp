@@ -7,13 +7,10 @@
 using Test = VerificationValidation::Test;
 using DefaultTests = VerificationValidation::DefaultTests;
 
-// lc
 const Test DefaultTests::MISMATCHED_DUP_IDS          = {"No mis-matched duplicate IDs", "lc", "File", "lc",  false, {Arg("-m", false, NULL), Arg("all", false, NULL)}};
 const Test DefaultTests::NO_DUPLICATE_ID             = {"Duplicate ID check", "lc", "File", "lc",  false, {Arg("-d", false, NULL), Arg("all", false, NULL)}};
-// gqa
 const Test DefaultTests::NO_NULL_REGIONS             = {"No null region", "gqa", "General", "gqa", true, {Arg("-Ao", false, NULL), Arg("-g", true, "4mm,4mm"), Arg("-t", true, "0.3mm"), Arg("all", false, NULL)}};
 const Test DefaultTests::NO_OVERLAPS                 = {"Overlaps cleaned to gridsize with tolerance", "gqa", "General", "gqa", true, {Arg("-Ao", false, NULL), Arg("-g", true, "32mm,4mm"), Arg("-t", true, "0.3mm"), Arg("all", false, NULL)}};
-// search
 const Test DefaultTests::NO_NESTED_REGIONS           = {"No nested regions", "search", "General", "search", false, {Arg("/all", false, NULL), Arg("-type region -below -type region", false, NULL)}};
 const Test DefaultTests::NO_EMPTY_COMBOS             = {"No empty combos", "search", "General", "search", false, {Arg("/all", false, NULL), Arg("-nnodes 0", false, NULL)}};
 const Test DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS   = {"No solids outside of regions", "search", "General", "search", false, {Arg("/all", false, NULL), Arg("! -below -type region -type shape", false, NULL)}};

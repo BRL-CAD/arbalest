@@ -30,6 +30,17 @@ namespace VerificationValidation {
         QString category;
         bool hasVariable;
         std::vector<Arg> ArgList;
+
+        QString getCmdWithArgs() const {
+            QString cmd = testCommand;
+            for(int i = 0; i < ArgList.size(); i++){
+                cmd = cmd + " " + ArgList[i].argument;
+                if(ArgList[i].isVariable){
+                    cmd  += ArgList[i].defaultValue;
+                }
+            }
+            return cmd;
+        }
     };
 
     class Result {

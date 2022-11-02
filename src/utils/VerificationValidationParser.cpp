@@ -17,31 +17,31 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
     Test* type = nullptr;
 
     // default checks
-    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_NESTED_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_EMPTY_COMBOS);
 
-    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
 
-    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::ALL_BOTS_VOLUME_MODE);
 
-    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_BOTS_LH_ORIENT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::ALL_REGIONS_MAT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::ALL_REGIONS_LOS);
 
-    else if (QString::compare(DefaultTests::NO_MATRICES.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_MATRICES.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_MATRICES);
 
-    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)

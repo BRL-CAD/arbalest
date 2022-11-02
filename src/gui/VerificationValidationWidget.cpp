@@ -315,9 +315,10 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
 void VerificationValidationWidget::searchTests(const QString &input)  {
     // Hide category when search
-    if(input.isNull()){
+    if(input.isEmpty()){
         QListWidgetItem* item = 0;
         for (int i = 0; i < testList->count(); i++) {
+            item = testList->item(i);
             item->setHidden(false);
         }
     } else {
