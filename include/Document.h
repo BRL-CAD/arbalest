@@ -20,9 +20,11 @@ class GeometryRenderer;
 class DisplayGrid;
 class RaytraceView;
 class ObjectTreeWidget;
+class MainWindow;
 
 class Document {
 private:
+    MainWindow* mainWindow;
     QString *filePath = nullptr;
     BRLCAD::MemoryDatabase *database;
     DisplayGrid *displayGrid;
@@ -36,13 +38,15 @@ private:
 
 
 public:
-    explicit Document(int documentId, const QString *filePath = nullptr);
+    explicit Document(MainWindow* mainWindow, int documentId, const QString *filePath = nullptr);
     virtual ~Document();
 
     void modifyObject(BRLCAD::Object* newObject);
 
     RaytraceView * raytraceWidget;
     // getters setters
+    int getTabIndex();
+
     QString* getFilePath() const
     {
 	    return filePath;
@@ -72,6 +76,8 @@ public:
     VerificationValidationWidget* getVerificationValidationWidget() const {
         return vvWidget;
     }
+
+    void loadVerificationValidationWidget();
 
     DisplayGrid *getDisplayGrid()  {
         return displayGrid;
