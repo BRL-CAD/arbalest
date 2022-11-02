@@ -176,7 +176,6 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	/* Retreieve the list length */
 	QStringList number = lines[0].split(" ");
 	int list_length = 0;
-	QRegExp re("\\d");
 	for(int i = 0; i < number.size(); i++) {
 		if(re.exactMatch(number[i])) {
 			if(number[i].toInt() == 0) {
