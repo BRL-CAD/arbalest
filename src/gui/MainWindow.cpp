@@ -107,14 +107,6 @@ void MainWindow::prepareUi() {
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QAction* verifyValidateOpenResultsAct = new QAction(tr("Open .atr file"), this);
-    verifyValidateOpenResultsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/openVerifyValidateIcon.png", "$Color-MenuIconFile")));
-    verifyValidateOpenResultsAct->setStatusTip(tr("Opens an arbalest test results file"));
-    connect(verifyValidateOpenResultsAct, &QAction::triggered, this, [this](){
-        openATRFileDialog();
-    });
-    fileMenu->addAction(verifyValidateOpenResultsAct);
-
     QIcon saveActIcon;
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
     saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-Menu")), QIcon::Active);
@@ -921,16 +913,13 @@ bool MainWindow::saveFileId(const QString& filePath, int documentId) {
 
 void MainWindow::openFileDialog() 
 {
-	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+	const QString filePath = QFileDialog::getOpenFileName(documentArea, 
+    tr("Open BRL-CAD database"),
+    QString(), 
+    "BRL-CAD Database (*.g);; Arbalest Test Results (*.atr)");
     if (!filePath.isEmpty()){
-        openFile(filePath);
-    }
-}
-
-void MainWindow::openATRFileDialog() {
-    const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open Arbalest Test Results"), QString(), "Arbalest Test Results (*.atr)");
-    if (!filePath.isEmpty()) {
-        openATRFile(filePath);
+        if (filePath.endsWith(".atr")) openATRFile(filePath);
+        else openFile(filePath);
     }
 }
 

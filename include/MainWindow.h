@@ -88,7 +88,6 @@ protected:
 	
 public slots:
     void openFileDialog();
-    void openATRFileDialog();
     bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
     bool saveAsFileDialogId(int documentId);
