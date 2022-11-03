@@ -742,7 +742,9 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addWidget(new QLabel(testName));
     detailLayout->addSpacing(10);
     detailLayout->addWidget(commandHeader);
-    detailLayout->addWidget(new QLabel(testCommand));
+    QLabel* testCmdLabel = new QLabel(testCommand);
+    testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
+    detailLayout->addWidget(testCmdLabel);
     detailLayout->addSpacing(10);
     detailLayout->addWidget(resultCodeHeader);
     detailLayout->addWidget(new QLabel(resultCode));
@@ -751,8 +753,8 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addWidget(new QLabel(description));
     detailLayout->addSpacing(10);
     detailLayout->addWidget(rawOutputHeader);
-    terminalOutput = "arbalest> "+testCommand+"<br>"+terminalOutput;
-    QTextEdit* rawOutputBox = new QTextEdit("<html><div style=\"font-weight:600; color:white;\">"+terminalOutput+"</div><html>");
+    terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
+    QTextEdit* rawOutputBox = new QTextEdit("<html>"+terminalOutput+"<html>");
     rawOutputBox->setReadOnly(true);
     QPalette rawOutputBox_palette = rawOutputBox->palette();
     rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
