@@ -619,10 +619,16 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QWidget* viewport = new QWidget();
     QScrollArea* scrollArea = new QScrollArea();
     QString resultCode;
-    QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
-    QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
-    QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
+    
+    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+
+    QString testName = (testNameItem) ? testNameItem->text() : "";
+    QString description = (descriptionItem) ? descriptionItem->text() : "";
+    QString objPath = (objPathItem) ? objPathItem->text() : "";
     QSqlQuery* q = new QSqlQuery(getDatabase());
+
     q->prepare("SELECT id, testCommand FROM Tests WHERE testName = ?");
     q->addBindValue(testName);
     dbExec(q);
