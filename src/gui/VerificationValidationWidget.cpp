@@ -687,18 +687,16 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
 void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QDialog* detail_dialog = new QDialog();
     detail_dialog->setModal(true);
-    detail_dialog->setWindowTitle("Details");
+    detail_dialog->setWindowTitle("Test Result Details");
 
-    QVBoxLayout* mainLayout = new QVBoxLayout();
     QVBoxLayout* detailLayout = new QVBoxLayout();
-    QWidget* viewport = new QWidget();
-    QScrollArea* scrollArea = new QScrollArea();
+
     QString resultCode;
     QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
     QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
     QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
     QSqlQuery* q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT id, testCommand FROM Tests WHERE testName = ?");
+    q->prepare("SELECT id FROM Tests WHERE testName = ?");
     q->addBindValue(testName);
     dbExec(q);
     if (!q->next()) {
@@ -707,7 +705,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     }
 
     int testID = q->value(0).toInt();
-    QString testCommand = q->value(1).toString();
+    QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCmdWithArgs();
 
     QSqlQuery* q2 = new QSqlQuery(getDatabase());
     q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
@@ -741,20 +739,27 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     rawOutputHeader->setStyleSheet("font-weight: bold");
 
     detailLayout->addWidget(testNameHeader);
-    detailLayout->addWidget(new QLabel(testName+"\n"));
+    detailLayout->addWidget(new QLabel(testName));
+    detailLayout->addSpacing(10);
     detailLayout->addWidget(commandHeader);
-    detailLayout->addWidget(new QLabel(testCommand+"\n"));
+    detailLayout->addWidget(new QLabel(testCommand));
+    detailLayout->addSpacing(10);
     detailLayout->addWidget(resultCodeHeader);
-    detailLayout->addWidget(new QLabel(resultCode+"\n"));
+    detailLayout->addWidget(new QLabel(resultCode));
+    detailLayout->addSpacing(10);
     detailLayout->addWidget(descriptionHeader);
-    detailLayout->addWidget(new QLabel(description+"\n"));
+    detailLayout->addWidget(new QLabel(description));
+    detailLayout->addSpacing(10);
     detailLayout->addWidget(rawOutputHeader);
-    detailLayout->addWidget(new QLabel(terminalOutput));
-    viewport->setLayout(detailLayout);
-    scrollArea->setWidget(viewport);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    mainLayout->addWidget(scrollArea);
-    detail_dialog->setLayout(mainLayout);
+    terminalOutput = "arbalest> "+testCommand+"<br>"+terminalOutput;
+    QTextEdit* rawOutputBox = new QTextEdit("<html><div style=\"font-weight:600; color:white;\">"+terminalOutput+"</div><html>");
+    rawOutputBox->setReadOnly(true);
+    QPalette rawOutputBox_palette = rawOutputBox->palette();
+    rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
+    rawOutputBox->setPalette(rawOutputBox_palette);
+    detailLayout->addWidget(rawOutputBox);
+
+    detail_dialog->setLayout(detailLayout);
     detail_dialog->exec();
 }
 
