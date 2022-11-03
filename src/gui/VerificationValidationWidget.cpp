@@ -42,25 +42,6 @@ void VerificationValidationWidget::showSelectTests() {
     selectTestsDialog->exec();
 }
 
-QString VerificationValidationWidget::constructTestCommand(int id, VerificationValidation::Test test){
-    QString cmd = test.testCommand;
-    QSqlQuery* q = new QSqlQuery(getDatabase());
-    
-    q->prepare("Select arg, defaultVal from TestArg Where testID = :id ORDER by argIdx");
-    q->bindValue(":id", id);
-    dbExec(q);
-
-    while(q->next()){
-        cmd = cmd + " " + q->value(0).toString();
-        if(q->value(1).toString() != NULL){
-            cmd = cmd + q->value(1).toString();
-        }
-    }
-    
-    delete q;
-    return cmd;
-}
-
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
     QString filepath = *(document->getFilePath());
     struct ged* dbp = mgedRun(cmd, filepath);
@@ -94,7 +75,7 @@ void VerificationValidationWidget::runTests() {
     for(int i = 0; i < totalTests; i++){
         statusBar->showMessage(status.arg(i+1).arg(totalTests));
         int testID = itemToTestMap.at(selected_tests[i]).first;
-        QString testCommand = constructTestCommand(testID, itemToTestMap.at(selected_tests[i]).second);
+        QString testCommand = itemToTestMap.at(selected_tests[i]).second.getCmdWithArgs();
         const QString* terminalOutput = runTest(testCommand);
         
         QString executableName = testCommand.split(' ').first();
@@ -226,7 +207,7 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasValArgs BOOL NOT NULL, category TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasValArgs BOOL NOT NULL, category TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestResults"))
         delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
@@ -475,42 +456,36 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
             vLayout->addWidget(new QLabel("Test Name: "+ test->text()));
             vLayout->addSpacing(5);
-            vLayout->addWidget(new QLabel("Test Command: "+ constructTestCommand(itemToTestMap.at(test).first, itemToTestMap.at(test).second)));
+            vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCmdWithArgs()));
             vLayout->addSpacing(15);
 
-            QSqlQuery* q = new QSqlQuery(getDatabase());
-            q->prepare("Select id, arg, defaultVal from TestArg Where testID = :id AND isVarArg = 1 ORDER by argIdx");
-            q->bindValue(":id", itemToTestMap.at(test).first);
-            dbExec(q);
             std::vector<QLineEdit*> input_vec;
-            std::vector<QString> argId_vec;
-            while(q->next()){
-                argId_vec.push_back(q->value(0).toString());
-                input_vec.push_back(new QLineEdit(q->value(2).toString()));
-                formLayout->addRow(q->value(1).toString(), input_vec.back());
-                formLayout->setSpacing(10);
+            for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
+                if(itemToTestMap.at(test).second.ArgList[i].isVariable){
+                    input_vec.push_back(new QLineEdit(itemToTestMap.at(test).second.ArgList[i].defaultValue));
+                    formLayout->addRow(itemToTestMap.at(test).second.ArgList[i].argument, input_vec.back());
+                    formLayout->setSpacing(10);
+                } else {
+                    input_vec.push_back(NULL);
+                }
             }
             
             vLayout->addLayout(formLayout);
-            
             QPushButton* setBtn = new QPushButton("Set");
             vLayout->addWidget(setBtn);
-
             userInputDialog->setLayout(vLayout);
-            int testID = itemToTestMap.at(test).first;
-            connect(setBtn, &QPushButton::clicked, [this, argId_vec, input_vec, testID](){
-                QSqlQuery* q = new QSqlQuery(getDatabase());
-                for(int i =  0; i < argId_vec.size(); i++){
-                    q->prepare("UPDATE TestArg SET DefaultVal = :input WHERE id = :id");
-                    q->bindValue(":id", argId_vec[i]);
-                    q->bindValue(":input", input_vec[i]->text());
-                    dbExec(q);
+
+            connect(setBtn, &QPushButton::clicked, [this, test, input_vec](){
+                for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
+                    if(itemToTestMap.at(test).second.ArgList[i].isVariable){
+                        itemToTestMap.at(test).second.ArgList[i].updateValue(input_vec[i]->text());
+                    }
                 }
-                idToItemMap.at(testID)->setToolTip(constructTestCommand(testID, itemToTestMap.at(idToItemMap.at(testID)).second));
+
+                test->setToolTip(itemToTestMap.at(test).second.getCmdWithArgs());
             });
             
             connect(setBtn, &QPushButton::clicked, userInputDialog, &QDialog::accept);
-
             userInputDialog->exec();
         }
     }
@@ -559,9 +534,16 @@ void VerificationValidationWidget::setupUI() {
         if(hasValArgs) {
             item->setIcon(edit_icon);
         }
-        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasValArgs, {}}))));
+        std::vector<VerificationValidation::Arg> ArgList;
+        query.prepare("Select arg, isVarArg, defaultVal FROM TestArg Where testID = :id ORDER BY argIdx");
+        query.bindValue(":id", id);
+        query.exec();
+        while(query.next()){
+            ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toBool(), query.value(2).toString()));
+        }
+        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasValArgs, ArgList}))));
         idToItemMap.insert(make_pair(id, item));
-        item->setToolTip(constructTestCommand(id, itemToTestMap.at(item).second));
+        item->setToolTip(itemToTestMap.at(item).second.getCmdWithArgs());
         testList->addItem(item);
     }
 

@@ -20,6 +20,10 @@ namespace VerificationValidation {
             this->isVariable = isVariable;
             this->defaultValue = defaultValue;
         }
+
+        void updateValue (QString input){
+            defaultValue = input;
+        }
     };
 
     class Test {

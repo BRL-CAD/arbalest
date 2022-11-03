@@ -15,7 +15,6 @@
 #include <QHBoxWidget.h>
 #include "VerificationValidation.h"
 #include "Utils.h"
-#include "map"
 
 #define RESULT_CODE_COLUMN 0
 #define TEST_NAME_COLUMN 1
@@ -119,7 +118,6 @@ private:
     // Other
     void checkSuiteSA();
     void checkTestSA();
-    QString constructTestCommand(int id, VerificationValidation::Test test);
     QString *runTest(const QString &cmd);
 };
 
