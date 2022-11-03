@@ -815,6 +815,7 @@ void MainWindow::prepareDockables(){
 
 // empty new file
 void MainWindow::newFile() {
+    objectVerificationValidationDockable->setVisible(false);
     Document* document = new Document(this, documentsCount);
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
