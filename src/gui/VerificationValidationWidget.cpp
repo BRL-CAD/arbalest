@@ -145,6 +145,7 @@ void VerificationValidationWidget::runTests() {
     titleBarWidget->setLayout(h_layout);
     parentDockable->setTitleBarWidget(titleBarWidget);
     parentDockable->setVisible(true);
+    // parentDockable->widget()->setVisible(false);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
