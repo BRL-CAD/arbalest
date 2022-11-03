@@ -815,7 +815,6 @@ void MainWindow::prepareDockables(){
 
 // empty new file
 void MainWindow::newFile() {
-    objectVerificationValidationDockable->setVisible(false);
     Document* document = new Document(this, documentsCount);
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
@@ -1040,6 +1039,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
+            objectVerificationValidationDockable->setVisible((documents[activeDocumentId]->getVerificationValidationWidget()) ? true : false);
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
