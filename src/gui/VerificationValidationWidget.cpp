@@ -51,7 +51,7 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
     return result;
 }
 
-void VerificationValidationWidget::runTests() {
+void VerificationValidationWidget::runTests() {    
     dbClearResults();
     resultTable->setRowCount(0);
 
@@ -134,10 +134,17 @@ void VerificationValidationWidget::runTests() {
     QString md5 = q->value(0).toString();
     QString filePath = q->value(1).toString();
     delete q;
+    
     QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
     QLabel *title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
-    parentDockable->setTitleBarWidget(title);
+    QWidget* titleBarWidget = new QWidget();
+    QHBoxLayout* h_layout = new QHBoxLayout();
+    h_layout->addWidget(title);
+    h_layout->addWidget(new QPushButton("Minimize"));
+    titleBarWidget->setLayout(h_layout);
+    parentDockable->setTitleBarWidget(titleBarWidget);
+    parentDockable->setVisible(true);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
