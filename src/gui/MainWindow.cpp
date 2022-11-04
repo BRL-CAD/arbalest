@@ -1029,6 +1029,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
+            objectVerificationValidationDockable->setVisible((documents[activeDocumentId]->getVerificationValidationWidget()) ? true : false);
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
