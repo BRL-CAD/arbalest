@@ -34,6 +34,25 @@ QString SelectMouseAction::getSelected() const {
     return m_selected;
 }
 
+class SelectCallback : public BRLCAD::ConstDatabase::HitCallback {
+public:
+    SelectCallback()
+        : BRLCAD::ConstDatabase::HitCallback() {}
+
+    virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
+        m_selected = hit.Name();
+
+        return false;
+    }
+
+    const QString& getSelected() const {
+        return m_selected;
+    }
+
+private:
+    QString m_selected;
+};
+
 bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
     bool ret = false;
     
@@ -45,18 +64,42 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 const int x = mouseEvent->x();
                 const int y = mouseEvent->y();
 
-                // Shoot a ray
+                int w = m_watched->getDocument()->getRaytraceWidget()->width();
+                int h = m_watched->getDocument()->getRaytraceWidget()->height();
 
-                // Check if a ray intersects or hit
+                QVector3D &eyePosition = m_watched->getCamera()->getEyePosition();
 
-                // Dynamically cast BRLCAD::ConstDatabase to BRLCAD::ConstDatabase::Hit and return region Name
+                QMatrix4x4 m_transformation;
+                QVector3D directionStart = m_transformation.map(eyePosition);
+                QVector3D directionEnd = m_transformation.map(QVector3D(0., 0., 0.));
+                QVector3D direction = directionEnd - directionStart;
+                direction.normalize();
 
-                emit Done(this);
+                QVector3D        imagePoint(x, h - y - 1., 0.);
+                QVector3D        modelPoint = m_transformation.map(imagePoint);
+                SelectCallback callback;
+                BRLCAD::Ray3D    ray;
+
+                ray.origin.coordinates[0] = modelPoint.x();
+                ray.origin.coordinates[1] = modelPoint.y();
+                ray.origin.coordinates[2] = modelPoint.z();
+                ray.direction.coordinates[0] = direction.x();
+                ray.direction.coordinates[1] = direction.y();
+                ray.direction.coordinates[2] = direction.z();
+
+                m_watched->getDocument()->getDatabase()->ShootRay(ray, callback, BRLCAD::ConstDatabase::StopAfterFirstHit);
+                m_selected = callback.getSelected();
+
+                if (!m_selected.isEmpty()) {
+                    emit Done(this);
+                }
 
                 ret = true;
             }
+            else {
+                ret = false;
 
-            ret = false;
+            }
         }
     }
 

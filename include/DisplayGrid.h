@@ -7,7 +7,6 @@
 #include <include/Document.h>
 #include <include/Display.h>
 #include <QSplitter>
-//#include "MouseAction.h"
 
 class Display;
 class MouseAction;
@@ -44,6 +43,7 @@ public:
     void resetAllViewPorts();
 
     void setMoveCameraMouseAction();
+    void setSelectObjectMouseAction();
 private:
     double defaultDisplayCameraRotation[4][3] = {
             {0, 0, 270},
