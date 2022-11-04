@@ -596,6 +596,7 @@ void MainWindow::prepareUi() {
             if (currentDocument->getFilePath()) { 
                 currentDocument->loadVerificationValidationWidget();
                 vvWidget = currentDocument->getVerificationValidationWidget();
+                objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
         objectVerificationValidationDockable->setVisible(true);

@@ -152,6 +152,29 @@ void Parser::searchFinalDefense(Result* r) {
     }
 }
 
+Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
+    Result* r = new Result;
+    r->terminalOutput = terminalOutput->trimmed();
+    r->resultCode = Result::Code::PASSED;
+
+    QStringList cmdList = cmd.split(" ");
+    if (cmdList.size() > 1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"SYNTAX ERROR", "title cannot have any arguments for testing (implies setting database name)"});
+    }
+
+    bool suspiciousTitle = terminalOutput->contains("tmp", Qt::CaseInsensitive) || 
+    terminalOutput->contains("temporary", Qt::CaseInsensitive) || 
+    terminalOutput->contains("untitled", Qt::CaseInsensitive);
+    
+    if (suspiciousTitle) {
+        r->resultCode = Result::Code::WARNING;
+        r->issues.push_back({*terminalOutput, "title contains a keyword indicating it is not finalized"});
+    }
+
+    return r;
+}
+
 Result* Parser::lc(const QString* terminalOutput) {
     return nullptr; // TODO: implement
 }

@@ -81,12 +81,12 @@ namespace VerificationValidation {
         const static VerificationValidation::Test ALL_REGIONS_LOS;
         const static VerificationValidation::Test NO_MATRICES;
         const static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
+        const static VerificationValidation::Test VALID_TITLE;
         const static std::vector<VerificationValidation::Test> allTests;
 
         // TODO: missing "No errors when top level drawn"
         // TODO: missing "BoTs are valid"
         // TODO: missing "Air does not stick out"
-        // TODO: missing "Title"
         // TODO: missing "Ground plane at z=0"
     };
 
@@ -97,6 +97,8 @@ namespace VerificationValidation {
         static bool searchCatchUsageErrors(Result* r, const QString& currentLine);
         static bool searchDBNotFoundErrors(Result* r);
         static void searchFinalDefense(Result* r);
+
+        static Result* title(const QString& cmd, const QString* terminalOutput);
 
         static Result* lc(const QString* terminalOutput);
         static Result* gqa(const QString* terminalOutput);
