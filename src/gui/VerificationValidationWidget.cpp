@@ -232,7 +232,10 @@ void VerificationValidationWidget::dbInitTables() {
 
 void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* q;
-    QString uuid = "TODO: HASH USING BRLCAD INTERFACE";
+    QString* gFilePath = document->getFilePath();
+    QString* uuid = generateUUID(*gFilePath);
+
+    if (!uuid) throw std::runtime_error("Failed to get checksum for " + gFilePath->toStdString());
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
@@ -248,7 +251,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
         q = new QSqlQuery(getDatabase());
         q->prepare("INSERT INTO Model (filepath, uuid) VALUES (?, ?)");
         q->addBindValue(QDir(*document->getFilePath()).absolutePath());
-        q->addBindValue(uuid);
+        q->addBindValue(*uuid);
         dbExec(q);
         modelID = q->lastInsertId().toString();
     } else {
