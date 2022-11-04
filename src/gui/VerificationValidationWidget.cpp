@@ -731,7 +731,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
 
         while (q2->next()) {
             QString objectIssueID = q2->value(0).toString();
-
+            
             QSqlQuery* q3 = new QSqlQuery(getDatabase());
             q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
             q3->addBindValue(objectIssueID);
@@ -743,7 +743,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             }
 
             objectName = q3->value(0).toString();
-            issueDescription = q3->value(1).toString();
+            issueDescription = q3->value(1).toString().replace("\n", "");
 
             resultTable->insertRow(resultTable->rowCount());
 
