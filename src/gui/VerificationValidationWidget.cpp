@@ -39,9 +39,8 @@ VerificationValidationWidget::~VerificationValidationWidget() {
 
 
 void VerificationValidationWidget::showSelectTests() {
-    statusBar->showMessage("Select tests to run...");
+    emit mainWindow->setStatusBarMessage("Select tests to run...");
     selectTestsDialog->exec();
-    //connect(selectTestsDialog, SIGNAL(accepted()), this, SLOT(runTests()));
 }
 
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
@@ -73,9 +72,8 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
-        statusBar->showMessage(status.arg(i+1).arg(totalTests));
+        emit mainWindow->setStatusBarMessage(i+1, totalTests);
         int testID = testList->row(selected_tests[i]) + 1;
         QString testCommand = selected_tests[i]->toolTip();
         const QString* terminalOutput = runTest(testCommand);
@@ -770,6 +768,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     delete q;
+    qApp->processEvents();
 }
 
 void VerificationValidationWidget::showAllResults() {

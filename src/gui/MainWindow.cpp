@@ -800,6 +800,9 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
+    connect(this, qOverload<int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<int, int>(&MainWindow::setStatusBarMessage));
+    connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
+
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
 //    toolboxDockable->hideHeader();
