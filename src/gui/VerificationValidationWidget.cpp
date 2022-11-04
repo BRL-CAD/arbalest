@@ -39,9 +39,8 @@ VerificationValidationWidget::~VerificationValidationWidget() {
 
 
 void VerificationValidationWidget::showSelectTests() {
-    statusBar->showMessage("Select tests to run...");
+    emit mainWindow->setStatusBarMessage("Select tests to run...");
     selectTestsDialog->exec();
-    //connect(selectTestsDialog, SIGNAL(accepted()), this, SLOT(runTests()));
 }
 
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
@@ -73,9 +72,8 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
-        statusBar->showMessage(status.arg(i+1).arg(totalTests));
+        emit mainWindow->setStatusBarMessage(i+1, totalTests);
         int testID = testList->row(selected_tests[i]) + 1;
         QString testCommand = selected_tests[i]->toolTip();
         const QString* terminalOutput = runTest(testCommand);
@@ -85,6 +83,8 @@ void VerificationValidationWidget::runTests() {
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
             result = Parser::search(testCommand, terminalOutput);
+        else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
+            result = Parser::title(testCommand, terminalOutput);
 
         // if parser hasn't been implemented, default
         if (!result) {
@@ -551,6 +551,7 @@ void VerificationValidationWidget::setupUI() {
     QGroupBox* groupbox3 = new QGroupBox();
     QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addWidget(new QLabel("Warning: running tests will overwrite your current results."));
     hbox->addWidget(buttonOptions);
     groupbox3->setLayout(hbox);
     
@@ -619,10 +620,16 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QWidget* viewport = new QWidget();
     QScrollArea* scrollArea = new QScrollArea();
     QString resultCode;
-    QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
-    QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
-    QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
+    
+    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+
+    QString testName = (testNameItem) ? testNameItem->text() : "";
+    QString description = (descriptionItem) ? descriptionItem->text() : "";
+    QString objPath = (objPathItem) ? objPathItem->text() : "";
     QSqlQuery* q = new QSqlQuery(getDatabase());
+
     q->prepare("SELECT id, testCommand FROM Tests WHERE testName = ?");
     q->addBindValue(testName);
     dbExec(q);
@@ -698,56 +705,70 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     int resultCode = q->value(1).toInt();
     QString terminalOutput = q->value(2).toString();
 
-    QSqlQuery* q2 = new QSqlQuery(getDatabase());
-    q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
-    q2->addBindValue(testResultID);
-    dbExec(q2, !SHOW_ERROR_POPUP);
+    QString iconPath = "";
+    QString objectName;
+    QString issueDescription;
 
-    while (q2->next()) {
-        QString objectIssueID = q2->value(0).toString();
-
-        QSqlQuery* q3 = new QSqlQuery(getDatabase());
-        q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
-        q3->addBindValue(objectIssueID);
-        dbExec(q3);
-
-        if (!q3->next()) {
-            popup("Failed to retrieve Object Issue #" + objectIssueID);
-            return;
-        }
-
-        QString objectName = q3->value(0).toString();
-        QString issueDescription = q3->value(1).toString().replace("\n", "");
-
+    if (resultCode == Result::Code::PASSED) {
         resultTable->insertRow(resultTable->rowCount());
-
-        QString iconPath = "";
-        if (resultCode == VerificationValidation::Result::Code::UNPARSEABLE)
-            iconPath = ":/icons/unparseable.png";
-        else if (resultCode == VerificationValidation::Result::Code::FAILED)
-            iconPath = ":/icons/error.png";
-        else if (resultCode == VerificationValidation::Result::Code::WARNING)
-            iconPath = ":/icons/warning.png";
-        else if (resultCode == VerificationValidation::Result::Code::PASSED)
-            iconPath = ":/icons/passed.png";
-
-        // Change to hide icon image path from showing
-        QTableWidgetItem* icon_item = new QTableWidgetItem;
-        QIcon icon(iconPath);
-        icon_item->setIcon(icon);
-        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
+        iconPath = ":/icons/passed.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
-        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
-        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+    } 
 
-        delete q3;
+    else if (resultCode == Result::Code::UNPARSEABLE) {
+        resultTable->insertRow(resultTable->rowCount());
+        iconPath = ":/icons/unparseable.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
     }
+
+    else {
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+        q2->addBindValue(testResultID);
+        dbExec(q2, !SHOW_ERROR_POPUP);
+
+        while (q2->next()) {
+            QString objectIssueID = q2->value(0).toString();
+            
+            QSqlQuery* q3 = new QSqlQuery(getDatabase());
+            q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
+            q3->addBindValue(objectIssueID);
+            dbExec(q3);
+
+            if (!q3->next()) {
+                popup("Failed to retrieve Object Issue #" + objectIssueID);
+                return;
+            }
+
+            objectName = q3->value(0).toString();
+            issueDescription = q3->value(1).toString().replace("\n", "");
+
+            resultTable->insertRow(resultTable->rowCount());
+
+            if (resultCode == VerificationValidation::Result::Code::FAILED)
+                iconPath = ":/icons/error.png";
+            else if (resultCode == VerificationValidation::Result::Code::WARNING)
+                iconPath = ":/icons/warning.png";                
+
+            // Change to hide icon image path from showing
+            resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+            resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+            resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
+            resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+
+            delete q3;
+        }
+        delete q2;
+    }
+    
     // Only select rows, disable edit
     resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     delete q;
-    delete q2;
+    qApp->processEvents();
 }
 
 void VerificationValidationWidget::showAllResults() {

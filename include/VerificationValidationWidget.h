@@ -36,7 +36,9 @@ public:
     explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
     void showSelectTests();
-    void setStatusBar(QStatusBar *statusBar) { this->statusBar = statusBar; }
+    void setStatusBar(QStatusBar *statusBar) { 
+        this->statusBar = statusBar;
+    }
     QString getDBConnectionName() const { return dbConnectionName; }
 
 public slots:
