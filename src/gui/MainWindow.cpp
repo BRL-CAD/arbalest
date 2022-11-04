@@ -855,7 +855,7 @@ void MainWindow::openFile(const QString& filePath) {
 
 void MainWindow::openATRFile(const QString& atrFilePath) {    
     {
-        QString modelID = "", gFilePath = "", uuid = ""; // TODO: check uuid checksum stuff here
+        QString modelID = "", gFilePath = "";
         if (!QFile::exists(atrFilePath)) { popup("File " + atrFilePath + " doesn't exist."); return; }
 
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -863,12 +863,11 @@ void MainWindow::openATRFile(const QString& atrFilePath) {
 
         if (!db.open() || !db.isOpen()) { popup("Failed to open " + atrFilePath); return; }
 
-        QSqlQuery q("SELECT id, filePath, uuid from Model", db);
-        if (!q.isActive() || !q.next())  { popup("Failed to fetch filepath from " + atrFilePath); return; }
+        QSqlQuery q("SELECT id, filePath from Model", db);
+        if (!q.isActive() || !q.next())  { popup("Failed to fetch Model table from " + atrFilePath); return; }
         else {
             modelID = q.value(0).toString();
             gFilePath = q.value(1).toString();
-            uuid = q.value(2).toString();
         }
 
         if (!gFilePath.isEmpty()) {
@@ -889,8 +888,11 @@ void MainWindow::openATRFile(const QString& atrFilePath) {
             }
 
             if (QFile::exists(gFilePath)) {
-                q.prepare("UPDATE Model SET filepath = ? WHERE id = ?"); // TODO: also update checksum here
+                QString* newUUID = generateUUID(gFilePath);
+                if (!newUUID) { popup("Failed to generate UUID for " + gFilePath); return; }
+                q.prepare("UPDATE Model SET filepath = ?, uuid = ? WHERE id = ?");
                 q.addBindValue(gFilePath);
+                q.addBindValue(*newUUID);
                 q.addBindValue(modelID);
                 q.exec();
                 if (!q.isActive()) { popup("Failed to update filepath to " + gFilePath + ".\n" + q.lastError().text()); return; }

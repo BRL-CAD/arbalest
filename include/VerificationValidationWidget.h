@@ -119,6 +119,7 @@ private:
     void checkSuiteSA();
     void checkTestSA();
     QString *runTest(const QString &cmd);
+    bool validChecksum();
 };
 
 #endif // VVWIDGET_H

@@ -25,7 +25,7 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     setupUI();
 
     if (msgBoxRes == OPEN) {
-        showAllResults();
+        if (validChecksum()) showAllResults();
         msgBoxRes = NO_SELECTION;
     } else if (msgBoxRes == DISCARD) {
         dbClearResults();
@@ -181,9 +181,9 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
 
     // if file exists, prompt before overwriting
     if (QFile::exists(this->dbName)) {
-        QMessageBox msgBox;
+        QMessageBox msgBox; 
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("Detected existing test results in " + this->dbName + ".\nDo you want to open or discard the results?");
+        msgBox.setText("Detected existing test results in " + this->dbName + ".\n\nDo you want to open or discard the results?");
         msgBox.setInformativeText("Changes cannot be reverted.");
         msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
         QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
@@ -232,10 +232,10 @@ void VerificationValidationWidget::dbInitTables() {
 
 void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* q;
-    QString* gFilePath = document->getFilePath();
-    QString* uuid = generateUUID(*gFilePath);
+    QString gFilePath = *document->getFilePath();
+    QString* uuid = generateUUID(gFilePath);
 
-    if (!uuid) throw std::runtime_error("Failed to get checksum for " + gFilePath->toStdString());
+    if (!uuid) throw std::runtime_error("Failed to generate UUID for " + gFilePath.toStdString());
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
@@ -876,4 +876,27 @@ void VerificationValidationWidget::showAllResults() {
     }
 
     delete q;
+}
+
+bool VerificationValidationWidget::validChecksum() {
+    QSqlQuery* q = dbExec("SELECT uuid FROM Model"); // TODO: defaults haven't been populated at this point
+    if (!q->next()) { popup("Failed to get UUID from Model"); return false; }
+    QString uuid = q->value(0).toString();
+    delete q;
+
+    QString gFilePath = *document->getFilePath();
+    QString* gFileUUID = generateUUID(gFilePath);
+    if (!gFileUUID) { popup("Failed to generate UUID for " + gFilePath); return false; }
+
+    QMessageBox msgBox;
+    if (uuid != *gFileUUID) {
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("The contents of " + gFilePath + " have changed.\nThis implies the results are outdated/incorrect.");
+        msgBox.setInformativeText("Checksums:\nold: " + uuid + "\nnew: " + *gFileUUID);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+    }
+
+    return true;
 }
