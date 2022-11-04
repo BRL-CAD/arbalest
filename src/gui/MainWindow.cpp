@@ -43,7 +43,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     documentArea->addTab(new HelpWidget(), "Quick Start");
     if(QCoreApplication::arguments().length()>1){
-        openFile(QString(QCoreApplication::arguments().at(1)));
+        QString filePath = QString(QCoreApplication::arguments().at(1));
+        if (filePath.endsWith(".atr")) openATRFile(filePath);
+        else openFile(filePath);
     }
     Globals::mainWindow = this;
 }
@@ -554,19 +556,47 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
-    QMenu* verificationValidation = menuTitleBar->addMenu(tr("&Verify/Validate"));
-    QAction* verificationValidationAct = new QAction(tr("Verify and validate current viewport"), this);
-    verificationValidationAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
-    verificationValidationAct->setStatusTip(tr("Verify and validate current viewport"));
-    verificationValidationAct->setShortcut(Qt::CTRL|Qt::Key_B);
-    connect(verificationValidationAct, &QAction::triggered, this, [this](){
+    QMenu* verifyValidateMenu = menuTitleBar->addMenu(tr("&Verify/Validate"));
+    QAction* verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
+    verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verifyValidateViewportAct->setStatusTip(tr("Verify and validate current viewport"));
+    verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
+    connect(verifyValidateViewportAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getVerificationValidationWidget()->setStatusBar(statusBar);
-        documents[activeDocumentId]->getVerificationValidationWidget()->showSelectTests();
+        Document* currentDocument = documents[activeDocumentId];
+        VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
+        // verification and validation needs persistent .g file
+        if (!vvWidget) {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setText("You must save this file before running tests.");
+            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+
+            if (msgBox.exec() == QMessageBox::Ok)  {
+                if (!saveAsFileDialogId(currentDocument->getDocumentId())) {
+                    popup("Failed to save.");
+                    return;
+                }
+                statusBar->showMessage("Loading Verification & Validation widget", statusBarShortMessageDuration);
+            }
+            else {
+                statusBar->showMessage("No changes were made.", statusBarShortMessageDuration);
+                return;
+            }
+
+            if (currentDocument->getFilePath()) { 
+                currentDocument->loadVerificationValidationWidget();
+                vvWidget = currentDocument->getVerificationValidationWidget();
+                objectVerificationValidationDockable->setContent(vvWidget);
+            }
+        }
         objectVerificationValidationDockable->setVisible(true);
-        documents[activeDocumentId]->getVerificationValidationWidget()->runTests();
+        vvWidget->setStatusBar(statusBar);
+        vvWidget->showSelectTests();
     });
-    verificationValidation->addAction(verificationValidationAct);
+    verifyValidateMenu->addAction(verifyValidateViewportAct);
+
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -737,7 +767,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* verifyValidate = new QToolButton(menuTitleBar);
-    verifyValidate->setDefaultAction(verificationValidationAct);
+    verifyValidate->setDefaultAction(verifyValidateViewportAct);
     verifyValidate->setObjectName("toolbarButton");
     QIcon verifyValidateIcon;
     verifyValidateIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-IconView")), QIcon::Normal);
@@ -770,6 +800,9 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
+    connect(this, qOverload<int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<int, int>(&MainWindow::setStatusBarMessage));
+    connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
+
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
 //    toolboxDockable->hideHeader();
@@ -778,7 +811,7 @@ void MainWindow::prepareDockables(){
 
 // empty new file
 void MainWindow::newFile() {
-    Document* document = new Document(documentsCount);
+    Document* document = new Document(this, documentsCount);
     document->getObjectTreeWidget()->setObjectName("dockableContent");
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
@@ -787,26 +820,27 @@ void MainWindow::newFile() {
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
             this, &MainWindow::objectTreeWidgetSelectionChanged);
-    
 }
 
 void MainWindow::openFile(const QString& filePath) {
     Document* document = nullptr;
 
     try {
-        document = new Document(documentsCount, &filePath);
+        document = new Document(this, documentsCount, &filePath);
     }
-    catch (const std::runtime_error& e) { 
+    catch (const std::runtime_error& e) {
         QString msg = e.what();
-        statusBar->showMessage(msg, statusBarShortMessageDuration);
-        popup(msg);
+        if (!msg.isEmpty()) popup(msg);
     }
     catch (...) {
         QString msg = "Failed to open " + filePath;
         statusBar->showMessage(msg, statusBarShortMessageDuration);
-        popup(msg);
-    }
 
+        QMessageBox msgBox;
+        msgBox.setText(msg);
+        msgBox.exec();
+    }
+    
     if (document != nullptr) {
         document->getObjectTreeWidget()->setObjectName("dockableContent");
         document->getProperties()->setObjectName("dockableContent");
@@ -817,6 +851,56 @@ void MainWindow::openFile(const QString& filePath) {
         connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
                 this, &MainWindow::objectTreeWidgetSelectionChanged);
     }
+}
+
+void MainWindow::openATRFile(const QString& atrFilePath) {    
+    {
+        QString modelID = "", gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
+        if (!QFile::exists(atrFilePath)) { popup("File " + atrFilePath + " doesn't exist."); return; }
+
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(atrFilePath);
+
+        if (!db.open() || !db.isOpen()) { popup("Failed to open " + atrFilePath); return; }
+
+        QSqlQuery q("SELECT id, filePath, md5Checksum from Model", db);
+        if (!q.isActive() || !q.next())  { popup("Failed to fetch filepath from " + atrFilePath); return; }
+        else {
+            modelID = q.value(0).toString();
+            gFilePath = q.value(1).toString();
+            md5Checksum = q.value(2).toString();
+        }
+
+        if (!gFilePath.isEmpty()) {
+            // if associated .g doesn't exist/was moved, ask user to find it and update
+            QMessageBox msgBox;
+            QString newGFilePath;
+            while (!QFile::exists(gFilePath)) { 
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("The file associated with these test results no longer exists at " + gFilePath + ".\nPlease update the file location.");
+                msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Open);
+
+                if (msgBox.exec() == QMessageBox::Open) {
+                    newGFilePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+                    if (!newGFilePath.isEmpty()) gFilePath = newGFilePath;
+                }
+                else break;
+            }
+
+            if (QFile::exists(gFilePath)) {
+                q.prepare("UPDATE Model SET filepath = ? WHERE id = ?"); // TODO: also update checksum here
+                q.addBindValue(gFilePath);
+                q.addBindValue(modelID);
+                q.exec();
+                if (!q.isActive()) { popup("Failed to update filepath to " + gFilePath + ".\n" + q.lastError().text()); return; }
+                openFile(gFilePath);
+            }
+        }
+
+        if (db.isOpen()) db.close();
+    }
+    QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
 }
 
 bool MainWindow::saveFile(const QString& filePath) {
@@ -833,9 +917,13 @@ bool MainWindow::saveFileId(const QString& filePath, int documentId) {
 
 void MainWindow::openFileDialog() 
 {
-	const QString filePath = QFileDialog::getOpenFileName(documentArea, tr("Open BRL-CAD database"), QString(), "BRL-CAD Database (*.g)");
+	const QString filePath = QFileDialog::getOpenFileName(documentArea, 
+    tr("Open BRL-CAD database"),
+    QString(), 
+    "BRL-CAD Database (*.g);; Arbalest Test Results (*.atr)");
     if (!filePath.isEmpty()){
-        openFile(filePath);
+        if (filePath.endsWith(".atr")) openATRFile(filePath);
+        else openFile(filePath);
     }
 }
 
@@ -944,6 +1032,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
+            objectVerificationValidationDockable->setVisible((documents[activeDocumentId]->getVerificationValidationWidget()) ? true : false);
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){

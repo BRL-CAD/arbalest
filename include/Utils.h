@@ -13,6 +13,8 @@
 #include <chrono>
 #include <stack>
 #include <iostream>
+#include <ged.h>
+#include <bu.h>
 using namespace std::chrono;
 using namespace std;
 
@@ -101,5 +103,6 @@ class Document;
 bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
 
 void popup(const QString& message);
+struct ged* mgedRun(const QString& cmd, const QString& gFilePath);
 
 #endif // UTILS_ARBALEST_H

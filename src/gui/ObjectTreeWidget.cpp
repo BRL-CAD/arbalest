@@ -127,3 +127,40 @@ void ObjectTreeWidget::refreshItemTextColors() {
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
 }
+
+QStringList ObjectTreeWidget::getSelectedObjects(const Name& name, const Level& level) {
+    QStringList ans;
+    ObjectTree* objTree = document->getObjectTree();
+
+    // if top, only traverse children of root
+    if (level == Level::TOP) {
+        for (int childObjectId : objTree->getChildren()[0]) {
+            if (objTree->getObjectVisibility()[childObjectId] == ObjectTree::VisibilityState::FullyVisible)
+                ans << objTree->getFullPathMap()[childObjectId];
+        }
+    } 
+    
+    // otherwise check entire tree
+    else {
+        document->getObjectTree()->traverseSubTree(0,false,[this, &ans, objTree]
+        (int objectId){
+            if (objTree->getObjectVisibility()[objectId] != ObjectTree::VisibilityState::FullyVisible) return true;
+
+            for (int childObjectId : document->getObjectTree()->getChildren()[objectId]) {
+                if (objTree->getObjectVisibility()[childObjectId] != ObjectTree::VisibilityState::FullyVisible) return true;
+            }
+            
+            ans << objTree->getFullPathMap()[objectId];
+            return false;
+        }
+        );
+
+    }
+
+    if (name == Name::BASENAME) {
+        for (int i = 0; i < ans.size(); i++) 
+            ans[i] = bu_path_basename(ans[i].toStdString().c_str(), NULL);
+    }
+
+    return ans;
+}
