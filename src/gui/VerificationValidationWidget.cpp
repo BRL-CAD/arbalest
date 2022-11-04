@@ -768,7 +768,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addSpacing(10);
     detailLayout->addWidget(rawOutputHeader);
     terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
-    QTextEdit* rawOutputBox = new QTextEdit("<html>"+terminalOutput+"<html>");
+    QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
     rawOutputBox->setReadOnly(true);
     QPalette rawOutputBox_palette = rawOutputBox->palette();
     rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
