@@ -131,7 +131,7 @@ void VerificationValidationWidget::runTests() {
     }
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
+    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
     q->addBindValue(modelID);
     dbExec(q);
     if (!q->next()) {
@@ -139,10 +139,10 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QString md5 = q->value(0).toString();
+    QString uuid = q->value(0).toString();
     QString filePath = q->value(1).toString();
     delete q;
-    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
+    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    uuid: "+uuid+",    Model ID: "+modelID;
     QLabel *title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     parentDockable->setTitleBarWidget(title);
@@ -213,7 +213,7 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, uuid TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
         delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasValArgs BOOL NOT NULL, category TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestResults"))
@@ -232,7 +232,7 @@ void VerificationValidationWidget::dbInitTables() {
 
 void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* q;
-    QString md5Checksum = "TODO: HASH USING BRLCAD INTERFACE";
+    QString uuid = "TODO: HASH USING BRLCAD INTERFACE";
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
@@ -246,9 +246,9 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     if (!numEntries) {
         delete q;
         q = new QSqlQuery(getDatabase());
-        q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
+        q->prepare("INSERT INTO Model (filepath, uuid) VALUES (?, ?)");
         q->addBindValue(QDir(*document->getFilePath()).absolutePath());
-        q->addBindValue(md5Checksum);
+        q->addBindValue(uuid);
         dbExec(q);
         modelID = q->lastInsertId().toString();
     } else {

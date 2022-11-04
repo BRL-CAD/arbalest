@@ -855,7 +855,7 @@ void MainWindow::openFile(const QString& filePath) {
 
 void MainWindow::openATRFile(const QString& atrFilePath) {    
     {
-        QString modelID = "", gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
+        QString modelID = "", gFilePath = "", uuid = ""; // TODO: check uuid checksum stuff here
         if (!QFile::exists(atrFilePath)) { popup("File " + atrFilePath + " doesn't exist."); return; }
 
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -863,12 +863,12 @@ void MainWindow::openATRFile(const QString& atrFilePath) {
 
         if (!db.open() || !db.isOpen()) { popup("Failed to open " + atrFilePath); return; }
 
-        QSqlQuery q("SELECT id, filePath, md5Checksum from Model", db);
+        QSqlQuery q("SELECT id, filePath, uuid from Model", db);
         if (!q.isActive() || !q.next())  { popup("Failed to fetch filepath from " + atrFilePath); return; }
         else {
             modelID = q.value(0).toString();
             gFilePath = q.value(1).toString();
-            md5Checksum = q.value(2).toString();
+            uuid = q.value(2).toString();
         }
 
         if (!gFilePath.isEmpty()) {
