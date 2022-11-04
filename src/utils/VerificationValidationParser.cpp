@@ -225,7 +225,7 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
         if(currentLine.contains("was not hit"))
         {
             r->resultCode = Result::Code::FAILED;
-            r->issues.push_back({objectName1, "Was not hit"});
+            r->issues.push_back({objectPath1, "'"+objectName1+"' was not hit"});
         }
     }
 
@@ -248,12 +248,12 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
         if(slashIdx2 != -1)
             objectName2 = objectPath2.mid(slashIdx2 + 1, objectPath2.size() - slashIdx2 - 1);
 
-        QString countString = splitLine[2];
-        QString distanceString = splitLine[3];
+        QString countString = splitLine[2].mid(6, splitLine[2].size() - 6);
+        QString distanceString = splitLine[3].mid(5, splitLine[3].size() - 5);
         int parenthIdx = currentLine.indexOf('(');
         QString locationString = currentLine.mid(parenthIdx + 1, currentLine.size() - parenthIdx - 1);
 
-        r->issues.push_back({objectName1, "Overlaps with '" + objectName2 + "' " + countString});
+        r->issues.push_back({objectPath1, "'"+objectName1+"' overlaps with '" + objectName2 + "' -- Count: " + countString + ", Distance: "+distanceString});
     }
     
 }
