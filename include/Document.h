@@ -11,6 +11,7 @@
 #include "Properties.h"
 #include "GeometryRenderer.h"
 #include "DisplayGrid.h"
+#include "VerificationValidationWidget.h"
 #include <include/RaytraceView.h>
 
 class Properties;
@@ -19,13 +20,16 @@ class GeometryRenderer;
 class DisplayGrid;
 class RaytraceView;
 class ObjectTreeWidget;
+class MainWindow;
 
 class Document {
 private:
+    MainWindow* mainWindow;
     QString *filePath = nullptr;
     BRLCAD::MemoryDatabase *database;
     DisplayGrid *displayGrid;
     ObjectTreeWidget *objectTreeWidget;
+    VerificationValidationWidget* vvWidget;
     Properties *properties;
     const int documentId;
     ObjectTree* objectTree;
@@ -34,13 +38,15 @@ private:
 
 
 public:
-    explicit Document(int documentId, const QString *filePath = nullptr);
+    explicit Document(MainWindow* mainWindow, int documentId, const QString *filePath = nullptr);
     virtual ~Document();
 
     void modifyObject(BRLCAD::Object* newObject);
 
     RaytraceView * raytraceWidget;
     // getters setters
+    int getTabIndex();
+
     QString* getFilePath() const
     {
 	    return filePath;
@@ -66,6 +72,12 @@ public:
     {
 	    return properties;
     }
+
+    VerificationValidationWidget* getVerificationValidationWidget() const {
+        return vvWidget;
+    }
+
+    void loadVerificationValidationWidget();
 
     DisplayGrid *getDisplayGrid()  {
         return displayGrid;

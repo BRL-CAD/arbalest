@@ -20,6 +20,8 @@
     <file>icons/baseline_center_focus_strong_black_48dp.png</file>
     <file>icons/baseline_refresh_black_48dp.png</file>
     <file>icons/sharp_grid_on_black_48dp.png</file>
+    <file>icons/verifyValidateIcon.png</file>
+    <file>icons/openVerifyValidateIcon.png</file>
 
     <!-- Toolbar raytrace -->
     <file>icons/baseline_filter_vintage_black_48dp.png</file>
@@ -43,6 +45,12 @@
     <!-- Menu close -->
     <file>icons/quitIcon.png</file>
 
+    <!-- Verification & Validation Dock -->
+    <file>icons/passed.png</file>
+    <file>icons/warning.png</file>
+    <file>icons/error.png</file>
+    <file>icons/unparseable.png</file>
+    <file>icons/editIcon.png</file>
   </qresource>
 
 </RCC>

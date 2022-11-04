@@ -1,4 +1,4 @@
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Sql REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
@@ -6,6 +6,7 @@ set(arbalest_Include_Dirs
         "src/windows"
         "include"
         ${BRLCAD_INCLUDE_DIRS}
+        ${BRLCAD_BASE_DIR}/include
         ${RT3_SOURCE_DIR}/include/brlcad)
 
 set(arbalest_Sources
@@ -37,11 +38,16 @@ set(arbalest_Sources
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
         src/gui/MatrixTransformWidget.cpp
+        src/utils/VerificationValidation.cpp
+        src/utils/VerificationValidationParser.cpp
+        src/gui/VerificationValidationWidget.cpp
         src/display/GridRenderer.cpp)
 
 set(arbalest_Link_Libraries
+        ged
         coreinterface
         Qt5::Widgets
+        Qt5::Sql
         OpenGL::GL)
 
 # Meta-Object Compiling
@@ -51,6 +57,7 @@ qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest
 # Resource Compiling
 qt5_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
+link_directories(${BRLCAD_BASE_DIR}/lib)
 include_directories(${arbalest_Include_Dirs})
 
 add_executable(arbalest

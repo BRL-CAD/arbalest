@@ -5,9 +5,10 @@
 #include <Document.h>
 #include<Display.h>
 #include <brlcad/Torus.h>
+#include "MainWindow.h"
 
 
-Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
+Document::Document(MainWindow* mainWindow, const int documentId, const QString *filePath) : documentId(documentId), mainWindow(mainWindow) {
     if (filePath != nullptr) this->filePath = new QString(*filePath);
     database =  new BRLCAD::MemoryDatabase();
     if (filePath != nullptr) {
@@ -22,6 +23,8 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
+    vvWidget = nullptr;
+    if (filePath) loadVerificationValidationWidget();
     displayGrid = new DisplayGrid(this);
 
     displayGrid->forceRerenderAllDisplays();
@@ -30,6 +33,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 }
 
 Document::~Document() {
+    delete vvWidget; // remove sqlite connection
     delete database;
 }
 
@@ -101,4 +105,21 @@ void Document::getBRLCADObject(const QString& objectName, const std::function<vo
 Display* Document::getDisplay()
 {
     return displayGrid->getActiveDisplay();
+}
+
+int Document::getTabIndex() {
+    return mainWindow->getDocumentArea()->indexOf(getDisplayGrid());
+}
+
+void Document::loadVerificationValidationWidget() {
+    if (!vvWidget) {
+        try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
+        catch (const std::runtime_error& e) { 
+            QString msg = e.what();
+            if (msg == "No changes were made.") throw e;
+            if (!msg.isEmpty()) popup(msg);
+            else throw e;
+        }
+        catch (...) { popup("Failed to create a VerificationValidationWidget"); }
+    }
 }
