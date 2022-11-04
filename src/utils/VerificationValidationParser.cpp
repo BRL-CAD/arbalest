@@ -152,46 +152,6 @@ void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Tes
     }
 }
 
-bool Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
-    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
-        return true;
-    }
-    return false;
-}
-
-bool Parser::searchDBNotFoundErrors(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
-        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
-        
-        int objNameSz = objNameEndIdx - objNameStartIdx;
-        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
-
-        return true;
-    }
-    return false; 
-}
-
-void Parser::searchFinalDefense(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
-    }
-
-    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
-    }
-}
-
 Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
@@ -225,10 +185,10 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
-    if (QString::compare(DefaultTests::NO_NULL_REGIONS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    if (QString::compare(DefaultTests::NO_NULL_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_OVERLAPS.testCommand, cmd, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(DefaultTests::NO_OVERLAPS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
 
     // search for DB errors (if found, return)
