@@ -93,10 +93,10 @@ namespace VerificationValidation {
     class Parser {
     public:
         static bool catchUsageErrors(Result* r, const QString& currentLine);
-        static bool dbNotFoundErrors(Result* r);
         static void finalDefense(Result* r);
 
         static Result* search(const QString& cmd, const QString* terminalOutput);
+        static bool searchDBNotFoundErrors(Result* r);
         static void searchSpecificTest(Result* r, const QString& currentLine, const Test* type);
 
         static Result* title(const QString& cmd, const QString* terminalOutput);

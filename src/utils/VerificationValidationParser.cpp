@@ -20,7 +20,7 @@ bool Parser::catchUsageErrors(Result* r, const QString& currentLine) {
     return false;
 }
 
-bool Parser::dbNotFoundErrors(Result* r) {
+bool Parser::searchDBNotFoundErrors(Result* r) {
     int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
     if (msgStart != -1) {
         int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
@@ -85,7 +85,7 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)
-    if (Parser::dbNotFoundErrors(r)) return r;
+    if (Parser::searchDBNotFoundErrors(r)) return r;
     
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {
@@ -190,9 +190,6 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
     
     else if (QString::compare(DefaultTests::NO_OVERLAPS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
-
-    // search for DB errors (if found, return)
-    if (Parser::dbNotFoundErrors(r)) return r;
     
     QStringList lines = r->terminalOutput.split('\n');
     bool startParsing = false;
