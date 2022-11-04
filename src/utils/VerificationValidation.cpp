@@ -20,6 +20,7 @@ const Test DefaultTests::NO_OVERLAPS                 = {"Overlaps cleaned to 4mm
 const Test DefaultTests::NO_DUPLICATE_ID             = {"Duplicate ID check", "lc -d all","File"};
 const Test DefaultTests::NO_MATRICES                 = {"No matrices", "search /all ! -matrix IDN", "File"};
 const Test DefaultTests::NO_INVALID_AIRCODE_REGIONS  = {"No regions have aircodes (except actual air regions)", "search /all -type region -attr aircode", "General"};
+const Test DefaultTests::VALID_TITLE                 = {"Valid title", "title", "General"};
 
 const std::vector<Test> DefaultTests::allTests = {
     DefaultTests::MISMATCHED_DUP_IDS,
@@ -34,5 +35,6 @@ const std::vector<Test> DefaultTests::allTests = {
     DefaultTests::NO_OVERLAPS,
     DefaultTests::NO_DUPLICATE_ID,
     DefaultTests::NO_MATRICES,
-    DefaultTests::NO_INVALID_AIRCODE_REGIONS
+    DefaultTests::NO_INVALID_AIRCODE_REGIONS,
+    DefaultTests::VALID_TITLE
 };
