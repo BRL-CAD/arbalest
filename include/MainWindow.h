@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QComboBox>
+#include <QObject>
 
 class Document;
 
@@ -88,7 +89,6 @@ protected:
 	
 public slots:
     void openFileDialog();
-    void openATRFileDialog();
     bool saveFileId(const QString& filePath, int documentId);
     void saveAsFileDialog();
     bool saveAsFileDialogId(int documentId);
@@ -100,5 +100,18 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
+    void setStatusBarMessage(int currTest, int totalTests) {
+        QString status = "Finished running %1 / %2 tests";
+        statusBar->showMessage(status.arg(currTest).arg(totalTests), statusBarShortMessageDuration);
+        qApp->processEvents();
+    }
+    void setStatusBarMessage(QString msg) {
+        statusBar->showMessage(msg, statusBarShortMessageDuration);
+        qApp->processEvents();
+    }
+
+signals:
+    void changeStatusBarMessage(int currTest, int totalTests);
+    void changeStatusBarMessage(QString msg);
 };
 #endif // MAINWINDOW_H
