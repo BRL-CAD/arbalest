@@ -24,8 +24,10 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     dbPopulateDefaults();
     setupUI();
 
+    updateDockableHeader();
+    validateChecksum();
     if (msgBoxRes == OPEN) {
-        if (validChecksum()) showAllResults();
+        showAllResults();
         msgBoxRes = NO_SELECTION;
     } else if (msgBoxRes == DISCARD) {
         dbClearResults();
@@ -34,6 +36,10 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
+    QString dockableTitle = "Verification & Validation";
+    QLabel *title = new QLabel(dockableTitle);
+    title->setObjectName("dockableHeader");
+    parentDockable->setTitleBarWidget(title);
     dbClose();
 }
 
@@ -52,6 +58,8 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
+    validateChecksum();
+    dbUpdateModelUUID();
     dbClearResults();
     resultTable->setRowCount(0);
 
@@ -129,23 +137,6 @@ void VerificationValidationWidget::runTests() {
 
         showResult(testResultID);
     }
-
-    QSqlQuery* q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
-    q->addBindValue(modelID);
-    dbExec(q);
-    if (!q->next()) {
-        popup("Failed to show modelID " + modelID);
-        return;
-    }
-
-    QString uuid = q->value(0).toString();
-    QString filePath = q->value(1).toString();
-    delete q;
-    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    uuid: "+uuid+",    Model ID: "+modelID;
-    QLabel *title = new QLabel(dockableTitle);
-    title->setObjectName("dockableHeader");
-    parentDockable->setTitleBarWidget(title);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -669,7 +660,8 @@ void VerificationValidationWidget::setupUI() {
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
-    QSqlQuery* query = new QSqlQuery(command, getDatabase());
+    QSqlDatabase db = getDatabase();
+    QSqlQuery* query = new QSqlQuery(command, db);
     if (showErrorPopup && !query->isActive())
         popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + command);
     return query;
@@ -878,25 +870,54 @@ void VerificationValidationWidget::showAllResults() {
     delete q;
 }
 
-bool VerificationValidationWidget::validChecksum() {
-    QSqlQuery* q = dbExec("SELECT uuid FROM Model"); // TODO: defaults haven't been populated at this point
-    if (!q->next()) { popup("Failed to get UUID from Model"); return false; }
+void VerificationValidationWidget::validateChecksum() {
+    QSqlQuery* q = dbExec("SELECT uuid FROM Model");
+    if (!q->next()) { popup("Failed to validate checksum (failed get UUID from Model)"); return; }
     QString uuid = q->value(0).toString();
     delete q;
 
     QString gFilePath = *document->getFilePath();
     QString* gFileUUID = generateUUID(gFilePath);
-    if (!gFileUUID) { popup("Failed to generate UUID for " + gFilePath); return false; }
+    if (!gFileUUID) { popup("Failed to validate checksum (failed generate UUID for " + gFilePath + ")"); return; }
 
     QMessageBox msgBox;
     if (uuid != *gFileUUID) {
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("The contents of " + gFilePath + " have changed.\nThis implies the results are outdated/incorrect.");
-        msgBox.setInformativeText("Checksums:\nold: " + uuid + "\nnew: " + *gFileUUID);
+        msgBox.setText("The contents of " + gFilePath + " have changed.\n\nChecksums:\nold: " + uuid + "\nnew: " + *gFileUUID);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.exec();
+        dbUpdateModelUUID();
     }
+}
 
-    return true;
+void VerificationValidationWidget::dbUpdateModelUUID() {
+    QString* uuid = generateUUID(*document->getFilePath());
+    if (!uuid) return;
+    QSqlQuery* updateQuery = new QSqlQuery(getDatabase());
+    updateQuery->prepare("UPDATE Model SET uuid = ? WHERE id = ?");
+    updateQuery->addBindValue(*uuid);
+    updateQuery->addBindValue(modelID);
+    updateQuery->exec();
+    delete updateQuery;
+
+    updateDockableHeader();
+}
+
+void VerificationValidationWidget::updateDockableHeader() {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
+    q->addBindValue(modelID);
+    q->exec();
+    if (q->next()) {
+        QString uuid = q->value(0).toString();
+        QString filePath = q->value(1).toString();
+
+        QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+"\tModel UUID: "+uuid;
+        QLabel *title = new QLabel(dockableTitle);
+        title->setObjectName("dockableHeader");
+        parentDockable->setTitleBarWidget(title);
+        qApp->processEvents();
+    }
+    delete q;
 }

@@ -36,6 +36,7 @@ class VerificationValidationWidget : public QHBoxWidget
 public:
     explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
+    void updateDockableHeader();
     void showSelectTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
@@ -106,6 +107,7 @@ private:
         return true;
     }
 
+    void dbUpdateModelUUID();
     void dbClearResults();
 
     // events
@@ -119,7 +121,7 @@ private:
     void checkSuiteSA();
     void checkTestSA();
     QString *runTest(const QString &cmd);
-    bool validChecksum();
+    void validateChecksum();
 };
 
 #endif // VVWIDGET_H

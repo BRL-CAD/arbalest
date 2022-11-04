@@ -1034,6 +1034,10 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
+            if (documents[activeDocumentId]->getVerificationValidationWidget()) 
+                documents[activeDocumentId]->getVerificationValidationWidget()->updateDockableHeader();
+            else
+                objectVerificationValidationDockable->setVisible(false);
             objectVerificationValidationDockable->setVisible((documents[activeDocumentId]->getVerificationValidationWidget()) ? true : false);
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
@@ -1047,6 +1051,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             }
         }
     }else if (activeDocumentId != -1){
+        objectVerificationValidationDockable->setVisible(false);
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         objectVerificationValidationDockable->clear();
