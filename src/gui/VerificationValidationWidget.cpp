@@ -553,6 +553,7 @@ void VerificationValidationWidget::setupUI() {
     QGroupBox* groupbox3 = new QGroupBox();
     QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addWidget(new QLabel("Warning: running tests will overwrite your current results."));
     hbox->addWidget(buttonOptions);
     groupbox3->setLayout(hbox);
     
