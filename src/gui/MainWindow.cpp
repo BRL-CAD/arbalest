@@ -29,7 +29,7 @@
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
-
+#include "SelectMouseAction.h"
 
 using namespace BRLCAD;
 using namespace std;
@@ -395,6 +395,7 @@ void MainWindow::prepareUi() {
     selectObjectAct->setStatusTip(tr("Select object."));
     connect(selectObjectAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
+        selectObjectButtonAction();
     });
     editMenu->addAction(selectObjectAct);
 
@@ -1075,10 +1076,18 @@ void MainWindow::moveCameraButtonAction() {
     m_mouseAction = new MoveCameraMouseAction();*/
 
     if (activeDocumentId != -1) {
-        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid *>(documentArea->widget(activeDocumentId));
+        DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
 
         if (displayGrid != nullptr) {
             displayGrid->setMoveCameraMouseAction();
         }
+    }
+}
+
+void MainWindow::selectObjectButtonAction() {
+    DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
+
+    if (displayGrid != nullptr) {
+        displayGrid->setSelectObjectMouseAction();
     }
 }
