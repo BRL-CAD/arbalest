@@ -24,6 +24,8 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     dbPopulateDefaults();
     setupUI();
 
+    updateDockableHeader();
+    validateChecksum();
     if (msgBoxRes == OPEN) {
         showAllResults();
         msgBoxRes = NO_SELECTION;
@@ -34,11 +36,15 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
 }
 
 VerificationValidationWidget::~VerificationValidationWidget() {
+    QString dockableTitle = "Verification & Validation";
+    QLabel *title = new QLabel(dockableTitle);
+    title->setObjectName("dockableHeader");
+    parentDockable->setTitleBarWidget(title);
     dbClose();
 }
 
 void VerificationValidationWidget::showSelectTests() {
-    statusBar->showMessage("Select tests to run...");
+    emit mainWindow->setStatusBarMessage("Select tests to run...");
     selectTestsDialog->exec();
 }
 
@@ -51,9 +57,13 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
     return result;
 }
 
-void VerificationValidationWidget::runTests() {    
+void VerificationValidationWidget::runTests() {
+    validateChecksum();
+    dbUpdateModelUUID();
     dbClearResults();
     resultTable->setRowCount(0);
+    minBtn_toggle = true;
+    resultTableChangeSize();
 
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
@@ -71,11 +81,17 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QString status = "Finished running %1 / %2 tests";
     for(int i = 0; i < totalTests; i++){
-        statusBar->showMessage(status.arg(i+1).arg(totalTests));
-        int testID = itemToTestMap.at(selected_tests[i]).first;
-        QString testCommand = itemToTestMap.at(selected_tests[i]).second.getCmdWithArgs();
+        emit mainWindow->setStatusBarMessage(i+1, totalTests);
+        QSqlQuery* tmp = new QSqlQuery(getDatabase());
+        tmp->prepare("SELECT id FROM Tests WHERE testName = ?");
+        tmp->addBindValue(selected_tests[i]->text());
+        dbExec(tmp);
+
+        if (!tmp->next()) continue;
+
+        QString testID = tmp->value(0).toString();
+        QString testCommand = selected_tests[i]->toolTip();
         const QString* terminalOutput = runTest(testCommand);
         
         QString executableName = testCommand.split(' ').first();
@@ -83,6 +99,10 @@ void VerificationValidationWidget::runTests() {
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
             result = Parser::search(testCommand, terminalOutput);
+        else if (QString::compare(executableName, "gqa", Qt::CaseInsensitive) == 0)
+            result = Parser::gqa(testCommand, terminalOutput);
+        else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
+            result = Parser::title(testCommand, terminalOutput);
 
         // if parser hasn't been implemented, default
         if (!result) {
@@ -121,31 +141,6 @@ void VerificationValidationWidget::runTests() {
 
         showResult(testResultID);
     }
-
-    QSqlQuery* q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
-    q->addBindValue(modelID);
-    dbExec(q);
-    if (!q->next()) {
-        popup("Failed to show modelID " + modelID);
-        return;
-    }
-
-    QString md5 = q->value(0).toString();
-    QString filePath = q->value(1).toString();
-    delete q;
-    
-    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
-    QLabel *title = new QLabel(dockableTitle);
-    title->setObjectName("dockableHeader");
-    QWidget* titleBarWidget = new QWidget();
-    QHBoxLayout* h_layout = new QHBoxLayout();
-    h_layout->addWidget(title);
-    h_layout->addWidget(new QPushButton("Minimize"));
-    titleBarWidget->setLayout(h_layout);
-    parentDockable->setTitleBarWidget(titleBarWidget);
-    parentDockable->setVisible(true);
-    // parentDockable->widget()->setVisible(false);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -181,9 +176,9 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
 
     // if file exists, prompt before overwriting
     if (QFile::exists(this->dbName)) {
-        QMessageBox msgBox;
+        QMessageBox msgBox; 
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("Detected existing test results in " + this->dbName + ".\nDo you want to open or discard the results?");
+        msgBox.setText("Detected existing test results in " + this->dbName + ".\n\nDo you want to open or discard the results?");
         msgBox.setInformativeText("Changes cannot be reverted.");
         msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
         QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
@@ -213,7 +208,7 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
 
 void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
-        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, uuid TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
         delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasValArgs BOOL NOT NULL, category TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestResults"))
@@ -232,23 +227,21 @@ void VerificationValidationWidget::dbInitTables() {
 
 void VerificationValidationWidget::dbPopulateDefaults() {
     QSqlQuery* q;
-    QString md5Checksum = "TODO: HASH USING BRLCAD INTERFACE";
+    QString gFilePath = *document->getFilePath();
+    QString* uuid = generateUUID(gFilePath);
+
+    if (!uuid) throw std::runtime_error("Failed to generate UUID for " + gFilePath.toStdString());
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT COUNT(id) FROM Model WHERE filepath=?");
+    q->prepare("SELECT id FROM Model WHERE filepath=?");
     q->addBindValue(QDir(*document->getFilePath()).absolutePath());
     dbExec(q, !SHOW_ERROR_POPUP);
 
-    int numEntries = 0;
-    if (q->next()) numEntries = q->value(0).toInt();
-
-    if (!numEntries) {
-        delete q;
-        q = new QSqlQuery(getDatabase());
-        q->prepare("INSERT INTO Model (filepath, md5Checksum) VALUES (?, ?)");
+    if (!q->next()) {
+        q->prepare("INSERT INTO Model (filepath, uuid) VALUES (?, ?)");
         q->addBindValue(QDir(*document->getFilePath()).absolutePath());
-        q->addBindValue(md5Checksum);
+        q->addBindValue(*uuid);
         dbExec(q);
         modelID = q->lastInsertId().toString();
     } else {
@@ -637,6 +630,7 @@ void VerificationValidationWidget::setupUI() {
     QGroupBox* groupbox3 = new QGroupBox();
     QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addWidget(new QLabel("Warning: running tests will overwrite your current results."));
     hbox->addWidget(buttonOptions);
     groupbox3->setLayout(hbox);
     
@@ -665,7 +659,8 @@ void VerificationValidationWidget::setupUI() {
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
-    QSqlQuery* query = new QSqlQuery(command, getDatabase());
+    QSqlDatabase db = getDatabase();
+    QSqlQuery* query = new QSqlQuery(command, db);
     if (showErrorPopup && !query->isActive())
         popup("[Verification & Validation]\nERROR: query failed to execute: " + query->lastError().text() + "\n\n" + command);
     return query;
@@ -700,9 +695,14 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QVBoxLayout* detailLayout = new QVBoxLayout();
 
     QString resultCode;
-    QString testName = resultTable->item(row, TEST_NAME_COLUMN)->text();
-    QString description = resultTable->item(row, DESCRIPTION_COLUMN)->text();
-    QString objPath = resultTable->item(row, OBJPATH_COLUMN)->text();
+    
+    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+
+    QString testName = (testNameItem) ? testNameItem->text() : "";
+    QString description = (descriptionItem) ? descriptionItem->text() : "";
+    QString objPath = (objPathItem) ? objPathItem->text() : "";
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT id FROM Tests WHERE testName = ?");
     q->addBindValue(testName);
@@ -751,7 +751,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addSpacing(10);
     detailLayout->addWidget(commandHeader);
     QLabel* testCmdLabel = new QLabel(testCommand);
-    testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
+    testCmdLabel->setFixedWidth(750);
     detailLayout->addWidget(testCmdLabel);
     detailLayout->addSpacing(10);
     detailLayout->addWidget(resultCodeHeader);
@@ -761,14 +761,20 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addWidget(new QLabel(description));
     detailLayout->addSpacing(10);
     detailLayout->addWidget(rawOutputHeader);
-    terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
-    QTextEdit* rawOutputBox = new QTextEdit("<html>"+terminalOutput+"<html>");
-    rawOutputBox->setReadOnly(true);
+
+    QTextEdit* rawOutputBox = new QTextEdit();
     QPalette rawOutputBox_palette = rawOutputBox->palette();
     rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
     rawOutputBox->setPalette(rawOutputBox_palette);
-    detailLayout->addWidget(rawOutputBox);
+    rawOutputBox->setFontWeight(QFont::DemiBold);
+    rawOutputBox->setTextColor(QColor("#39ff14"));
+    rawOutputBox->append("arbalest> "+testCommand+"\n");
+    rawOutputBox->setTextColor(Qt::white);
+    rawOutputBox->append(terminalOutput);
+    rawOutputBox->setReadOnly(true);
+    rawOutputBox->moveCursor(QTextCursor::Start, QTextCursor::MoveAnchor);
 
+    detailLayout->addWidget(rawOutputBox);
     detail_dialog->setLayout(detailLayout);
     detail_dialog->exec();
 }
@@ -788,56 +794,70 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     int resultCode = q->value(1).toInt();
     QString terminalOutput = q->value(2).toString();
 
-    QSqlQuery* q2 = new QSqlQuery(getDatabase());
-    q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
-    q2->addBindValue(testResultID);
-    dbExec(q2, !SHOW_ERROR_POPUP);
+    QString iconPath = "";
+    QString objectName;
+    QString issueDescription;
 
-    while (q2->next()) {
-        QString objectIssueID = q2->value(0).toString();
-
-        QSqlQuery* q3 = new QSqlQuery(getDatabase());
-        q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
-        q3->addBindValue(objectIssueID);
-        dbExec(q3);
-
-        if (!q3->next()) {
-            popup("Failed to retrieve Object Issue #" + objectIssueID);
-            return;
-        }
-
-        QString objectName = q3->value(0).toString();
-        QString issueDescription = q3->value(1).toString();
-
+    if (resultCode == Result::Code::PASSED) {
         resultTable->insertRow(resultTable->rowCount());
-
-        QString iconPath = "";
-        if (resultCode == VerificationValidation::Result::Code::UNPARSEABLE)
-            iconPath = ":/icons/unparseable.png";
-        else if (resultCode == VerificationValidation::Result::Code::FAILED)
-            iconPath = ":/icons/error.png";
-        else if (resultCode == VerificationValidation::Result::Code::WARNING)
-            iconPath = ":/icons/warning.png";
-        else if (resultCode == VerificationValidation::Result::Code::PASSED)
-            iconPath = ":/icons/passed.png";
-
-        // Change to hide icon image path from showing
-        QTableWidgetItem* icon_item = new QTableWidgetItem;
-        QIcon icon(iconPath);
-        icon_item->setIcon(icon);
-        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, icon_item);
+        iconPath = ":/icons/passed.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
-        resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
-        resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+    } 
 
-        delete q3;
+    else if (resultCode == Result::Code::UNPARSEABLE) {
+        resultTable->insertRow(resultTable->rowCount());
+        iconPath = ":/icons/unparseable.png";
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
     }
+
+    else {
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+        q2->addBindValue(testResultID);
+        dbExec(q2, !SHOW_ERROR_POPUP);
+
+        while (q2->next()) {
+            QString objectIssueID = q2->value(0).toString();
+            
+            QSqlQuery* q3 = new QSqlQuery(getDatabase());
+            q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
+            q3->addBindValue(objectIssueID);
+            dbExec(q3);
+
+            if (!q3->next()) {
+                popup("Failed to retrieve Object Issue #" + objectIssueID);
+                return;
+            }
+
+            objectName = q3->value(0).toString();
+            issueDescription = q3->value(1).toString().replace("\n", "");
+
+            resultTable->insertRow(resultTable->rowCount());
+
+            if (resultCode == VerificationValidation::Result::Code::FAILED)
+                iconPath = ":/icons/error.png";
+            else if (resultCode == VerificationValidation::Result::Code::WARNING)
+                iconPath = ":/icons/warning.png";                
+
+            // Change to hide icon image path from showing
+            resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
+            resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+            resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
+            resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+
+            delete q3;
+        }
+        delete q2;
+    }
+    
     // Only select rows, disable edit
     resultTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     resultTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     delete q;
-    delete q2;
+    qApp->processEvents();
 }
 
 void VerificationValidationWidget::showAllResults() {
@@ -853,4 +873,78 @@ void VerificationValidationWidget::showAllResults() {
     }
 
     delete q;
+}
+
+void VerificationValidationWidget::validateChecksum() {
+    QSqlQuery* q = dbExec("SELECT uuid FROM Model");
+    if (!q->next()) { popup("Failed to validate checksum (failed get UUID from Model)"); return; }
+    QString uuid = q->value(0).toString();
+    delete q;
+
+    QString gFilePath = *document->getFilePath();
+    QString* gFileUUID = generateUUID(gFilePath);
+    if (!gFileUUID) { popup("Failed to validate checksum (failed generate UUID for " + gFilePath + ")"); return; }
+
+    QMessageBox msgBox;
+    if (uuid != *gFileUUID) {
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("The contents of " + gFilePath + " have changed.\n\nChecksums:\nold: " + uuid + "\nnew: " + *gFileUUID);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+        dbUpdateModelUUID();
+    }
+}
+
+void VerificationValidationWidget::dbUpdateModelUUID() {
+    QString* uuid = generateUUID(*document->getFilePath());
+    if (!uuid) return;
+    QSqlQuery* updateQuery = new QSqlQuery(getDatabase());
+    updateQuery->prepare("UPDATE Model SET uuid = ? WHERE id = ?");
+    updateQuery->addBindValue(*uuid);
+    updateQuery->addBindValue(modelID);
+    updateQuery->exec();
+    delete updateQuery;
+
+    updateDockableHeader();
+}
+
+void VerificationValidationWidget::resultTableChangeSize() {
+    if(minBtn_toggle){
+        minBtn->setIcon(QIcon(":/icons/collapse.png"));
+        parentDockable->widget()->setVisible(true);
+        minBtn_toggle = false;
+    } else {
+        minBtn->setIcon(QIcon(":/icons/expand.png"));
+        parentDockable->widget()->setVisible(false);
+        minBtn_toggle = true;
+    }
+}
+
+void VerificationValidationWidget::updateDockableHeader() {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
+    q->addBindValue(modelID);
+    q->exec();
+    if (q->next()) {
+        QString uuid = q->value(0).toString();
+        QString filePath = q->value(1).toString();
+
+        QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
+        QLabel *title = new QLabel(dockableTitle);
+        minBtn = new QToolButton();
+        minBtn->setIcon(QIcon(":/icons/collapse.png"));
+        minBtn_toggle = false;
+        QHBoxLayout* h_layout = new QHBoxLayout();
+        h_layout->addWidget(title);
+        h_layout->addWidget(minBtn);
+        QWidget* titleWidget = new QWidget();
+        titleWidget->setLayout(h_layout);
+        title->setObjectName("dockableHeader");
+        parentDockable->setTitleBarWidget(titleWidget);
+        qApp->processEvents();
+    }
+    delete q;
+    // Result min button
+    connect(minBtn, SIGNAL(clicked()), this, SLOT(resultTableChangeSize()));
 }

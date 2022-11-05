@@ -36,6 +36,7 @@ class VerificationValidationWidget : public QHBoxWidget
 public:
     explicit VerificationValidationWidget(MainWindow *mainWindow, Document *document, QWidget *parent = nullptr);
     ~VerificationValidationWidget();
+    void updateDockableHeader();
     void showSelectTests();
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
@@ -51,6 +52,7 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void resultTableChangeSize();
 
 private:
     MainWindow *mainWindow;
@@ -73,6 +75,8 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    bool minBtn_toggle;
+    QToolButton* minBtn;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;
@@ -106,6 +110,7 @@ private:
         return true;
     }
 
+    void dbUpdateModelUUID();
     void dbClearResults();
 
     // events
@@ -119,6 +124,7 @@ private:
     void checkSuiteSA();
     void checkTestSA();
     QString *runTest(const QString &cmd);
+    void validateChecksum();
 };
 
 #endif // VVWIDGET_H
