@@ -171,3 +171,47 @@ void popup(const QString& message) {
     msgBox->setText(message);
     msgBox->exec();
 }
+
+struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
+    struct ged* dbp;
+    const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
+
+    const char* cmdList[tmp.size() + 1];
+    for (int i = 0; i < tmp.size(); i++) {
+        char* cmdBuf = new char[tmp[i].size() + 1];
+        strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
+        cmdBuf[tmp[i].size()] = '\0';
+        cmdList[i] = cmdBuf;
+    }
+    cmdList[tmp.size()] = NULL;
+    
+    if (!bu_file_exists((gFilePath).toStdString().c_str(), NULL)) {
+        QString errorMsg = "[mgedRun] ERROR: [" + gFilePath + "] does not exist\n";
+        popup(errorMsg);
+        return nullptr;
+    }
+
+    dbp = ged_open("db", gFilePath.toStdString().c_str(), 1);
+    ged_exec(dbp, tmp.size(), cmdList);
+    return dbp;
+}
+
+QString* generateUUID(const QString& filepath) {
+    QString* ret = nullptr;
+    if (!bu_file_exists(filepath.toStdString().c_str(), NULL)) return ret;
+
+    uint8_t uuid_int[16] = {0};
+    uint8_t seed[16] = {1,2,3,4,5,6,7,8,0,0,0,0,0,0,0,0}; // arbitrary seed
+    char uuid_str[37] = {0};
+
+    struct bu_mapped_file *mf = bu_open_mapped_file(filepath.toStdString().c_str(), ".atr");
+
+    bu_uuid_create(uuid_int, mf->buflen, (uint8_t*) mf->buf, seed);
+    bu_close_mapped_file(mf);
+    bu_uuid_encode(uuid_int, (uint8_t*) uuid_str);
+
+    if (!mf) return ret;
+
+    ret = new QString(uuid_str);
+    return ret;
+}

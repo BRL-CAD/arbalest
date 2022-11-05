@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QComboBox>
+#include <QObject>
 
 class Document;
 
@@ -25,6 +26,22 @@ public:
 
     QStatusBar *getStatusBar() const {
         return statusBar;
+    }
+
+    QTabWidget *getDocumentArea() const {
+        return documentArea;
+    }
+
+    const std::unordered_map<int, Document*> *getDocuments() const {
+        return &documents;
+    }
+
+    int getActiveDocumentId() const {
+        return activeDocumentId;
+    }
+
+    Dockable *getVerificationValidationDockable() const {
+        return objectVerificationValidationDockable;
     }
 
     const int statusBarShortMessageDuration = 7000;
@@ -59,6 +76,7 @@ private:
 
     void newFile(); // empty new file
     void openFile(const QString& filePath);
+    void openATRFile(const QString& atrFilePath);
     bool saveFile(const QString& filePath);
     bool maybeSave(int documentId, bool *cancel = nullptr);
 
@@ -82,5 +100,18 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
+    void setStatusBarMessage(int currTest, int totalTests) {
+        QString status = "Finished running %1 / %2 tests";
+        statusBar->showMessage(status.arg(currTest).arg(totalTests), statusBarShortMessageDuration);
+        qApp->processEvents();
+    }
+    void setStatusBarMessage(QString msg) {
+        statusBar->showMessage(msg, statusBarShortMessageDuration);
+        qApp->processEvents();
+    }
+
+signals:
+    void changeStatusBarMessage(int currTest, int totalTests);
+    void changeStatusBarMessage(QString msg);
 };
 #endif // MAINWINDOW_H
