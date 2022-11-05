@@ -97,6 +97,8 @@ void VerificationValidationWidget::runTests() {
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
             result = Parser::search(testCommand, terminalOutput);
+        else if (QString::compare(executableName, "gqa", Qt::CaseInsensitive) == 0)
+            result = Parser::gqa(testCommand, terminalOutput);
         else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
             result = Parser::title(testCommand, terminalOutput);
 

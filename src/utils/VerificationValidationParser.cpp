@@ -10,6 +10,46 @@ using Test = VerificationValidation::Test;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
 
+bool Parser::catchUsageErrors(Result* r, const QString& currentLine) {
+    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
+        return true;
+    }
+    return false;
+}
+
+bool Parser::searchDBNotFoundErrors(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
+        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
+        
+        int objNameSz = objNameEndIdx - objNameStartIdx;
+        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
+
+        return true;
+    }
+    return false; 
+}
+
+void Parser::finalDefense(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
+    }
+
+    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
+    }
+}
+
 Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
@@ -50,13 +90,13 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
     QStringList lines = r->terminalOutput.split('\n');
     for (size_t i = 0; i < lines.size(); i++) {
         // if no usage errors, run specific test
-        if (!Parser::searchCatchUsageErrors(r, lines[i]) && type)
+        if (!Parser::catchUsageErrors(r, lines[i]) && type)
             Parser::searchSpecificTest(r, lines[i], type);
     }
 
     // final defense: find any errors / warnings
     if (r->resultCode == Result::Code::PASSED)
-        Parser::searchFinalDefense(r);
+        Parser::finalDefense(r);
 
     return r;
 }
@@ -112,46 +152,6 @@ void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Tes
     }
 }
 
-bool Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
-    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
-        return true;
-    }
-    return false;
-}
-
-bool Parser::searchDBNotFoundErrors(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
-        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
-        
-        int objNameSz = objNameEndIdx - objNameStartIdx;
-        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
-
-        return true;
-    }
-    return false; 
-}
-
-void Parser::searchFinalDefense(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
-    }
-
-    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
-    }
-}
-
 Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
@@ -178,6 +178,82 @@ Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
 Result* Parser::lc(const QString* terminalOutput) {
     return nullptr; // TODO: implement
 }
-Result* Parser::gqa(const QString* terminalOutput) {
-    return nullptr; // TODO: implement
+
+Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
+    Result* r = new Result;
+    r->terminalOutput = terminalOutput->trimmed();
+    r->resultCode = Result::Code::PASSED;
+    Test* type = nullptr;
+
+    if (QString::compare(DefaultTests::NO_NULL_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+        type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
+    
+    else if (QString::compare(DefaultTests::NO_OVERLAPS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+        type = (Test*) &(DefaultTests::NO_OVERLAPS);
+    
+    QStringList lines = r->terminalOutput.split('\n');
+    bool startParsing = false;
+    for (size_t i = 0; i < lines.size(); i++) {
+        // if no usage errors, run specific test
+        if(lines[i].startsWith("list Overlaps"))
+        {
+            startParsing = true;
+            continue;
+        }
+        if (!Parser::catchUsageErrors(r, lines[i]) && type && startParsing)
+            Parser::gqaSpecificTest(r, lines[i], type);
+    }
+
+    // final defense: find any errors / warnings
+    if (r->resultCode == Result::Code::PASSED)
+        Parser::finalDefense(r);
+
+    return r;
+}
+
+void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* type) {
+    if (currentLine.trimmed().isEmpty()) return;
+    
+    if(type == &DefaultTests::NO_NULL_REGIONS)
+    {
+        QString objectPath1 = currentLine.split(' ')[0];
+        QString objectName1 = objectPath1;
+        int slashIdx1 = objectPath1.lastIndexOf('/');
+        if(slashIdx1 != -1)
+            objectName1 = objectPath1.mid(slashIdx1 + 1, objectPath1.size() - slashIdx1 - 1);
+
+        if(currentLine.contains("was not hit"))
+        {
+            r->resultCode = Result::Code::FAILED;
+            r->issues.push_back({objectPath1, "'"+objectName1+"' was not hit"});
+        }
+    }
+
+    else if(type == &DefaultTests::NO_OVERLAPS)
+    {
+        if(currentLine.contains("was not hit")) return;
+
+        r->resultCode = Result::Code::WARNING;
+        QStringList splitLine = currentLine.split(' ');
+
+        QString objectPath1 = splitLine[0];
+        QString objectName1 = objectPath1;
+        int slashIdx1 = objectPath1.lastIndexOf('/');
+        if(slashIdx1 != -1)
+            objectName1 = objectPath1.mid(slashIdx1 + 1, objectPath1.size() - slashIdx1 - 1);
+
+        QString objectPath2 = splitLine[1];
+        QString objectName2 = objectPath2;
+        int slashIdx2 = objectPath2.lastIndexOf('/');
+        if(slashIdx2 != -1)
+            objectName2 = objectPath2.mid(slashIdx2 + 1, objectPath2.size() - slashIdx2 - 1);
+
+        QString countString = splitLine[2].mid(6, splitLine[2].size() - 6);
+        QString distanceString = splitLine[3].mid(5, splitLine[3].size() - 5);
+        int parenthIdx = currentLine.indexOf('(');
+        QString locationString = currentLine.mid(parenthIdx + 1, currentLine.size() - parenthIdx - 1);
+
+        r->issues.push_back({objectPath1, "'"+objectName1+"' overlaps with '" + objectName2 + "' -- Count: " + countString + ", Distance: "+distanceString});
+    }
+    
 }
