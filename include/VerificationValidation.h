@@ -7,6 +7,7 @@
 #include <vector>
 #include <list>
 #include <QString>
+#include "ObjectTreeWidget.h"
 
 namespace VerificationValidation {
     class Arg {
@@ -29,10 +30,6 @@ namespace VerificationValidation {
             if (defaultValue != NULL) this->type = Dynamic;
             else this->type = type;
         }
-
-        void updateValue (QString input){
-            defaultValue = input;
-        }
     };
 
     class Test {
@@ -44,13 +41,29 @@ namespace VerificationValidation {
         bool hasVariable;
         std::vector<Arg> ArgList;
 
-        QString getCmdWithArgs() const {
+        bool operator==(const Test& rhs) {
+            if (ArgList.size() != rhs.ArgList.size()) return false;
+
+            for (int i = 0; i < ArgList.size(); i++) {
+                if ((ArgList[i].type != rhs.ArgList[i].type) || 
+                    (rhs.ArgList[i].type != Arg::Type::ObjectName && rhs.ArgList[i].type != Arg::Type::ObjectPath && ArgList[i].argument != rhs.ArgList[i].argument))
+                    return false;
+            }
+            return true;
+        }
+
+        bool operator!=(const Test& rhs) {
+            return !operator==(rhs);
+        }
+
+        QString getCMD() const {
             QString cmd = testCommand;
             for(int i = 0; i < ArgList.size(); i++){
-                cmd = cmd + " " + ArgList[i].argument;
-                if(ArgList[i].type == Arg::Type::Dynamic){
-                    cmd  += ArgList[i].defaultValue;
-                }
+                QString arg = ArgList[i].argument;
+                cmd += " " + arg;
+                
+                if (ArgList[i].type == Arg::Type::Dynamic)
+                    cmd += ArgList[i].defaultValue;
             }
             return cmd;
         }
@@ -101,13 +114,13 @@ namespace VerificationValidation {
 
     class Parser {
     public:
-        static Result* search(const QString& cmd, const QString* terminalOutput);
+        static Result* search(const QString& cmd, const QString* terminalOutput, const Test& test);
         static void searchSpecificTest(Result* r, const QString& currentLine, const Test* type);
         static bool searchCatchUsageErrors(Result* r, const QString& currentLine);
         static bool searchDBNotFoundErrors(Result* r);
         static void searchFinalDefense(Result* r);
 
-        static Result* title(const QString& cmd, const QString* terminalOutput);
+        static Result* title(const QString& cmd, const QString* terminalOutput, const Test& test);
 
         static Result* lc(const QString* terminalOutput);
         static Result* gqa(const QString* terminalOutput);

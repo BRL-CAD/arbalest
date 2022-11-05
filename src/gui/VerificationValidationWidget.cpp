@@ -73,61 +73,58 @@ void VerificationValidationWidget::runTests() {
 
     for(int i = 0; i < totalTests; i++){
         emit mainWindow->setStatusBarMessage(i+1, totalTests);
-        QSqlQuery* tmp = new QSqlQuery(getDatabase());
-        tmp->prepare("SELECT id FROM Tests WHERE testName = ?");
-        tmp->addBindValue(selected_tests[i]->text());
-        dbExec(tmp);
+        int testID = itemToTestMap.at(selected_tests[i]).first;
+        Test currentTest = itemToTestMap.at(selected_tests[i]).second;
+        QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL); // TODO: fix DOUBLE SLASHES + two detail windows popping up
+        for (const QString& object : selectedObjects) {
+            QString testCommand = currentTest.getCMD().replace("$OBJECT", object, Qt::CaseSensitive);
+            const QString* terminalOutput = runTest(testCommand);
 
-        if (!tmp->next()) continue;
+            QString executableName = selected_tests[i]->toolTip().split(' ').first();
+            Result* result = nullptr;
+            // find proper parser
+            if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
+                result = Parser::search(testCommand, terminalOutput, currentTest);
+            else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
+                result = Parser::title(testCommand, terminalOutput, currentTest);
 
-        QString testID = tmp->value(0).toString();
-        QString testCommand = selected_tests[i]->toolTip();
-        const QString* terminalOutput = runTest(testCommand);
-        
-        QString executableName = testCommand.split(' ').first();
-        Result* result = nullptr;
-        // find proper parser
-        if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
-            result = Parser::search(testCommand, terminalOutput);
-        else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
-            result = Parser::title(testCommand, terminalOutput);
+            // if parser hasn't been implemented, default
+            if (!result) {
+                result = new Result;
+                result->resultCode = Result::Code::UNPARSEABLE;
+            }
 
-        // if parser hasn't been implemented, default
-        if (!result) {
-            result = new Result;
-            result->resultCode = Result::Code::UNPARSEABLE;
-        }
+            QString resultCode = QString::number(result->resultCode);
 
-        QString resultCode = QString::number(result->resultCode);
-
-        // insert results into db
-        QSqlQuery* q2 = new QSqlQuery(getDatabase());
-        q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
-        q2->addBindValue(modelID);
-        q2->addBindValue(testID);
-        q2->addBindValue(resultCode);
-        q2->addBindValue((terminalOutput) ? *terminalOutput : "");
-        dbExec(q2);
-
-        QString testResultID = q2->lastInsertId().toString();
-
-        // insert issues into db
-        for (Result::ObjectIssue currentIssue : result->issues) {
-            q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
-            q2->addBindValue(currentIssue.objectName);
-            q2->addBindValue(currentIssue.issueDescription);
+            // insert results into db
+            QSqlQuery* q2 = new QSqlQuery(getDatabase());
+            q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
+            q2->addBindValue(modelID);
+            q2->addBindValue(testID);
+            q2->addBindValue(resultCode);
+            q2->addBindValue((terminalOutput) ? *terminalOutput : "");
             dbExec(q2);
 
-            QString objectIssueID = q2->lastInsertId().toString();
-            q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
-            q2->addBindValue(testResultID);
-            q2->addBindValue(objectIssueID);
-            dbExec(q2);
-        }
+            QString testResultID = q2->lastInsertId().toString();
 
-        showResult(testResultID);
+            // insert issues into db
+            for (Result::ObjectIssue currentIssue : result->issues) {
+                q2 = new QSqlQuery(getDatabase());
+                q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
+                q2->addBindValue(currentIssue.objectName);
+                q2->addBindValue(currentIssue.issueDescription);
+                dbExec(q2);
+
+                QString objectIssueID = q2->lastInsertId().toString();
+                q2 = new QSqlQuery(getDatabase());
+                q2->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
+                q2->addBindValue(testResultID);
+                q2->addBindValue(objectIssueID);
+                dbExec(q2);
+            }
+
+            showResult(testResultID);
+        }
     }
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
@@ -464,7 +461,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
             vLayout->addWidget(new QLabel("Test Name: "+ test->text()));
             vLayout->addSpacing(5);
-            vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCmdWithArgs()));
+            vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCMD()));
             vLayout->addSpacing(15);
 
             std::vector<QLineEdit*> input_vec;
@@ -486,11 +483,11 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             connect(setBtn, &QPushButton::clicked, [this, test, input_vec](){
                 for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
                     if(itemToTestMap.at(test).second.ArgList[i].type == Arg::Type::Dynamic){
-                        itemToTestMap.at(test).second.ArgList[i].updateValue(input_vec[i]->text());
+                        itemToTestMap.at(test).second.ArgList[i].defaultValue = input_vec[i]->text();
                     }
                 }
 
-                test->setToolTip(itemToTestMap.at(test).second.getCmdWithArgs());
+                test->setToolTip(itemToTestMap.at(test).second.getCMD());
             });
             
             connect(setBtn, &QPushButton::clicked, userInputDialog, &QDialog::accept);
@@ -551,7 +548,7 @@ void VerificationValidationWidget::setupUI() {
         }
         itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasVarArgs, ArgList}))));
         idToItemMap.insert(make_pair(id, item));
-        item->setToolTip(itemToTestMap.at(item).second.getCmdWithArgs());
+        item->setToolTip(itemToTestMap.at(item).second.getCMD());
         testList->addItem(item);
     }
 
@@ -719,64 +716,67 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     }
 
     int testID = q->value(0).toInt();
-    QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCmdWithArgs();
+    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+    for (const QString& object : selectedObjects) {
+        QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCMD().replace("$OBJECT", object, Qt::CaseSensitive);
 
-    QSqlQuery* q2 = new QSqlQuery(getDatabase());
-    q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
-    q2->addBindValue(testID);
-    dbExec(q2);
-    if (!q2->next()) {
-        popup("Failed to show testID: " + testID);
-        return;
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
+        q2->addBindValue(testID);
+        dbExec(q2);
+        if (!q2->next()) {
+            popup("Failed to show testID: " + testID);
+            return;
+        }
+
+        QString terminalOutput = q2->value(0).toString();
+        int code = q2->value(1).toInt();
+        if(code == Result::Code::PASSED)
+            resultCode = "Passed";
+        else if(code == Result::Code::WARNING)
+            resultCode = "Warning";
+        else if(code == Result::Code::FAILED)
+            resultCode = "Failed";
+        else
+            resultCode = "Unparseable";
+
+        QLabel *testNameHeader = new QLabel("Test Name:");
+        testNameHeader->setStyleSheet("font-weight: bold");
+        QLabel *commandHeader = new QLabel("Command:");
+        commandHeader->setStyleSheet("font-weight: bold");
+        QLabel *resultCodeHeader = new QLabel("Result Code:");
+        resultCodeHeader->setStyleSheet("font-weight: bold");
+        QLabel *descriptionHeader = new QLabel("Description:");
+        descriptionHeader->setStyleSheet("font-weight: bold");
+        QLabel *rawOutputHeader = new QLabel("Raw Output:");
+        rawOutputHeader->setStyleSheet("font-weight: bold");
+
+        detailLayout->addWidget(testNameHeader);
+        detailLayout->addWidget(new QLabel(testName));
+        detailLayout->addSpacing(10);
+        detailLayout->addWidget(commandHeader);
+        QLabel* testCmdLabel = new QLabel(testCommand);
+        testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
+        detailLayout->addWidget(testCmdLabel);
+        detailLayout->addSpacing(10);
+        detailLayout->addWidget(resultCodeHeader);
+        detailLayout->addWidget(new QLabel(resultCode));
+        detailLayout->addSpacing(10);
+        detailLayout->addWidget(descriptionHeader);
+        detailLayout->addWidget(new QLabel(description));
+        detailLayout->addSpacing(10);
+        detailLayout->addWidget(rawOutputHeader);
+        terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
+        QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
+        rawOutputBox->setReadOnly(true);
+        QPalette rawOutputBox_palette = rawOutputBox->palette();
+        rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
+        rawOutputBox->setPalette(rawOutputBox_palette);
+        detailLayout->addWidget(rawOutputBox);
+
+        detail_dialog->setLayout(detailLayout);
+        detail_dialog->exec();
     }
-
-    QString terminalOutput = q2->value(0).toString();
-    int code = q2->value(1).toInt();
-    if(code == Result::Code::PASSED)
-        resultCode = "Passed";
-    else if(code == Result::Code::WARNING)
-        resultCode = "Warning";
-    else if(code == Result::Code::FAILED)
-        resultCode = "Failed";
-    else
-        resultCode = "Unparseable";
-
-    QLabel *testNameHeader = new QLabel("Test Name:");
-    testNameHeader->setStyleSheet("font-weight: bold");
-    QLabel *commandHeader = new QLabel("Command:");
-    commandHeader->setStyleSheet("font-weight: bold");
-    QLabel *resultCodeHeader = new QLabel("Result Code:");
-    resultCodeHeader->setStyleSheet("font-weight: bold");
-    QLabel *descriptionHeader = new QLabel("Description:");
-    descriptionHeader->setStyleSheet("font-weight: bold");
-    QLabel *rawOutputHeader = new QLabel("Raw Output:");
-    rawOutputHeader->setStyleSheet("font-weight: bold");
-
-    detailLayout->addWidget(testNameHeader);
-    detailLayout->addWidget(new QLabel(testName));
-    detailLayout->addSpacing(10);
-    detailLayout->addWidget(commandHeader);
-    QLabel* testCmdLabel = new QLabel(testCommand);
-    testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
-    detailLayout->addWidget(testCmdLabel);
-    detailLayout->addSpacing(10);
-    detailLayout->addWidget(resultCodeHeader);
-    detailLayout->addWidget(new QLabel(resultCode));
-    detailLayout->addSpacing(10);
-    detailLayout->addWidget(descriptionHeader);
-    detailLayout->addWidget(new QLabel(description));
-    detailLayout->addSpacing(10);
-    detailLayout->addWidget(rawOutputHeader);
-    terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
-    QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
-    rawOutputBox->setReadOnly(true);
-    QPalette rawOutputBox_palette = rawOutputBox->palette();
-    rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
-    rawOutputBox->setPalette(rawOutputBox_palette);
-    detailLayout->addWidget(rawOutputBox);
-
-    detail_dialog->setLayout(detailLayout);
-    detail_dialog->exec();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {

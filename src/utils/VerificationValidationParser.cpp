@@ -10,38 +10,38 @@ using Test = VerificationValidation::Test;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
 
-Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
+Result* Parser::search(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
     // default checks
-    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    if (DefaultTests::NO_NESTED_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_NESTED_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_EMPTY_COMBOS == test)
         type = (Test*) &(DefaultTests::NO_EMPTY_COMBOS);
 
-    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
 
-    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_BOTS_VOLUME_MODE == test)
         type = (Test*) &(DefaultTests::ALL_BOTS_VOLUME_MODE);
 
-    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_BOTS_LH_ORIENT == test)
         type = (Test*) &(DefaultTests::NO_BOTS_LH_ORIENT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_REGIONS_MAT == test)
         type = (Test*) &(DefaultTests::ALL_REGIONS_MAT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_REGIONS_LOS == test)
         type = (Test*) &(DefaultTests::ALL_REGIONS_LOS);
 
-    else if (QString::compare(DefaultTests::NO_MATRICES.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_MATRICES == test)
         type = (Test*) &(DefaultTests::NO_MATRICES);
 
-    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_INVALID_AIRCODE_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)
@@ -152,7 +152,7 @@ void Parser::searchFinalDefense(Result* r) {
     }
 }
 
-Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
+Result* Parser::title(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;

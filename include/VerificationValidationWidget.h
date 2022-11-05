@@ -31,6 +31,7 @@ class MainWindow;
 class Document;
 class Dockable;
 using Arg = VerificationValidation::Arg;
+using Test = VerificationValidation::Test;
 
 class VerificationValidationWidget : public QHBoxWidget
 {
