@@ -116,7 +116,7 @@ void Document::loadVerificationValidationWidget() {
         try { vvWidget = new VerificationValidationWidget(mainWindow, this); }
         catch (const std::runtime_error& e) { 
             QString msg = e.what();
-            if (msg == "No changes were made.") throw e;
+            if (msg == "No changes were made." || msg.startsWith("Failed to generate UUID for")) throw e;
             if (!msg.isEmpty()) popup(msg);
             else throw e;
         }
