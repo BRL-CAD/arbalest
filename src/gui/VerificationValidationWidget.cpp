@@ -72,7 +72,7 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL); // TODO: fix DOUBLE SLASHES + two detail windows popping up
+    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
     if (!selectedObjects.size()) { 
         popup("No objects are visible.");
         return;
@@ -736,6 +736,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
     QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
     QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+    QString testResultID = testNameItem->toolTip();
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
@@ -748,69 +749,88 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
         popup("Failed to show testName: " + testName);
         return;
     }
-
     int testID = q->value(0).toInt();
-    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-    for (const QString& object : selectedObjects) {
-        QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCMD(object);
+    Test currentTest = itemToTestMap.at(idToItemMap.at(testID)).second;
 
-        QSqlQuery* q2 = new QSqlQuery(getDatabase());
-        q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
-        q2->addBindValue(testID);
-        dbExec(q2);
-        if (!q2->next()) {
-            popup("Failed to show testID: " + testID);
-            return;
-        }
+    q->prepare("SELECT TestArg.arg FROM TestArg INNER JOIN TestResults ON TestArg.id = TestResults.objectArgID WHERE TestResults.id = ?");
+    q->addBindValue(testResultID);
+    dbExec(q);
 
-        QString terminalOutput = q2->value(0).toString();
-        int code = q2->value(1).toInt();
-        if(code == Result::Code::PASSED)
-            resultCode = "Passed";
-        else if(code == Result::Code::WARNING)
-            resultCode = "Warning";
-        else if(code == Result::Code::FAILED)
-            resultCode = "Failed";
-        else
-            resultCode = "Unparseable";
-
-        QLabel *testNameHeader = new QLabel("Test Name:");
-        testNameHeader->setStyleSheet("font-weight: bold");
-        QLabel *commandHeader = new QLabel("Command:");
-        commandHeader->setStyleSheet("font-weight: bold");
-        QLabel *resultCodeHeader = new QLabel("Result Code:");
-        resultCodeHeader->setStyleSheet("font-weight: bold");
-        QLabel *descriptionHeader = new QLabel("Description:");
-        descriptionHeader->setStyleSheet("font-weight: bold");
-        QLabel *rawOutputHeader = new QLabel("Raw Output:");
-        rawOutputHeader->setStyleSheet("font-weight: bold");
-
-        detailLayout->addWidget(testNameHeader);
-        detailLayout->addWidget(new QLabel(testName));
-        detailLayout->addSpacing(10);
-        detailLayout->addWidget(commandHeader);
-        QLabel* testCmdLabel = new QLabel(testCommand);
-        testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
-        detailLayout->addWidget(testCmdLabel);
-        detailLayout->addSpacing(10);
-        detailLayout->addWidget(resultCodeHeader);
-        detailLayout->addWidget(new QLabel(resultCode));
-        detailLayout->addSpacing(10);
-        detailLayout->addWidget(descriptionHeader);
-        detailLayout->addWidget(new QLabel(description));
-        detailLayout->addSpacing(10);
-        detailLayout->addWidget(rawOutputHeader);
-        terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
-        QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
-        rawOutputBox->setReadOnly(true);
-        QPalette rawOutputBox_palette = rawOutputBox->palette();
-        rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
-        rawOutputBox->setPalette(rawOutputBox_palette);
-        detailLayout->addWidget(rawOutputBox);
-
-        detail_dialog->setLayout(detailLayout);
-        detail_dialog->exec();
+    if (!q->next()) {
+        popup("Failed to get results (id=" + testResultID + ")");
+        return;
     }
+
+    QString object = q->value(0).toString();
+    QString testCommand = currentTest.getCMD(object);
+
+    QSqlQuery* q2 = new QSqlQuery(getDatabase());
+    q2->prepare("SELECT TestResults.terminalOutput, TestResults.resultCode FROM TestResults INNER JOIN TestArg ON TestResults.objectArgID = TestArg.id WHERE TestResults.testID = ? AND (TestArg.argType = ? OR TestArg.argType = ? OR TestArg.argType = ?) AND TestArg.arg = ?");
+    q2->addBindValue(testID);
+    q2->addBindValue(Arg::Type::ObjectName);
+    q2->addBindValue(Arg::Type::ObjectNone);
+    q2->addBindValue(Arg::Type::ObjectPath);
+    
+    QString objectPlaceholder = object;
+    Arg::Type type = currentTest.getObjArgType();
+    if (type == Arg::Type::ObjectName)
+        objectPlaceholder = objectPlaceholder.split("/").last();
+    else if (type == Arg::Type::ObjectNone)
+        objectPlaceholder = "";
+    q2->addBindValue(objectPlaceholder);
+    dbExec(q2);
+    if (!q2->next()) {
+        popup("Failed to show testID: " + testID);
+        return;
+    }
+
+    QString terminalOutput = q2->value(0).toString();
+    int code = q2->value(1).toInt();
+    if(code == Result::Code::PASSED)
+        resultCode = "Passed";
+    else if(code == Result::Code::WARNING)
+        resultCode = "Warning";
+    else if(code == Result::Code::FAILED)
+        resultCode = "Failed";
+    else
+        resultCode = "Unparseable";
+
+    QLabel *testNameHeader = new QLabel("Test Name:");
+    testNameHeader->setStyleSheet("font-weight: bold");
+    QLabel *commandHeader = new QLabel("Command:");
+    commandHeader->setStyleSheet("font-weight: bold");
+    QLabel *resultCodeHeader = new QLabel("Result Code:");
+    resultCodeHeader->setStyleSheet("font-weight: bold");
+    QLabel *descriptionHeader = new QLabel("Description:");
+    descriptionHeader->setStyleSheet("font-weight: bold");
+    QLabel *rawOutputHeader = new QLabel("Raw Output:");
+    rawOutputHeader->setStyleSheet("font-weight: bold");
+
+    detailLayout->addWidget(testNameHeader);
+    detailLayout->addWidget(new QLabel(testName));
+    detailLayout->addSpacing(10);
+    detailLayout->addWidget(commandHeader);
+    QLabel* testCmdLabel = new QLabel(testCommand);
+    testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
+    detailLayout->addWidget(testCmdLabel);
+    detailLayout->addSpacing(10);
+    detailLayout->addWidget(resultCodeHeader);
+    detailLayout->addWidget(new QLabel(resultCode));
+    detailLayout->addSpacing(10);
+    detailLayout->addWidget(descriptionHeader);
+    detailLayout->addWidget(new QLabel(description));
+    detailLayout->addSpacing(10);
+    detailLayout->addWidget(rawOutputHeader);
+    terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
+    QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
+    rawOutputBox->setReadOnly(true);
+    QPalette rawOutputBox_palette = rawOutputBox->palette();
+    rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
+    rawOutputBox->setPalette(rawOutputBox_palette);
+    detailLayout->addWidget(rawOutputBox);
+
+    detail_dialog->setLayout(detailLayout);
+    detail_dialog->exec();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
@@ -837,6 +857,9 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         iconPath = ":/icons/passed.png";
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+
+        resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
+        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
     } 
 
     else if (resultCode == Result::Code::UNPARSEABLE) {
@@ -844,6 +867,9 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         iconPath = ":/icons/unparseable.png";
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
+
+        resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
+        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
     }
 
     else {
@@ -880,6 +906,11 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
             resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
             resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
+
+            resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
+            resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
+            resultTable->item(resultTable->rowCount()-1, DESCRIPTION_COLUMN)->setToolTip(testResultID);
+            resultTable->item(resultTable->rowCount()-1, OBJPATH_COLUMN)->setToolTip(testResultID);
 
             delete q3;
         }

@@ -71,7 +71,6 @@ namespace VerificationValidation {
                 if (ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) 
                     return ArgList[i].type;
             }
-            std::cout << "[Verification & Validation] Warning: " + getCMD().toStdString() << " has no object" << std::endl;
             return Arg::Type::ObjectNone;
         }
 
