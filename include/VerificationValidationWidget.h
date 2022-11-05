@@ -15,6 +15,7 @@
 #include <QHBoxWidget.h>
 #include "VerificationValidation.h"
 #include "Utils.h"
+#include "VerificationValidation.h"
 
 #define RESULT_CODE_COLUMN 0
 #define TEST_NAME_COLUMN 1
@@ -29,6 +30,7 @@
 class MainWindow;
 class Document;
 class Dockable;
+using Arg = VerificationValidation::Arg;
 
 class VerificationValidationWidget : public QHBoxWidget
 {

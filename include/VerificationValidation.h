@@ -11,14 +11,23 @@
 namespace VerificationValidation {
     class Arg {
     public:
-        QString argument;
-        bool isVariable;
-        QString defaultValue;
+        enum Type {
+            Static, // argument is not variable (e.g.: "-t")
+            Dynamic, // argument is variable (e.g.: "-t3mm,3mm" or "-t5mm,5mm")
+            ObjectName, // argument is the objectName
+            ObjectPath // argument is the objectPath
+        };
 
-        Arg(QString argument, bool isVariable, QString defaultValue){
+        QString argument;
+        QString defaultValue;
+        Type type;
+
+        Arg(QString argument, QString defaultValue = NULL, Type type = Static){
             this->argument = argument;
-            this->isVariable = isVariable;
             this->defaultValue = defaultValue;
+
+            if (defaultValue != NULL) this->type = Dynamic;
+            else this->type = type;
         }
 
         void updateValue (QString input){
@@ -39,7 +48,7 @@ namespace VerificationValidation {
             QString cmd = testCommand;
             for(int i = 0; i < ArgList.size(); i++){
                 cmd = cmd + " " + ArgList[i].argument;
-                if(ArgList[i].isVariable){
+                if(ArgList[i].type == Arg::Type::Dynamic){
                     cmd  += ArgList[i].defaultValue;
                 }
             }
@@ -68,21 +77,21 @@ namespace VerificationValidation {
 
     class DefaultTests {
     public:
-        const static VerificationValidation::Test MISMATCHED_DUP_IDS;
-        const static VerificationValidation::Test NO_DUPLICATE_ID;
-        const static VerificationValidation::Test NO_NULL_REGIONS;
-        const static VerificationValidation::Test NO_OVERLAPS;
-        const static VerificationValidation::Test NO_NESTED_REGIONS;
-        const static VerificationValidation::Test NO_EMPTY_COMBOS;
-        const static VerificationValidation::Test NO_SOLIDS_OUTSIDE_REGIONS;
-        const static VerificationValidation::Test ALL_BOTS_VOLUME_MODE;
-        const static VerificationValidation::Test NO_BOTS_LH_ORIENT; // TODO: this command can run faster if use unix
-        const static VerificationValidation::Test ALL_REGIONS_MAT;
-        const static VerificationValidation::Test ALL_REGIONS_LOS;
-        const static VerificationValidation::Test NO_MATRICES;
-        const static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
-        const static VerificationValidation::Test VALID_TITLE;
-        const static std::vector<VerificationValidation::Test> allTests;
+        static VerificationValidation::Test MISMATCHED_DUP_IDS;
+        static VerificationValidation::Test NO_DUPLICATE_ID;
+        static VerificationValidation::Test NO_NULL_REGIONS;
+        static VerificationValidation::Test NO_OVERLAPS;
+        static VerificationValidation::Test NO_NESTED_REGIONS;
+        static VerificationValidation::Test NO_EMPTY_COMBOS;
+        static VerificationValidation::Test NO_SOLIDS_OUTSIDE_REGIONS;
+        static VerificationValidation::Test ALL_BOTS_VOLUME_MODE;
+        static VerificationValidation::Test NO_BOTS_LH_ORIENT; // TODO: this command can run faster if use unix
+        static VerificationValidation::Test ALL_REGIONS_MAT;
+        static VerificationValidation::Test ALL_REGIONS_LOS;
+        static VerificationValidation::Test NO_MATRICES;
+        static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
+        static VerificationValidation::Test VALID_TITLE;
+        const static std::vector<VerificationValidation::Test*> allTests;
 
         // TODO: missing "No errors when top level drawn"
         // TODO: missing "BoTs are valid"
