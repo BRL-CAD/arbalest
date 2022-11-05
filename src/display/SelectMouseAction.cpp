@@ -77,7 +77,6 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
                 QVector3D        imagePoint(x, h - y - 1., 0.);
                 QVector3D        modelPoint = m_transformation.map(imagePoint);
-                SelectCallback callback;
                 BRLCAD::Ray3D    ray;
 
                 ray.origin.coordinates[0] = modelPoint.x();
@@ -87,6 +86,7 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 ray.direction.coordinates[1] = direction.y();
                 ray.direction.coordinates[2] = direction.z();
 
+                SelectCallback callback;
                 m_watched->getDocument()->getDatabase()->ShootRay(ray, callback, BRLCAD::ConstDatabase::StopAfterFirstHit);
                 m_selected = callback.getSelected();
 

@@ -3,6 +3,7 @@
 #include <include/Display.h>
 #include "DisplayGrid.h"
 #include "MoveCameraMouseAction.h"
+#include "SelectMouseAction.h"
 
 DisplayGrid::DisplayGrid(Document*  document) : document(document) {
     verticalSplitter = new QSplitter(this);
@@ -108,3 +109,22 @@ void DisplayGrid::setMoveCameraMouseAction() {
     }
 }
 
+void DisplayGrid::setSelectObjectMouseAction() {
+    int displaysSize = displays.size();
+    for (int index = 0; index < displaysSize; ++index) {
+        if (mouseActions[index] != nullptr) {
+            delete mouseActions[index];
+        }
+
+        mouseActions[index] = new SelectMouseAction(this, displays[index]);
+
+        connect(mouseActions[index], &MouseAction::Done, this, [this, &index](MouseAction *mouseAction) {
+            QTreeWidget* treeWidget = this->getDocument()->getObjectTreeWidget();
+            SelectMouseAction* selectMouseAction = dynamic_cast<SelectMouseAction*>(mouseActions[index]);
+            
+            if (selectMouseAction != nullptr) {
+                
+            }
+        });
+    }
+}

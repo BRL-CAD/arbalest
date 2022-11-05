@@ -13,6 +13,7 @@ class MouseAction;
 
 
 class DisplayGrid : public QVBoxWidget {
+Q_OBJECT
 public:
     explicit DisplayGrid(Document*  document);
 
@@ -44,6 +45,8 @@ public:
 
     void setMoveCameraMouseAction();
     void setSelectObjectMouseAction();
+
+    bool selectObjectMouseActionEnabled = false;
 private:
     double defaultDisplayCameraRotation[4][3] = {
             {0, 0, 270},
