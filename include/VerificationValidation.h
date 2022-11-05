@@ -101,11 +101,9 @@ namespace VerificationValidation {
 
         static Result* title(const QString& cmd, const QString* terminalOutput);
 
-<<<<<<< HEAD
         static Result* lc(const QString& cmd, const QString* terminalOutput);
         static Result* gqa(const QString& cmd, const QString* terminalOutput);
         static void gqaSpecificTest(Result* r, const QString& currentLine, const Test* type);
->>>>>>> d11691b1f1d8b546cc8622506e62d166cdcd72c0
     };
 }
 
