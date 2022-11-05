@@ -15,6 +15,7 @@ namespace VerificationValidation {
         enum Type {
             Static, // argument is not variable (e.g.: "-t")
             Dynamic, // argument is variable (e.g.: "-t3mm,3mm" or "-t5mm,5mm")
+            ObjectNone, // only used to determine when a command has no object
             ObjectName, // argument is the objectName
             ObjectPath // argument is the objectPath
         };
@@ -35,10 +36,14 @@ namespace VerificationValidation {
     class Test {
     public:
         QString testName;
-        QString testCommand;
-        QString suiteName;
+        QStringList suiteNames;
         QString category;
         std::vector<Arg> ArgList;
+
+        Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList) :
+        testName(testName), suiteNames(suiteNames), ArgList(ArgList), 
+        category((ArgList.size()) ? ArgList[0].argument : "NULL")
+        {}
 
         bool operator==(const Test& rhs) {
             if (ArgList.size() != rhs.ArgList.size()) return false;
@@ -61,11 +66,26 @@ namespace VerificationValidation {
             return false;
         }
 
-        QString getCMD() const {
-            QString cmd = testCommand;
+        Arg::Type getObjArgType() const {
+            for (int i = 0; i < ArgList.size(); i++) {
+                if (ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) 
+                    return ArgList[i].type;
+            }
+            std::cout << "[Verification & Validation] Warning: " + getCMD().toStdString() << " has no object" << std::endl;
+            return Arg::Type::ObjectNone;
+        }
+
+        QString getCMD(const QString& object = NULL) const {
+            QString cmd = "";
             for(int i = 0; i < ArgList.size(); i++){
                 QString arg = ArgList[i].argument;
-                cmd += " " + arg;
+                if (!object.isEmpty())
+                    cmd += " ";
+
+                if ((ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) && object != NULL)
+                    cmd += object;
+                else 
+                    cmd += arg;
                 
                 if (ArgList[i].type == Arg::Type::Dynamic)
                     cmd += ArgList[i].defaultValue;

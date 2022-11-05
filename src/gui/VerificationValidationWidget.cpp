@@ -67,17 +67,56 @@ void VerificationValidationWidget::runTests() {
 
     // Run tests
     int totalTests = selected_tests.count();
-    if(totalTests ==  0){
+    if(!totalTests) {
+        popup("No tests were selected.");
         return;
     }
 
-    for(int i = 0; i < totalTests; i++){
-        emit mainWindow->setStatusBarMessage(i+1, totalTests);
-        int testID = itemToTestMap.at(selected_tests[i]).first;
-        Test currentTest = itemToTestMap.at(selected_tests[i]).second;
-        QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL); // TODO: fix DOUBLE SLASHES + two detail windows popping up
-        for (const QString& object : selectedObjects) {
-            QString testCommand = currentTest.getCMD().replace("$OBJECT", object, Qt::CaseSensitive);
+    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL); // TODO: fix DOUBLE SLASHES + two detail windows popping up
+    if (!selectedObjects.size()) { 
+        popup("No objects are visible.");
+        return;
+    }
+
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    for (const QString& object : selectedObjects) {
+        for(int i = 0; i < totalTests; i++){
+            emit mainWindow->setStatusBarMessage(i+1, totalTests);
+            int testID = itemToTestMap.at(selected_tests[i]).first;
+            Test currentTest = itemToTestMap.at(selected_tests[i]).second;
+
+            for (int j = 0; j < currentTest.ArgList.size(); j++) {
+                Arg::Type type = currentTest.ArgList[j].type;
+                q->prepare("INSERT OR IGNORE INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+                q->addBindValue(testID);
+                q->addBindValue(j+1);
+                QString arg = currentTest.ArgList[j].argument;
+                if (type == Arg::Type::ObjectName) arg = object.split("/").last();
+                else if (type == Arg::Type::ObjectPath) arg = object;
+                q->addBindValue(arg);
+                q->addBindValue(type);
+                q->addBindValue(currentTest.ArgList[j].defaultValue);
+                dbExec(q);
+            }
+
+            QString objectPlaceholder = object;
+            Arg::Type type = currentTest.getObjArgType();
+            if (type == Arg::Type::ObjectName)
+                objectPlaceholder = objectPlaceholder.split("/").last();
+            else if (type == Arg::Type::ObjectNone)
+                objectPlaceholder = "";
+            
+            q->prepare("SELECT id FROM TestArg WHERE (argType = ? OR argType = ? or argType = ?) AND arg = ? AND testID = ?");
+            q->addBindValue(Arg::Type::ObjectName);
+            q->addBindValue(Arg::Type::ObjectPath);
+            q->addBindValue(Arg::Type::ObjectNone);
+            q->addBindValue(objectPlaceholder);
+            q->addBindValue(testID);
+            dbExec(q);
+
+            if (!q->next()) { continue; }
+            QString objectArgID = q->value(0).toString();
+            QString testCommand = currentTest.getCMD(objectPlaceholder);
             const QString* terminalOutput = runTest(testCommand);
 
             QString executableName = selected_tests[i]->toolTip().split(' ').first();
@@ -97,37 +136,34 @@ void VerificationValidationWidget::runTests() {
             QString resultCode = QString::number(result->resultCode);
 
             // insert results into db
-            QSqlQuery* q2 = new QSqlQuery(getDatabase());
-            q2->prepare("INSERT INTO TestResults (modelID, testID, resultCode, terminalOutput) VALUES (?,?,?,?)");
-            q2->addBindValue(modelID);
-            q2->addBindValue(testID);
-            q2->addBindValue(resultCode);
-            q2->addBindValue((terminalOutput) ? *terminalOutput : "");
-            dbExec(q2);
+            q->prepare("INSERT INTO TestResults (modelID, testID, objectArgID, resultCode, terminalOutput) VALUES (?,?,?,?,?)");
+            q->addBindValue(modelID);
+            q->addBindValue(testID);
+            q->addBindValue(objectArgID);
+            q->addBindValue(resultCode);
+            q->addBindValue((terminalOutput) ? *terminalOutput : "");
+            dbExec(q);
 
-            QString testResultID = q2->lastInsertId().toString();
+            QString testResultID = q->lastInsertId().toString();
 
             // insert issues into db
             for (Result::ObjectIssue currentIssue : result->issues) {
-                q2 = new QSqlQuery(getDatabase());
-                q2->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
-                q2->addBindValue(currentIssue.objectName);
-                q2->addBindValue(currentIssue.issueDescription);
-                dbExec(q2);
+                q->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
+                q->addBindValue(currentIssue.objectName);
+                q->addBindValue(currentIssue.issueDescription);
+                dbExec(q);
 
-                QString objectIssueID = q2->lastInsertId().toString();
-                q2 = new QSqlQuery(getDatabase());
-                q2->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
-                q2->addBindValue(testResultID);
-                q2->addBindValue(objectIssueID);
-                dbExec(q2);
+                QString objectIssueID = q->lastInsertId().toString();
+                q->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
+                q->addBindValue(testResultID);
+                q->addBindValue(objectIssueID);
+                dbExec(q);
             }
 
             showResult(testResultID);
         }
     }
 
-    QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
     q->addBindValue(modelID);
     dbExec(q);
@@ -212,9 +248,9 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, category TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, category TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestResults"))
-        delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
+        delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, objectArgID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
         delete dbExec("CREATE TABLE Issues (id INTEGER PRIMARY KEY, testResultID INTEGER NOT NULL, objectIssueID INTEGER NOT NULL)");
     if (!getDatabase().tables().contains("ObjectIssue"))
@@ -259,40 +295,42 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
         for (int i = 0; i < DefaultTests::allTests.size(); i++) {
-            q->prepare("INSERT INTO Tests (testName, testCommand, category) VALUES (:testName, :testCommand, :category)");
-            q->bindValue(":testName", DefaultTests::allTests[i]->testName);
-            q->bindValue(":testCommand", DefaultTests::allTests[i]->testCommand);
-            q->bindValue(":category", DefaultTests::allTests[i]->category);
-            dbExec(q);
-
-            QString testID = q->lastInsertId().toString();
+            Test* t = DefaultTests::allTests[i];
 			
-            q->prepare("INSERT OR IGNORE INTO TestSuites VALUES (NULL, ?)");
-            q->addBindValue(DefaultTests::allTests[i]->suiteName);
-            dbExec(q);
-
-            for (int j = 0; j < DefaultTests::allTests[i]->ArgList.size(); j++){
-                q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (:testID, :argIdx, :arg, :argType, :defaultVal)");
-                q->bindValue(":testID", testID);
-                q->bindValue(":argIdx", j+1);
-                q->bindValue(":arg", DefaultTests::allTests[i]->ArgList[j].argument);
-                q->bindValue(":argType", DefaultTests::allTests[i]->ArgList[j].type);
-                q->bindValue(":defaultVal", DefaultTests::allTests[i]->ArgList[j].defaultValue);
+            for (const QString& suiteName : t->suiteNames) {
+                q->prepare("INSERT OR IGNORE INTO TestSuites VALUES (NULL, ?)");
+                q->addBindValue(suiteName);
                 dbExec(q);
-            } 
-			
-			q->prepare("SELECT id FROM TestSuites WHERE suiteName = ?");
-            q->addBindValue(DefaultTests::allTests[i]->suiteName);
+            }
+            
+            q->prepare("INSERT INTO Tests (testName, category) VALUES (:testName, :category)");
+            q->bindValue(":testName", t->testName);
+            q->bindValue(":category", t->category);
             dbExec(q);
-            QString testSuiteID;
-			while (q->next()){
-				testSuiteID = q->value(0).toString();
-			}
+            QString testID = q->lastInsertId().toString();
 
-            q->prepare("INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (?, ?)");
-            q->addBindValue(testID);
-            q->addBindValue(testSuiteID);
-            dbExec(q);
+            for (int j = 0; j < DefaultTests::allTests[i]->ArgList.size(); j++) {
+                Arg::Type type = DefaultTests::allTests[i]->ArgList[j].type;
+                q->prepare("INSERT OR IGNORE INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+                q->addBindValue(testID);
+                q->addBindValue(j+1);
+                q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argument);
+                q->addBindValue(type);
+                q->addBindValue(DefaultTests::allTests[i]->ArgList[j].defaultValue);
+                dbExec(q);
+            }
+            
+            for (const QString& suiteName : t->suiteNames) {
+                q->prepare("SELECT id FROM TestSuites WHERE suiteName = ?");
+                q->addBindValue(suiteName);
+                dbExec(q);
+                if (!q->next()) continue;
+                QString testSuiteID = q->value(0).toString();
+                q->prepare("INSERT INTO TestsInSuite (testID, testSuiteID) VALUES (?, ?)");
+                q->addBindValue(testID);
+                q->addBindValue(testSuiteID);
+                dbExec(q);
+            }
         }
     }
     delete q;
@@ -509,24 +547,22 @@ void VerificationValidationWidget::setupUI() {
     // Get test list from db
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
-    query.exec("Select id, testName, testCommand, category from Tests ORDER BY category ASC");
+    query.exec("Select id, testName, category from Tests ORDER BY category ASC");
 
     QStringList testIdList;
-    QStringList tests;
-    QStringList testCmds;
+    QStringList testNameList;
     QStringList categoryList;
 
     while(query.next()){
         testIdList << query.value(0).toString();
-    	tests << query.value(1).toString();
-        testCmds << query.value(2).toString();
-        categoryList << query.value(4).toString();
+    	testNameList << query.value(1).toString();
+        categoryList << query.value(2).toString();
     }
 
     // Creat test widget item
     QIcon edit_icon(":/icons/editIcon.png");
-    for (int i = 0; i < tests.size(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(tests[i]);
+    for (int i = 0; i < testNameList.size(); i++) {
+        QListWidgetItem* item = new QListWidgetItem(testNameList[i]);
         int id = testIdList[i].toInt();
 
         std::vector<VerificationValidation::Arg> ArgList;
@@ -536,7 +572,7 @@ void VerificationValidationWidget::setupUI() {
         while(query.next()){
             ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), (Arg::Type)query.value(2).toInt()));
         }
-        Test t{tests[i], testCmds[i], NULL, categoryList[i], ArgList};
+        Test t(testNameList[i], {}, ArgList); // TODO: set suites
 
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
@@ -716,7 +752,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     int testID = q->value(0).toInt();
     QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
     for (const QString& object : selectedObjects) {
-        QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCMD().replace("$OBJECT", object, Qt::CaseSensitive);
+        QString testCommand = itemToTestMap.at(idToItemMap.at(testID)).second.getCMD(object);
 
         QSqlQuery* q2 = new QSqlQuery(getDatabase());
         q2->prepare("SELECT terminalOutput, resultCode FROM TestResults WHERE testID = ?");
