@@ -242,10 +242,6 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 
 
 }
-<<<<<<< HEAD
-Result* Parser::gqa(const QString* terminalOutput) {
-    return nullptr; // TODO: implement
-=======
 
 Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
     Result* r = new Result;
@@ -324,5 +320,4 @@ void Parser::gqaSpecificTest(Result* r, const QString& currentLine, const Test* 
         r->issues.push_back({objectPath1, "'"+objectName1+"' overlaps with '" + objectName2 + "' -- Count: " + countString + ", Distance: "+distanceString});
     }
     
->>>>>>> d11691b1f1d8b546cc8622506e62d166cdcd72c0
 }
