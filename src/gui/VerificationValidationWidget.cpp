@@ -25,6 +25,7 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     setupUI();
 
     updateDockableHeader();
+    
     validateChecksum();
     if (msgBoxRes == OPEN) {
         showAllResults();
@@ -63,8 +64,7 @@ void VerificationValidationWidget::runTests() {
     dbClearResults();
     resultTable->setRowCount(0);
     minBtn_toggle = true;
-    resultTableChangeSize();
-
+    
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
     QListWidgetItem* item = 0;
@@ -80,6 +80,8 @@ void VerificationValidationWidget::runTests() {
     if(totalTests ==  0){
         return;
     }
+
+    resultTableChangeSize();
 
     for(int i = 0; i < totalTests; i++){
         emit mainWindow->setStatusBarMessage(i+1, totalTests);
@@ -933,8 +935,8 @@ void VerificationValidationWidget::updateDockableHeader() {
         QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
         QLabel *title = new QLabel(dockableTitle);
         minBtn = new QToolButton();
-        minBtn->setIcon(QIcon(":/icons/collapse.png"));
-        minBtn_toggle = false;
+        minBtn->setIcon(QIcon(":/icons/expand.png"));
+        minBtn_toggle = true;
         QHBoxLayout* h_layout = new QHBoxLayout();
         h_layout->addWidget(title);
         h_layout->addWidget(minBtn);
@@ -942,6 +944,7 @@ void VerificationValidationWidget::updateDockableHeader() {
         titleWidget->setLayout(h_layout);
         title->setObjectName("dockableHeader");
         parentDockable->setTitleBarWidget(titleWidget);
+        parentDockable->widget()->setVisible(false);
         qApp->processEvents();
     }
     delete q;
