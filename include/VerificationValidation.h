@@ -66,7 +66,7 @@ namespace VerificationValidation {
         static bool searchDBNotFoundErrors(Result* r);
         static void searchFinalDefense(Result* r);
 
-        static Result* lc(const QString cmd, const QString* terminalOutput);
+        static Result* lc(const QString& cmd, const QString* terminalOutput);
         static Result* gqa(const QString* terminalOutput);
     };
 }

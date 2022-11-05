@@ -209,9 +209,9 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	/* Start adding the issues to list */
 	for(size_t i = 0; i < list_length; i++) {
 		/* The +2 is to ignore the list length and list details */
-		QStringList temp_parser = lines[i+2].split(QRegExp("\\s+"), QString::SkipEmptyParts); // Retrieve data into lists
+		QStringList temp_parser = lines[i+2].split(QRegExp("\\s+"), Qt::SkipEmptyParts); // Retrieve data into lists
 		Result::ObjectIssue tempObject;
-		tempObject.objectName = temp_parser[4].left(temp_parser[4].indexOf('.'));
+		tempObject.objectName = temp_parser[4];
 		tempObject.issueDescription = issueDescription ;
 		final->issues.push_back(tempObject);
 	}
