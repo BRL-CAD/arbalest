@@ -230,16 +230,11 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
     // if Model table empty, assume new db and insert model info
     q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT COUNT(id) FROM Model WHERE filepath=?");
+    q->prepare("SELECT id FROM Model WHERE filepath=?");
     q->addBindValue(QDir(*document->getFilePath()).absolutePath());
     dbExec(q, !SHOW_ERROR_POPUP);
 
-    int numEntries = 0;
-    if (q->next()) numEntries = q->value(0).toInt();
-
-    if (!numEntries) {
-        delete q;
-        q = new QSqlQuery(getDatabase());
+    if (!q->next()) {
         q->prepare("INSERT INTO Model (filepath, uuid) VALUES (?, ?)");
         q->addBindValue(QDir(*document->getFilePath()).absolutePath());
         q->addBindValue(*uuid);
