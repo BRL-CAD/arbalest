@@ -38,7 +38,6 @@ namespace VerificationValidation {
         QString testCommand;
         QString suiteName;
         QString category;
-        bool hasVariable;
         std::vector<Arg> ArgList;
 
         bool operator==(const Test& rhs) {
@@ -54,6 +53,12 @@ namespace VerificationValidation {
 
         bool operator!=(const Test& rhs) {
             return !operator==(rhs);
+        }
+
+        bool hasVarArgs() const {
+            for (int i = 0; i < ArgList.size(); i++)
+                if (ArgList[i].type == Arg::Type::Dynamic) return true;
+            return false;
         }
 
         QString getCMD() const {

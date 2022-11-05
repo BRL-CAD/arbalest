@@ -212,7 +212,7 @@ void VerificationValidationWidget::dbInitTables() {
     if (!getDatabase().tables().contains("Model"))
         delete dbExec("CREATE TABLE Model (id INTEGER PRIMARY KEY, filepath TEXT NOT NULL UNIQUE, md5Checksum TEXT NOT NULL)");
     if (!getDatabase().tables().contains("Tests"))
-        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, hasVarArgs BOOL NOT NULL, category TEXT NOT NULL)");
+        delete dbExec("CREATE TABLE Tests (id INTEGER PRIMARY KEY, testName TEXT NOT NULL, testCommand TEXT NOT NULL, category TEXT NOT NULL)");
     if (!getDatabase().tables().contains("TestResults"))
         delete dbExec("CREATE TABLE TestResults (id INTEGER PRIMARY KEY, modelID INTEGER NOT NULL, testID INTEGER NOT NULL, resultCode TEXT, terminalOutput TEXT)");
     if (!getDatabase().tables().contains("Issues"))
@@ -259,10 +259,9 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     q = dbExec("SELECT id FROM Tests", !SHOW_ERROR_POPUP);
     if (!q->next()) {
         for (int i = 0; i < DefaultTests::allTests.size(); i++) {
-            q->prepare("INSERT INTO Tests (testName, testCommand, hasVarArgs, category) VALUES (:testName, :testCommand, :hasVarArgs, :category)");
+            q->prepare("INSERT INTO Tests (testName, testCommand, category) VALUES (:testName, :testCommand, :category)");
             q->bindValue(":testName", DefaultTests::allTests[i]->testName);
             q->bindValue(":testCommand", DefaultTests::allTests[i]->testCommand);
-            q->bindValue(":hasVarArgs", DefaultTests::allTests[i]->hasVariable);
             q->bindValue(":category", DefaultTests::allTests[i]->category);
             dbExec(q);
 
@@ -451,7 +450,7 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
 
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     if(test->toolTip() !=  "Category"){
-        if(itemToTestMap.at(test).second.hasVariable) {
+        if(itemToTestMap.at(test).second.hasVarArgs()) {
             QDialog* userInputDialog = new QDialog();
             userInputDialog->setModal(true);
             userInputDialog->setWindowTitle("Custom Argument Value");
@@ -510,19 +509,17 @@ void VerificationValidationWidget::setupUI() {
     // Get test list from db
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
-    query.exec("Select id, testName, testCommand, hasVarArgs, category from Tests ORDER BY category ASC");
+    query.exec("Select id, testName, testCommand, category from Tests ORDER BY category ASC");
 
     QStringList testIdList;
     QStringList tests;
     QStringList testCmds;
-    QStringList hasVariableList;
     QStringList categoryList;
 
     while(query.next()){
         testIdList << query.value(0).toString();
     	tests << query.value(1).toString();
         testCmds << query.value(2).toString();
-        hasVariableList << query.value(3).toString();
         categoryList << query.value(4).toString();
     }
 
@@ -531,14 +528,7 @@ void VerificationValidationWidget::setupUI() {
     for (int i = 0; i < tests.size(); i++) {
         QListWidgetItem* item = new QListWidgetItem(tests[i]);
         int id = testIdList[i].toInt();
-        bool hasVarArgs = hasVariableList[i].toInt();
 
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
-        if(hasVarArgs) {
-            item->setIcon(edit_icon);
-        }
         std::vector<VerificationValidation::Arg> ArgList;
         query.prepare("Select arg, defaultVal, argType FROM TestArg Where testID = :id ORDER BY argIdx");
         query.bindValue(":id", id);
@@ -546,7 +536,15 @@ void VerificationValidationWidget::setupUI() {
         while(query.next()){
             ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), (Arg::Type)query.value(2).toInt()));
         }
-        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasVarArgs, ArgList}))));
+        Test t{tests[i], testCmds[i], NULL, categoryList[i], ArgList};
+
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
+        if(t.hasVarArgs()) 
+            item->setIcon(edit_icon);
+
+        itemToTestMap.insert(make_pair(item, make_pair(id, t)));
         idToItemMap.insert(make_pair(id, item));
         item->setToolTip(itemToTestMap.at(item).second.getCMD());
         testList->addItem(item);
