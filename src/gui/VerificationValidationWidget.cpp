@@ -52,9 +52,6 @@ QString* VerificationValidationWidget::runTest(const QString& cmd) {
 }
 
 void VerificationValidationWidget::runTests() {
-    dbClearResults();
-    resultTable->setRowCount(0);
-
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
     QListWidgetItem* item = 0;
@@ -77,6 +74,9 @@ void VerificationValidationWidget::runTests() {
         popup("No objects are visible.");
         return;
     }
+
+    dbClearResults();
+    resultTable->setRowCount(0);
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
     for (const QString& object : selectedObjects) {
