@@ -31,6 +31,8 @@ namespace VerificationValidation {
             if (defaultValue != NULL) this->type = Dynamic;
             else this->type = type;
         }
+
+        bool operator<(const Arg& rhs) { return argument < rhs.argument; }
     };
 
     class Test {
@@ -46,12 +48,20 @@ namespace VerificationValidation {
         {}
 
         bool operator==(const Test& rhs) {
+            std::cout << "comparing:\n" << getCMD().toStdString() << "\n" << rhs.getCMD().toStdString() << std::endl;
             if (ArgList.size() != rhs.ArgList.size()) return false;
 
-            for (int i = 0; i < ArgList.size(); i++) {
-                if ((ArgList[i].type != rhs.ArgList[i].type) || 
-                    (rhs.ArgList[i].type != Arg::Type::ObjectName && rhs.ArgList[i].type != Arg::Type::ObjectPath && ArgList[i].argument != rhs.ArgList[i].argument))
+            std::vector<Arg> lhsArgList(ArgList);
+            std::vector<Arg> rhsArgList(rhs.ArgList);
+            std::sort(lhsArgList.begin(), lhsArgList.end());
+            std::sort(rhsArgList.begin(), rhsArgList.end());
+
+            for (int i = 0; i < lhsArgList.size(); i++) {
+                if (lhsArgList[i].type == rhsArgList[i].type && (lhsArgList[i].type == Arg::Type::ObjectName || lhsArgList[i].type == Arg::Type::ObjectNone || lhsArgList[i].type == Arg::Type::ObjectPath))
+                    continue;
+                if (lhsArgList[i].argument != rhsArgList[i].argument)
                     return false;
+                std::cout << "here: " << lhsArgList[i].argument.toStdString() << std::endl;
             }
             return true;
         }

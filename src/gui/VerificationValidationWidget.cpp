@@ -87,16 +87,29 @@ void VerificationValidationWidget::runTests() {
 
             for (int j = 0; j < currentTest.ArgList.size(); j++) {
                 Arg::Type type = currentTest.ArgList[j].type;
-                q->prepare("INSERT OR IGNORE INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
-                q->addBindValue(testID);
-                q->addBindValue(j+1);
                 QString arg = currentTest.ArgList[j].argument;
                 if (type == Arg::Type::ObjectName) arg = object.split("/").last();
                 else if (type == Arg::Type::ObjectPath) arg = object;
+
+                int cnt = 0;
+                q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
+                q->addBindValue(testID);
+                q->addBindValue(j+1);
                 q->addBindValue(arg);
                 q->addBindValue(type);
-                q->addBindValue(currentTest.ArgList[j].defaultValue);
                 dbExec(q);
+
+                if (q->next()) cnt = q->value(0).toInt();
+
+                if (!cnt) {
+                    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+                    q->addBindValue(testID);
+                    q->addBindValue(j+1);
+                    q->addBindValue(arg);
+                    q->addBindValue(type);
+                    q->addBindValue(currentTest.ArgList[j].defaultValue);
+                    dbExec(q);
+                }
             }
 
             QString objectPlaceholder = object;
@@ -311,13 +324,26 @@ void VerificationValidationWidget::dbPopulateDefaults() {
 
             for (int j = 0; j < DefaultTests::allTests[i]->ArgList.size(); j++) {
                 Arg::Type type = DefaultTests::allTests[i]->ArgList[j].type;
-                q->prepare("INSERT OR IGNORE INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+
+                int cnt = 0;
+                q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
                 q->addBindValue(testID);
                 q->addBindValue(j+1);
                 q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argument);
                 q->addBindValue(type);
-                q->addBindValue(DefaultTests::allTests[i]->ArgList[j].defaultValue);
                 dbExec(q);
+
+                if (q->next()) cnt = q->value(0).toInt();
+
+                if (!cnt) {
+                    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+                    q->addBindValue(testID);
+                    q->addBindValue(j+1);
+                    q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argument);
+                    q->addBindValue(type);
+                    q->addBindValue(DefaultTests::allTests[i]->ArgList[j].defaultValue);
+                    dbExec(q);
+                }
             }
             
             for (const QString& suiteName : t->suiteNames) {
