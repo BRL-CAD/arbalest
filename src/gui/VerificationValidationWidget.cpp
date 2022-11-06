@@ -96,6 +96,19 @@ void VerificationValidationWidget::runTests() {
         QString testID = tmp->value(0).toString();
         QString testCommand = selected_tests[i]->toolTip();
         const QString* terminalOutput = runTest(testCommand);
+
+        // Update db with new arg value
+        if(itemToTestMap.at(selected_tests[i]).second.hasVariable){
+            for(int j = 0; j < itemToTestMap.at(selected_tests[i]).second.ArgList.size(); j++){
+                if(itemToTestMap.at(selected_tests[i]).second.ArgList[j].isVariable){
+                    tmp->prepare("UPDATE TestArg SET defaultVal = :newVal WHERE testID = :testId AND argIdx = :argIdx");
+                    tmp->bindValue(":newVal", itemToTestMap.at(selected_tests[i]).second.ArgList[j].defaultValue);
+                    tmp->bindValue(":testId", testID);
+                    tmp->bindValue(":argIdx", j+1);
+                    tmp->exec();
+                }
+            }
+        }
         
         QString executableName = testCommand.split(' ').first();
         Result* result = nullptr;
@@ -491,6 +504,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
                             isDefault = false;
                     }
                 }
+
                 if(isDefault){
                     test->setText(testName+" (default)");
                     test->setIcon(QIcon(":/icons/edit_default.png"));
