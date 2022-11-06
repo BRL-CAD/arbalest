@@ -895,6 +895,9 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->insertRow(resultTable->rowCount());
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem("Results for '" + ((object.isEmpty()) ? "miscellaneous" : object) + "'"));
         resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setForeground(QBrush(QColor(Globals::theme->process("$Color-FullyVisibleObjectText"))));
+        QFont f;
+        f.setBold(true);
+        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setFont(f);
     }
 
     if (resultCode == Result::Code::PASSED) {
