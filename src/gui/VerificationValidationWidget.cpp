@@ -97,15 +97,12 @@ void VerificationValidationWidget::runTests() {
         // find proper parser
         if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
             result = Parser::search(testCommand, terminalOutput);
-<<<<<<< HEAD
-	else if (QString::compare(executableName, "lc", Qt::CaseInsensitive) == 0)
-	    result = Parser::lc(testCommand, terminalOutput);
-=======
+	    else if (QString::compare(executableName, "lc", Qt::CaseInsensitive) == 0)
+	        result = Parser::lc(testCommand, terminalOutput);
         else if (QString::compare(executableName, "gqa", Qt::CaseInsensitive) == 0)
             result = Parser::gqa(testCommand, terminalOutput);
         else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
             result = Parser::title(testCommand, terminalOutput);
->>>>>>> d11691b1f1d8b546cc8622506e62d166cdcd72c0
 
         // if parser hasn't been implemented, default
         if (!result) {

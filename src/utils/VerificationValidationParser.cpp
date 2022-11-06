@@ -178,26 +178,26 @@ Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
     return r;
 }
 
-Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
-	Result* final = new Result;
-	final->terminalOutput = terminalOutput->trimmed();
+Result* Parser::lc(const QString& cmd, const QString* terminalOutput) {
+	Result* r = new Result;
+	r->terminalOutput = terminalOutput->trimmed();
 	
 	/* Check if database exists */
-	if(final->terminalOutput.indexOf("does not exist.") != -1) {
-		final->resultCode = Result::Code::FAILED;
+	if(r->terminalOutput.indexOf("does not exist.") != -1) {
+		r->resultCode = Result::Code::FAILED;
         r->issues.push_back({"Database doesn't exist", *terminalOutput});
-		return final;
+		return r;
 	}
 
 	/* Check if its just usage */
 	if(cmd.trimmed() == "lc") {
-		final->resultCode = Result::Code::FAILED;
+		r->resultCode = Result::Code::FAILED;
         r->issues.push_back({"SYNTAX ERROR", *terminalOutput});
-		return final;
+		return r;
 	}
 
 
-	QStringList lines = final->terminalOutput.split("\n");
+	QStringList lines = r->terminalOutput.split("\n");
 	/* Retreieve the list length */
 	QStringList number = lines[0].split(" ");
 	int list_length = 0;
@@ -205,8 +205,8 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	for(int i = 0; i < number.size(); i++) {
 		if(re.exactMatch(number[i])) {
 			if(number[i].toInt() == 0) {
-				final->resultCode = Result::Code::PASSED;
-				return final;
+				r->resultCode = Result::Code::PASSED;
+				return r;
 			}
 			else {
 				list_length = number[i].toInt();
@@ -214,36 +214,38 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 		}
 	}
 
+    int dFlagIdx = cmd.indexOf("-d");
+    int mFlagIdx = cmd.indexOf("-m");
 
 	QString issueDescription;
 	/* Is it an error or warning? */
-	if(cmd.indexOf("-d") != -1) { // This is a Warning
-		final->resultCode = Result::Code::WARNING;
+    if (dFlagIdx != -1 && mFlagIdx != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"Unknown combination of flags in command", cmd});
+		return r;
+    }
+	else if(dFlagIdx != -1) { // This is a Warning
+		r->resultCode = Result::Code::WARNING;
 		issueDescription = "Contains duplicated IDs";
-
 	}
-	else if(cmd.indexOf("-m") != -1) { // This is an Error
-		final->resultCode = Result::Code::FAILED; 
+	else if(mFlagIdx != -1) { // This is an Error
+		r->resultCode = Result::Code::FAILED; 
 		issueDescription = "Contains mismatched IDs";
 	}
 	else { // If this is neither, assuming it is unparsable
-		final->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"Unknown flag in command", "title cannot have any arguments for testing (implies setting database name)"});
-		return final;
+		r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"Unknown flag in command", cmd});
+		return r;
 	}
 
 	/* Start adding the issues to list */
 	for(size_t i = 0; i < list_length; i++) {
 		/* The +2 is to ignore the list length and list details */
 		QStringList temp_parser = lines[i+2].split(QRegExp("\\s+"), Qt::SkipEmptyParts); // Retrieve data into lists
-		Result::ObjectIssue tempObject;
-		tempObject.objectName = temp_parser[4];
-		tempObject.issueDescription = issueDescription ;
-		final->issues.push_back(tempObject);
+		r->issues.push_back({temp_parser[4], issueDescription});
 	}
-	return final;
 
-
+	return r;
 }
 
 Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
