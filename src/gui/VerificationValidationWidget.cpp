@@ -654,6 +654,7 @@ void VerificationValidationWidget::setupUI() {
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
     connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
+    connect(resultTable, SIGNAL(cellClicked(int, int)), this, SLOT(visualizeOverlaps(int, int)));
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
@@ -769,6 +770,65 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
 
     detail_dialog->setLayout(detailLayout);
     detail_dialog->exec();
+}
+
+void VerificationValidationWidget::visualizeOverlaps(int row, int column) {
+    QString resultCode;
+    
+    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+
+    QString testName = (testNameItem) ? testNameItem->text() : "";
+    QString description = (descriptionItem) ? descriptionItem->text() : "";
+    QString objPath = (objPathItem) ? objPathItem->text() : "";
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id FROM Tests WHERE testName = ?");
+    q->addBindValue(testName);
+    dbExec(q);
+    if (!q->next()) {
+        popup("Failed to show testName: " + testName);
+        return;
+    }
+
+    int testID = q->value(0).toInt();
+
+    QSqlQuery* q2 = new QSqlQuery(getDatabase());
+    q2->prepare("SELECT resultCode FROM TestResults WHERE testID = ?");
+    q2->addBindValue(testID);
+    dbExec(q2);
+    if (!q2->next()) {
+        popup("Failed to show testID: " + testID);
+        return;
+    }
+
+    int code = q2->value(0).toInt();
+
+    if((code == Result::Code::WARNING || code == Result::Code::FAILED) && (testName == DefaultTests::NO_OVERLAPS.testName || testName == DefaultTests::NO_NULL_REGIONS.testName)) {
+        //QString visualizeCmd = "gqa -Ap -g"+DefaultTests::NO_OVERLAPS.ArgList[1].defaultValue+" -t"+DefaultTests::NO_OVERLAPS.ArgList[2].defaultValue+" "+objName1+" "+objName2;
+        QStringList splitString = description.split('\'');
+        QString objName1 = splitString[1];
+        QString objName2 = objName1;
+        if(testName == DefaultTests::NO_OVERLAPS.testName)
+            objName2 = splitString[3];
+
+        ObjectTree *objTree = document->getObjectTree();
+        QHash<int, QString> nameMap = document->getObjectTree()->getNameMap();
+        QHashIterator<int, QString> iter1(nameMap);
+        QHashIterator<int, QString> iter2(nameMap);
+        while(iter1.hasNext()) {
+            iter1.next();
+            objTree->changeVisibilityState(iter1.key(), false);
+        }
+        while(iter2.hasNext()) {
+            iter2.next();
+            if(iter2.value() == objName1 || iter2.value() == objName2)
+                objTree->changeVisibilityState(iter2.key(), true);
+        }
+        document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        document->getDisplayGrid()->forceRerenderAllDisplays();
+        document->getObjectTreeWidget()->refreshItemTextColors();
+    }
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {

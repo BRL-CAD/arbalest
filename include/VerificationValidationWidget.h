@@ -49,7 +49,8 @@ private slots:
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
     void testListSelection(QListWidgetItem*);
-    void setupDetailedResult(int row, int  column);
+    void setupDetailedResult(int row, int column);
+    void visualizeOverlaps(int row, int column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
 
