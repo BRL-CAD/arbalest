@@ -4,6 +4,9 @@
 
 #include "Utils.h"
 #include "VerificationValidation.h"
+#include <iostream> 
+#include <sstream> 
+#include <cstdlib>
 
 using Result = VerificationValidation::Result;
 using Test = VerificationValidation::Test;
@@ -175,8 +178,99 @@ Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
     return r;
 }
 
-Result* Parser::lc(const QString* terminalOutput) {
-    return nullptr; // TODO: implement
+Result* Parser::lc(const QString& cmd, const QString* terminalOutput, const QString& gFilePath) {
+	Result* r = new Result;
+	r->terminalOutput = terminalOutput->trimmed();
+	
+	/* Check if database exists */
+	if(r->terminalOutput.contains("does not exist.", Qt::CaseInsensitive)) {
+		r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"Database doesn't exist", *terminalOutput});
+		return r;
+	}
+
+    if(r->terminalOutput.contains("More than one group name was specified", Qt::CaseInsensitive)) {
+		r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"Database doesn't exist", *terminalOutput});
+		return r;
+	}
+
+	/* Check if its just usage */
+	if(QString::compare(cmd.trimmed(), "lc", Qt::CaseInsensitive) == 0) {
+		r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"SYNTAX ERROR", *terminalOutput});
+		return r;
+	}
+
+	QStringList lines = r->terminalOutput.split("\n");
+	/* Retreieve the list length */
+	QStringList number = lines[0].split(" ");
+	int list_length = 0;
+	QRegExp re("\\d");
+	for(int i = 0; i < number.size(); i++) {
+		if(re.exactMatch(number[i])) {
+			if(number[i].toInt() == 0) {
+				r->resultCode = Result::Code::PASSED;
+				return r;
+			}
+			else {
+				list_length = number[i].toInt();
+			}
+		}
+	}
+
+	int dFlagIdx = cmd.indexOf("-d");
+    int mFlagIdx = cmd.indexOf("-m");
+    /* Is it an error or warning? */
+    if (dFlagIdx != -1 && mFlagIdx != -1) {
+        r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"Unknown combination of flags in command", cmd});
+		return r;
+    }
+	else if(dFlagIdx != -1) { // This is a Warning
+		r->resultCode = Result::Code::WARNING;
+	}
+	else if(mFlagIdx != -1) { // This is an Error
+		r->resultCode = Result::Code::FAILED; 
+	}
+	else { // If this is neither, assuming it is unparsable
+		r->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"Unknown flag in command", cmd});
+		return r;
+	}
+
+    QString object = cmd.trimmed().split(" ").last();
+    /* Start adding the issues to list */
+	for(size_t i = 0; i < list_length; i++) {
+		/* The +2 is to ignore the list length and list details */
+		QStringList temp_parser = lines[i+2].split(QRegExp("\\s+"), Qt::SkipEmptyParts); // Retrieve data into lists
+        if (temp_parser.size() != 6) {
+            r->resultCode = Result::Code::UNPARSEABLE;
+            r->issues.push_back({"Cannot parse unexpected output (was expecting 6 columns)", "was expecting 6 columns, found " + QString::number(temp_parser.size())});
+            return r;
+        }
+
+        QString ID = temp_parser[0];
+        QString MAT = temp_parser[1];
+        QString LOS = temp_parser[2];
+        QString AIR = temp_parser[3];
+        QString REGION = temp_parser[4];
+        QString PARENT = temp_parser[5];
+
+		QString issueDescription = "(ID,MAT,LOS,AIR,REGION,PARENT) = ("+ID+","+MAT+","+LOS+","+AIR+","+REGION+","+PARENT+")";
+        QString objectPath = "COULD NOT OBTAIN FULL PATH";
+        QString searchCMD = "search / -path /%1/\\*%2/%3";
+        struct ged* dbp = mgedRun(searchCMD.arg(object).arg(PARENT).arg(REGION), gFilePath);
+        if (dbp) {
+            QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
+            ged_close(dbp);
+            if (result) objectPath = *result;
+        }
+
+        r->issues.push_back({objectPath, issueDescription});
+	}
+
+	return r;
 }
 
 Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
