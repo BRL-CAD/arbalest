@@ -19,7 +19,7 @@ Test DefaultTests::ALL_BOTS_VOLUME_MODE        = Test("All BoTs are volume mode 
 Test DefaultTests::NO_BOTS_LH_ORIENT           = Test("No BoTs are left hand orientation", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-type bot -param orient=lh")});
 Test DefaultTests::ALL_REGIONS_MAT             = Test("All regions have material", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-type region ! -attr aircode ! -attr material_id")});
 Test DefaultTests::ALL_REGIONS_LOS             = Test("All regions have LOS", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-type region ! -attr aircode ! -attr los")});
-Test DefaultTests::NO_MATRICES                 = Test("No matrices", {"File"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-! -matrix IDN")});
+Test DefaultTests::NO_MATRICES                 = Test("No matrices", {"File"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("! -matrix IDN")});
 Test DefaultTests::NO_INVALID_AIRCODE_REGIONS  = Test("No regions have aircodes (except actual air regions)", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-type region -attr aircode")});
 Test DefaultTests::VALID_TITLE                 = Test("Valid title", {"General"}, {Arg("title"), Arg("", NULL, Arg::Type::ObjectNone)});
 

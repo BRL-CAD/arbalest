@@ -136,7 +136,7 @@ void VerificationValidationWidget::runTests() {
             QString testCommand = currentTest.getCMD(objectPlaceholder);
             const QString* terminalOutput = runTest(testCommand);
 
-            QString executableName = selected_tests[i]->toolTip().split(' ').first();
+            QString executableName = selected_tests[i]->toolTip().split(' ', Qt::SkipEmptyParts).first();
             Result* result = nullptr;
 
             // find proper parser
@@ -603,7 +603,7 @@ void VerificationValidationWidget::setupUI() {
         while(query.next()){
             ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), (Arg::Type)query.value(2).toInt()));
         }
-        Test t(testNameList[i], {}, ArgList); // TODO: set suites
+        Test t(testNameList[i], {}, ArgList);
 
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);

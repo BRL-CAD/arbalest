@@ -48,7 +48,6 @@ namespace VerificationValidation {
         {}
 
         bool operator==(const Test& rhs) {
-            std::cout << "comparing:\n" << getCMD().toStdString() << "\n" << rhs.getCMD().toStdString() << std::endl;
             if (ArgList.size() != rhs.ArgList.size()) return false;
 
             std::vector<Arg> lhsArgList(ArgList);
@@ -61,7 +60,6 @@ namespace VerificationValidation {
                     continue;
                 if (lhsArgList[i].argument != rhsArgList[i].argument)
                     return false;
-                std::cout << "here: " << lhsArgList[i].argument.toStdString() << std::endl;
             }
             return true;
         }
@@ -98,7 +96,7 @@ namespace VerificationValidation {
                 }
 
                 else  {
-                    if (!object.isEmpty()) cmd += " ";
+                    cmd += " ";
                     cmd += arg;
                 }
                 
