@@ -43,8 +43,8 @@ void VerificationValidationWidget::showSelectTests() {
 QString* VerificationValidationWidget::runTest(const QString& cmd) {
     QString filepath = *(document->getFilePath());
     struct ged* dbp = mgedRun(cmd, filepath);
-    QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
-    ged_close(dbp);
+    QString* result = (dbp) ? new QString(bu_vls_addr(dbp->ged_result_str)) : nullptr;
+    if (dbp) ged_close(dbp);
 
     return result;
 }
@@ -98,7 +98,6 @@ void VerificationValidationWidget::runTests() {
                 if (q->next()) cnt = q->value(0).toInt();
 
                 if (!cnt) {
-                    std::cout << "doesn't exist: " << currentTest.getCMD().toStdString() << "|" << testID << " " << currentTest.ArgList[j].argIdx << " " << arg.toStdString() << " " << type << std::endl;;
                     q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
                     q->addBindValue(testID);
                     q->addBindValue(currentTest.ArgList[j].argIdx);
@@ -339,7 +338,6 @@ void VerificationValidationWidget::dbPopulateDefaults() {
                 if (q->next()) cnt = q->value(0).toInt();
 
                 if (!cnt) {
-                    std::cout << "DBPOPDEFAULT: doesn't exist: " << t->getCMD().toStdString() << "|" << testID.toStdString() << " " << t->ArgList[j].argIdx << " " << DefaultTests::allTests[i]->ArgList[j].argument.toStdString() << " " << type << std::endl;;
                     q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
                     q->addBindValue(testID);
                     q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argIdx);
