@@ -80,7 +80,7 @@ void VerificationValidationWidget::runTests() {
     }
 
     for(int i = 0; i < totalTests; i++){
-        emit mainWindow->setStatusBarMessage(i+1, totalTests);
+        emit mainWindow->setStatusBarMessage(false, i+1, totalTests);
         QSqlQuery* tmp = new QSqlQuery(getDatabase());
         tmp->prepare("SELECT id FROM Tests WHERE testName = ?");
         // tmp->addBindValue(selected_tests[i]->text());
@@ -137,7 +137,7 @@ void VerificationValidationWidget::runTests() {
             q2->addBindValue(objectIssueID);
             dbExec(q2);
         }
-
+        emit mainWindow->setStatusBarMessage(true, i+1, totalTests);
         showResult(testResultID);
     }
 }
