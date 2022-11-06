@@ -25,6 +25,7 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     setupUI();
 
     updateDockableHeader();
+    
     validateChecksum();
     if (msgBoxRes == OPEN) {
         showAllResults();
@@ -62,7 +63,8 @@ void VerificationValidationWidget::runTests() {
     dbUpdateModelUUID();
     dbClearResults();
     resultTable->setRowCount(0);
-
+    minBtn_toggle = true;
+    
     // Get list of checked tests
     QList<QListWidgetItem *> selected_tests;
     QListWidgetItem* item = 0;
@@ -78,6 +80,8 @@ void VerificationValidationWidget::runTests() {
     if(totalTests ==  0){
         return;
     }
+
+    resultTableChangeSize();
 
     for(int i = 0; i < totalTests; i++){
         emit mainWindow->setStatusBarMessage(false, i+1, totalTests);
@@ -760,7 +764,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addSpacing(10);
     detailLayout->addWidget(commandHeader);
     QLabel* testCmdLabel = new QLabel(testCommand);
-    testCmdLabel->setFixedWidth(testCmdLabel->sizeHint().width()+120);
+    testCmdLabel->setFixedWidth(750);
     detailLayout->addWidget(testCmdLabel);
     detailLayout->addSpacing(10);
     detailLayout->addWidget(resultCodeHeader);
@@ -770,14 +774,20 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detailLayout->addWidget(new QLabel(description));
     detailLayout->addSpacing(10);
     detailLayout->addWidget(rawOutputHeader);
-    terminalOutput = "<div style=\"font-weight:500; color:#39ff14;\">arbalest> "+testCommand+"</div><br><div style=\"font-weight:500; color:white;\">"+terminalOutput+"</div>";
-    QTextEdit* rawOutputBox = new QTextEdit("<html><pre>"+terminalOutput+"</pre></html>");
-    rawOutputBox->setReadOnly(true);
+
+    QTextEdit* rawOutputBox = new QTextEdit();
     QPalette rawOutputBox_palette = rawOutputBox->palette();
     rawOutputBox_palette.setColor(QPalette::Base, Qt::black);
     rawOutputBox->setPalette(rawOutputBox_palette);
-    detailLayout->addWidget(rawOutputBox);
+    rawOutputBox->setFontWeight(QFont::DemiBold);
+    rawOutputBox->setTextColor(QColor("#39ff14"));
+    rawOutputBox->append("arbalest> "+testCommand+"\n");
+    rawOutputBox->setTextColor(Qt::white);
+    rawOutputBox->append(terminalOutput);
+    rawOutputBox->setReadOnly(true);
+    rawOutputBox->moveCursor(QTextCursor::Start, QTextCursor::MoveAnchor);
 
+    detailLayout->addWidget(rawOutputBox);
     detail_dialog->setLayout(detailLayout);
     detail_dialog->exec();
 }
@@ -912,6 +922,18 @@ void VerificationValidationWidget::dbUpdateModelUUID() {
     updateDockableHeader();
 }
 
+void VerificationValidationWidget::resultTableChangeSize() {
+    if(minBtn_toggle){
+        minBtn->setIcon(QIcon(":/icons/collapse.png"));
+        parentDockable->widget()->setVisible(true);
+        minBtn_toggle = false;
+    } else {
+        minBtn->setIcon(QIcon(":/icons/expand.png"));
+        parentDockable->widget()->setVisible(false);
+        minBtn_toggle = true;
+    }
+}
+
 void VerificationValidationWidget::updateDockableHeader() {
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
@@ -921,11 +943,22 @@ void VerificationValidationWidget::updateDockableHeader() {
         QString uuid = q->value(0).toString();
         QString filePath = q->value(1).toString();
 
-        QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+"\tModel UUID: "+uuid;
+        QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
         QLabel *title = new QLabel(dockableTitle);
+        minBtn = new QToolButton();
+        minBtn->setIcon(QIcon(":/icons/expand.png"));
+        minBtn_toggle = true;
+        QHBoxLayout* h_layout = new QHBoxLayout();
+        h_layout->addWidget(title);
+        h_layout->addWidget(minBtn);
+        QWidget* titleWidget = new QWidget();
+        titleWidget->setLayout(h_layout);
         title->setObjectName("dockableHeader");
-        parentDockable->setTitleBarWidget(title);
+        parentDockable->setTitleBarWidget(titleWidget);
+        parentDockable->widget()->setVisible(false);
         qApp->processEvents();
     }
     delete q;
+    // Result min button
+    connect(minBtn, SIGNAL(clicked()), this, SLOT(resultTableChangeSize()));
 }

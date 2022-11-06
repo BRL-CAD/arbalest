@@ -52,6 +52,7 @@ private slots:
     void setupDetailedResult(int row, int  column);
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void resultTableChangeSize();
 
 private:
     MainWindow *mainWindow;
@@ -74,6 +75,8 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    bool minBtn_toggle;
+    QToolButton* minBtn;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;

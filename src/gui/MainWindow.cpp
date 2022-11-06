@@ -591,7 +591,7 @@ void MainWindow::prepareUi() {
                 objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
-        objectVerificationValidationDockable->setVisible(true);
+        // objectVerificationValidationDockable->setVisible(false);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
     });
@@ -660,7 +660,6 @@ void MainWindow::prepareUi() {
     statusBarPathLabel = new QLabel("No document open");
     statusBarPathLabel->setObjectName("statusBarPathLabel");
     statusBar->addWidget(statusBarPathLabel);
-	
 
     // Document area --------------------------------------------------------------------------------------------------------
     documentArea = new QTabWidget(this);
