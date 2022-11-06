@@ -707,6 +707,8 @@ void VerificationValidationWidget::setupUI() {
 
     resultTable->setShowGrid(false);
     resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
+    resultTable->setColumnHidden(OBJECT_COLUMN, true);
+    resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
