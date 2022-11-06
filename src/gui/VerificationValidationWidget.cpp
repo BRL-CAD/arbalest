@@ -293,7 +293,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
     delete q;
 }
 
-void VerificationValidationWidget::searchTests(const QString &input)  {
+void VerificationValidationWidget::searchTests_run(const QString &input)  {
     // Hide category when search
     if(input.isEmpty()){
         QListWidgetItem* item = 0;
@@ -306,6 +306,27 @@ void VerificationValidationWidget::searchTests(const QString &input)  {
         QListWidgetItem* item = 0;
         for (int i = 0; i < testList->count(); i++) {
             item = testList->item(i);
+            if(!tests.contains(item) || item->toolTip() == "Category")
+                item->setHidden(true);
+            else
+                item->setHidden(false);
+        }
+    }
+}
+
+void VerificationValidationWidget::searchTests_rm(const QString &input)  {
+    // Hide category when search
+    if(input.isEmpty()){
+        QListWidgetItem* item = 0;
+        for (int i = 0; i < rmTestList->count(); i++) {
+            item = rmTestList->item(i);
+            item->setHidden(false);
+        }
+    } else {
+        QList<QListWidgetItem *> tests = rmTestList->findItems(input, Qt::MatchContains);
+        QListWidgetItem* item = 0;
+        for (int i = 0; i < rmTestList->count(); i++) {
+            item = rmTestList->item(i);
             if(!tests.contains(item) || item->toolTip() == "Category")
                 item->setHidden(true);
             else
@@ -443,6 +464,117 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     delete q2;
 }
 
+void VerificationValidationWidget::showNewTestDialog() {
+    QDialog* newTestDialog = new QDialog();
+    newTestDialog->exec();
+}
+
+void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
+    // Get test list from db
+    QSqlDatabase db = getDatabase();
+    QSqlQuery query(db);
+    query.exec("Select id, testName, testCommand, hasValArgs, category from Tests ORDER BY category ASC");
+
+    QStringList testIdList;
+    QStringList tests;
+    QStringList testCmds;
+    QStringList hasVariableList;
+    QStringList categoryList;
+
+    while(query.next()){
+        testIdList << query.value(0).toString();
+    	tests << query.value(1).toString();
+        testCmds << query.value(2).toString();
+        hasVariableList << query.value(3).toString();
+        categoryList << query.value(4).toString();
+    }
+
+    // Creat test widget item
+    QIcon edit_icon(":/icons/editIcon.png");
+    for (int i = 0; i < tests.size(); i++) {
+        QListWidgetItem* item = new QListWidgetItem(tests[i]);
+        int id = testIdList[i].toInt();
+        bool hasValArgs = hasVariableList[i].toInt();
+
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
+        if(hasValArgs) {
+            item->setIcon(edit_icon);
+        }
+        std::vector<VerificationValidation::Arg> ArgList;
+        query.prepare("Select arg, isVarArg, defaultVal FROM TestArg Where testID = :id ORDER BY argIdx");
+        query.bindValue(":id", id);
+        query.exec();
+        while(query.next()){
+            ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toBool(), query.value(2).toString()));
+        }
+        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasValArgs, ArgList}))));
+        idToItemMap.insert(make_pair(id, item));
+        item->setToolTip(itemToTestMap.at(item).second.getCmdWithArgs());
+        listWidget->addItem(item);
+    }
+
+    // Add test categories in test lists
+    int offset = 0;
+    for (int i = 0; i < categoryList.size(); i++) {
+        QList<QListWidgetItem *> items = listWidget->findItems(categoryList[i], Qt::MatchExactly);
+        if (items.size() == 0) {
+            QListWidgetItem* item = new QListWidgetItem(categoryList[i]);
+            item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
+            item->setToolTip("Category");
+            QFont itemFont = item->font();
+            itemFont.setWeight(QFont::Bold);
+            item->setFont(itemFont);
+            listWidget->insertItem(i+offset, item);
+            offset += 1;
+        }
+    }
+
+    // Tests checklist add to dialog
+   	listWidget->setMinimumWidth(listWidget->sizeHintForColumn(0)+40);
+}
+
+void removeTests(){
+    
+}
+
+void VerificationValidationWidget::showRemoveTestDialog(){
+    QDialog* rmTestDialog = new QDialog();
+    QVBoxLayout* v_layout = new QVBoxLayout();
+    QHBoxLayout* h_layout = new QHBoxLayout();
+    QLineEdit* searchBox = new QLineEdit();
+
+    h_layout->addWidget(new QLabel("Search: "));
+    h_layout->addWidget(searchBox);
+    v_layout->addLayout(h_layout);
+    rmTestList = new QListWidget();
+    addItemFromTest(rmTestList);
+
+    v_layout->addWidget(rmTestList);
+    QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttonOptions->button(QDialogButtonBox::Ok)->setText("Remove");
+    v_layout->addWidget(buttonOptions);
+    rmTestDialog->setLayout(v_layout);
+    rmTestDialog->setModal(true);
+    rmTestDialog->setWindowTitle("Select Tests To Remove");
+    connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests_rm(const QString &)));
+    connect(buttonOptions, &QDialogButtonBox::accepted, rmTestDialog, &QDialog::accept);
+    connect(buttonOptions, SINGAL(accepted()), this, SLOT(removeTests()));
+    connect(buttonOptions, &QDialogButtonBox::rejected, rmTestDialog, &QDialog::reject);
+    rmTestDialog->exec();
+}
+
+void VerificationValidationWidget::showNewTestSuiteDialog() {
+    QDialog* newTSDialog = new QDialog();
+    newTSDialog->exec();
+}
+
+void VerificationValidationWidget::showRemoveTestSuiteDialog() {
+    QDialog* rmTSDialgo = new QDialog();
+    rmTSDialog->exec();
+}
+
 void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     if(test->toolTip() !=  "Category"){
         if(itemToTestMap.at(test).second.hasVariable) {
@@ -501,69 +633,9 @@ void VerificationValidationWidget::setupUI() {
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     addWidget(resultTable);
 
-    // Get test list from db
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
-    query.exec("Select id, testName, testCommand, hasValArgs, category from Tests ORDER BY category ASC");
-
-    QStringList testIdList;
-    QStringList tests;
-    QStringList testCmds;
-    QStringList hasVariableList;
-    QStringList categoryList;
-
-    while(query.next()){
-        testIdList << query.value(0).toString();
-    	tests << query.value(1).toString();
-        testCmds << query.value(2).toString();
-        hasVariableList << query.value(3).toString();
-        categoryList << query.value(4).toString();
-    }
-
-    // Creat test widget item
-    QIcon edit_icon(":/icons/editIcon.png");
-    for (int i = 0; i < tests.size(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(tests[i]);
-        int id = testIdList[i].toInt();
-        bool hasValArgs = hasVariableList[i].toInt();
-
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
-        if(hasValArgs) {
-            item->setIcon(edit_icon);
-        }
-        std::vector<VerificationValidation::Arg> ArgList;
-        query.prepare("Select arg, isVarArg, defaultVal FROM TestArg Where testID = :id ORDER BY argIdx");
-        query.bindValue(":id", id);
-        query.exec();
-        while(query.next()){
-            ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toBool(), query.value(2).toString()));
-        }
-        itemToTestMap.insert(make_pair(item, make_pair(id, VerificationValidation::Test({tests[i], testCmds[i], NULL, categoryList[i], hasValArgs, ArgList}))));
-        idToItemMap.insert(make_pair(id, item));
-        item->setToolTip(itemToTestMap.at(item).second.getCmdWithArgs());
-        testList->addItem(item);
-    }
-
-    // Add test categories in test lists
-    int offset = 0;
-    for (int i = 0; i < categoryList.size(); i++) {
-        QList<QListWidgetItem *> items = testList->findItems(categoryList[i], Qt::MatchExactly);
-        if (items.size() == 0) {
-            QListWidgetItem* item = new QListWidgetItem(categoryList[i]);
-            item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
-            item->setToolTip("Category");
-            QFont itemFont = item->font();
-            itemFont.setWeight(QFont::Bold);
-            item->setFont(itemFont);
-            testList->insertItem(i+offset, item);
-            offset += 1;
-        }
-    }
-
-    // Tests checklist add to dialog
-   	testList->setMinimumWidth(testList->sizeHintForColumn(0)+40);
+    addItemFromTest(testList);
 
     // Get suite list from db
     query.exec("Select suiteName from TestSuites ORDER by id ASC");
@@ -606,7 +678,7 @@ void VerificationValidationWidget::setupUI() {
 	
     // format and populate Select Tests dialog box
     selectTestsDialog->setModal(true);
-    selectTestsDialog->setWindowTitle("Select Tests");
+    selectTestsDialog->setWindowTitle("Select Tests To Run");
     QGridLayout* grid = new QGridLayout();
 	
     QGroupBox* groupbox1 = new QGroupBox("Select Test Categories");
@@ -645,7 +717,7 @@ void VerificationValidationWidget::setupUI() {
     // Test select signal connect function
     connect(testList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(testListSelection(QListWidgetItem*)));
     // Search button pressed signal select function
-    connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests(const QString &)));
+    connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests_run(const QString &)));
     // Test input for gqa
     connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
     // Run test & exit

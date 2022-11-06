@@ -41,6 +41,10 @@ public:
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
 
+    void showNewTestDialog();
+    void showRemoveTestDialog();
+    void showNewTestSuiteDialog();
+    void showRemoveTestSuiteDialog();
 public slots:
     void runTests();
 
@@ -50,8 +54,10 @@ private slots:
 	void updateTestListWidget(QListWidgetItem*);
     void testListSelection(QListWidgetItem*);
     void setupDetailedResult(int row, int  column);
-    void searchTests(const QString &input);
+    void searchTests_run(const QString &input);
+    void searchTests_rm(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void removeTests();
 
 private:
     MainWindow *mainWindow;
@@ -74,6 +80,13 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+
+    // Test and test suite create remove
+    QDialog* newTestDialog;
+    QDialog* rmTestDialog;
+    QListWidget* rmTestList;
+    QDialog* newTSDialog;
+    QDialog* rmTSDialog;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;
@@ -122,6 +135,7 @@ private:
     void checkTestSA();
     QString *runTest(const QString &cmd);
     void validateChecksum();
+    void addItemFromTest(QListWidget* &listWidget);
 };
 
 #endif // VVWIDGET_H
