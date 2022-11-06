@@ -72,9 +72,11 @@ void VerificationValidationWidget::runTests() {
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
     QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-    for (const QString& object : selectedObjects) {
+    QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
+    for (int objIdx = 0; objIdx < selectedObjects.size(); objIdx++) {
+        QString object = selectedObjects[objIdx];
         for(int i = 0; i < totalTests; i++){
-            emit mainWindow->setStatusBarMessage(i+1, totalTests);
+            emit mainWindow->setStatusBarMessage(i+1, totalTests, objIdx+1, selectedObjects.size());
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
 
@@ -127,6 +129,8 @@ void VerificationValidationWidget::runTests() {
             // run tests
             QString objectArgID = q->value(0).toString();
             QString testCommand = currentTest.getCMD(objectPlaceholder);
+            if (previouslyRunTests.contains(testCommand)) continue;
+            previouslyRunTests.insert(testCommand);
             const QString* terminalOutput = runTest(testCommand);
 
             QString executableName = selected_tests[i]->toolTip().split(' ', Qt::SkipEmptyParts).first();
