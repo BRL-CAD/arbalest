@@ -86,6 +86,7 @@ namespace VerificationValidation {
             QString cmd = "";
             bool addedObject = false;
             for(int i = 0; i < ArgList.size(); i++){
+                std::cout << "before: " << cmd.toStdString() << std::endl;
                 QString arg = ArgList[i].argument;
                 if ((ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) && object != NULL) {
                     if (!addedObject) {
@@ -102,6 +103,8 @@ namespace VerificationValidation {
                 
                 if (ArgList[i].type == Arg::Type::Dynamic)
                     cmd += ArgList[i].defaultValue;
+                
+                std::cout << "after: " << cmd.toStdString() << std::endl;
             }
             return cmd;
         }

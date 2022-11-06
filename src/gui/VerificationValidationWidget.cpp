@@ -81,6 +81,7 @@ void VerificationValidationWidget::runTests() {
     QSqlQuery* q = new QSqlQuery(getDatabase());
     for (const QString& object : selectedObjects) {
         for(int i = 0; i < totalTests; i++){
+            std::cout << "here:" << object.toStdString() << ".\n";
             emit mainWindow->setStatusBarMessage(i+1, totalTests);
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
@@ -568,7 +569,7 @@ void VerificationValidationWidget::setupUI() {
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "Test Name" << "Description" << "Object Path";
-    resultTable->setColumnCount(columnLabels.size());
+    resultTable->setColumnCount(columnLabels.size() + 1); // add hidden column for testResultID
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
     resultTable->horizontalHeader()->setStretchLastSection(true);
@@ -767,7 +768,8 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
     QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
     QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
-    QString testResultID = testNameItem->toolTip();
+    QTableWidgetItem* testResultItem = resultTable->item(row, TEST_RESULT_ID_COLUMN);
+    QString testResultID = testResultItem->text();
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
@@ -888,9 +890,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         iconPath = ":/icons/passed.png";
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
-
-        resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
-        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
+        resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
     } 
 
     else if (resultCode == Result::Code::UNPARSEABLE) {
@@ -898,9 +898,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         iconPath = ":/icons/unparseable.png";
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
-
-        resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
-        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
+        resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
     }
 
     else {
@@ -937,12 +935,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
             resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
             resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
-
-            resultTable->item(resultTable->rowCount()-1, RESULT_CODE_COLUMN)->setToolTip(testResultID);
-            resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setToolTip(testResultID);
-            resultTable->item(resultTable->rowCount()-1, DESCRIPTION_COLUMN)->setToolTip(testResultID);
-            resultTable->item(resultTable->rowCount()-1, OBJPATH_COLUMN)->setToolTip(testResultID);
-
+            resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
             delete q3;
         }
         delete q2;
