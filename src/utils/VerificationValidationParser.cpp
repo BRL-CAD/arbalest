@@ -184,13 +184,15 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	
 	/* Check if database exists */
 	if(final->terminalOutput.indexOf("does not exist.") != -1) {
-		final->resultCode = Result::Code::UNPARSEABLE;
+		final->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"Database doesn't exist", *terminalOutput});
 		return final;
 	}
 
 	/* Check if its just usage */
 	if(cmd.trimmed() == "lc") {
-		final->resultCode = Result::Code::UNPARSEABLE;
+		final->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"SYNTAX ERROR", *terminalOutput});
 		return final;
 	}
 
@@ -217,15 +219,16 @@ Result* Parser::lc(const QString cmd, const QString* terminalOutput) {
 	/* Is it an error or warning? */
 	if(cmd.indexOf("-d") != -1) { // This is a Warning
 		final->resultCode = Result::Code::WARNING;
-		issueDescription = "Contains duplicated ID's";
+		issueDescription = "Contains duplicated IDs";
 
 	}
 	else if(cmd.indexOf("-m") != -1) { // This is an Error
 		final->resultCode = Result::Code::FAILED; 
-		issueDescription = "Contains mismatched ID's";
+		issueDescription = "Contains mismatched IDs";
 	}
 	else { // If this is neither, assuming it is unparsable
 		final->resultCode = Result::Code::UNPARSEABLE;
+        r->issues.push_back({"Unknown flag in command", "title cannot have any arguments for testing (implies setting database name)"});
 		return final;
 	}
 
