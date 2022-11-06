@@ -591,6 +591,11 @@ void MainWindow::prepareUi() {
                 objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
+        QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+        if (!selectedObjects.size()) { 
+            popup("Cannot run tests with no visible objects.");
+            return;
+        }
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();

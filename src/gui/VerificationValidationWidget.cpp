@@ -67,16 +67,11 @@ void VerificationValidationWidget::runTests() {
         return;
     }
 
-    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-    if (!selectedObjects.size()) { 
-        popup("No objects are visible.");
-        return;
-    }
-
     dbClearResults();
     resultTable->setRowCount(0);
 
     QSqlQuery* q = new QSqlQuery(getDatabase());
+    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
     for (const QString& object : selectedObjects) {
         for(int i = 0; i < totalTests; i++){
             emit mainWindow->setStatusBarMessage(i+1, totalTests);
