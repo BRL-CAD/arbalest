@@ -101,7 +101,7 @@ namespace VerificationValidation {
 
         static Result* title(const QString& cmd, const QString* terminalOutput);
 
-        static Result* lc(const QString& cmd, const QString* terminalOutput);
+        static Result* lc(const QString& cmd, const QString* terminalOutput, const QString& gFilePath);
         static Result* gqa(const QString& cmd, const QString* terminalOutput);
         static void gqaSpecificTest(Result* r, const QString& currentLine, const Test* type);
     };
