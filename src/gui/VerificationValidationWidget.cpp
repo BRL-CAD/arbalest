@@ -535,7 +535,7 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
    	listWidget->setMinimumWidth(listWidget->sizeHintForColumn(0)+40);
 }
 
-void removeTests(){
+void VerificationValidationWidget::removeTests(){
     
 }
 
@@ -560,7 +560,7 @@ void VerificationValidationWidget::showRemoveTestDialog(){
     rmTestDialog->setWindowTitle("Select Tests To Remove");
     connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests_rm(const QString &)));
     connect(buttonOptions, &QDialogButtonBox::accepted, rmTestDialog, &QDialog::accept);
-    connect(buttonOptions, SINGAL(accepted()), this, SLOT(removeTests()));
+    connect(buttonOptions, SIGNAL(accepted()), this, SLOT(removeTests()));
     connect(buttonOptions, &QDialogButtonBox::rejected, rmTestDialog, &QDialog::reject);
     rmTestDialog->exec();
 }
