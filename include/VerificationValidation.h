@@ -21,6 +21,7 @@ namespace VerificationValidation {
         };
 
         QString argument;
+        int argIdx;
         QString defaultValue;
         Type type;
 
@@ -45,7 +46,10 @@ namespace VerificationValidation {
         Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList) :
         testName(testName), suiteNames(suiteNames), ArgList(ArgList), 
         category((ArgList.size()) ? ArgList[0].argument : "NULL")
-        {}
+        {
+            for (int i = 0; i < ArgList.size(); i++)
+                this->ArgList[i].argIdx = i;
+        }
 
         bool operator==(const Test& rhs) {
             if (ArgList.size() != rhs.ArgList.size()) return false;

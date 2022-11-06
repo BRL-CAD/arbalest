@@ -90,7 +90,7 @@ void VerificationValidationWidget::runTests() {
                 int cnt = 0;
                 q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
                 q->addBindValue(testID);
-                q->addBindValue(j+1);
+                q->addBindValue(currentTest.ArgList[j].argIdx);
                 q->addBindValue(arg);
                 q->addBindValue(type);
                 dbExec(q);
@@ -98,9 +98,10 @@ void VerificationValidationWidget::runTests() {
                 if (q->next()) cnt = q->value(0).toInt();
 
                 if (!cnt) {
+                    std::cout << "doesn't exist: " << currentTest.getCMD().toStdString() << "|" << testID << " " << currentTest.ArgList[j].argIdx << " " << arg.toStdString() << " " << type << std::endl;;
                     q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
                     q->addBindValue(testID);
-                    q->addBindValue(j+1);
+                    q->addBindValue(currentTest.ArgList[j].argIdx);
                     q->addBindValue(arg);
                     q->addBindValue(type);
                     q->addBindValue(currentTest.ArgList[j].defaultValue);
@@ -330,7 +331,7 @@ void VerificationValidationWidget::dbPopulateDefaults() {
                 int cnt = 0;
                 q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
                 q->addBindValue(testID);
-                q->addBindValue(j+1);
+                q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argIdx);
                 q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argument);
                 q->addBindValue(type);
                 dbExec(q);
@@ -338,9 +339,10 @@ void VerificationValidationWidget::dbPopulateDefaults() {
                 if (q->next()) cnt = q->value(0).toInt();
 
                 if (!cnt) {
+                    std::cout << "DBPOPDEFAULT: doesn't exist: " << t->getCMD().toStdString() << "|" << testID.toStdString() << " " << t->ArgList[j].argIdx << " " << DefaultTests::allTests[i]->ArgList[j].argument.toStdString() << " " << type << std::endl;;
                     q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
                     q->addBindValue(testID);
-                    q->addBindValue(j+1);
+                    q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argIdx);
                     q->addBindValue(DefaultTests::allTests[i]->ArgList[j].argument);
                     q->addBindValue(type);
                     q->addBindValue(DefaultTests::allTests[i]->ArgList[j].defaultValue);
@@ -597,8 +599,16 @@ void VerificationValidationWidget::setupUI() {
         query.prepare("Select arg, defaultVal, argType FROM TestArg Where testID = :id ORDER BY argIdx");
         query.bindValue(":id", id);
         query.exec();
+
+        bool addedObject = false;
         while(query.next()){
-            ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), (Arg::Type)query.value(2).toInt()));
+            Arg::Type type = (Arg::Type) query.value(2).toInt();
+            if (type == Arg::Type::ObjectName || type == Arg::Type::ObjectPath) {
+                if (addedObject) continue;
+                ArgList.push_back(VerificationValidation::Arg((type == Arg::Type::ObjectName) ? "$OBJECT" : "/$OBJECT", query.value(1).toString(), type));
+                addedObject = true;
+            }
+            else ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), type));
         }
         Test t(testNameList[i], {}, ArgList);
 
