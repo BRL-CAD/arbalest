@@ -157,7 +157,7 @@ Result* Parser::title(const QString& cmd, const QString* terminalOutput, const T
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
 
-    QStringList cmdList = cmd.split(" ");
+    QStringList cmdList = cmd.split(" ", Qt::SkipEmptyParts);
     if (cmdList.size() > 1) {
         r->resultCode = Result::Code::UNPARSEABLE;
         r->issues.push_back({"SYNTAX ERROR", "title cannot have any arguments for testing (implies setting database name)"});

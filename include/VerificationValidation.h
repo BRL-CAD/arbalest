@@ -89,21 +89,21 @@ namespace VerificationValidation {
                 QString arg = ArgList[i].argument;
                 if ((ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) && object != NULL) {
                     if (!addedObject) {
-                        if (!object.isEmpty()) cmd += " ";
                         cmd += object;
+                        if (i + 1 != ArgList.size() && !object.isEmpty()) cmd += " ";
                         addedObject = true;
                     }
                 }
 
                 else  {
-                    cmd += " ";
                     cmd += arg;
+                    if (i + 1 != ArgList.size() && !arg.isEmpty()) cmd += " ";
                 }
                 
                 if (ArgList[i].type == Arg::Type::Dynamic)
                     cmd += ArgList[i].defaultValue;
             }
-            return cmd.trimmed();
+            return cmd;
         }
     };
 
