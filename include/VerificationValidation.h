@@ -6,6 +6,7 @@
 #define VV_H
 #include <vector>
 #include <list>
+#include <map>
 #include <QString>
 
 namespace VerificationValidation {
@@ -83,7 +84,7 @@ namespace VerificationValidation {
         const static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
         const static VerificationValidation::Test VALID_TITLE;
         const static std::vector<VerificationValidation::Test> allTests;
-
+        const static std::map<QString, VerificationValidation::Test> nameToTestMap;
         // TODO: missing "No errors when top level drawn"
         // TODO: missing "BoTs are valid"
         // TODO: missing "Air does not stick out"
