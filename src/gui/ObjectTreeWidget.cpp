@@ -162,5 +162,6 @@ QStringList ObjectTreeWidget::getSelectedObjects(const Name& name, const Level& 
             ans[i] = bu_path_basename(ans[i].toStdString().c_str(), NULL);
     }
 
+    ans.sort(Qt::CaseInsensitive);
     return ans;
 }

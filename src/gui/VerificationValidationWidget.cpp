@@ -190,7 +190,6 @@ void VerificationValidationWidget::runTests() {
     QLabel *title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     parentDockable->setTitleBarWidget(title);
-    resultTable->sortByColumn(TEST_RESULT_ID_COLUMN, Qt::SortOrder::DescendingOrder);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -562,7 +561,7 @@ void VerificationValidationWidget::setupUI() {
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "Test Name" << "Description" << "Object Path";
-    resultTable->setColumnCount(columnLabels.size() + 1); // add hidden column for testResultID
+    resultTable->setColumnCount(columnLabels.size() + 2); // add hidden columns for testResultID + object
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
     resultTable->horizontalHeader()->setStretchLastSection(true);
@@ -701,6 +700,9 @@ void VerificationValidationWidget::setupUI() {
     grid->addWidget(groupbox2, 0, 1);
     grid->addWidget(groupbox3, 1, 0, 1, 2);
     selectTestsDialog->setLayout(grid);
+
+    resultTable->setShowGrid(false);
+    resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
@@ -741,11 +743,10 @@ void VerificationValidationWidget::dbClearResults() {
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
-    resultTable->setColumnWidth(0, this->width() * 0.025);
-    resultTable->setColumnWidth(1, this->width() * 0.125);
-    resultTable->setColumnWidth(2, this->width() * 0.60);
-    resultTable->setColumnWidth(3, this->width() * 0.25);
-
+    resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+    resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.125);
+    resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.60);
+    resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.25);
     QHBoxWidget::resizeEvent(event);
 }
 
@@ -761,8 +762,6 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
     QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
     QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
-    QTableWidgetItem* testResultItem = resultTable->item(row, TEST_RESULT_ID_COLUMN);
-    QString testResultID = testResultItem->text();
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
@@ -771,23 +770,10 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     q->prepare("SELECT id FROM Tests WHERE testName = ?");
     q->addBindValue(testName);
     dbExec(q);
-    if (!q->next()) {
-        popup("Failed to show testName: " + testName);
-        return;
-    }
+    if (!q->next()) { return; }
     int testID = q->value(0).toInt();
     Test currentTest = itemToTestMap.at(idToItemMap.at(testID)).second;
-
-    q->prepare("SELECT TestArg.arg FROM TestArg INNER JOIN TestResults ON TestArg.id = TestResults.objectArgID WHERE TestResults.id = ?");
-    q->addBindValue(testResultID);
-    dbExec(q);
-
-    if (!q->next()) {
-        popup("Failed to get results (id=" + testResultID + ")");
-        return;
-    }
-
-    QString object = q->value(0).toString();
+    QString object = resultTable->item(row, OBJECT_COLUMN)->text();
     QString testCommand = currentTest.getCMD(object);
 
     QSqlQuery* q2 = new QSqlQuery(getDatabase());
@@ -874,9 +860,26 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     int resultCode = q->value(1).toInt();
     QString terminalOutput = q->value(2).toString();
 
+    q->prepare("SELECT TestArg.arg FROM TestArg INNER JOIN TestResults ON TestArg.id = TestResults.objectArgID WHERE TestResults.id = ?");
+    q->addBindValue(testResultID);
+    dbExec(q);
+
+    if (!q->next()) {
+        popup("Failed to grab associated object for test result #" + testResultID);
+        return;
+    }
+
+    QString object = q->value(0).toString();
     QString iconPath = "";
     QString objectName;
     QString issueDescription;
+
+    QTableWidgetItem* previousRowObject = resultTable->item(resultTable->rowCount()-1, OBJECT_COLUMN);
+    if (!previousRowObject || previousRowObject->text() != object) {
+        resultTable->insertRow(resultTable->rowCount());
+        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem("Results for '" + ((object.isEmpty()) ? "miscellaneous" : object) + "'"));
+        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setForeground(QBrush(QColor(Globals::theme->process("$Color-FullyVisibleObjectText"))));
+    }
 
     if (resultCode == Result::Code::PASSED) {
         resultTable->insertRow(resultTable->rowCount());
@@ -884,6 +887,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
+        resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
     } 
 
     else if (resultCode == Result::Code::UNPARSEABLE) {
@@ -892,6 +896,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
+        resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
     }
 
     else {
@@ -929,6 +934,7 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             resultTable->setItem(resultTable->rowCount()-1, DESCRIPTION_COLUMN, new QTableWidgetItem(issueDescription));
             resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
             resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
+            resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
             delete q3;
         }
         delete q2;
@@ -953,6 +959,5 @@ void VerificationValidationWidget::showAllResults() {
         testResultID = q->value(0).toString();
         showResult(testResultID);
     }
-    resultTable->sortByColumn(TEST_RESULT_ID_COLUMN, Qt::SortOrder::DescendingOrder);
     delete q;
 }
