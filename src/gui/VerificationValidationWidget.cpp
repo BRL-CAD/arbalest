@@ -7,8 +7,6 @@ using Parser = VerificationValidation::Parser;
 
 #define SHOW_ERROR_POPUP true
 
-// TODO: if checksum doesn't match current test file, notify user
-
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
 document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
