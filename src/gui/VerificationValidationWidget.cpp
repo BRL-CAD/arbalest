@@ -491,8 +491,6 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
             connect(setBtn, &QPushButton::clicked, [this, test, input_vec, testName](){
                 bool isDefault = true;
-                QSqlDatabase db = getDatabase();
-                QSqlQuery query(db);
                 for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
                     if(itemToTestMap.at(test).second.ArgList[i].isVariable){
                         itemToTestMap.at(test).second.ArgList[i].updateValue(input_vec[i]->text());
