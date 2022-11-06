@@ -86,15 +86,21 @@ namespace VerificationValidation {
 
         QString getCMD(const QString& object = NULL) const {
             QString cmd = "";
+            bool addedObject = false;
             for(int i = 0; i < ArgList.size(); i++){
                 QString arg = ArgList[i].argument;
-                if (!object.isEmpty())
-                    cmd += " ";
+                if ((ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) && object != NULL) {
+                    if (!addedObject) {
+                        if (!object.isEmpty()) cmd += " ";
+                        cmd += object;
+                        addedObject = true;
+                    }
+                }
 
-                if ((ArgList[i].type == Arg::Type::ObjectName || ArgList[i].type == Arg::Type::ObjectPath) && object != NULL)
-                    cmd += object;
-                else 
+                else  {
+                    if (!object.isEmpty()) cmd += " ";
                     cmd += arg;
+                }
                 
                 if (ArgList[i].type == Arg::Type::Dynamic)
                     cmd += ArgList[i].defaultValue;

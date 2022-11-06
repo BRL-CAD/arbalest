@@ -85,6 +85,7 @@ void VerificationValidationWidget::runTests() {
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
 
+            // for the current test, insert any Args that aren't in TestArg
             for (int j = 0; j < currentTest.ArgList.size(); j++) {
                 Arg::Type type = currentTest.ArgList[j].type;
                 QString arg = currentTest.ArgList[j].argument;
@@ -112,6 +113,7 @@ void VerificationValidationWidget::runTests() {
                 }
             }
 
+            // find objectArgID associated with this object
             QString objectPlaceholder = object;
             Arg::Type type = currentTest.getObjArgType();
             if (type == Arg::Type::ObjectName)
@@ -128,12 +130,15 @@ void VerificationValidationWidget::runTests() {
             dbExec(q);
 
             if (!q->next()) { continue; }
+
+            // run tests
             QString objectArgID = q->value(0).toString();
             QString testCommand = currentTest.getCMD(objectPlaceholder);
             const QString* terminalOutput = runTest(testCommand);
 
             QString executableName = selected_tests[i]->toolTip().split(' ').first();
             Result* result = nullptr;
+
             // find proper parser
             if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
                 result = Parser::search(testCommand, terminalOutput, currentTest);
