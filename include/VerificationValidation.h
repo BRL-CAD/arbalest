@@ -100,8 +100,10 @@ namespace VerificationValidation {
                     if (i + 1 != ArgList.size() && !arg.isEmpty()) cmd += " ";
                 }
                 
-                if (ArgList[i].type == Arg::Type::Dynamic)
+                if (ArgList[i].type == Arg::Type::Dynamic) {
                     cmd += ArgList[i].defaultValue;
+                    if (i + 1 != ArgList.size() && !ArgList[i].defaultValue.isEmpty()) cmd += " ";
+                }
             }
             return cmd;
         }

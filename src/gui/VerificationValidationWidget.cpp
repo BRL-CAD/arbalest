@@ -190,6 +190,7 @@ void VerificationValidationWidget::runTests() {
     QLabel *title = new QLabel(dockableTitle);
     title->setObjectName("dockableHeader");
     parentDockable->setTitleBarWidget(title);
+    resultTable->sortByColumn(TEST_RESULT_ID_COLUMN, Qt::SortOrder::DescendingOrder);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
@@ -952,6 +953,6 @@ void VerificationValidationWidget::showAllResults() {
         testResultID = q->value(0).toString();
         showResult(testResultID);
     }
-
+    resultTable->sortByColumn(TEST_RESULT_ID_COLUMN, Qt::SortOrder::DescendingOrder);
     delete q;
 }
