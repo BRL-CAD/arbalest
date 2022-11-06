@@ -83,7 +83,8 @@ void VerificationValidationWidget::runTests() {
         emit mainWindow->setStatusBarMessage(i+1, totalTests);
         QSqlQuery* tmp = new QSqlQuery(getDatabase());
         tmp->prepare("SELECT id FROM Tests WHERE testName = ?");
-        tmp->addBindValue(selected_tests[i]->text());
+        // tmp->addBindValue(selected_tests[i]->text());
+        tmp->addBindValue(itemToTestMap.at(selected_tests[i]).second.testName);
         dbExec(tmp);
 
         if (!tmp->next()) continue;
@@ -453,7 +454,8 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             QVBoxLayout* vLayout = new QVBoxLayout();
             QFormLayout* formLayout = new QFormLayout();
 
-            vLayout->addWidget(new QLabel("Test Name: "+ test->text()));
+            QString testName = itemToTestMap.at(test).second.testName;
+            vLayout->addWidget(new QLabel("Test Name: "+ testName));
             vLayout->addSpacing(5);
             vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCmdWithArgs()));
             vLayout->addSpacing(15);
@@ -474,13 +476,22 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(setBtn);
             userInputDialog->setLayout(vLayout);
 
-            connect(setBtn, &QPushButton::clicked, [this, test, input_vec](){
+            connect(setBtn, &QPushButton::clicked, [this, test, input_vec, testName](){
+                bool isDefault = true;
                 for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
                     if(itemToTestMap.at(test).second.ArgList[i].isVariable){
                         itemToTestMap.at(test).second.ArgList[i].updateValue(input_vec[i]->text());
+                        if(DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue != input_vec[i]->text())
+                            isDefault = false;
                     }
                 }
-
+                if(isDefault){
+                    test->setText(testName+" (default)");
+                    test->setIcon(QIcon(":/icons/edit_default.png"));
+                } else {
+                    test->setText(testName);
+                    test->setIcon(QIcon(":/icons/edit.png"));
+                }
                 test->setToolTip(itemToTestMap.at(test).second.getCmdWithArgs());
             });
             
@@ -521,7 +532,6 @@ void VerificationValidationWidget::setupUI() {
     }
 
     // Creat test widget item
-    QIcon edit_icon(":/icons/editIcon.png");
     for (int i = 0; i < tests.size(); i++) {
         QListWidgetItem* item = new QListWidgetItem(tests[i]);
         int id = testIdList[i].toInt();
@@ -531,7 +541,8 @@ void VerificationValidationWidget::setupUI() {
         item->setCheckState(Qt::Unchecked);
         item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
         if(hasValArgs) {
-            item->setIcon(edit_icon);
+            item->setText(item->text()+" (default)");
+            item->setIcon(QIcon(":/icons/edit_default.png"));
         }
         std::vector<VerificationValidation::Arg> ArgList;
         query.prepare("Select arg, isVarArg, defaultVal FROM TestArg Where testID = :id ORDER BY argIdx");

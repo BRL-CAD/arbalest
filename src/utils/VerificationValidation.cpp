@@ -39,3 +39,8 @@ const std::vector<Test> DefaultTests::allTests = {
     DefaultTests::NO_INVALID_AIRCODE_REGIONS,
     DefaultTests::VALID_TITLE
 };
+
+const std::map<QString, VerificationValidation::Test> DefaultTests::nameToTestMap = {
+    std::make_pair("No null region", DefaultTests::NO_NULL_REGIONS),
+    std::make_pair("Overlaps cleaned to gridsize with tolerance", DefaultTests::NO_OVERLAPS)
+};
