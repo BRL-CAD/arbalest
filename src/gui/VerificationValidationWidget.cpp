@@ -81,7 +81,6 @@ void VerificationValidationWidget::runTests() {
     QSqlQuery* q = new QSqlQuery(getDatabase());
     for (const QString& object : selectedObjects) {
         for(int i = 0; i < totalTests; i++){
-            std::cout << "here:" << object.toStdString() << ".\n";
             emit mainWindow->setStatusBarMessage(i+1, totalTests);
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
