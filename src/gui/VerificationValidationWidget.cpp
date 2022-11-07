@@ -562,11 +562,186 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
 }
 
 void VerificationValidationWidget::createTest() {
+    if(testNameInput->text().simplified().isEmpty()){
+        popup("[Verification & Validation]\nERROR: cannot create a test with empty name");
+        showNewTestDialog();
+        return;
+    }
+    QString testName = testNameInput->text();
 
+    if(testCmdInput->text().simplified().isEmpty()){
+        popup("[Verification & Validation]\nERROR: cannot create a test with empty command");
+        showNewTestDialog();
+        return;
+    }
+    QString testCmd = testCmdInput->text();
+
+    QString testCategory = "";
+    if(!testCategoryInput->text().simplified().isEmpty()){
+        testCategory = testCategoryInput->text();
+    }
+
+    bool hasVar = false;
+    for(int i = 0; i < isVarList.size(); i++){
+        if(isVarList[i]->checkState()){
+            hasVar = true;
+            break;
+        } else {
+            if(!varInputList[i]->text().simplified().isEmpty()){
+                hasVar = true;
+                break;
+            }
+        }
+    }
+
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("INSERT INTO Tests (testName, testCommand, hasValArgs, category) VALUES (:testName, :testCommand, :hasValArgs, :category)");
+    q->bindValue(":testName", testName);
+    q->bindValue(":testCommand", testCmd);
+    q->bindValue(":hasValArgs", hasVar);
+    q->bindValue(":category", testCategory);
+    q->exec();
+
+    QString testID = q->lastInsertId().toString();
+    for(int i = 0; i < addToSuiteList->count(); i++){
+        QListWidgetItem* item = addToSuiteList->item(i);
+        if(item->checkState()){
+            q->prepare("SELECT id FROM TestSuites WHERE suiteName = ?");
+            q->addBindValue(item->text());
+            q->exec();
+            int suiteID = -1;
+            while(q->next()){
+                suiteID = q->value(0).toInt();
+            }
+            q->prepare("INSERT INTO TestsInSuite (testSuiteID, testID) VALUES (:suiteID, :testID)");
+            q->bindValue(":suiteID", suiteID);
+            q->bindValue(":testID", testID);
+            q->exec();
+        }
+    }
+
+    int argIdx = 1;
+    for(int i = 0; i < argInputList.size(); i++){
+        if(argInputList[i]->text().simplified().isEmpty() && !isVarList[i]->checkState() && varInputList[i]->text().simplified().isEmpty()){
+            continue;
+        }
+        bool isVariable = false;
+        if(isVarList[i]->checkState() || !varInputList[i]->text().simplified().isEmpty()){
+            isVariable = true;
+        }
+        q->prepare("INSERT INTO TestArg (testID, argIdx, arg, isVarArg, defaultVal) VALUES (:testID, :argIdx, :arg, :isVarArg, :defaultVal)");
+        q->bindValue(":testID", testID);
+        q->bindValue(":argIdx", argIdx);
+        q->bindValue(":arg", argInputList[i]->text());
+        q->bindValue(":isVarArg", isVariable);
+        q->bindValue(":defaultVal", varInputList[i]->text());
+        dbExec(q);
+        argIdx += 1;
+    }
+
+    setupUI();
+}
+
+void VerificationValidationWidget::addArgForm() {
+    int n = argInputList.size()+1;
+    QString boxTitle = "Argument Input %1";
+    QGroupBox* argField = new QGroupBox(boxTitle.arg(n));
+    QFormLayout* argForm = new QFormLayout();
+    QLineEdit* argInput = new QLineEdit();
+    argForm->addRow("Argument: ", argInput);
+    QCheckBox* isVar = new QCheckBox();
+    argForm->addRow("Has variable: ", isVar);
+    QLineEdit* varInput = new QLineEdit();
+    argForm->addRow("Variable: ", varInput);
+
+    argInputList.push_back(argInput);
+    isVarList.push_back(isVar);
+    varInputList.push_back(varInput);
+
+    argField->setLayout(argForm);
+    argField->setMinimumWidth(250);
+    argLayout->addWidget(argField);
+    argLayout->addSpacing(10);
 }
 
 void VerificationValidationWidget::showNewTestDialog() {
+    argInputList.clear();
+    isVarList.clear();
+    varInputList.clear();
+
     QDialog* newTestDialog = new QDialog();
+    QGridLayout* grid = new QGridLayout();
+    
+    QGroupBox* groupbox1 = new QGroupBox("Main Info");
+    QVBoxLayout* v_layout = new QVBoxLayout();
+    
+    QFormLayout* mainForm = new QFormLayout();
+    testNameInput = new QLineEdit();
+    mainForm->addRow("Test Name: ", testNameInput);
+    testCmdInput = new QLineEdit();
+    mainForm->addRow("Test Command: ", testCmdInput);
+    testCategoryInput = new QLineEdit();
+    mainForm->addRow("Test Category: ", testCategoryInput);
+    v_layout->addLayout(mainForm);
+
+    v_layout->addSpacing(15);
+    v_layout->addWidget(new QLabel("Select test suite to add test to"));
+    addToSuiteList = new QListWidget();
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->exec("Select suiteName from TestSuites ORDER by id ASC");
+    QStringList testSuites;
+    while(q->next()){
+    	testSuites << q->value(0).toString();
+    }
+    addToSuiteList->addItems(testSuites);
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < addToSuiteList->count(); i++) {
+        item = addToSuiteList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
+    }
+    v_layout->addWidget(addToSuiteList);
+    groupbox1->setLayout(v_layout);
+
+    QGroupBox* groupbox2 = new QGroupBox("Additional Info");
+    QVBoxLayout* v_layout2 = new QVBoxLayout();
+    QPushButton* addArgFormBtn = new QPushButton("Add Argument Input Field");
+    v_layout2->addSpacing(10);
+    v_layout2->addWidget(addArgFormBtn);
+    v_layout2->addSpacing(20);
+    v_layout2->addWidget(new QLabel("If for tops write PATH or NAME in arguments"));
+    v_layout2->addSpacing(5);
+    QScrollArea* scroll = new QScrollArea();
+    scroll->setWidgetResizable(true);
+    QWidget* content_widget = new QWidget();
+    argLayout = new QHBoxLayout();
+    for(int i = 0; i < 3; i++){
+        addArgForm();
+    }
+    content_widget->setLayout(argLayout);
+    scroll->setWidget(content_widget);
+    v_layout2->addWidget(scroll);
+    groupbox2->setLayout(v_layout2);
+    
+    QGroupBox* groupbox3 = new QGroupBox();
+    QHBoxLayout* hbox = new QHBoxLayout();
+    QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttonOptions->button(QDialogButtonBox::Ok)->setText("Create");
+    hbox->addWidget(buttonOptions);
+    groupbox3->setLayout(hbox);
+
+    grid->addWidget(groupbox1, 0, 0);
+    grid->addWidget(groupbox2, 0, 1);
+    grid->addWidget(groupbox3, 1, 0, 1, 2);
+    newTestDialog->setLayout(grid);
+    newTestDialog->setModal(true);
+    newTestDialog->setWindowTitle("Create New Test");
+    connect(addArgFormBtn, SIGNAL(clicked()), this, SLOT(addArgForm()));
+    connect(buttonOptions, &QDialogButtonBox::accepted, newTestDialog, &QDialog::accept);
+    connect(buttonOptions, SIGNAL(accepted()), this, SLOT(createTest()));
+    connect(buttonOptions, &QDialogButtonBox::rejected, newTestDialog, &QDialog::reject);
+
     newTestDialog->exec();
 }
 
@@ -628,7 +803,7 @@ void VerificationValidationWidget::showRemoveTestDialog(){
 }
 
 void VerificationValidationWidget::createSuite() {
-    if(suiteNameBox->text().isEmpty()){
+    if(suiteNameBox->text().simplified().isEmpty()){
         popup("[Verification & Validation]\nERROR: cannot create a test suite with empty name");
         showNewTestSuiteDialog();
         return;
@@ -715,7 +890,7 @@ void VerificationValidationWidget::showNewTestSuiteDialog() {
     v_layout->addWidget(buttonOptions);
     newTSDialog->setLayout(v_layout);
     newTSDialog->setModal(true);
-    newTSDialog->setWindowTitle("Select Tests To Remove");
+    newTSDialog->setWindowTitle("Create New Test Suite");
     connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests_TS(const QString &)));
     connect(buttonOptions, &QDialogButtonBox::accepted, newTSDialog, &QDialog::accept);
     connect(buttonOptions, SIGNAL(accepted()), this, SLOT(createSuite()));

@@ -62,6 +62,7 @@ private slots:
     void removeTests();
     void createSuite();
     void removeSuites();
+    void addArgForm();
 
 private:
     MainWindow *mainWindow;
@@ -86,6 +87,15 @@ private:
     QStatusBar* statusBar;
 
     // Test and test suite create remove
+    QLineEdit* testNameInput;
+    QLineEdit* testCmdInput;
+    QLineEdit* testCategoryInput;
+    QListWidget* addToSuiteList;
+    QHBoxLayout* argLayout;
+    std::vector<QLineEdit*> argInputList;
+    std::vector<QCheckBox*> isVarList;
+    std::vector<QLineEdit*> varInputList;
+
     QListWidget* rmTestList;
     QListWidget* newTSList;
     QListWidget* rmTSList;
