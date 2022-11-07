@@ -551,12 +551,13 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCMD()));
             vLayout->addSpacing(15);
 
-            std::vector<std::tuple<Arg*, QString, QString>> inputTuples;
-            for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size(); i++){
-                if(itemToTestMap.at(test).second.ArgList.at(i).type == Arg::Type::Dynamic){
-                    QLineEdit* lineEdit = new QLineEdit(itemToTestMap.at(test).second.ArgList.at(i).defaultValue);
-                    inputTuples.push_back(std::make_tuple(&itemToTestMap.at(test).second.ArgList[i], lineEdit->text(), DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue));
-                    formLayout->addRow(itemToTestMap.at(test).second.ArgList.at(i).argument, lineEdit);
+            std::vector<std::tuple<Arg*, QLineEdit*, QString>> inputTuples;
+            std::vector<Arg>* argList = &(itemToTestMap.at(test).second.ArgList);
+            for(int i = 0; i < argList->size(); i++){
+                if(argList->at(i).type == Arg::Type::Dynamic){
+                    QLineEdit* lineEdit = new QLineEdit(argList->at(i).defaultValue);
+                    inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, DefaultTests::nameToTestMap.at(testName).ArgList.at(i).defaultValue));
+                    formLayout->addRow(argList->at(i).argument, lineEdit);
                     formLayout->setSpacing(10);
                 }
             }
@@ -568,10 +569,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
             connect(setBtn, &QPushButton::clicked, [this, test, inputTuples, testName](){
                 bool isDefault = true;
-                for(const auto& [currentArg, currentInput, defaultVal] : inputTuples){
+                for(const auto& [currentArg, currentLineEdit, defaultVal] : inputTuples){
                     if(currentArg->type == Arg::Type::Dynamic){
-                        currentArg->defaultValue = currentInput;
-                        if (defaultVal != currentInput)
+                        currentArg->defaultValue = currentLineEdit->text();
+                        if (defaultVal != currentLineEdit->text())
                             isDefault = false;
                     }
                 }
