@@ -654,7 +654,7 @@ void VerificationValidationWidget::setupUI() {
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
     connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
-    connect(resultTable, SIGNAL(cellClicked(int, int)), this, SLOT(visualizeOverlaps(int, int)));
+    connect(resultTable, SIGNAL(cellClicked(int, int)), this, SLOT(setupResultMenu(int, int)));
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
@@ -684,6 +684,26 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     resultTable->setColumnWidth(3, this->width() * 0.25);
 
     QHBoxWidget::resizeEvent(event);
+}
+
+void VerificationValidationWidget::copyToClipboard(int row, int column) {
+    clipboard = QApplication::clipboard();
+    QTableWidgetItem *objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+    QString objPath = (objPathItem) ? objPathItem->text() : "";
+    clipboard->setText(objPath);
+}
+
+void VerificationValidationWidget::setupResultMenu(int row, int column) {
+    QMenu *resultMenu = new QMenu();
+    QAction *visualizeObjects = new QAction("Visualize Objects");
+    QAction *copyPath = new QAction("Copy Path");
+    resultMenu->addAction(visualizeObjects);
+    resultMenu->addAction(copyPath);
+
+    resultMenu->exec(QCursor::pos());
+
+    //connect();
+    //connect();
 }
 
 void VerificationValidationWidget::setupDetailedResult(int row, int column) {
@@ -804,18 +824,17 @@ void VerificationValidationWidget::visualizeOverlaps(int row, int column) {
 
     int code = q2->value(0).toInt();
 
-    if((code == Result::Code::WARNING || code == Result::Code::FAILED) && (testName == DefaultTests::NO_OVERLAPS.testName || testName == DefaultTests::NO_NULL_REGIONS.testName)) {
+    ObjectTree *objTree = document->getObjectTree();
+    QHash<int, QString> nameMap = document->getObjectTree()->getNameMap();
+    QHashIterator<int, QString> iter1(nameMap);
+    QHashIterator<int, QString> iter2(nameMap);
+
+    if((code == Result::Code::WARNING || code == Result::Code::FAILED) && testName == DefaultTests::NO_OVERLAPS.testName) {
         //QString visualizeCmd = "gqa -Ap -g"+DefaultTests::NO_OVERLAPS.ArgList[1].defaultValue+" -t"+DefaultTests::NO_OVERLAPS.ArgList[2].defaultValue+" "+objName1+" "+objName2;
         QStringList splitString = description.split('\'');
         QString objName1 = splitString[1];
-        QString objName2 = objName1;
-        if(testName == DefaultTests::NO_OVERLAPS.testName)
-            objName2 = splitString[3];
+        QString objName2 = splitString[3];
 
-        ObjectTree *objTree = document->getObjectTree();
-        QHash<int, QString> nameMap = document->getObjectTree()->getNameMap();
-        QHashIterator<int, QString> iter1(nameMap);
-        QHashIterator<int, QString> iter2(nameMap);
         while(iter1.hasNext()) {
             iter1.next();
             objTree->changeVisibilityState(iter1.key(), false);
@@ -825,10 +844,26 @@ void VerificationValidationWidget::visualizeOverlaps(int row, int column) {
             if(iter2.value() == objName1 || iter2.value() == objName2)
                 objTree->changeVisibilityState(iter2.key(), true);
         }
-        document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        document->getDisplayGrid()->forceRerenderAllDisplays();
-        document->getObjectTreeWidget()->refreshItemTextColors();
     }
+
+    else {
+        int idxLastSlash = objPath.lastIndexOf('/');
+        if(idxLastSlash == -1) return;
+        QString objName = objPath.mid(idxLastSlash + 1, objPath.size() - idxLastSlash - 1);
+        while(iter1.hasNext()) {
+            iter1.next();
+            objTree->changeVisibilityState(iter1.key(), false);
+        }
+        while(iter2.hasNext()) {
+            iter2.next();
+            if(iter2.value() == objName)
+                objTree->changeVisibilityState(iter2.key(), true);
+        }
+    }
+
+    document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    document->getDisplayGrid()->forceRerenderAllDisplays();
+    document->getObjectTreeWidget()->refreshItemTextColors();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
