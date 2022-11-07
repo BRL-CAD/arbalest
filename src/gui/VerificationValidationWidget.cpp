@@ -217,14 +217,6 @@ void VerificationValidationWidget::runTests() {
         popup("Failed to show modelID " + modelID);
         return;
     }
-
-    QString md5 = q->value(0).toString();
-    QString filePath = q->value(1).toString();
-    delete q;
-    QString dockableTitle = "Verification & Validation -- File Path: "+filePath+",    MD5: "+md5+",    Model ID: "+modelID;
-    QLabel *title = new QLabel(dockableTitle);
-    title->setObjectName("dockableHeader");
-    parentDockable->setTitleBarWidget(title);
 }
 
 void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
