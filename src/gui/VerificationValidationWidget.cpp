@@ -551,14 +551,13 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCMD()));
             vLayout->addSpacing(15);
 
-            std::vector<QLineEdit*> input_vec;
-            for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
-                if(itemToTestMap.at(test).second.ArgList[i].type == Arg::Type::Dynamic){
-                    input_vec.push_back(new QLineEdit(itemToTestMap.at(test).second.ArgList[i].defaultValue));
-                    formLayout->addRow(itemToTestMap.at(test).second.ArgList[i].argument, input_vec.back());
+            std::vector<Arg>* argList = &(itemToTestMap.at(test).second.ArgList);
+            std::vector<std::tuple<Arg*, QLineEdit*, QString>> inputTuples;
+            for(int i = 0; i < argList->size(); i++){
+                if(argList->at(i).type == Arg::Type::Dynamic){
+                    inputTuples.push_back(std::make_tuple(&argList->at(i), new QLineEdit(argList->at(i).defaultValue), DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue));
+                    formLayout->addRow(argList->at(i).argument, std::get<1>(inputTuples[inputTuples.size()-1]));
                     formLayout->setSpacing(10);
-                } else {
-                    input_vec.push_back(NULL);
                 }
             }
             
@@ -567,12 +566,12 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(setBtn);
             userInputDialog->setLayout(vLayout);
 
-            connect(setBtn, &QPushButton::clicked, [this, test, input_vec, testName](){
+            connect(setBtn, &QPushButton::clicked, [this, test, inputTuples, testName](){
                 bool isDefault = true;
-                for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size();  i++){
-                    if(itemToTestMap.at(test).second.ArgList[i].type == Arg::Type::Dynamic){
-                        itemToTestMap.at(test).second.ArgList[i].defaultValue = input_vec[i]->text();
-                        if (DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue != input_vec[i]->text())
+                for(auto const& [currentArg, currentInput, defaultVal] : inputTuples){
+                    if(currentArg->type == Arg::Type::Dynamic){
+                        currentArg->defaultValue = currentInput->text();
+                        if (defaultVal != currentInput->text())
                             isDefault = false;
                     }
                 }
