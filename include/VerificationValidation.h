@@ -135,20 +135,20 @@ namespace VerificationValidation {
 
     class DefaultTests {
     public:
-        const static VerificationValidation::Test MISMATCHED_DUP_IDS;
-        const static VerificationValidation::Test NO_DUPLICATE_ID;
-        const static VerificationValidation::Test NO_NULL_REGIONS;
-        const static VerificationValidation::Test NO_OVERLAPS;
-        const static VerificationValidation::Test NO_NESTED_REGIONS;
-        const static VerificationValidation::Test NO_EMPTY_COMBOS;
-        const static VerificationValidation::Test NO_SOLIDS_OUTSIDE_REGIONS;
-        const static VerificationValidation::Test ALL_BOTS_VOLUME_MODE;
-        const static VerificationValidation::Test NO_BOTS_LH_ORIENT; // TODO: this command can run faster if use unix
-        const static VerificationValidation::Test ALL_REGIONS_MAT;
-        const static VerificationValidation::Test ALL_REGIONS_LOS;
-        const static VerificationValidation::Test NO_MATRICES;
-        const static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
-        const static VerificationValidation::Test VALID_TITLE;
+        static VerificationValidation::Test MISMATCHED_DUP_IDS;
+        static VerificationValidation::Test NO_DUPLICATE_ID;
+        static VerificationValidation::Test NO_NULL_REGIONS;
+        static VerificationValidation::Test NO_OVERLAPS;
+        static VerificationValidation::Test NO_NESTED_REGIONS;
+        static VerificationValidation::Test NO_EMPTY_COMBOS;
+        static VerificationValidation::Test NO_SOLIDS_OUTSIDE_REGIONS;
+        static VerificationValidation::Test ALL_BOTS_VOLUME_MODE;
+        static VerificationValidation::Test NO_BOTS_LH_ORIENT; // TODO: this command can run faster if use unix
+        static VerificationValidation::Test ALL_REGIONS_MAT;
+        static VerificationValidation::Test ALL_REGIONS_LOS;
+        static VerificationValidation::Test NO_MATRICES;
+        static VerificationValidation::Test NO_INVALID_AIRCODE_REGIONS;
+        static VerificationValidation::Test VALID_TITLE;
         const static std::vector<VerificationValidation::Test*> allTests;
         const static std::map<QString, VerificationValidation::Test> nameToTestMap;
 
@@ -167,7 +167,7 @@ namespace VerificationValidation {
 
         static Result* title(const QString& cmd, const QString* terminalOutput, const Test& test);
         static Result* lc(const QString& cmd, const QString* terminalOutput, const QString& gFilePath);
-        static Result* gqa(const QString& cmd, const QString* terminalOutput);
+        static Result* gqa(const QString& cmd, const QString* terminalOutput, const Test& test);
         static void gqaSpecificTest(Result* r, const QString& currentLine, const Test* type);
 
         static bool catchUsageErrors(Result* r, const QString& currentLine);

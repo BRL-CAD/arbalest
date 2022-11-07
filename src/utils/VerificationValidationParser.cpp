@@ -165,20 +165,6 @@ bool Parser::searchDBNotFoundErrors(Result* r) {
     return false; 
 }
 
-void Parser::searchFinalDefense(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED ERROR", r->terminalOutput.mid(msgStart)});
-    }
-
-    msgStart = r->terminalOutput.indexOf(QRegExp("warning[: ]", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        r->resultCode = Result::Code::UNPARSEABLE;
-        r->issues.push_back({"UNEXPECTED WARNING", r->terminalOutput.mid(msgStart)});
-    }
-}
-
 Result* Parser::title(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
@@ -297,16 +283,16 @@ Result* Parser::lc(const QString& cmd, const QString* terminalOutput, const QStr
 	return r;
 }
 
-Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
+Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
-    if (QString::compare(DefaultTests::NO_NULL_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    if (DefaultTests::NO_NULL_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_OVERLAPS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_OVERLAPS == test)
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
     
     QStringList lines = r->terminalOutput.split('\n');

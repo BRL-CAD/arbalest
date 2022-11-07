@@ -103,7 +103,7 @@ public slots:
 
     void setStatusBarMessage(bool testRan, int currTest, int totalTests, int currObject, int totalObjects) {
         QString status;
-        status = ((testRan) ? "Finished" : "Started") + " running %1 / %2 tests for %3 / %4 objects";
+        status = QString((testRan) ? "Finished" : "Started") + " running %1 / %2 tests for %3 / %4 objects";
         statusBar->showMessage(status.arg(currTest).arg(totalTests).arg(currObject).arg(totalObjects), statusBarShortMessageDuration);
         qApp->processEvents();
     }
