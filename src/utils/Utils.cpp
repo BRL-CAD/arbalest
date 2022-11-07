@@ -195,3 +195,23 @@ struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
     ged_exec(dbp, tmp.size(), cmdList);
     return dbp;
 }
+
+QString* generateUUID(const QString& filepath) {
+    QString* ret = nullptr;
+    if (!bu_file_exists(filepath.toStdString().c_str(), NULL)) return ret;
+
+    uint8_t uuid_int[16] = {0};
+    uint8_t seed[16] = {1,2,3,4,5,6,7,8,0,0,0,0,0,0,0,0}; // arbitrary seed
+    char uuid_str[37] = {0};
+
+    struct bu_mapped_file *mf = bu_open_mapped_file(filepath.toStdString().c_str(), ".atr");
+
+    bu_uuid_create(uuid_int, mf->buflen, (uint8_t*) mf->buf, seed);
+    bu_close_mapped_file(mf);
+    bu_uuid_encode(uuid_int, (uint8_t*) uuid_str);
+
+    if (!mf) return ret;
+
+    ret = new QString(uuid_str);
+    return ret;
+}
