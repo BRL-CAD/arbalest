@@ -51,6 +51,10 @@
     <file>icons/error.png</file>
     <file>icons/unparseable.png</file>
     <file>icons/editIcon.png</file>
+    <file>icons/collapse.png</file>
+    <file>icons/expand.png</file>
+    <file>icons/edit.png</file>
+    <file>icons/edit_default.png</file>
   </qresource>
 
 </RCC>

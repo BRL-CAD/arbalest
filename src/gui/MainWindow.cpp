@@ -591,7 +591,7 @@ void MainWindow::prepareUi() {
                 objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
-        objectVerificationValidationDockable->setVisible(true);
+        // objectVerificationValidationDockable->setVisible(false);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
     });
@@ -660,7 +660,6 @@ void MainWindow::prepareUi() {
     statusBarPathLabel = new QLabel("No document open");
     statusBarPathLabel->setObjectName("statusBarPathLabel");
     statusBar->addWidget(statusBarPathLabel);
-	
 
     // Document area --------------------------------------------------------------------------------------------------------
     documentArea = new QTabWidget(this);
@@ -800,7 +799,7 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
-    connect(this, qOverload<int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<int, int>(&MainWindow::setStatusBarMessage));
+    connect(this, qOverload<bool, int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<bool, int, int>(&MainWindow::setStatusBarMessage));
     connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
 
     // Toolbox

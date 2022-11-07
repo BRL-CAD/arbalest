@@ -55,6 +55,7 @@ private slots:
     void visualizeOverlaps();
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void resultTableChangeSize();
 
 private:
     MainWindow *mainWindow;
@@ -79,6 +80,8 @@ private:
     QStatusBar* statusBar;
     QClipboard* clipboard;
     int currentResultRow = 1;
+    bool minBtn_toggle;
+    QToolButton* minBtn;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;

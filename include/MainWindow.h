@@ -100,8 +100,12 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
-    void setStatusBarMessage(int currTest, int totalTests) {
-        QString status = "Finished running %1 / %2 tests";
+    void setStatusBarMessage(bool testRan, int currTest, int totalTests) {
+        QString status;
+        if(testRan)
+            status = "Finished running %1 / %2 tests";
+        else
+            status = "Started running %1 / %2 tests";
         statusBar->showMessage(status.arg(currTest).arg(totalTests), statusBarShortMessageDuration);
         qApp->processEvents();
     }
@@ -111,7 +115,7 @@ public slots:
     }
 
 signals:
-    void changeStatusBarMessage(int currTest, int totalTests);
+    void changeStatusBarMessage(bool testRan, int currTest, int totalTests);
     void changeStatusBarMessage(QString msg);
 };
 #endif // MAINWINDOW_H
