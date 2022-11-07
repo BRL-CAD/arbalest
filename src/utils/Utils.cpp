@@ -191,7 +191,7 @@ struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
         return nullptr;
     }
 
-    dbp = ged_open("db", gFilePath.toStdString().c_str(), 1);
+    dbp = ged_open("db", gFilePath.toStdString().c_str(), 0);
     ged_exec(dbp, tmp.size(), cmdList);
     return dbp;
 }

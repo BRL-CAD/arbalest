@@ -23,22 +23,6 @@ bool Parser::catchUsageErrors(Result* r, const QString& currentLine) {
     return false;
 }
 
-bool Parser::searchDBNotFoundErrors(Result* r) {
-    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
-    if (msgStart != -1) {
-        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
-        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
-        
-        int objNameSz = objNameEndIdx - objNameStartIdx;
-        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
-        r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
-
-        return true;
-    }
-    return false; 
-}
-
 void Parser::finalDefense(Result* r) {
     int msgStart = r->terminalOutput.indexOf(QRegExp("error[: ]", Qt::CaseInsensitive));
     if (msgStart != -1) {
@@ -53,38 +37,38 @@ void Parser::finalDefense(Result* r) {
     }
 }
 
-Result* Parser::search(const QString& cmd, const QString* terminalOutput) {
+Result* Parser::search(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
     // default checks
-    if (QString::compare(DefaultTests::NO_NESTED_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    if (DefaultTests::NO_NESTED_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_NESTED_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_EMPTY_COMBOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_EMPTY_COMBOS == test)
         type = (Test*) &(DefaultTests::NO_EMPTY_COMBOS);
 
-    else if (QString::compare(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
 
-    else if (QString::compare(DefaultTests::ALL_BOTS_VOLUME_MODE.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_BOTS_VOLUME_MODE == test)
         type = (Test*) &(DefaultTests::ALL_BOTS_VOLUME_MODE);
 
-    else if (QString::compare(DefaultTests::NO_BOTS_LH_ORIENT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_BOTS_LH_ORIENT == test)
         type = (Test*) &(DefaultTests::NO_BOTS_LH_ORIENT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_MAT.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_REGIONS_MAT == test)
         type = (Test*) &(DefaultTests::ALL_REGIONS_MAT);
 
-    else if (QString::compare(DefaultTests::ALL_REGIONS_LOS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::ALL_REGIONS_LOS == test)
         type = (Test*) &(DefaultTests::ALL_REGIONS_LOS);
 
-    else if (QString::compare(DefaultTests::NO_MATRICES.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_MATRICES == test)
         type = (Test*) &(DefaultTests::NO_MATRICES);
 
-    else if (QString::compare(DefaultTests::NO_INVALID_AIRCODE_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_INVALID_AIRCODE_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)
@@ -155,12 +139,38 @@ void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Tes
     }
 }
 
-Result* Parser::title(const QString& cmd, const QString* terminalOutput) {
+bool Parser::searchCatchUsageErrors(Result* r, const QString& currentLine) {
+    int msgStart = currentLine.indexOf(QRegExp("usage:", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({"SYNTAX ERROR", currentLine.mid(msgStart)});
+        return true;
+    }
+    return false;
+}
+
+bool Parser::searchDBNotFoundErrors(Result* r) {
+    int msgStart = r->terminalOutput.indexOf(QRegExp("Search path error:\n input: '.*' normalized: '.* not found in database!'", Qt::CaseInsensitive));
+    if (msgStart != -1) {
+        int objNameStartIdx = msgStart + 28; // skip over "Search path error:\n input: '"
+        int objNameEndIdx = r->terminalOutput.indexOf("'", objNameStartIdx);
+        
+        int objNameSz = objNameEndIdx - objNameStartIdx;
+        QString objName = r->terminalOutput.mid(objNameStartIdx, objNameSz);
+        r->resultCode = Result::Code::FAILED;
+        r->issues.push_back({objName, r->terminalOutput.mid(msgStart)});
+
+        return true;
+    }
+    return false; 
+}
+
+Result* Parser::title(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
 
-    QStringList cmdList = cmd.split(" ");
+    QStringList cmdList = cmd.split(" ", Qt::SkipEmptyParts);
     if (cmdList.size() > 1) {
         r->resultCode = Result::Code::UNPARSEABLE;
         r->issues.push_back({"SYNTAX ERROR", "title cannot have any arguments for testing (implies setting database name)"});
@@ -273,16 +283,16 @@ Result* Parser::lc(const QString& cmd, const QString* terminalOutput, const QStr
 	return r;
 }
 
-Result* Parser::gqa(const QString& cmd, const QString* terminalOutput) {
+Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Test& test) {
     Result* r = new Result;
     r->terminalOutput = terminalOutput->trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
-    if (QString::compare(DefaultTests::NO_NULL_REGIONS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    if (DefaultTests::NO_NULL_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (QString::compare(DefaultTests::NO_OVERLAPS.getCmdWithArgs(), cmd, Qt::CaseInsensitive) == 0)
+    else if (DefaultTests::NO_OVERLAPS == test)
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
     
     QStringList lines = r->terminalOutput.split('\n');
