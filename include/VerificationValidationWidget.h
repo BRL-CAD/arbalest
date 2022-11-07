@@ -63,6 +63,7 @@ private slots:
     void createSuite();
     void removeSuites();
     void addArgForm();
+    void isVarClicked(int state);
 
 private:
     MainWindow *mainWindow;

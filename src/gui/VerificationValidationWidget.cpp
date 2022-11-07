@@ -626,7 +626,7 @@ void VerificationValidationWidget::createTest() {
             continue;
         }
         bool isVariable = false;
-        if(isVarList[i]->checkState() || !varInputList[i]->text().simplified().isEmpty()){
+        if(isVarList[i]->checkState()){
             isVariable = true;
         }
         q->prepare("INSERT INTO TestArg (testID, argIdx, arg, isVarArg, defaultVal) VALUES (:testID, :argIdx, :arg, :isVarArg, :defaultVal)");
@@ -642,6 +642,20 @@ void VerificationValidationWidget::createTest() {
     setupUI();
 }
 
+void VerificationValidationWidget::isVarClicked(int state) {
+    QObject* obj = sender();
+    for(int i = 0; i < isVarList.size(); i++){
+        if(obj == isVarList[i]){
+            if(state == 2){
+                varInputList[i]->setDisabled(false);
+            }
+            if(state == 0){
+                varInputList[i]->setDisabled(true);
+            }
+        }
+    }
+}
+
 void VerificationValidationWidget::addArgForm() {
     int n = argInputList.size()+1;
     QString boxTitle = "Argument Input %1";
@@ -653,7 +667,7 @@ void VerificationValidationWidget::addArgForm() {
     argForm->addRow("Has variable: ", isVar);
     QLineEdit* varInput = new QLineEdit();
     argForm->addRow("Variable: ", varInput);
-
+    varInput->setDisabled(true);
     argInputList.push_back(argInput);
     isVarList.push_back(isVar);
     varInputList.push_back(varInput);
@@ -662,6 +676,8 @@ void VerificationValidationWidget::addArgForm() {
     argField->setMinimumWidth(250);
     argLayout->addWidget(argField);
     argLayout->addSpacing(10);
+
+    connect(isVar, SIGNAL(stateChanged(int)), this, SLOT(isVarClicked(int)));
 }
 
 void VerificationValidationWidget::showNewTestDialog() {
