@@ -49,10 +49,10 @@ private slots:
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
     void testListSelection(QListWidgetItem*);
-    void copyToClipboard(int row, int column);
+    void copyToClipboard();
     void setupResultMenu(int row, int column);
     void setupDetailedResult(int row, int column);
-    void visualizeOverlaps(int row, int column);
+    void visualizeOverlaps();
     void searchTests(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
 
@@ -78,6 +78,7 @@ private:
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
     QClipboard* clipboard;
+    int currentResultRow = 1;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;

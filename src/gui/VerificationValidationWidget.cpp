@@ -1,6 +1,7 @@
 #include "VerificationValidationWidget.h"
 #include <Document.h>
 #include "MainWindow.h"
+#include <QAction>
 using Result = VerificationValidation::Result;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
@@ -686,24 +687,20 @@ void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
     QHBoxWidget::resizeEvent(event);
 }
 
-void VerificationValidationWidget::copyToClipboard(int row, int column) {
+void VerificationValidationWidget::copyToClipboard() {
     clipboard = QApplication::clipboard();
-    QTableWidgetItem *objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+    QTableWidgetItem *objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
     QString objPath = (objPathItem) ? objPathItem->text() : "";
     clipboard->setText(objPath);
 }
 
 void VerificationValidationWidget::setupResultMenu(int row, int column) {
+    currentResultRow = row;
     QMenu *resultMenu = new QMenu();
-    QAction *visualizeObjects = new QAction("Visualize Objects");
-    QAction *copyPath = new QAction("Copy Path");
-    resultMenu->addAction(visualizeObjects);
-    resultMenu->addAction(copyPath);
+    resultMenu->addAction("Visualize Objects", this, SLOT(visualizeOverlaps()));
+    resultMenu->addAction("Copy Path", this, SLOT(copyToClipboard()));
 
     resultMenu->exec(QCursor::pos());
-
-    //connect();
-    //connect();
 }
 
 void VerificationValidationWidget::setupDetailedResult(int row, int column) {
@@ -792,12 +789,10 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     detail_dialog->exec();
 }
 
-void VerificationValidationWidget::visualizeOverlaps(int row, int column) {
-    QString resultCode;
-    
-    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
-    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
-    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+void VerificationValidationWidget::visualizeOverlaps() {
+    QTableWidgetItem* testNameItem = resultTable->item(currentResultRow, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(currentResultRow, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
