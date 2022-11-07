@@ -335,6 +335,27 @@ void VerificationValidationWidget::searchTests_rm(const QString &input)  {
     }
 }
 
+void VerificationValidationWidget::searchTests_TS(const QString &input)  {
+    // Hide category when search
+    if(input.isEmpty()){
+        QListWidgetItem* item = 0;
+        for (int i = 0; i < newTSList->count(); i++) {
+            item = newTSList->item(i);
+            item->setHidden(false);
+        }
+    } else {
+        QList<QListWidgetItem *> tests = newTSList->findItems(input, Qt::MatchContains);
+        QListWidgetItem* item = 0;
+        for (int i = 0; i < newTSList->count(); i++) {
+            item = newTSList->item(i);
+            if(!tests.contains(item) || item->toolTip() == "Category")
+                item->setHidden(true);
+            else
+                item->setHidden(false);
+        }
+    }
+}
+
 void VerificationValidationWidget::updateSuiteSelectAll(QListWidgetItem* sa_option) {
     QListWidgetItem* item = 0;
     for (int i = 0; i < suiteList->count(); i++) {
@@ -464,11 +485,6 @@ void VerificationValidationWidget::testListSelection(QListWidgetItem* test_click
     delete q2;
 }
 
-void VerificationValidationWidget::showNewTestDialog() {
-    QDialog* newTestDialog = new QDialog();
-    newTestDialog->exec();
-}
-
 void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
     // Get test list from db
     QSqlDatabase db = getDatabase();
@@ -535,8 +551,13 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
    	listWidget->setMinimumWidth(listWidget->sizeHintForColumn(0)+40);
 }
 
-void VerificationValidationWidget::removeTests(){
+void VerificationValidationWidget::removeTests() {
     
+}
+
+void VerificationValidationWidget::showNewTestDialog() {
+    QDialog* newTestDialog = new QDialog();
+    newTestDialog->exec();
 }
 
 void VerificationValidationWidget::showRemoveTestDialog(){
@@ -565,13 +586,80 @@ void VerificationValidationWidget::showRemoveTestDialog(){
     rmTestDialog->exec();
 }
 
+void VerificationValidationWidget::createSuite() {
+    if(suiteNameBox->text().isEmpty()){
+        popup("[Verification & Validation]\nERROR: cannot create a test suite with empty name");
+        showNewTestSuiteDialog();
+        return;
+    }
+
+    QString suiteName = suiteNameBox->text();
+
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare("SELECT id FROM TestSuites WHERE suiteName = ?");
+    q->addBindValue(suiteName);
+    q->exec();
+    if(q->next()){
+        popup("[Verification & Validation]\nERROR: cannot create a test suite with duplicate name");
+        showNewTestSuiteDialog();
+        return;
+    }
+
+    q->prepare("INSERT OR IGNORE INTO TestSuites VALUES (NULL, ?)");
+    q->addBindValue(suiteName);
+    q->exec();
+    QString suiteID = q->lastInsertId().toString();
+
+    for(int i = 0; i < newTSList->cout(); i++){
+        QListWidgetItem* item = newTSList->item(i);
+        if(item->checkState()){
+            
+        }
+    }
+}
+
 void VerificationValidationWidget::showNewTestSuiteDialog() {
     QDialog* newTSDialog = new QDialog();
+    QVBoxLayout* v_layout = new QVBoxLayout();
+
+    QHBoxLayout* h_layout = new QHBoxLayout();
+    suiteNameBox = new QLineEdit();
+    h_layout->addWidget(new QLabel("Test Suite Name: "));
+    h_layout->addWidget(suiteNameBox);
+    v_layout->addLayout(h_layout);
+
+    v_layout->addSpacing(10);
+
+    QVBoxLayout* v_layout1 = new QVBoxLayout();
+    QGroupBox* groupbox1 = new QGroupBox("Test List");
+    QHBoxLayout* h_layout1 = new QHBoxLayout();
+    QLineEdit* searchBox = new QLineEdit();
+    h_layout1->addWidget(new QLabel("Search: "));
+    h_layout1->addWidget(searchBox);
+    v_layout1->addLayout(h_layout1);
+
+    newTSList = new QListWidget();
+    addItemFromTest(newTSList);
+
+    v_layout1->addWidget(newTSList);
+    groupbox1->setLayout(v_layout1);
+    v_layout->addWidget(groupbox1);
+    QDialogButtonBox* buttonOptions = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttonOptions->button(QDialogButtonBox::Ok)->setText("Create");
+    v_layout->addWidget(buttonOptions);
+    newTSDialog->setLayout(v_layout);
+    newTSDialog->setModal(true);
+    newTSDialog->setWindowTitle("Select Tests To Remove");
+    connect(searchBox, SIGNAL(textEdited(const QString &)), this, SLOT(searchTests_TS(const QString &)));
+    connect(buttonOptions, &QDialogButtonBox::accepted, newTSDialog, &QDialog::accept);
+    connect(buttonOptions, SIGNAL(accepted()), this, SLOT(createSuite()));
+    connect(buttonOptions, &QDialogButtonBox::rejected, newTSDialog, &QDialog::reject);
+
     newTSDialog->exec();
 }
 
 void VerificationValidationWidget::showRemoveTestSuiteDialog() {
-    QDialog* rmTSDialgo = new QDialog();
+    QDialog* rmTSDialog = new QDialog();
     rmTSDialog->exec();
 }
 
