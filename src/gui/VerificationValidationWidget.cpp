@@ -210,7 +210,7 @@ void VerificationValidationWidget::runTests() {
         }
     }
 
-    q->prepare("SELECT md5Checksum, filePath FROM Model WHERE id = ?");
+    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
     q->addBindValue(modelID);
     dbExec(q);
     if (!q->next()) {
