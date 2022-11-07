@@ -58,8 +58,10 @@ private slots:
     void searchTests_rm(const QString &input);
     void searchTests_TS(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void createTest();
     void removeTests();
     void createSuite();
+    void removeSuites();
 
 private:
     MainWindow *mainWindow;
@@ -86,6 +88,7 @@ private:
     // Test and test suite create remove
     QListWidget* rmTestList;
     QListWidget* newTSList;
+    QListWidget* rmTSList;
     QLineEdit* suiteNameBox;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
