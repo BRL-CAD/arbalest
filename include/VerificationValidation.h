@@ -63,7 +63,7 @@ namespace VerificationValidation {
             for (int i = 0; i < lhsArgList.size(); i++) {
                 if (lhsArgList[i].type == rhsArgList[i].type && (lhsArgList[i].type == Arg::Type::ObjectName || lhsArgList[i].type == Arg::Type::ObjectNone || lhsArgList[i].type == Arg::Type::ObjectPath))
                     continue;
-                if (lhsArgList[i].argument != rhsArgList[i].argument)
+                if (lhsArgList[i].argument != rhsArgList[i].argument || lhsArgList[i].defaultValue != rhsArgList[i].defaultValue)
                     return false;
             }
             return true;
