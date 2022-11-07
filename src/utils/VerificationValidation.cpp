@@ -9,7 +9,7 @@ using DefaultTests = VerificationValidation::DefaultTests;
 
 Test DefaultTests::MISMATCHED_DUP_IDS          = Test("No mis-matched duplicate IDs", {"File"}, {Arg("lc"), Arg("-m"), Arg("$OBJECT", NULL, Arg::Type::ObjectName)});
 Test DefaultTests::NO_DUPLICATE_ID             = Test("Duplicate ID check", {"File"}, {Arg("lc"), Arg("-d"), Arg("$OBJECT", NULL, Arg::Type::ObjectName)});
-Test DefaultTests::NO_NULL_REGIONS             = Test("No null region", {"General"}, {Arg("gqa"), Arg("-Ao"), Arg("-g", "4mm,4mm"), Arg("-t", "0.3mm"), Arg("$OBJECT", NULL, Arg::Type::ObjectName)});
+Test DefaultTests::NO_NULL_REGIONS             = Test("No null region", {"General"}, {Arg("gqa"), Arg("-Ao"), Arg("-g","4mm,4mm"), Arg("-t", "0.3mm"), Arg("$OBJECT", NULL, Arg::Type::ObjectName)});
 Test DefaultTests::NO_OVERLAPS                 = Test("Overlaps cleaned to gridsize with tolerance", {"General"}, {Arg("gqa"), Arg("-Ao"), Arg("-g", "32mm,4mm"), Arg("-t", "0.3mm"), Arg("$OBJECT", NULL, Arg::Type::ObjectName)});
 Test DefaultTests::NO_NESTED_REGIONS           = Test("No nested regions", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-type region -below -type region")});
 Test DefaultTests::NO_EMPTY_COMBOS             = Test("No empty combos", {"General"}, {Arg("search"), Arg("/$OBJECT", NULL, Arg::Type::ObjectPath), Arg("-nnodes 0")});

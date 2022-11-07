@@ -155,7 +155,7 @@ void VerificationValidationWidget::runTests() {
                         q->prepare("UPDATE TestArg SET defaultVal = :newVal WHERE testID = :testId AND argIdx = :argIdx");
                         q->bindValue(":newVal", newArgs[j].defaultValue);
                         q->bindValue(":testId", testID);
-                        q->bindValue(":argIdx", j+1);
+                        q->bindValue(":argIdx", newArgs[j].argIdx);
                         q->exec();
                     }
                 }
@@ -551,12 +551,12 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             vLayout->addWidget(new QLabel("Test Command: "+ itemToTestMap.at(test).second.getCMD()));
             vLayout->addSpacing(15);
 
-            std::vector<Arg>* argList = &(itemToTestMap.at(test).second.ArgList);
-            std::vector<std::tuple<Arg*, QLineEdit*, QString>> inputTuples;
-            for(int i = 0; i < argList->size(); i++){
-                if(argList->at(i).type == Arg::Type::Dynamic){
-                    inputTuples.push_back(std::make_tuple(&argList->at(i), new QLineEdit(argList->at(i).defaultValue), DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue));
-                    formLayout->addRow(argList->at(i).argument, std::get<1>(inputTuples[inputTuples.size()-1]));
+            std::vector<std::tuple<Arg*, QString, QString>> inputTuples;
+            for(int i = 0; i < itemToTestMap.at(test).second.ArgList.size(); i++){
+                if(itemToTestMap.at(test).second.ArgList.at(i).type == Arg::Type::Dynamic){
+                    QLineEdit* lineEdit = new QLineEdit(itemToTestMap.at(test).second.ArgList.at(i).defaultValue);
+                    inputTuples.push_back(std::make_tuple(&itemToTestMap.at(test).second.ArgList[i], lineEdit->text(), DefaultTests::nameToTestMap.at(testName).ArgList[i].defaultValue));
+                    formLayout->addRow(itemToTestMap.at(test).second.ArgList.at(i).argument, lineEdit);
                     formLayout->setSpacing(10);
                 }
             }
@@ -568,10 +568,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
             connect(setBtn, &QPushButton::clicked, [this, test, inputTuples, testName](){
                 bool isDefault = true;
-                for(auto const& [currentArg, currentInput, defaultVal] : inputTuples){
+                for(const auto& [currentArg, currentInput, defaultVal] : inputTuples){
                     if(currentArg->type == Arg::Type::Dynamic){
-                        currentArg->defaultValue = currentInput->text();
-                        if (defaultVal != currentInput->text())
+                        currentArg->defaultValue = currentInput;
+                        if (defaultVal != currentInput)
                             isDefault = false;
                     }
                 }
@@ -623,22 +623,26 @@ void VerificationValidationWidget::setupUI() {
         QListWidgetItem* item = new QListWidgetItem(testNameList[i]);
         int id = testIdList[i].toInt();
 
-        std::vector<VerificationValidation::Arg> ArgList;
+        std::vector<VerificationValidation::Arg> argList;
         query.prepare("Select arg, defaultVal, argType FROM TestArg Where testID = :id ORDER BY argIdx");
         query.bindValue(":id", id);
         query.exec();
 
         bool addedObject = false;
         while(query.next()){
+            QString arg = query.value(0).toString();
+            QString defaultVal = query.value(1).toString();
             Arg::Type type = (Arg::Type) query.value(2).toInt();
             if (type == Arg::Type::ObjectName || type == Arg::Type::ObjectPath) {
                 if (addedObject) continue;
-                ArgList.push_back(VerificationValidation::Arg((type == Arg::Type::ObjectName) ? "$OBJECT" : "/$OBJECT", query.value(1).toString(), type));
+                argList.push_back(VerificationValidation::Arg(arg, defaultVal, type));
                 addedObject = true;
             }
-            else ArgList.push_back(VerificationValidation::Arg(query.value(0).toString(), query.value(1).toString(), type));
+            else {
+                argList.push_back(VerificationValidation::Arg(arg, defaultVal, type));
+            }
         }
-        Test t(testNameList[i], {}, ArgList);
+        Test t(testNameList[i], {}, argList);
 
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
@@ -823,20 +827,26 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     QString object = resultTable->item(row, OBJECT_COLUMN)->text();
     QString testCommand = currentTest.getCMD(object);
 
+    QString objectPlaceholder = object;
+    for (Arg& a : currentTest.ArgList) {
+        if (a.type == Arg::Type::ObjectName) {
+            objectPlaceholder = objectPlaceholder.split("/").last();
+            break;
+        }
+        else if (a.type == Arg::Type::ObjectNone) {
+            objectPlaceholder = "";
+            break;
+        }
+    }
+
     QSqlQuery* q2 = new QSqlQuery(getDatabase());
     q2->prepare("SELECT TestResults.terminalOutput, TestResults.resultCode FROM TestResults INNER JOIN TestArg ON TestResults.objectArgID = TestArg.id WHERE TestResults.testID = ? AND (TestArg.argType = ? OR TestArg.argType = ? OR TestArg.argType = ?) AND TestArg.arg = ?");
     q2->addBindValue(testID);
     q2->addBindValue(Arg::Type::ObjectName);
     q2->addBindValue(Arg::Type::ObjectNone);
-    q2->addBindValue(Arg::Type::ObjectPath);
-    
-    QString objectPlaceholder = object;
-    Arg::Type type = currentTest.getObjArgType();
-    if (type == Arg::Type::ObjectName)
-        objectPlaceholder = objectPlaceholder.split("/").last();
-    else if (type == Arg::Type::ObjectNone)
-        objectPlaceholder = "";
+    q2->addBindValue(Arg::Type::ObjectPath);    
     q2->addBindValue(objectPlaceholder);
+
     dbExec(q2);
     if (!q2->next()) {
         popup("Failed to show testID: " + testID);

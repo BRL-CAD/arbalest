@@ -45,10 +45,10 @@ namespace VerificationValidation {
         std::vector<Arg> ArgList;
 
         Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList) :
-        testName(testName), suiteNames(suiteNames), ArgList(ArgList), 
+        testName(testName), suiteNames(suiteNames), ArgList(ArgList),
         category((ArgList.size()) ? ArgList[0].argument : "NULL")
         {
-            for (int i = 0; i < ArgList.size(); i++)
+            for (int i = 0; i < this->ArgList.size(); i++)
                 this->ArgList[i].argIdx = i;
         }
 
