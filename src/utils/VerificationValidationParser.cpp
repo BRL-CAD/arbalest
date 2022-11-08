@@ -289,10 +289,10 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Tes
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
-    if (DefaultTests::NO_NULL_REGIONS.isSameType(test))
+    if (DefaultTests::NO_NULL_REGIONS == test)
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (DefaultTests::NO_OVERLAPS.isSameType(test))
+    else if (DefaultTests::NO_OVERLAPS == test)
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
     
     QStringList lines = r->terminalOutput.split('\n');
