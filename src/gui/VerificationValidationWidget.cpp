@@ -141,11 +141,7 @@ void VerificationValidationWidget::runTests() {
             q->addBindValue(testID);
             dbExec(q);
 
-            if (!q->next()) { 
-                //std::cout << "bad if here" << std::endl;
-                continue; 
-            }
-            //std::cout << "good" << std::endl;
+            if (!q->next()) continue;
 
             // run tests
             QString objectArgID = q->value(0).toString();
@@ -744,6 +740,7 @@ void VerificationValidationWidget::createTest() {
     q->bindValue(":argType", Arg::Type::ObjectName);
     dbExec(q);
 
+
     setupUI();
 }
 
@@ -1171,76 +1168,6 @@ void VerificationValidationWidget::setupUI() {
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
     addItemFromTest(testList);
-    query.exec("Select id, testName, category from Tests ORDER BY category ASC");
-
-    QStringList testIdList;
-    QStringList testNameList;
-    QStringList categoryList;
-
-    while(query.next()){
-        testIdList << query.value(0).toString();
-    	testNameList << query.value(1).toString();
-        categoryList << query.value(2).toString();
-    }
-
-    // Creat test widget item
-    for (int i = 0; i < testNameList.size(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(testNameList[i]);
-        int id = testIdList[i].toInt();
-
-        std::vector<VerificationValidation::Arg> argList;
-        query.prepare("Select arg, defaultVal, argType FROM TestArg Where testID = :id ORDER BY argIdx");
-        query.bindValue(":id", id);
-        query.exec();
-
-        bool addedObject = false;
-        while(query.next()){
-            QString arg = query.value(0).toString();
-            QString defaultVal = query.value(1).toString();
-            Arg::Type type = (Arg::Type) query.value(2).toInt();
-            if (type == Arg::Type::ObjectName || type == Arg::Type::ObjectPath) {
-                if (addedObject) continue;
-                argList.push_back(VerificationValidation::Arg(arg, defaultVal, type));
-                addedObject = true;
-            }
-            else {
-                argList.push_back(VerificationValidation::Arg(arg, defaultVal, type));
-            }
-        }
-        Test t(testNameList[i], {}, argList);
-
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
-        if(t.hasVarArgs()) {
-            item->setText(item->text()+" (default)");
-            item->setIcon(QIcon(":/icons/edit_default.png"));
-        }
-
-        itemToTestMap.insert(make_pair(item, make_pair(id, t)));
-        idToItemMap.insert(make_pair(id, item));
-        item->setToolTip(itemToTestMap.at(item).second.getCMD());
-        testList->addItem(item);
-    }
-
-    // Add test categories in test lists
-    int offset = 0;
-    for (int i = 0; i < categoryList.size(); i++) {
-        QList<QListWidgetItem *> items = testList->findItems(categoryList[i], Qt::MatchExactly);
-        if (items.size() == 0) {
-            QListWidgetItem* item = new QListWidgetItem(categoryList[i]);
-            item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
-            item->setToolTip("Category");
-            QFont itemFont = item->font();
-            itemFont.setWeight(QFont::Bold);
-            item->setFont(itemFont);
-            testList->insertItem(i+offset, item);
-            offset += 1;
-        }
-    }
-
-    // Tests checklist add to dialog
-   	testList->setMinimumWidth(testList->sizeHintForColumn(0)+40);
 
     // Get suite list from db
     query.exec("Select suiteName from TestSuites ORDER by id ASC");
