@@ -59,7 +59,7 @@ private slots:
     void testListSelection(QListWidgetItem*);
     void copyToClipboard();
     void setupResultMenu(int row, int column);
-    void setupDetailedResult(int row, int column);
+    void setupDetailedResult();
     void visualizeOverlaps();
     void searchTests_run(const QString &input);
     void searchTests_rm(const QString &input);
