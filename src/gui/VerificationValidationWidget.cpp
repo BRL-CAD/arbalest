@@ -679,7 +679,7 @@ void VerificationValidationWidget::createTest() {
     }
     QString testCmd = testCmdInput->text();
 
-    QString testCategory = "";
+    QString testCategory = "no category";
     if(!testCategoryInput->text().simplified().isEmpty()){
         testCategory = testCategoryInput->text();
     }
@@ -708,6 +708,14 @@ void VerificationValidationWidget::createTest() {
             dbExec(q);
         }
     }
+
+    // insert cmd into arglist
+    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType) VALUES (:testID, :argIdx, :arg, :argType)");
+    q->bindValue(":testID", testID);
+    q->bindValue(":argIdx", 0);
+    q->bindValue(":arg", testCmd);
+    q->bindValue(":argType", Arg::Type::Static);
+    dbExec(q);
 
     int argIdx = 1;
     for(int i = 0; i < argInputList.size(); i++){

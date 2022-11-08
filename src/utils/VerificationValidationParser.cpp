@@ -44,31 +44,31 @@ Result* Parser::search(const QString& cmd, const QString* terminalOutput, const 
     Test* type = nullptr;
 
     // default checks
-    if (DefaultTests::NO_NESTED_REGIONS == test)
+    if (DefaultTests::NO_NESTED_REGIONS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_NESTED_REGIONS);
     
-    else if (DefaultTests::NO_EMPTY_COMBOS == test)
+    else if (DefaultTests::NO_EMPTY_COMBOS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_EMPTY_COMBOS);
 
-    else if (DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS == test)
+    else if (DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_SOLIDS_OUTSIDE_REGIONS);
 
-    else if (DefaultTests::ALL_BOTS_VOLUME_MODE == test)
+    else if (DefaultTests::ALL_BOTS_VOLUME_MODE.isSameType(test))
         type = (Test*) &(DefaultTests::ALL_BOTS_VOLUME_MODE);
 
-    else if (DefaultTests::NO_BOTS_LH_ORIENT == test)
+    else if (DefaultTests::NO_BOTS_LH_ORIENT.isSameType(test))
         type = (Test*) &(DefaultTests::NO_BOTS_LH_ORIENT);
 
-    else if (DefaultTests::ALL_REGIONS_MAT == test)
+    else if (DefaultTests::ALL_REGIONS_MAT.isSameType(test))
         type = (Test*) &(DefaultTests::ALL_REGIONS_MAT);
 
-    else if (DefaultTests::ALL_REGIONS_LOS == test)
+    else if (DefaultTests::ALL_REGIONS_LOS.isSameType(test))
         type = (Test*) &(DefaultTests::ALL_REGIONS_LOS);
 
-    else if (DefaultTests::NO_MATRICES == test)
+    else if (DefaultTests::NO_MATRICES.isSameType(test))
         type = (Test*) &(DefaultTests::NO_MATRICES);
 
-    else if (DefaultTests::NO_INVALID_AIRCODE_REGIONS == test)
+    else if (DefaultTests::NO_INVALID_AIRCODE_REGIONS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_INVALID_AIRCODE_REGIONS);
 
     // search for DB errors (if found, return)
@@ -289,10 +289,10 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Tes
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
-    if (DefaultTests::NO_NULL_REGIONS == test)
+    if (DefaultTests::NO_NULL_REGIONS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (DefaultTests::NO_OVERLAPS == test)
+    else if (DefaultTests::NO_OVERLAPS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
     
     QStringList lines = r->terminalOutput.split('\n');
