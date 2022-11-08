@@ -15,11 +15,14 @@
 #include <QHBoxWidget.h>
 #include "VerificationValidation.h"
 #include "Utils.h"
+#include "VerificationValidation.h"
 
 #define RESULT_CODE_COLUMN 0
 #define TEST_NAME_COLUMN 1
 #define DESCRIPTION_COLUMN 2
 #define OBJPATH_COLUMN 3
+#define OBJECT_COLUMN 4
+#define TEST_RESULT_ID_COLUMN 5
 
 #define NO_SELECTION -1
 #define OPEN 0
@@ -29,6 +32,8 @@
 class MainWindow;
 class Document;
 class Dockable;
+using Arg = VerificationValidation::Arg;
+using Test = VerificationValidation::Test;
 
 class VerificationValidationWidget : public QHBoxWidget
 {
@@ -64,6 +69,7 @@ private slots:
     void removeSuites();
     void addArgForm();
     void isVarClicked(int state);
+    void resultTableChangeSize();
 
 private:
     MainWindow *mainWindow;
@@ -101,6 +107,8 @@ private:
     QListWidget* newTSList;
     QListWidget* rmTSList;
     QLineEdit* suiteNameBox;
+    bool minBtn_toggle;
+    QToolButton* minBtn;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;

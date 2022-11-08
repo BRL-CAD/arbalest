@@ -591,6 +591,11 @@ void MainWindow::prepareUi() {
                 objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
+        QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+        if (!selectedObjects.size()) { 
+            popup("Cannot run tests with no visible objects.");
+            return;
+        }
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
@@ -695,7 +700,6 @@ void MainWindow::prepareUi() {
     statusBarPathLabel = new QLabel("No document open");
     statusBarPathLabel->setObjectName("statusBarPathLabel");
     statusBar->addWidget(statusBarPathLabel);
-	
 
     // Document area --------------------------------------------------------------------------------------------------------
     documentArea = new QTabWidget(this);
@@ -835,7 +839,7 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
-    connect(this, qOverload<int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<int, int>(&MainWindow::setStatusBarMessage));
+    connect(this, qOverload<bool, int, int, int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
     connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
 
     // Toolbox
