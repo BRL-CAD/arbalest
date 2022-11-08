@@ -40,16 +40,40 @@ namespace VerificationValidation {
     class Test {
     public:
         QString testName;
+        QString testCommand;
         QStringList suiteNames;
         QString category;
         std::vector<Arg> ArgList;
 
-        Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList) :
-        testName(testName), suiteNames(suiteNames), ArgList(ArgList),
-        category((ArgList.size()) ? ArgList[0].argument : "NULL")
+        Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList, const QString category = NULL) :
+        testName(testName), suiteNames(suiteNames), ArgList(ArgList)
         {
+            if (!ArgList.size()) throw std::runtime_error("ArgList must be populated for a test");
+            else this->testCommand = ArgList[0].argument;
+            
+            if (category != NULL) this->category = category;
+            else if (ArgList.size()) this->category = ArgList[0].argument;
+            else this->category = "NULL";
+
             for (int i = 0; i < this->ArgList.size(); i++)
                 this->ArgList[i].argIdx = i;
+        }
+
+        bool isSameType(const Test& rhs) {
+            if (ArgList.size() != rhs.ArgList.size()) return false;
+
+            std::vector<Arg> lhsArgList(ArgList);
+            std::vector<Arg> rhsArgList(rhs.ArgList);
+            std::sort(lhsArgList.begin(), lhsArgList.end());
+            std::sort(rhsArgList.begin(), rhsArgList.end());
+
+            for (int i = 0; i < lhsArgList.size(); i++) {
+                if (lhsArgList[i].type == rhsArgList[i].type && (lhsArgList[i].type == Arg::Type::ObjectName || lhsArgList[i].type == Arg::Type::ObjectNone || lhsArgList[i].type == Arg::Type::ObjectPath))
+                    continue;
+                if (lhsArgList[i].argument != rhsArgList[i].argument)
+                    return false;
+            }
+            return true;
         }
 
         bool operator==(const Test& rhs) {

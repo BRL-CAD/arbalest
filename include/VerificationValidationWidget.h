@@ -13,7 +13,6 @@
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
-#include "VerificationValidation.h"
 #include "Utils.h"
 #include "VerificationValidation.h"
 
@@ -46,6 +45,10 @@ public:
     void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
 
+    void showNewTestDialog();
+    void showRemoveTestDialog();
+    void showNewTestSuiteDialog();
+    void showRemoveTestSuiteDialog();
 public slots:
     void runTests();
 
@@ -55,8 +58,17 @@ private slots:
 	void updateTestListWidget(QListWidgetItem*);
     void testListSelection(QListWidgetItem*);
     void setupDetailedResult(int row, int  column);
-    void searchTests(const QString &input);
+    void searchTests_run(const QString &input);
+    void searchTests_rm(const QString &input);
+    void searchTests_TS(const QString &input);
     void userInputDialogUI(QListWidgetItem*);
+    void createTest();
+    void removeTests();
+    void createSuite();
+    void removeSuites();
+    void addArgForm();
+    void rmvArgForm();
+    void isVarClicked(int state);
     void resultTableChangeSize();
 
 private:
@@ -80,6 +92,23 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    QWidget* content_widget;
+    std::vector<QGroupBox*> argForms;
+
+    // Test and test suite create remove
+    QLineEdit* testNameInput;
+    QLineEdit* testCmdInput;
+    QLineEdit* testCategoryInput;
+    QListWidget* addToSuiteList;
+    QHBoxLayout* argLayout;
+    std::vector<QLineEdit*> argInputList;
+    std::vector<QCheckBox*> isVarList;
+    std::vector<QLineEdit*> varInputList;
+
+    QListWidget* rmTestList;
+    QListWidget* newTSList;
+    QListWidget* rmTSList;
+    QLineEdit* suiteNameBox;
     bool minBtn_toggle;
     QToolButton* minBtn;
     
@@ -130,6 +159,7 @@ private:
     void checkTestSA();
     QString *runTest(const QString &cmd);
     void validateChecksum();
+    void addItemFromTest(QListWidget* &listWidget);
 };
 
 #endif // VVWIDGET_H

@@ -602,6 +602,41 @@ void MainWindow::prepareUi() {
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
+    QAction* verificationValidationNewTest = new QAction(tr("Create new test"), this);
+    verificationValidationNewTest->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateCreateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationNewTest->setStatusTip(tr("Create new test"));
+    connect(verificationValidationNewTest, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showNewTestDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationNewTest);
+
+    QAction* verificationValidationRemoveTest = new QAction(tr("Remove test"), this);
+    verificationValidationRemoveTest->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateRemoveIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationRemoveTest->setStatusTip(tr("Remove test"));
+    connect(verificationValidationRemoveTest, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showRemoveTestDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationRemoveTest);
+
+    QAction* verificationValidationNewTestSuite = new QAction(tr("Create new test suite"), this);
+    verificationValidationNewTestSuite->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateCreateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationNewTestSuite->setStatusTip(tr("Create new test suite"));
+    connect(verificationValidationNewTestSuite, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showNewTestSuiteDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationNewTestSuite);
+
+    QAction* verificationValidationRemoveTestSuite = new QAction(tr("Remove test suite"), this);
+    verificationValidationRemoveTestSuite->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateRemoveIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationRemoveTestSuite->setStatusTip(tr("Remove test suite"));
+    connect(verificationValidationRemoveTestSuite, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showRemoveTestSuiteDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationRemoveTestSuite);
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
