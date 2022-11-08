@@ -23,8 +23,6 @@ dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId())
     dbPopulateDefaults();
     
     setupUI();
-    // Open details dialog
-    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
 
     updateDockableHeader();
     
@@ -1284,7 +1282,6 @@ void VerificationValidationWidget::setupUI() {
     connect(buttonOptions, &QDialogButtonBox::accepted, this, &VerificationValidationWidget::runTests);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
-    connect(resultTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(setupDetailedResult(int, int)));
     connect(resultTable, SIGNAL(cellClicked(int, int)), this, SLOT(setupResultMenu(int, int)));
 }
 
@@ -1327,12 +1324,13 @@ void VerificationValidationWidget::setupResultMenu(int row, int column) {
     currentResultRow = row;
     QMenu *resultMenu = new QMenu();
     resultMenu->addAction("Visualize Objects", this, SLOT(visualizeOverlaps()));
+    resultMenu->addAction("Test Result Details", this, SLOT(setupDetailedResult()));
     resultMenu->addAction("Copy Path", this, SLOT(copyToClipboard()));
 
     resultMenu->exec(QCursor::pos());
 }
 
-void VerificationValidationWidget::setupDetailedResult(int row, int column) {
+void VerificationValidationWidget::setupDetailedResult() {
     QDialog* detail_dialog = new QDialog();
     detail_dialog->setModal(true);
     detail_dialog->setWindowTitle("Test Result Details");
@@ -1341,9 +1339,9 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
 
     QString resultCode;
     
-    QTableWidgetItem* testNameItem = resultTable->item(row, TEST_NAME_COLUMN);
-    QTableWidgetItem* descriptionItem = resultTable->item(row, DESCRIPTION_COLUMN);
-    QTableWidgetItem* objPathItem = resultTable->item(row, OBJPATH_COLUMN);
+    QTableWidgetItem* testNameItem = resultTable->item(currentResultRow, TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(currentResultRow, DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
@@ -1355,7 +1353,7 @@ void VerificationValidationWidget::setupDetailedResult(int row, int column) {
     if (!q->next()) { return; }
     int testID = q->value(0).toInt();
     Test currentTest = itemToTestMap.at(idToItemMap.at(testID)).second;
-    QString object = resultTable->item(row, OBJECT_COLUMN)->text();
+    QString object = resultTable->item(currentResultRow, OBJECT_COLUMN)->text();
     QString testCommand = currentTest.getCMD(object);
 
     QString objectPlaceholder = object;
