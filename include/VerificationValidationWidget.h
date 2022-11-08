@@ -67,6 +67,7 @@ private slots:
     void createSuite();
     void removeSuites();
     void addArgForm();
+    void rmvArgForm();
     void isVarClicked(int state);
     void resultTableChangeSize();
 
@@ -91,6 +92,8 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    QWidget* content_widget;
+    std::vector<QGroupBox*> argForms;
 
     // Test and test suite create remove
     QLineEdit* testNameInput;

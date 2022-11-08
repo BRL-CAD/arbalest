@@ -759,7 +759,7 @@ void VerificationValidationWidget::isVarClicked(int state) {
 }
 
 void VerificationValidationWidget::addArgForm() {
-    int n = argInputList.size()+1;
+    int n = argForms.size()+1;
     QString boxTitle = "Argument Input %1";
     QGroupBox* argField = new QGroupBox(boxTitle.arg(n));
     QFormLayout* argForm = new QFormLayout();
@@ -777,9 +777,28 @@ void VerificationValidationWidget::addArgForm() {
     argField->setLayout(argForm);
     argField->setMinimumWidth(250);
     argLayout->addWidget(argField);
-    argLayout->addSpacing(10);
+
+    argForms.push_back(argField);
 
     connect(isVar, SIGNAL(stateChanged(int)), this, SLOT(isVarClicked(int)));
+}
+
+void VerificationValidationWidget::rmvArgForm() {
+    int n = argForms.size();
+    if (!n) return;
+
+    QGroupBox* tmp = argForms[argForms.size()-1];
+    argLayout->removeWidget(tmp);
+    tmp->setVisible(false);
+    content_widget->setLayout(argLayout);
+    content_widget->setVisible(false);
+    content_widget->setVisible(true);
+    qApp->processEvents();
+
+    argInputList.pop_back();
+    isVarList.pop_back();
+    varInputList.pop_back();
+    argForms.pop_back();
 }
 
 void VerificationValidationWidget::showNewTestDialog() {
@@ -824,19 +843,19 @@ void VerificationValidationWidget::showNewTestDialog() {
 
     QGroupBox* groupbox2 = new QGroupBox("Additional Info");
     QVBoxLayout* v_layout2 = new QVBoxLayout();
-    QPushButton* addArgFormBtn = new QPushButton("Add Argument Input Field");
+    QHBoxWidget* h_widget = new QHBoxWidget();
+    QPushButton* addArgFormBtn = new QPushButton("Add Arg");
+    QPushButton* rmvArgFormBtn = new QPushButton("Remove Arg");
     v_layout2->addSpacing(10);
-    v_layout2->addWidget(addArgFormBtn);
+    h_widget->addWidget(addArgFormBtn);
+    h_widget->addWidget(rmvArgFormBtn);
+    v_layout2->addWidget(h_widget);
     v_layout2->addSpacing(20);
-    v_layout2->addWidget(new QLabel("If for tops write PATH or NAME in arguments"));
     v_layout2->addSpacing(5);
     QScrollArea* scroll = new QScrollArea();
     scroll->setWidgetResizable(true);
-    QWidget* content_widget = new QWidget();
+    content_widget = new QWidget();
     argLayout = new QHBoxLayout();
-    for(int i = 0; i < 3; i++){
-        addArgForm();
-    }
     content_widget->setLayout(argLayout);
     scroll->setWidget(content_widget);
     v_layout2->addWidget(scroll);
@@ -856,6 +875,7 @@ void VerificationValidationWidget::showNewTestDialog() {
     newTestDialog->setModal(true);
     newTestDialog->setWindowTitle("Create New Test");
     connect(addArgFormBtn, SIGNAL(clicked()), this, SLOT(addArgForm()));
+    connect(rmvArgFormBtn, SIGNAL(clicked()), this, SLOT(rmvArgForm()));
     connect(buttonOptions, &QDialogButtonBox::accepted, newTestDialog, &QDialog::accept);
     connect(buttonOptions, SIGNAL(accepted()), this, SLOT(createTest()));
     connect(buttonOptions, &QDialogButtonBox::rejected, newTestDialog, &QDialog::reject);
