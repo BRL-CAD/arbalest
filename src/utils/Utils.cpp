@@ -176,7 +176,7 @@ struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
     struct ged* dbp;
     const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
 
-    const char* cmdList[tmp.size() + 1];
+    const char** cmdList = new const char*[tmp.size() + 1];
     for (int i = 0; i < tmp.size(); i++) {
         char* cmdBuf = new char[tmp[i].size() + 1];
         strncpy(cmdBuf, tmp[i].toStdString().data(), tmp[i].size());
