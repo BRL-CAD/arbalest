@@ -57,7 +57,10 @@ private slots:
 	void updateTestSelectAll(QListWidgetItem*);
 	void updateTestListWidget(QListWidgetItem*);
     void testListSelection(QListWidgetItem*);
-    void setupDetailedResult(int row, int  column);
+    void copyToClipboard();
+    void setupResultMenu(int row, int column);
+    void setupDetailedResult(int row, int column);
+    void visualizeOverlaps();
     void searchTests_run(const QString &input);
     void searchTests_rm(const QString &input);
     void searchTests_TS(const QString &input);
@@ -92,6 +95,8 @@ private:
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
     QStatusBar* statusBar;
+    QClipboard* clipboard;
+    int currentResultRow = 1;
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
 
