@@ -21,6 +21,8 @@
     <file>icons/baseline_refresh_black_48dp.png</file>
     <file>icons/sharp_grid_on_black_48dp.png</file>
     <file>icons/verifyValidateIcon.png</file>
+    <file>icons/verifyValidateCreateIcon.png</file>
+    <file>icons/verifyValidateRemoveIcon.png</file>
     <file>icons/openVerifyValidateIcon.png</file>
 
     <!-- Toolbar raytrace -->
@@ -51,6 +53,10 @@
     <file>icons/error.png</file>
     <file>icons/unparseable.png</file>
     <file>icons/editIcon.png</file>
+    <file>icons/collapse.png</file>
+    <file>icons/expand.png</file>
+    <file>icons/edit.png</file>
+    <file>icons/edit_default.png</file>
   </qresource>
 
 </RCC>

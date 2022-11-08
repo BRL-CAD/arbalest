@@ -591,12 +591,52 @@ void MainWindow::prepareUi() {
                 objectVerificationValidationDockable->setContent(vvWidget);
             }
         }
+        QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+        if (!selectedObjects.size()) { 
+            popup("Cannot run tests with no visible objects.");
+            return;
+        }
         objectVerificationValidationDockable->setVisible(true);
         vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
+    QAction* verificationValidationNewTest = new QAction(tr("Create new test"), this);
+    verificationValidationNewTest->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateCreateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationNewTest->setStatusTip(tr("Create new test"));
+    connect(verificationValidationNewTest, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showNewTestDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationNewTest);
+
+    QAction* verificationValidationRemoveTest = new QAction(tr("Remove test"), this);
+    verificationValidationRemoveTest->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateRemoveIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationRemoveTest->setStatusTip(tr("Remove test"));
+    connect(verificationValidationRemoveTest, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showRemoveTestDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationRemoveTest);
+
+    QAction* verificationValidationNewTestSuite = new QAction(tr("Create new test suite"), this);
+    verificationValidationNewTestSuite->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateCreateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationNewTestSuite->setStatusTip(tr("Create new test suite"));
+    connect(verificationValidationNewTestSuite, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showNewTestSuiteDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationNewTestSuite);
+
+    QAction* verificationValidationRemoveTestSuite = new QAction(tr("Remove test suite"), this);
+    verificationValidationRemoveTestSuite->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateRemoveIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationRemoveTestSuite->setStatusTip(tr("Remove test suite"));
+    connect(verificationValidationRemoveTestSuite, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->showRemoveTestSuiteDialog();
+    });
+    verifyValidateMenu->addAction(verificationValidationRemoveTestSuite);
 
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -660,7 +700,6 @@ void MainWindow::prepareUi() {
     statusBarPathLabel = new QLabel("No document open");
     statusBarPathLabel->setObjectName("statusBarPathLabel");
     statusBar->addWidget(statusBarPathLabel);
-	
 
     // Document area --------------------------------------------------------------------------------------------------------
     documentArea = new QTabWidget(this);
@@ -800,7 +839,7 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
-    connect(this, qOverload<int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<int, int>(&MainWindow::setStatusBarMessage));
+    connect(this, qOverload<bool, int, int, int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
     connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
 
     // Toolbox
@@ -855,7 +894,7 @@ void MainWindow::openFile(const QString& filePath) {
 
 void MainWindow::openATRFile(const QString& atrFilePath) {    
     {
-        QString modelID = "", gFilePath = "", md5Checksum = ""; // TODO: check md5 checksum stuff here
+        QString modelID = "", gFilePath = "";
         if (!QFile::exists(atrFilePath)) { popup("File " + atrFilePath + " doesn't exist."); return; }
 
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -863,12 +902,11 @@ void MainWindow::openATRFile(const QString& atrFilePath) {
 
         if (!db.open() || !db.isOpen()) { popup("Failed to open " + atrFilePath); return; }
 
-        QSqlQuery q("SELECT id, filePath, md5Checksum from Model", db);
-        if (!q.isActive() || !q.next())  { popup("Failed to fetch filepath from " + atrFilePath); return; }
+        QSqlQuery q("SELECT id, filePath from Model", db);
+        if (!q.isActive() || !q.next())  { popup("Failed to fetch Model table from " + atrFilePath); return; }
         else {
             modelID = q.value(0).toString();
             gFilePath = q.value(1).toString();
-            md5Checksum = q.value(2).toString();
         }
 
         if (!gFilePath.isEmpty()) {
@@ -889,8 +927,11 @@ void MainWindow::openATRFile(const QString& atrFilePath) {
             }
 
             if (QFile::exists(gFilePath)) {
-                q.prepare("UPDATE Model SET filepath = ? WHERE id = ?"); // TODO: also update checksum here
+                QString* newUUID = generateUUID(gFilePath);
+                if (!newUUID) { popup("Failed to generate UUID for " + gFilePath); return; }
+                q.prepare("UPDATE Model SET filepath = ?, uuid = ? WHERE id = ?");
                 q.addBindValue(gFilePath);
+                q.addBindValue(*newUUID);
                 q.addBindValue(modelID);
                 q.exec();
                 if (!q.isActive()) { popup("Failed to update filepath to " + gFilePath + ".\n" + q.lastError().text()); return; }
@@ -1032,6 +1073,10 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
+            if (documents[activeDocumentId]->getVerificationValidationWidget()) 
+                documents[activeDocumentId]->getVerificationValidationWidget()->updateDockableHeader();
+            else
+                objectVerificationValidationDockable->setVisible(false);
             objectVerificationValidationDockable->setVisible((documents[activeDocumentId]->getVerificationValidationWidget()) ? true : false);
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
@@ -1045,6 +1090,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             }
         }
     }else if (activeDocumentId != -1){
+        objectVerificationValidationDockable->setVisible(false);
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
         objectVerificationValidationDockable->clear();
