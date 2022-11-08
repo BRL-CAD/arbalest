@@ -290,10 +290,23 @@ Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Tes
     Test* type = nullptr;
 
     if (DefaultTests::NO_NULL_REGIONS == test)
+        type = (Test*)&(DefaultTests::NO_NULL_REGIONS);
+
+    else if (DefaultTests::NO_OVERLAPS == test)
+        type = (Test*)&(DefaultTests::NO_OVERLAPS);
+
+    else if (DefaultTests::NO_NULL_REGIONS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_NULL_REGIONS);
     
-    else if (DefaultTests::NO_OVERLAPS == test)
+    else if (DefaultTests::NO_OVERLAPS.isSameType(test))
         type = (Test*) &(DefaultTests::NO_OVERLAPS);
+
+    std::cout << "here: " << test.getCMD().toStdString() << std::endl;
+    std::cout << "here nnr: " << DefaultTests::NO_NULL_REGIONS.getCMD().toStdString() << std::endl;
+    std::cout << "here no: " << DefaultTests::NO_OVERLAPS.getCMD().toStdString() << std::endl;
+
+    if (type)
+        std::cout << "type is: " << type->testName.toStdString() << std::endl;
     
     QStringList lines = r->terminalOutput.split('\n');
     bool startParsing = false;
