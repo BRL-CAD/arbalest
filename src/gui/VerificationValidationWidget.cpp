@@ -141,7 +141,11 @@ void VerificationValidationWidget::runTests() {
             q->addBindValue(testID);
             dbExec(q);
 
-            if (!q->next()) { continue; }
+            if (!q->next()) { 
+                //std::cout << "bad if here" << std::endl;
+                continue; 
+            }
+            //std::cout << "good" << std::endl;
 
             // run tests
             QString objectArgID = q->value(0).toString();
@@ -731,6 +735,14 @@ void VerificationValidationWidget::createTest() {
         dbExec(q);
         argIdx += 1;
     }
+
+    // insert dummy object
+    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType) VALUES (:testID, :argIdx, :arg, :argType)");
+    q->bindValue(":testID", testID);
+    q->bindValue(":argIdx", argIdx);
+    q->bindValue(":arg", "$OBJECT");
+    q->bindValue(":argType", Arg::Type::ObjectName);
+    dbExec(q);
 
     setupUI();
 }
