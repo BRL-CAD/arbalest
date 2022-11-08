@@ -45,10 +45,16 @@ namespace VerificationValidation {
         QString category;
         std::vector<Arg> ArgList;
 
-        Test(const QString& testName, const QString& testCommand, const QString& category, const QStringList& suiteNames, const std::vector<Arg>& ArgList) :
-        testName(testName), testCommand(testCommand), category(category), suiteNames(suiteNames), ArgList(ArgList),
-        category((ArgList.size()) ? ArgList[0].argument : "NULL")
+        Test(const QString& testName, const QStringList& suiteNames, const std::vector<Arg>& ArgList, const QString category = NULL) :
+        testName(testName), suiteNames(suiteNames), ArgList(ArgList)
         {
+            if (!ArgList.size()) throw std::runtime_error("ArgList must be populated for a test");
+            else this->testCommand = ArgList[0].argument;
+            
+            if (category != NULL) this->category = category;
+            else if (ArgList.size()) this->category = ArgList[0].argument;
+            else this->category = "NULL";
+
             for (int i = 0; i < this->ArgList.size(); i++)
                 this->ArgList[i].argIdx = i;
         }

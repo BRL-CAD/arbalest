@@ -13,7 +13,6 @@
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
-#include "VerificationValidation.h"
 #include "Utils.h"
 #include "VerificationValidation.h"
 
