@@ -61,7 +61,6 @@ private slots:
     void setupResultMenu(int row, int column);
     void setupDetailedResult(int row, int column);
     void visualizeOverlaps();
-    void searchTests(const QString &input);
     void searchTests_run(const QString &input);
     void searchTests_rm(const QString &input);
     void searchTests_TS(const QString &input);

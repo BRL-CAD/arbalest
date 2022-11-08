@@ -882,6 +882,7 @@ void VerificationValidationWidget::showNewTestDialog() {
     connect(buttonOptions, &QDialogButtonBox::rejected, newTestDialog, &QDialog::reject);
 
     newTestDialog->exec();
+    argForms.clear();
 }
 
 void VerificationValidationWidget::removeTests() {
