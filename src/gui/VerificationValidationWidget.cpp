@@ -25,7 +25,7 @@ msgBoxRes(NO_SELECTION), dbConnectionName("")
     QDir dirCacheFolder(cache);
     if (!dirCacheFolder.exists() && !dirCacheFolder.mkpath(".")) throw std::runtime_error("Failed to create atr cache folder");
     
-    dbFilePath = dirCacheFolder.absolutePath() + "/untitled" + QString::number(document->getDocumentId()) + ".atr";;
+    dbFilePath = dirCacheFolder.absolutePath() + "/untitled/" + QString::number(document->getDocumentId()) + ".atr";;
     
     try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
@@ -234,11 +234,17 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
 
-    this->dbName = dbFilePath;
+    this->dbName = dbFilePath; // TODO: figure out if can deprecate dbName
     QString* fp = document->getFilePath();
+    
+    // if persistent titled file, create UUID and store accordingly
     if (fp) {
-        QStringList fpList = fp->split("/");
-        this->dbName = cacheFolder + "/" + fpList.last() + ".atr";
+        QString* uuid = generateUUID(*fp);
+        if (!uuid) throw std::runtime_error("Failed to generate UUID for " + fp->toStdString());
+        QDir dbFolder(cacheFolder + "/" + uuid->left(2) + "/" + uuid->right(uuid->size() - 2));
+        if (!dbFolder.exists()) dbFolder.mkpath(".");
+
+        this->dbName = dbFolder.absolutePath() + "/" + fp->split("/").last() + ".atr";
         this->dbFilePath = QDir(this->dbName).absolutePath();
     }
 
