@@ -12,11 +12,20 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
 document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), folderName("atr"), dbConnectionName(""),
-dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
+msgBoxRes(NO_SELECTION), dbConnectionName("")
 {
     if (!dbConnectionName.isEmpty()) return;
-    if (!QDir(folderName).exists() && !QDir().mkdir(folderName)) popup("Failed to create " + folderName + " folder");
+
+    // get BRL-CAD cache path
+    char cache[MAXPATHLEN];
+    bu_dir(cache, MAXPATHLEN, BU_DIR_CACHE, ".atr", NULL);
+    cacheFolder = QString(cache);
+    
+    // create path if doesn't already exist
+    QDir dirCacheFolder(cache);
+    if (!dirCacheFolder.exists() && !dirCacheFolder.mkpath(".")) throw std::runtime_error("Failed to create atr cache folder");
+    
+    dbFilePath = dirCacheFolder.absolutePath() + "/untitled" + QString::number(document->getDocumentId()) + ".atr";;
     
     try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
@@ -229,7 +238,7 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
     QString* fp = document->getFilePath();
     if (fp) {
         QStringList fpList = fp->split("/");
-        this->dbName = folderName + "/" + fpList.last() + ".atr";
+        this->dbName = cacheFolder + "/" + fpList.last() + ".atr";
         this->dbFilePath = QDir(this->dbName).absolutePath();
     }
 

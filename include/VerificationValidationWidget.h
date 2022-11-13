@@ -10,6 +10,7 @@
 #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
+#include <bu/app.h>
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
@@ -78,7 +79,7 @@ private:
     MainWindow *mainWindow;
     Dockable *parentDockable;
     int msgBoxRes;
-    QString folderName;
+    QString cacheFolder;
 
     // widget-specific data
     Document *document;
