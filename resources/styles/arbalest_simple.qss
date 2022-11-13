@@ -167,18 +167,21 @@ ObjectTreeWidget::item:selected {
 /* -------------------------------------------------------------------------------------------------------------------*/
 
 /* VerificationValidationWidget --------------------------------------------------------------------------------------------------------*/
-QHeaderView::section {
-    background: "$Color-DockableHeader";
-    border: none;
-    height: 32px;
-}
-
-QTableWidget {
+QTableWidget, QDialog, QListWidget, QGroupBox {
     background: "$Color-Main";
 }
 
 QTableWidget::item:selected {
     background: "$Color-SelectedVVRow";
+}
+
+QHBoxLayout, QHeaderView::section {
+    background: "$Color-Secondary";
+}
+
+QHeaderView::section {
+    border: none;
+    height: 32px;
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 

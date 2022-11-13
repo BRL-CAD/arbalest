@@ -637,7 +637,7 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
         item->setCheckState(Qt::Unchecked);
         item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
         if(t.hasVarArgs()) {
-            item->setIcon(QIcon(QIcon(":/icons/edit_default.png")));
+            item->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit_default.png", "$Color-IconEditVVArg"))));
         }
 
         listWidget->addItem(item);
@@ -1154,10 +1154,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
                 if(isDefault){
                     test->setText(testName+" (default)");
-                    test->setIcon(QIcon(":/icons/edit_default.png"));
+                    test->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit_default.png", "$Color-IconEditVVArg"))));
                 } else {
                     test->setText(testName);
-                    test->setIcon(QIcon(":/icons/edit.png"));
+                    test->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit.png", "$Color-IconEditVVArg"))));
                 }
                 test->setToolTip(itemToTestMap.at(test).second.getCMD());
             });
@@ -1686,6 +1686,7 @@ void VerificationValidationWidget::updateDockableHeader() {
 
         QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
         QLabel *title = new QLabel(dockableTitle);
+        title->setStyleSheet("QLabel { background: transparent; }");
         minBtn = new QToolButton();
         minBtn->setIcon(QIcon(":/icons/expand.png"));
         minBtn_toggle = true;
