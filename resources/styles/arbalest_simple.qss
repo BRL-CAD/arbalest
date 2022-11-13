@@ -166,6 +166,22 @@ ObjectTreeWidget::item:selected {
 }
 /* -------------------------------------------------------------------------------------------------------------------*/
 
+/* VerificationValidationWidget --------------------------------------------------------------------------------------------------------*/
+QHeaderView::section {
+    background: "$Color-DockableHeader";
+    border: none;
+    height: 32px;
+}
+
+QTableWidget {
+    background: "$Color-Main";
+}
+
+QTableWidget::item:selected {
+    background: "$Color-SelectedVVRow";
+}
+/* -------------------------------------------------------------------------------------------------------------------*/
+
 /* Properties --------------------------------------------------------------------------------------------------------*/
 #properties-nameWidget {
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
