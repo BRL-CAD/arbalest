@@ -84,8 +84,6 @@ private:
     // widget-specific data
     Document *document;
     QString modelID;
-    QString dbFilePath;
-    QString dbName;
     QString dbConnectionName;
 
     // user interface data
@@ -122,7 +120,7 @@ private:
     std::map<int, QListWidgetItem*> idToItemMap;
 
     // init functions
-    void dbConnect(QString dbFilePath);
+    void dbConnect(QString& dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
