@@ -175,7 +175,7 @@ QTableWidget::item:selected {
     background: "$Color-SelectedVVRow";
 }
 
-QHBoxLayout, QHeaderView::section {
+QHBoxLayout, QPlainTextEdit, QHeaderView::section {
     background: "$Color-Secondary";
 }
 
