@@ -117,13 +117,12 @@ void DisplayGrid::setSelectObjectMouseAction() {
         }
 
         mouseActions[index] = new SelectMouseAction(this, displays[index]);
+        connect(mouseActions[index], &MouseAction::Done, this, [this](MouseAction* mouseAction) {
+            SelectMouseAction* selectMouseAction = dynamic_cast<SelectMouseAction*>(mouseAction);
 
-        connect(mouseActions[index], &MouseAction::Done, this, [this, &index](MouseAction *mouseAction) {
-            QTreeWidget* treeWidget = this->getDocument()->getObjectTreeWidget();
-            SelectMouseAction* selectMouseAction = dynamic_cast<SelectMouseAction*>(mouseActions[index]);
-            
             if (selectMouseAction != nullptr) {
-                
+                QString regionName = selectMouseAction->getSelected();
+                document->getObjectTreeWidget()->build(regionName);
             }
         });
     }

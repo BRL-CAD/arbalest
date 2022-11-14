@@ -61,24 +61,26 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
             QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 
             if (mouseEvent->button() == Qt::LeftButton) {
-                const int x = mouseEvent->x();
-                const int y = mouseEvent->y();
-
-                int w = m_watched->getDocument()->getRaytraceWidget()->width();
-                int h = m_watched->getDocument()->getRaytraceWidget()->height();
-
-                QVector3D &eyePosition = m_watched->getCamera()->getEyePosition();
-
-                QMatrix4x4 m_transformation;
-                QVector3D directionStart = m_transformation.map(eyePosition);
-                QVector3D directionEnd = m_transformation.map(QVector3D(0., 0., 0.));
+                QMatrix4x4 transformation;
+                transformation.translate(m_watched->getCamera()->getEyePosition().x(),
+                    m_watched->getCamera()->getEyePosition().y(),
+                    m_watched->getCamera()->getEyePosition().z());
+                transformation.rotate(-m_watched->getCamera()->getAnglesAroundAxes().y(), 0., 1., 0.);
+                transformation.rotate(-m_watched->getCamera()->getAnglesAroundAxes().z(), 0., 0., 1.);
+                transformation.rotate(-m_watched->getCamera()->getAnglesAroundAxes().x(), 1., 0., 0.);
+                transformation.translate(0, 0, 10000);
+                transformation.scale(m_watched->getCamera()->getVerticalSpan() / m_watched->getH());
+                transformation.translate(-m_watched->getW() / 2., -m_watched->getH() / 2.);
+                
+                QVector3D directionStart = transformation.map(QVector3D(0., 0., 1.));
+                QVector3D directionEnd = transformation.map(QVector3D(0., 0., 0.));
                 QVector3D direction = directionEnd - directionStart;
                 direction.normalize();
 
-                QVector3D        imagePoint(x, h - y - 1., 0.);
-                QVector3D        modelPoint = m_transformation.map(imagePoint);
+                QVector3D imagePoint(mouseEvent->x(), mouseEvent->y(), 0.);
+                QVector3D modelPoint = transformation.map(imagePoint);
+                
                 BRLCAD::Ray3D    ray;
-
                 ray.origin.coordinates[0] = modelPoint.x();
                 ray.origin.coordinates[1] = modelPoint.y();
                 ray.origin.coordinates[2] = modelPoint.z();

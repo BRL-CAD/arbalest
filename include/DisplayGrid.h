@@ -46,7 +46,6 @@ public:
     void setMoveCameraMouseAction();
     void setSelectObjectMouseAction();
 
-    bool selectObjectMouseActionEnabled = false;
 private:
     double defaultDisplayCameraRotation[4][3] = {
             {0, 0, 270},

@@ -100,6 +100,21 @@ void ObjectTreeWidget::build(const int objectId, QTreeWidgetItem* parent)
 	}
 }
 
+void ObjectTreeWidget::build(QString selected) {
+    int size = document->getObjectTree()->getFullPathMap().size();
+
+    for (int objectId = 1; objectId < size; ++objectId) {
+        ObjectTree::VisibilityState visibilityState = document->getObjectTree()->getObjectVisibility()[objectId];
+        if (visibilityState == ObjectTree::FullyVisible || visibilityState == ObjectTree::SomeChildrenVisible) {
+            if (document->getObjectTree()->getFullPathMap()[objectId] == selected) {
+                objectIdTreeWidgetItemMap[objectId]->setSelected(true);
+                document->getProperties()->bindObject(objectId);
+            }
+        }
+    }
+}
+
+
 const QHash<int, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetItemMap() const {
     return objectIdTreeWidgetItemMap;
 }

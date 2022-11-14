@@ -388,14 +388,26 @@ void MainWindow::prepareUi() {
     });
     editMenu->addAction(relativeRotateAct);
 
-    QIcon selectObjectActIcon;
-    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")), QIcon::Normal);
-    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-Menu")), QIcon::Active);
-    QAction* selectObjectAct = new QAction(selectObjectActIcon, tr("Select object"), this);
+    QAction* selectObjectAct = new QAction(tr("Select object"), this);
+    selectObjectAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")));
     selectObjectAct->setStatusTip(tr("Select object."));
-    connect(selectObjectAct, &QAction::triggered, this, [this]() {
-        if (activeDocumentId == -1) return;
-        selectObjectButtonAction();
+    selectObjectAct->setCheckable(true);
+    connect(selectObjectAct, &QAction::toggled, this, [=]() {
+        if (activeDocumentId == -1) {
+            selectObjectAct->setChecked(false);
+            return;
+        }
+
+        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled == false) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
+            selectObjectAct->setToolTip("Select Object OFF");
+            selectObjectButtonAction();
+        }
+        else {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
+            selectObjectAct->setToolTip("Select Object ON");
+            moveCameraButtonAction();
+        }
     });
     editMenu->addAction(selectObjectAct);
 
