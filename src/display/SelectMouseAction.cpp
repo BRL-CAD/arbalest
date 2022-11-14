@@ -77,7 +77,7 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 QVector3D direction = directionEnd - directionStart;
                 direction.normalize();
 
-                QVector3D imagePoint(mouseEvent->x(), mouseEvent->y(), 0.);
+                QVector3D imagePoint(mouseEvent->x(), m_watched->getH() - mouseEvent->y() - 1., 0.);
                 QVector3D modelPoint = transformation.map(imagePoint);
                 
                 BRLCAD::Ray3D    ray;
