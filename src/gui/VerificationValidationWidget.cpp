@@ -1174,6 +1174,10 @@ void VerificationValidationWidget::setupUI() {
     suiteList = new QListWidget();
     test_sa = new QListWidget();
     suite_sa = new QListWidget();
+    terminal = new MgedWidget(document);
+
+    // setup terminal
+    addWidget(terminal);
 
     // setup result table's column headers
     QStringList columnLabels;
