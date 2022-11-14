@@ -155,9 +155,6 @@ private:
     void dbUpdateModelUUID();
     void dbClearResults();
 
-    // events
-    void resizeEvent(QResizeEvent *event) override;
-
     // ui stuff
     void showResult(const QString &testResultID);
     void showAllResults();

@@ -20,7 +20,6 @@ private:
 	int baseCurPos; // any idx less than equal this should not be editable
 
 	void clear();
-
 	void keyPressEvent(QKeyEvent* event);
 };
 

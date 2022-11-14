@@ -41,6 +41,7 @@ set(arbalest_Sources
         src/utils/VerificationValidation.cpp
         src/utils/VerificationValidationParser.cpp
         src/gui/VerificationValidationWidget.cpp
+        src/gui/MgedWidget.cpp
         src/display/GridRenderer.cpp)
 
 set(arbalest_Link_Libraries
