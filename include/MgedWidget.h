@@ -7,6 +7,8 @@
 #include "Utils.h"
 #include "QVBoxWidget.h"
 
+#define TERMINAL_PREFIX "mged> "
+
 class Document;
 class MgedWidget : public QPlainTextEdit {
 public:
@@ -14,6 +16,7 @@ public:
 
 private:
 	Document* d;
+	const QString prefix;
 	int baseCurPos; // any idx less than equal this should not be editable
 
 	void clear();
