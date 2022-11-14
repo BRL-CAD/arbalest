@@ -10,7 +10,7 @@ using Parser = VerificationValidation::Parser;
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
 document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
-testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
 msgBoxRes(NO_SELECTION), folderName("atr"), dbConnectionName(""),
 dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
@@ -1185,6 +1185,20 @@ void VerificationValidationWidget::setupUI() {
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     addWidget(resultTable);
 
+    // setup terminal
+    QPushButton* btnCollapseTerminal = new QPushButton;
+    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
+    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    addWidget(btnCollapseTerminal);
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
+        if (!terminal) {
+            terminal = new MgedWidget(document);
+            terminal->setVisible(false);
+            this->addWidget(terminal);
+        }
+        terminal->setVisible(!terminal->isVisible());
+    });
+
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
     addItemFromTest(testList);
@@ -1265,6 +1279,7 @@ void VerificationValidationWidget::setupUI() {
     resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
     resultTable->setColumnHidden(OBJECT_COLUMN, true);
     resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
+    resultTable->resizeColumnsToContents();
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
@@ -1303,14 +1318,6 @@ void VerificationValidationWidget::dbClearResults() {
     delete dbExec("DELETE FROM TestResults");
     delete dbExec("DELETE FROM Issues");
     delete dbExec("DELETE FROM ObjectIssue");
-}
-
-void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
-    resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
-    resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.125);
-    resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.60);
-    resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.25);
-    QHBoxWidget::resizeEvent(event);
 }
 
 void VerificationValidationWidget::copyToClipboard() {

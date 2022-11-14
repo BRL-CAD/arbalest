@@ -15,6 +15,7 @@
 #include <QHBoxWidget.h>
 #include "Utils.h"
 #include "VerificationValidation.h"
+#include "MgedWidget.h"
 
 #define RESULT_CODE_COLUMN 0
 #define TEST_NAME_COLUMN 1
@@ -100,6 +101,8 @@ private:
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
 
+    MgedWidget* terminal;
+
     // Test and test suite create remove
     QLineEdit* testNameInput;
     QLineEdit* testCmdInput;
@@ -151,9 +154,6 @@ private:
 
     void dbUpdateModelUUID();
     void dbClearResults();
-
-    // events
-    void resizeEvent(QResizeEvent *event) override;
 
     // ui stuff
     void showResult(const QString &testResultID);
