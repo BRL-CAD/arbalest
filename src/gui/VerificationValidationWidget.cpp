@@ -1186,11 +1186,11 @@ void VerificationValidationWidget::setupUI() {
     addWidget(resultTable);
 
     // setup terminal
-    QToolButton* btnCollapseTerminal = new QToolButton;
+    QPushButton* btnCollapseTerminal = new QPushButton;
     btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
     btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     addWidget(btnCollapseTerminal);
-    connect(btnCollapseTerminal, &QToolButton::clicked, this, [this, btnCollapseTerminal]() {
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
         if (!terminal) {
             terminal = new MgedWidget(document);
             terminal->setVisible(false);
