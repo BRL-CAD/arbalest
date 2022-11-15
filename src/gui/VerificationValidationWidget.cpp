@@ -857,6 +857,7 @@ void VerificationValidationWidget::showNewTestDialog() {
     argLayout = new QHBoxLayout();
     content_widget->setLayout(argLayout);
     scroll->setWidget(content_widget);
+    scroll->setMinimumWidth(275);
     v_layout2->addWidget(scroll);
     groupbox2->setLayout(v_layout2);
     
