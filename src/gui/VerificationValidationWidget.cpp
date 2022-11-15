@@ -12,12 +12,20 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
 document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), folderName("atr"), dbConnectionName(""),
-dbFilePath(folderName + "/untitled" + QString::number(document->getDocumentId()) + ".atr")
+msgBoxRes(NO_SELECTION), dbConnectionName("")
 {
     if (!dbConnectionName.isEmpty()) return;
-    if (!QDir(folderName).exists() && !QDir().mkdir(folderName)) popup("Failed to create " + folderName + " folder");
+
+    // get BRL-CAD cache path
+    char cache[MAXPATHLEN];
+    bu_dir(cache, MAXPATHLEN, BU_DIR_CACHE, ".atr", NULL);
+    cacheFolder = QString(cache);
     
+    // create cache if doesn't already exist
+    QDir dirCacheFolder(cache);
+    if (!dirCacheFolder.exists() && !dirCacheFolder.mkpath(".")) throw std::runtime_error("Failed to create atr cache folder");
+   
+    QString dbFilePath = cacheFolder + "/untitled/" + QString::number(document->getDocumentId()) + ".atr";;
     try { dbConnect(dbFilePath); } catch (const std::runtime_error& e) { throw e; }
     dbInitTables();
     dbPopulateDefaults();
@@ -221,19 +229,23 @@ void VerificationValidationWidget::runTests() {
     }
 }
 
-void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
+void VerificationValidationWidget::dbConnect(QString& dbFilePath) {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
 
-    this->dbName = dbFilePath;
     QString* fp = document->getFilePath();
+    
+    // if persistent titled file, create UUID and store accordingly
     if (fp) {
-        QStringList fpList = fp->split("/");
-        this->dbName = folderName + "/" + fpList.last() + ".atr";
-        this->dbFilePath = QDir(this->dbName).absolutePath();
+        QString* uuid = generateUUID(*fp);
+        if (!uuid) throw std::runtime_error("Failed to generate UUID for " + fp->toStdString());
+        QDir dbFolder(cacheFolder + "/" + uuid->left(2) + "/" + uuid->right(uuid->size() - 2));
+        if (!dbFolder.exists()) dbFolder.mkpath(".");
+
+        dbFilePath = dbFolder.absolutePath() + "/" + fp->split("/").last() + ".atr";
     }
 
-    dbConnectionName = this->dbName + "-connection";
+    dbConnectionName = dbFilePath + "-connection";
     QSqlDatabase db = getDatabase();
 
     // if SQL connection already open, just switch to that tab
@@ -253,10 +265,10 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
     }
 
     // if file exists, prompt before overwriting
-    if (QFile::exists(this->dbName)) {
+    if (QFile::exists(dbFilePath)) {
         QMessageBox msgBox; 
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("Detected existing test results in " + this->dbName + ".\n\nDo you want to open or discard the results?");
+        msgBox.setText("Detected existing test results in " + dbFilePath + ".\n\nDo you want to open or discard the results?");
         msgBox.setInformativeText("Changes cannot be reverted.");
         msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
         QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
@@ -278,7 +290,7 @@ void VerificationValidationWidget::dbConnect(const QString dbFilePath) {
     }
 
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-    db.setDatabaseName(this->dbName);
+    db.setDatabaseName(dbFilePath);
 
     if (!db.open() || !db.isOpen())
         throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
@@ -857,6 +869,7 @@ void VerificationValidationWidget::showNewTestDialog() {
     argLayout = new QHBoxLayout();
     content_widget->setLayout(argLayout);
     scroll->setWidget(content_widget);
+    scroll->setMinimumWidth(275);
     v_layout2->addWidget(scroll);
     groupbox2->setLayout(v_layout2);
     
@@ -1178,11 +1191,39 @@ void VerificationValidationWidget::setupUI() {
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "Test Name" << "Description" << "Object Path";
-    resultTable->setColumnCount(columnLabels.size() + 2); // add hidden columns for testResultID + object
+    resultTable->setColumnCount(columnLabels.size() + 4); // add hidden columns for testResultID + object
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
     resultTable->horizontalHeader()->setStretchLastSection(true);
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    
+    QHeaderView* header = resultTable->horizontalHeader();
+    resultTableSortIdx = 6;
+    connect(header, &QHeaderView::sectionClicked, [this](int idx){
+        if(idx == resultTableSortIdx){
+            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#f4f4f4"));
+            resultTable->sortItems(RESULT_TABLE_IDX, Qt::AscendingOrder);
+
+            for(int i = 0; i < nonResultItemList.size(); i++){
+                resultTable->showRow(nonResultItemList[i]);
+            }
+            resultTableSortIdx = RESULT_TABLE_IDX;
+        } else {
+            if(resultTableSortIdx != RESULT_TABLE_IDX){
+                resultTable->horizontalHeaderItem(resultTableSortIdx)->setBackground(QColor("#f4f4f4"));
+            }
+            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#87cefa"));
+            for(int i = 0; i < nonResultItemList.size(); i++){
+                resultTable->hideRow(nonResultItemList[i]);
+            }
+            if(idx == 0)
+                resultTable->sortItems(ERROR_TYPE, Qt::AscendingOrder);
+            else
+                resultTable->sortItems(idx, Qt::AscendingOrder);
+            resultTableSortIdx = idx;
+        }
+    });
+
     addWidget(resultTable);
 
     // setup terminal
@@ -1280,6 +1321,8 @@ void VerificationValidationWidget::setupUI() {
     resultTable->setColumnHidden(OBJECT_COLUMN, true);
     resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
     resultTable->resizeColumnsToContents();
+    resultTable->setColumnHidden(RESULT_TABLE_IDX, true);
+    resultTable->setColumnHidden(ERROR_TYPE, true);
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
@@ -1553,6 +1596,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         QFont f;
         f.setBold(true);
         resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setFont(f);
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        nonResultItemList.push_back(resultTable->rowCount()-1);
     }
 
     if (resultCode == Result::Code::PASSED) {
@@ -1562,6 +1607,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
         resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(4)));
     } 
 
     else if (resultCode == Result::Code::UNPARSEABLE) {
@@ -1571,6 +1618,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
         resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(3)));
     }
 
     else {
@@ -1596,11 +1645,16 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             issueDescription = q3->value(1).toString().replace("\n", "");
 
             resultTable->insertRow(resultTable->rowCount());
-
-            if (resultCode == VerificationValidation::Result::Code::FAILED)
+            
+            int error_type;
+            if (resultCode == VerificationValidation::Result::Code::FAILED){
                 iconPath = ":/icons/error.png";
-            else if (resultCode == VerificationValidation::Result::Code::WARNING)
-                iconPath = ":/icons/warning.png";                
+                error_type = 1;
+            }
+            else if (resultCode == VerificationValidation::Result::Code::WARNING){
+                iconPath = ":/icons/warning.png";
+                error_type = 2;
+            }        
 
             // Change to hide icon image path from showing
             resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
@@ -1609,6 +1663,9 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
             resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
             resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+            resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+            resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(error_type)));
+
             delete q3;
         }
         delete q2;

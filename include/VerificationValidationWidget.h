@@ -10,6 +10,7 @@
 #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
+#include <bu/app.h>
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QHBoxWidget.h>
@@ -23,6 +24,8 @@
 #define OBJPATH_COLUMN 3
 #define OBJECT_COLUMN 4
 #define TEST_RESULT_ID_COLUMN 5
+#define RESULT_TABLE_IDX 6
+#define ERROR_TYPE 7
 
 #define NO_SELECTION -1
 #define OPEN 0
@@ -79,13 +82,11 @@ private:
     MainWindow *mainWindow;
     Dockable *parentDockable;
     int msgBoxRes;
-    QString folderName;
+    QString cacheFolder;
 
     // widget-specific data
     Document *document;
     QString modelID;
-    QString dbFilePath;
-    QString dbName;
     QString dbConnectionName;
 
     // user interface data
@@ -119,12 +120,14 @@ private:
     QLineEdit* suiteNameBox;
     bool minBtn_toggle;
     QToolButton* minBtn;
+    int resultTableSortIdx;
+    std::vector<int> nonResultItemList;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;
 
     // init functions
-    void dbConnect(QString dbFilePath);
+    void dbConnect(QString& dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
