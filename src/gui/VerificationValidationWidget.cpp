@@ -1323,6 +1323,7 @@ void VerificationValidationWidget::setupUI() {
     resultTable->resizeColumnsToContents();
     resultTable->setColumnHidden(RESULT_TABLE_IDX, true);
     resultTable->setColumnHidden(ERROR_TYPE, true);
+    resultTable->setContextMenuPolicy(Qt::CustomContextMenu);
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
@@ -1340,7 +1341,7 @@ void VerificationValidationWidget::setupUI() {
     connect(buttonOptions, &QDialogButtonBox::accepted, this, &VerificationValidationWidget::runTests);
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
-    connect(resultTable, SIGNAL(cellClicked(int, int)), this, SLOT(setupResultMenu(int, int)));
+    connect(resultTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(setupResultMenu(const QPoint&)));
 }
 
 QSqlQuery* VerificationValidationWidget::dbExec(QString command, bool showErrorPopup) {
@@ -1363,24 +1364,38 @@ void VerificationValidationWidget::dbClearResults() {
     delete dbExec("DELETE FROM ObjectIssue");
 }
 
-void VerificationValidationWidget::copyToClipboard() {
+void VerificationValidationWidget::copyToClipboard(QTableWidgetItem* item) {
     clipboard = QApplication::clipboard();
-    QTableWidgetItem *objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
+    QTableWidgetItem *objPathItem = resultTable->item(item->row(), OBJPATH_COLUMN);
     QString objPath = (objPathItem) ? objPathItem->text() : "";
     clipboard->setText(objPath);
 }
 
-void VerificationValidationWidget::setupResultMenu(int row, int column) {
-    currentResultRow = row;
+void VerificationValidationWidget::setupResultMenu(const QPoint& pos) {
+    //currentResultRow = row;
+    QList<QTableWidgetItem*> list = resultTable->selectedItems();
+    QList<QTableWidgetItem*> selectedItems;
+    for(int i = 0; i < list.size(); i++) {
+        if(list.at(i)->column() == OBJPATH_COLUMN)
+            selectedItems.append(list.at(i));
+    }
     QMenu *resultMenu = new QMenu();
-    resultMenu->addAction("Visualize Objects", this, SLOT(visualizeOverlaps()));
-    resultMenu->addAction("Test Result Details", this, SLOT(setupDetailedResult()));
-    resultMenu->addAction("Copy Path", this, SLOT(copyToClipboard()));
+    resultMenu->addAction("Visualize Objects", this, [this, selectedItems]{
+        visualizeObjects(selectedItems);
+    });
+    if(selectedItems.size() == 1) {
+        resultMenu->addAction("Test Result Details", this, [this, selectedItems]{
+            setupDetailedResult(selectedItems.at(0));
+        });
+        resultMenu->addAction("Copy Path", this, [this, selectedItems]{
+            copyToClipboard(selectedItems.at(0));
+        });
+    }
 
     resultMenu->exec(QCursor::pos());
 }
 
-void VerificationValidationWidget::setupDetailedResult() {
+void VerificationValidationWidget::setupDetailedResult(QTableWidgetItem* item) {
     QDialog* detail_dialog = new QDialog();
     detail_dialog->setModal(true);
     detail_dialog->setWindowTitle("Test Result Details");
@@ -1389,9 +1404,9 @@ void VerificationValidationWidget::setupDetailedResult() {
 
     QString resultCode;
     
-    QTableWidgetItem* testNameItem = resultTable->item(currentResultRow, TEST_NAME_COLUMN);
-    QTableWidgetItem* descriptionItem = resultTable->item(currentResultRow, DESCRIPTION_COLUMN);
-    QTableWidgetItem* objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
+    QTableWidgetItem* testNameItem = resultTable->item(item->row(), TEST_NAME_COLUMN);
+    QTableWidgetItem* descriptionItem = resultTable->item(item->row(), DESCRIPTION_COLUMN);
+    QTableWidgetItem* objPathItem = resultTable->item(item->row(), OBJPATH_COLUMN);
 
     QString testName = (testNameItem) ? testNameItem->text() : "";
     QString description = (descriptionItem) ? descriptionItem->text() : "";
@@ -1403,7 +1418,7 @@ void VerificationValidationWidget::setupDetailedResult() {
     if (!q->next()) { return; }
     int testID = q->value(0).toInt();
     Test currentTest = itemToTestMap.at(idToItemMap.at(testID)).second;
-    QString object = resultTable->item(currentResultRow, OBJECT_COLUMN)->text();
+    QString object = resultTable->item(item->row(), OBJECT_COLUMN)->text();
     QString testCommand = currentTest.getCMD(object);
 
     QString objectPlaceholder = object;
@@ -1487,71 +1502,82 @@ void VerificationValidationWidget::setupDetailedResult() {
     detail_dialog->exec();
 }
 
-void VerificationValidationWidget::visualizeOverlaps() {
-    QTableWidgetItem* testNameItem = resultTable->item(currentResultRow, TEST_NAME_COLUMN);
-    QTableWidgetItem* descriptionItem = resultTable->item(currentResultRow, DESCRIPTION_COLUMN);
-    QTableWidgetItem* objPathItem = resultTable->item(currentResultRow, OBJPATH_COLUMN);
+void VerificationValidationWidget::visualizeObjects(QList<QTableWidgetItem*> items) {
+    QTableWidgetItem* testNameItem;
+    QTableWidgetItem* descriptionItem;
+    QTableWidgetItem* objPathItem;
 
-    QString testName = (testNameItem) ? testNameItem->text() : "";
-    QString description = (descriptionItem) ? descriptionItem->text() : "";
-    QString objPath = (objPathItem) ? objPathItem->text() : "";
+    QString testName;
+    QString description;
+    QString objPath;
+    QString objName, objName2;
+    int testID;
+    int code;
+    int idxLastSlash;
+    QStringList splitString;
+
+    QList<QString> objNames;
+    QList<int> codes;
+
     QSqlQuery* q = new QSqlQuery(getDatabase());
-    q->prepare("SELECT id FROM Tests WHERE testName = ?");
-    q->addBindValue(testName);
-    dbExec(q);
-    if (!q->next()) {
-        popup("Failed to show testName: " + testName);
-        return;
-    }
-
-    int testID = q->value(0).toInt();
-
-    QSqlQuery* q2 = new QSqlQuery(getDatabase());
-    q2->prepare("SELECT resultCode FROM TestResults WHERE testID = ?");
-    q2->addBindValue(testID);
-    dbExec(q2);
-    if (!q2->next()) {
-        popup("Failed to show testID: " + testID);
-        return;
-    }
-
-    int code = q2->value(0).toInt();
-
     ObjectTree *objTree = document->getObjectTree();
     QHash<int, QString> nameMap = document->getObjectTree()->getNameMap();
     QHashIterator<int, QString> iter1(nameMap);
     QHashIterator<int, QString> iter2(nameMap);
 
-    if((code == Result::Code::WARNING || code == Result::Code::FAILED) && testName == DefaultTests::NO_OVERLAPS.testName) {
-        //QString visualizeCmd = "gqa -Ap -g"+DefaultTests::NO_OVERLAPS.ArgList[1].defaultValue+" -t"+DefaultTests::NO_OVERLAPS.ArgList[2].defaultValue+" "+objName1+" "+objName2;
-        QStringList splitString = description.split('\'');
-        QString objName1 = splitString[1];
-        QString objName2 = splitString[3];
+    for(int i = 0; i < items.size(); i++) {
+        testNameItem = resultTable->item(items.at(i)->row(), TEST_NAME_COLUMN);
+        descriptionItem = resultTable->item(items.at(i)->row(), DESCRIPTION_COLUMN);
+        objPathItem = resultTable->item(items.at(i)->row(), OBJPATH_COLUMN);
 
-        while(iter1.hasNext()) {
-            iter1.next();
-            objTree->changeVisibilityState(iter1.key(), false);
+        testName = (testNameItem) ? testNameItem->text() : "";
+        description = (descriptionItem) ? descriptionItem->text() : "";
+        objPath = (objPathItem) ? objPathItem->text() : "";
+
+        q->prepare("SELECT id FROM Tests WHERE testName = ?");
+        q->addBindValue(testName);
+        dbExec(q);
+        if (!q->next()) {
+            popup("Failed to show testName: " + testName);
+            return;
         }
-        while(iter2.hasNext()) {
-            iter2.next();
-            if(iter2.value() == objName1 || iter2.value() == objName2)
-                objTree->changeVisibilityState(iter2.key(), true);
+
+        testID = q->value(0).toInt();
+
+        q->prepare("SELECT resultCode FROM TestResults WHERE testID = ?");
+        q->addBindValue(testID);
+        dbExec(q);
+        if (!q->next()) {
+            popup("Failed to show testID: " + testID);
+            return;
+        }
+
+        code = q->value(0).toInt();
+        codes.append(code);
+
+        if((code == Result::Code::WARNING || code == Result::Code::FAILED) && testName == DefaultTests::NO_OVERLAPS.testName) {
+            splitString = description.split('\'');
+            objName = splitString[1];
+            objName2 = splitString[3];
+            objNames.append(objName);
+            objNames.append(objName2);
+        }
+        else {
+            idxLastSlash = objPath.lastIndexOf('/');
+            if(idxLastSlash == -1) continue;
+            objName = objPath.mid(idxLastSlash + 1, objPath.size() - idxLastSlash - 1);
+            objNames.append(objName);
         }
     }
 
-    else {
-        int idxLastSlash = objPath.lastIndexOf('/');
-        if(idxLastSlash == -1) return;
-        QString objName = objPath.mid(idxLastSlash + 1, objPath.size() - idxLastSlash - 1);
-        while(iter1.hasNext()) {
-            iter1.next();
-            objTree->changeVisibilityState(iter1.key(), false);
-        }
-        while(iter2.hasNext()) {
-            iter2.next();
-            if(iter2.value() == objName)
-                objTree->changeVisibilityState(iter2.key(), true);
-        }
+    while(iter1.hasNext()) {
+        iter1.next();
+        objTree->changeVisibilityState(iter1.key(), false);
+    }
+    while(iter2.hasNext()) {
+        iter2.next();
+        if(objNames.contains(iter2.value()))
+            objTree->changeVisibilityState(iter2.key(), true);
     }
 
     document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
