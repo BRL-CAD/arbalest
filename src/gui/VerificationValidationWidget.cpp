@@ -1179,11 +1179,39 @@ void VerificationValidationWidget::setupUI() {
     // setup result table's column headers
     QStringList columnLabels;
     columnLabels << "   " << "Test Name" << "Description" << "Object Path";
-    resultTable->setColumnCount(columnLabels.size() + 2); // add hidden columns for testResultID + object
+    resultTable->setColumnCount(columnLabels.size() + 4); // add hidden columns for testResultID + object
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
     resultTable->horizontalHeader()->setStretchLastSection(true);
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    
+    QHeaderView* header = resultTable->horizontalHeader();
+    resultTableSortIdx = 6;
+    connect(header, &QHeaderView::sectionClicked, [this](int idx){
+        if(idx == resultTableSortIdx){
+            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#f4f4f4"));
+            resultTable->sortItems(RESULT_TABLE_IDX, Qt::AscendingOrder);
+
+            for(int i = 0; i < nonResultItemList.size(); i++){
+                resultTable->showRow(nonResultItemList[i]);
+            }
+            resultTableSortIdx = RESULT_TABLE_IDX;
+        } else {
+            if(resultTableSortIdx != RESULT_TABLE_IDX){
+                resultTable->horizontalHeaderItem(resultTableSortIdx)->setBackground(QColor("#f4f4f4"));
+            }
+            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#87cefa"));
+            for(int i = 0; i < nonResultItemList.size(); i++){
+                resultTable->hideRow(nonResultItemList[i]);
+            }
+            if(idx == 0)
+                resultTable->sortItems(ERROR_TYPE, Qt::AscendingOrder);
+            else
+                resultTable->sortItems(idx, Qt::AscendingOrder);
+            resultTableSortIdx = idx;
+        }
+    });
+
     addWidget(resultTable);
 
     QSqlDatabase db = getDatabase();
@@ -1266,6 +1294,8 @@ void VerificationValidationWidget::setupUI() {
     resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
     resultTable->setColumnHidden(OBJECT_COLUMN, true);
     resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
+    resultTable->setColumnHidden(RESULT_TABLE_IDX, true);
+    resultTable->setColumnHidden(ERROR_TYPE, true);
 	
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
@@ -1547,6 +1577,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         QFont f;
         f.setBold(true);
         resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setFont(f);
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        nonResultItemList.push_back(resultTable->rowCount()-1);
     }
 
     if (resultCode == Result::Code::PASSED) {
@@ -1556,6 +1588,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
         resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(4)));
     } 
 
     else if (resultCode == Result::Code::UNPARSEABLE) {
@@ -1565,6 +1599,8 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
         resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem(testName));
         resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
         resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+        resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(3)));
     }
 
     else {
@@ -1590,11 +1626,16 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             issueDescription = q3->value(1).toString().replace("\n", "");
 
             resultTable->insertRow(resultTable->rowCount());
-
-            if (resultCode == VerificationValidation::Result::Code::FAILED)
+            
+            int error_type;
+            if (resultCode == VerificationValidation::Result::Code::FAILED){
                 iconPath = ":/icons/error.png";
-            else if (resultCode == VerificationValidation::Result::Code::WARNING)
-                iconPath = ":/icons/warning.png";                
+                error_type = 1;
+            }
+            else if (resultCode == VerificationValidation::Result::Code::WARNING){
+                iconPath = ":/icons/warning.png";
+                error_type = 2;
+            }        
 
             // Change to hide icon image path from showing
             resultTable->setItem(resultTable->rowCount()-1, RESULT_CODE_COLUMN, new QTableWidgetItem(QIcon(iconPath), ""));
@@ -1603,6 +1644,9 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
             resultTable->setItem(resultTable->rowCount()-1, OBJPATH_COLUMN, new QTableWidgetItem(objectName));
             resultTable->setItem(resultTable->rowCount()-1, TEST_RESULT_ID_COLUMN, new QTableWidgetItem(testResultID));
             resultTable->setItem(resultTable->rowCount()-1, OBJECT_COLUMN, new QTableWidgetItem(object));
+            resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
+            resultTable->setItem(resultTable->rowCount()-1, ERROR_TYPE, new QTableWidgetItem(QString::number(error_type)));
+
             delete q3;
         }
         delete q2;
