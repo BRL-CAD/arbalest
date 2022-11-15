@@ -1081,12 +1081,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 }
 
 void MainWindow::moveCameraButtonAction() {
-    /*if (m_mouseAction != nullptr) {
-        delete m_mouseAction;
-    }
-
-    m_mouseAction = new MoveCameraMouseAction();*/
-
     if (activeDocumentId != -1) {
         DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
 
