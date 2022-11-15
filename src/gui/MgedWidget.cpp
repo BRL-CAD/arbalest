@@ -4,9 +4,7 @@
 #include "MgedWidget.h"
 #include "Document.h"
 
-// TODO: test undo/redo, select all -> delete, etc.
-// TODO: fix shortcuts (e.g.: fn+left)
-// TODO: implement CTRL+C
+// TODO: implement CTRL+C?
 // TODO: consider case where baseCurPos overflows
 
 MgedWidget::MgedWidget(Document* d, QWidget* parent) : QPlainTextEdit(TERMINAL_PREFIX), d(d), prefix(TERMINAL_PREFIX), baseCurPos(prefix.size()) {}
@@ -14,9 +12,10 @@ MgedWidget::MgedWidget(Document* d, QWidget* parent) : QPlainTextEdit(TERMINAL_P
 void MgedWidget::keyPressEvent(QKeyEvent* event) {
 	QTextCursor cursor = textCursor();
 	int key = event->key();
+
 	if (key != Qt::Key_Up && key != Qt::Key_Down && key != Qt::Key_Left && key != Qt::Key_Right) {
 		if (cursor.position() == baseCurPos && key == Qt::Key_Backspace) return;
-		else if (cursor.position() < baseCurPos) {
+		else if (cursor.position() < baseCurPos || cursor.selectionStart() < baseCurPos) {
 			cursor.setPosition(baseCurPos);
 			setTextCursor(cursor);
 			return;
@@ -44,6 +43,7 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 		insertPlainText("\n");
 		insertPlainText(prefix);
 		baseCurPos = textCursor().position();
+		document()->clearUndoRedoStacks();
 	}
 }
 
