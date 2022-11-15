@@ -100,7 +100,7 @@ void ObjectTreeWidget::build(const int objectId, QTreeWidgetItem* parent)
 	}
 }
 
-void ObjectTreeWidget::build(QString selected) {
+void ObjectTreeWidget::select(QString selected) {
     int size = document->getObjectTree()->getFullPathMap().size();
 
     for (int objectId = 1; objectId < size; ++objectId) {

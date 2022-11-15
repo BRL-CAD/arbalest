@@ -122,7 +122,7 @@ void DisplayGrid::setSelectObjectMouseAction() {
 
             if (selectMouseAction != nullptr) {
                 QString regionName = selectMouseAction->getSelected();
-                document->getObjectTreeWidget()->build(regionName);
+                document->getObjectTreeWidget()->select(regionName);
             }
         });
     }
