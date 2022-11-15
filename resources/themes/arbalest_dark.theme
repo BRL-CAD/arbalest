@@ -19,6 +19,8 @@ $Color-PropertiesObjectNameText         : #ff3567;  // Name text color of select
 $Color-PropertiesObjectTypeText         : #3ed9ff; // Title of CollapsibleWidget
 $Color-SelectedObjectRow                : #646464;  // Background of the object selected in the object tree.
 $Color-HoverObjectRow                   : #00000000;  // Background of the object selected in the object tree.
+$Color-SelectedVVRow                    : #0078D7; // Color of Verification Validation row when highlighted
+$Color-IconEditVVArg                    : #ffffff; // Color of Verification Validation icon's edit button
 $Color-LightText                        : #eaeaea;  // for non important text
 $Color-ScrollBars                       : #626262;
 $Color-DataCellBordersAndHeader         : #30374a;

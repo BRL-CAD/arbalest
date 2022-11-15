@@ -10,7 +10,7 @@ using Parser = VerificationValidation::Parser;
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
 document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
-testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
 msgBoxRes(NO_SELECTION), dbConnectionName("")
 {
@@ -649,7 +649,7 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
         item->setCheckState(Qt::Unchecked);
         item->setFlags(item->flags() &  ~Qt::ItemIsSelectable);
         if(t.hasVarArgs()) {
-            item->setIcon(QIcon(QIcon(":/icons/edit_default.png")));
+            item->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit_default.png", "$Color-IconEditVVArg"))));
         }
 
         listWidget->addItem(item);
@@ -1167,10 +1167,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 
                 if(isDefault){
                     test->setText(testName+" (default)");
-                    test->setIcon(QIcon(":/icons/edit_default.png"));
+                    test->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit_default.png", "$Color-IconEditVVArg"))));
                 } else {
                     test->setText(testName);
-                    test->setIcon(QIcon(":/icons/edit.png"));
+                    test->setIcon(QIcon(QPixmap::fromImage(coloredIcon(":/icons/edit.png", "$Color-IconEditVVArg"))));
                 }
                 test->setToolTip(itemToTestMap.at(test).second.getCMD());
             });
@@ -1225,6 +1225,20 @@ void VerificationValidationWidget::setupUI() {
     });
 
     addWidget(resultTable);
+
+    // setup terminal
+    QPushButton* btnCollapseTerminal = new QPushButton;
+    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
+    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    addWidget(btnCollapseTerminal);
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
+        if (!terminal) {
+            terminal = new MgedWidget(document);
+            terminal->setVisible(false);
+            this->addWidget(terminal);
+        }
+        terminal->setVisible(!terminal->isVisible());
+    });
 
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
@@ -1306,6 +1320,7 @@ void VerificationValidationWidget::setupUI() {
     resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
     resultTable->setColumnHidden(OBJECT_COLUMN, true);
     resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
+    resultTable->resizeColumnsToContents();
     resultTable->setColumnHidden(RESULT_TABLE_IDX, true);
     resultTable->setColumnHidden(ERROR_TYPE, true);
 	
@@ -1346,14 +1361,6 @@ void VerificationValidationWidget::dbClearResults() {
     delete dbExec("DELETE FROM TestResults");
     delete dbExec("DELETE FROM Issues");
     delete dbExec("DELETE FROM ObjectIssue");
-}
-
-void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
-    resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
-    resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.125);
-    resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.60);
-    resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.25);
-    QHBoxWidget::resizeEvent(event);
 }
 
 void VerificationValidationWidget::copyToClipboard() {
@@ -1743,6 +1750,7 @@ void VerificationValidationWidget::updateDockableHeader() {
 
         QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
         QLabel *title = new QLabel(dockableTitle);
+        title->setStyleSheet("QLabel { background: transparent; }");
         minBtn = new QToolButton();
         minBtn->setIcon(QIcon(":/icons/expand.png"));
         minBtn_toggle = true;
