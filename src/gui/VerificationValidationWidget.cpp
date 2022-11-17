@@ -1202,8 +1202,8 @@ void VerificationValidationWidget::setupUI() {
 
     // setup result table's column headers
     QStringList columnLabels;
-    columnLabels << "   " << "Test Name" << "Description" << "Object Path";
-    resultTable->setColumnCount(columnLabels.size() + 4); // add hidden columns for testResultID + object
+    columnLabels << "   " << "Test Name" << "Description" << "Object Path" << "Object Tested";
+    resultTable->setColumnCount(columnLabels.size() + 3); // add hidden columns for testResultID + object
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
     resultTable->horizontalHeader()->setStretchLastSection(true);
@@ -1330,7 +1330,6 @@ void VerificationValidationWidget::setupUI() {
 
     resultTable->setShowGrid(false);
     resultTable->setStyleSheet("QTableWidget::item {border-bottom: 0.5px solid #3C3C3C;}");
-    resultTable->setColumnHidden(OBJECT_COLUMN, true);
     resultTable->setColumnHidden(TEST_RESULT_ID_COLUMN, true);
     resultTable->resizeColumnsToContents();
     resultTable->setColumnHidden(RESULT_TABLE_IDX, true);
