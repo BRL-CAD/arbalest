@@ -419,6 +419,7 @@ void VerificationValidationWidget::searchTests_run(const QString &input)  {
                 item->setHidden(false);
         }
     }
+    searchTests_SA();
 }
 
 void VerificationValidationWidget::searchTests_rm(const QString &input)  {
@@ -440,6 +441,22 @@ void VerificationValidationWidget::searchTests_rm(const QString &input)  {
                 item->setHidden(false);
         }
     }
+}
+
+void VerificationValidationWidget::searchTests_SA(){
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < itemToTestMap.size(); i++) {
+        auto it = itemToTestMap.begin();
+        std::advance(it, i);
+        item = it->first;
+        if(!item->isHidden()){
+            if(!item->checkState()){
+                test_sa->item(0)->setCheckState(Qt::Unchecked);
+                return;
+            }
+        }
+	}
+    test_sa->item(0)->setCheckState(Qt::Checked);
 }
 
 void VerificationValidationWidget::searchTests_TS(const QString &input)  {
@@ -482,20 +499,15 @@ void VerificationValidationWidget::updateTestSelectAll(QListWidgetItem* sa_optio
         auto it = itemToTestMap.begin();
         std::advance(it, i);
         item = it->first;
-		if(sa_option->checkState()){
-			item->setCheckState(Qt::Checked);
-		} else {
-			item->setCheckState(Qt::Unchecked);
-		}
+        if(!item->isHidden()){
+            if(sa_option->checkState()){
+                item->setCheckState(Qt::Checked);
+            } else {
+                item->setCheckState(Qt::Unchecked);
+            }
+            testListSelection(item);
+        }
 	}
-
-    if(sa_option->checkState()){
-		suite_sa->item(0)->setCheckState(Qt::Checked);
-	} else {
-        suite_sa->item(0)->setCheckState(Qt::Unchecked);
-    }
-    
-    updateSuiteSelectAll(suite_sa->item(0));
 }
 
 void VerificationValidationWidget::checkSuiteSA() {
