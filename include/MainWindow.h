@@ -113,11 +113,56 @@ public slots:
         qApp->processEvents();
     }
 
-    void updateVerifyValidateAct(VerificationValidationWidget* vvWidget) {
-        if (!vvWidget || !vvWidget->isRunningTests())
+    void updateVerifyValidateAct(Document* currentDocument) {
+        if (!currentDocument) return;
+        verifyValidateViewportAct->disconnect();
+        if (!currentDocument->getVerificationValidationWidget() || !currentDocument->getVerificationValidationWidget()->isRunningTests()) {
             verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
-        else
+            connect(verifyValidateViewportAct, &QAction::triggered, [this, currentDocument]() {
+                if (activeDocumentId == -1) return;
+                VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
+
+                // verification and validation needs persistent .g file
+                if (!vvWidget) {
+                    QMessageBox msgBox;
+                    msgBox.setIcon(QMessageBox::Warning);
+                    msgBox.setText("You must save this file before running tests.");
+                    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                    msgBox.setDefaultButton(QMessageBox::Ok);
+
+                    if (msgBox.exec() == QMessageBox::Ok) {
+                        if (!saveAsFileDialogId(currentDocument->getDocumentId())) {
+                            popup("Failed to save.");
+                            return;
+                        }
+                        statusBar->showMessage("Loading Verification & Validation widget", statusBarShortMessageDuration);
+                    }
+                    else {
+                        statusBar->showMessage("No changes were made.", statusBarShortMessageDuration);
+                        return;
+                    }
+
+                    if (currentDocument->getFilePath()) {
+                        currentDocument->loadVerificationValidationWidget();
+                        vvWidget = currentDocument->getVerificationValidationWidget();
+                        objectVerificationValidationDockable->setContent(vvWidget);
+                    }
+                }
+                QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+                if (!selectedObjects.size()) {
+                    popup("Cannot run tests with no visible objects.");
+                    return;
+                }
+                objectVerificationValidationDockable->setVisible(true);
+                vvWidget->showSelectTests();
+            });
+        }
+        else {
             verifyValidateViewportAct->setIcon(QIcon(":/icons/verifyValidateCancelIcon.png"));
+            connect(verifyValidateViewportAct, &QAction::triggered, [this, currentDocument]() {
+                std::cout << "canceling here!!!" << std::endl;
+            });
+        }
     }
 };
 #endif // MAINWINDOW_H

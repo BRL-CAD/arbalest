@@ -558,47 +558,9 @@ void MainWindow::prepareUi() {
 
     QMenu* verifyValidateMenu = menuTitleBar->addMenu(tr("&Verify/Validate"));
     verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
-    verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
     verifyValidateViewportAct->setStatusTip(tr("Verify and validate current viewport"));
     verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
-    connect(verifyValidateViewportAct, &QAction::triggered, this, [this](){
-        if (activeDocumentId == -1) return;
-        Document* currentDocument = documents[activeDocumentId];
-        VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
-        // verification and validation needs persistent .g file
-        if (!vvWidget) {
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("You must save this file before running tests.");
-            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Ok);
-
-            if (msgBox.exec() == QMessageBox::Ok)  {
-                if (!saveAsFileDialogId(currentDocument->getDocumentId())) {
-                    popup("Failed to save.");
-                    return;
-                }
-                statusBar->showMessage("Loading Verification & Validation widget", statusBarShortMessageDuration);
-            }
-            else {
-                statusBar->showMessage("No changes were made.", statusBarShortMessageDuration);
-                return;
-            }
-
-            if (currentDocument->getFilePath()) { 
-                currentDocument->loadVerificationValidationWidget();
-                vvWidget = currentDocument->getVerificationValidationWidget();
-                objectVerificationValidationDockable->setContent(vvWidget);
-            }
-        }
-        QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-        if (!selectedObjects.size()) { 
-            popup("Cannot run tests with no visible objects.");
-            return;
-        }
-        objectVerificationValidationDockable->setVisible(true);
-        vvWidget->showSelectTests();
-    });
+    updateVerifyValidateAct(documents[activeDocumentId]);
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
     QAction* verificationValidationNewTest = new QAction(tr("Create new test"), this);
@@ -1069,7 +1031,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
-            updateVerifyValidateAct(documents[activeDocumentId]->getVerificationValidationWidget());
+            updateVerifyValidateAct(documents[activeDocumentId]);
             if (documents[activeDocumentId]->getVerificationValidationWidget())
                 documents[activeDocumentId]->getVerificationValidationWidget()->updateDockableHeader();
             else

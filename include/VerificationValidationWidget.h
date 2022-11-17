@@ -56,7 +56,7 @@ public:
 
 signals:
     void queryFinished(const QList<QList<QVariant>>& answer);
-    void updateVerifyValidateAct(VerificationValidationWidget* vvWidget);
+    void updateVerifyValidateAct(Document* currentDocument);
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);

@@ -1224,11 +1224,11 @@ void VerificationValidationWidget::setupUI() {
         connect(thread, &MgedWorker::finished, thread, &QObject::deleteLater);
         connect(thread, &MgedWorker::finished, [this]() {
             this->runningTests = false;
-            emit updateVerifyValidateAct(this);
+            emit updateVerifyValidateAct(this->document);
         });
 
         this->runningTests = true;
-        emit updateVerifyValidateAct(this);
+        emit updateVerifyValidateAct(this->document);
         thread->start();        
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
