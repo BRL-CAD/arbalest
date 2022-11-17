@@ -180,11 +180,10 @@ class MgedWorker : public QThread {
     Q_OBJECT
 public:
     MgedWorker(const QList<QListWidgetItem*>& selected_tests, const QStringList& selectedObjects, const int& totalTests, const std::map<QListWidgetItem*, std::pair<int, Test>>& itemToTestMap, 
-        const QString& modelID, const QString& dbConnectionName, const QString& gFilePath, const QString& dbFilePath) 
+        const QString& modelID, const QString& gFilePath) 
         : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap), 
-        modelID(modelID), dbConnectionName(dbConnectionName + "_run_tests"), gFilePath(gFilePath), dbFilePath(dbFilePath)
+        modelID(modelID), gFilePath(gFilePath)
     {}
-    QSqlDatabase getDatabase() const { return QSqlDatabase::database(this->dbConnectionName, false); }
     void run() override;
 
 signals:
@@ -197,11 +196,8 @@ private:
     const QList<QListWidgetItem*> selected_tests;
     const std::map<QListWidgetItem*, std::pair<int, Test>> itemToTestMap;
     const QStringList selectedObjects;
-    
     const QString modelID;
-    const QString dbConnectionName;
     const QString gFilePath;
-    const QString dbFilePath;
     const int totalTests;
 };
 #endif

@@ -1693,18 +1693,7 @@ QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
 }
 
 void MgedWorker::run() {
-    //QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName); // TODO: deprecate everything related to this
-    //db.setDatabaseName(this->dbFilePath);
-    // TODO: transition to signals/slots method (e.g.: thread emits signals to main thread to perform DB queries) -- use QString -> template + QStringList ->args
-
-    /*if (!db.open() || !db.isOpen()) {
-        std::cout << "[MgedWorker] ERROR: db failed to open: " << db.lastError().text().toStdString() << std::endl;
-        return;
-    }*/
-
     QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
-    //QSqlQuery* q = new QSqlQuery(getDatabase()); // TODO: deprecate everything related to this
-
     for (int objIdx = 0; objIdx < selectedObjects.size(); objIdx++) {
         QString object = selectedObjects[objIdx];
         for (int i = 0; i < totalTests; i++) {
@@ -1721,18 +1710,12 @@ void MgedWorker::run() {
 
                 int cnt = 0;
                 QList<QList<QVariant>> answer;
-                std::cout << "emitting query request" << std::endl;
                 emit queryRequest("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?", 
                     { QString::number(testID), QString::number(currentTest.ArgList[j].argIdx), arg, QString::number((int)type) },
                     &answer, 1);
-                std::cout << "finished emitting query request" << std::endl;
-
-                // TODO: make sure queryRequest blocks
 
                 if (answer.size() > 0 && answer[0].size() > 0)
                     cnt = answer[0][0].toInt();
-                else
-                    std::cout << "was not able to get proper response: " << answer.size() << std::endl;
 
                 if (!cnt) {
                     emit queryRequest("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)",
