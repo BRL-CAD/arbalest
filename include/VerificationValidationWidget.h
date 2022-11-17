@@ -53,6 +53,9 @@ public:
     void showNewTestSuiteDialog();
     void showRemoveTestSuiteDialog();
 
+signals:
+    void queryFinished(const QList<QList<QVariant>>& answer);
+
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
 	void updateTestSelectAll(QListWidgetItem*);
@@ -76,6 +79,8 @@ private slots:
     void isVarClicked(int state);
     void resultTableChangeSize();
     void showResult(const QString& testResultID);
+    void performQueryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer, const int& numAnswersExpected);
+    void performQueryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
 
 private:
     MainWindow *mainWindow;
@@ -185,6 +190,8 @@ public:
 signals:
     void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
     void showResultRequest(const QString& testResultID);
+    void queryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer = nullptr, const int& numAnswersExpected = 0);
+    void queryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
 
 private:
     const QList<QListWidgetItem*> selected_tests;

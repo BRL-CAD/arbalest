@@ -1209,7 +1209,17 @@ void VerificationValidationWidget::setupUI() {
             mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
 
         // signal that allows Verification Validation Widget's result table to be updated via thread
-        connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult);
+        connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult, Qt::BlockingQueuedConnection);
+
+        // signals that allows V&V Widget's database to be updated from thread
+        // note: must be blocking
+        connect(thread, qOverload<const QString&, const QStringList&, QList<QList<QVariant>>*, const int&>(&MgedWorker::queryRequest), 
+                this, qOverload<const QString&, const QStringList&, QList<QList<QVariant>>*, const int&>(&VerificationValidationWidget::performQueryRequest),
+                Qt::BlockingQueuedConnection);
+        
+        connect(thread, qOverload<const QString&, const QStringList&, QString&>(&MgedWorker::queryRequest),
+                this, qOverload<const QString&, const QStringList&, QString&>(&VerificationValidationWidget::performQueryRequest),
+                Qt::BlockingQueuedConnection);
         thread->start();
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
@@ -1683,17 +1693,17 @@ QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
 }
 
 void MgedWorker::run() {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName);
-    db.setDatabaseName(this->dbFilePath);
+    //QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName); // TODO: deprecate everything related to this
+    //db.setDatabaseName(this->dbFilePath);
     // TODO: transition to signals/slots method (e.g.: thread emits signals to main thread to perform DB queries) -- use QString -> template + QStringList ->args
 
-    if (!db.open() || !db.isOpen()) {
+    /*if (!db.open() || !db.isOpen()) {
         std::cout << "[MgedWorker] ERROR: db failed to open: " << db.lastError().text().toStdString() << std::endl;
         return;
-    }
+    }*/
 
     QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
-    QSqlQuery* q = new QSqlQuery(getDatabase());
+    //QSqlQuery* q = new QSqlQuery(getDatabase()); // TODO: deprecate everything related to this
 
     for (int objIdx = 0; objIdx < selectedObjects.size(); objIdx++) {
         QString object = selectedObjects[objIdx];
@@ -1710,23 +1720,23 @@ void MgedWorker::run() {
                 else if (type == Arg::Type::ObjectPath) arg = object;
 
                 int cnt = 0;
-                q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
-                q->addBindValue(testID);
-                q->addBindValue(currentTest.ArgList[j].argIdx);
-                q->addBindValue(arg);
-                q->addBindValue(type);
-                q->exec();
+                QList<QList<QVariant>> answer;
+                std::cout << "emitting query request" << std::endl;
+                emit queryRequest("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?", 
+                    { QString::number(testID), QString::number(currentTest.ArgList[j].argIdx), arg, QString::number((int)type) },
+                    &answer, 1);
+                std::cout << "finished emitting query request" << std::endl;
 
-                if (q->next()) cnt = q->value(0).toInt();
+                // TODO: make sure queryRequest blocks
+
+                if (answer.size() > 0 && answer[0].size() > 0)
+                    cnt = answer[0][0].toInt();
+                else
+                    std::cout << "was not able to get proper response: " << answer.size() << std::endl;
 
                 if (!cnt) {
-                    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
-                    q->addBindValue(testID);
-                    q->addBindValue(currentTest.ArgList[j].argIdx);
-                    q->addBindValue(arg);
-                    q->addBindValue(type);
-                    q->addBindValue(currentTest.ArgList[j].defaultValue);
-                    q->exec();
+                    emit queryRequest("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)",
+                        { QString::number(testID), QString::number(currentTest.ArgList[j].argIdx), arg, QString::number((int)type), currentTest.ArgList[j].defaultValue });
                 }
             }
 
@@ -1738,18 +1748,15 @@ void MgedWorker::run() {
             else if (type == Arg::Type::ObjectNone)
                 objectPlaceholder = "";
 
-            q->prepare("SELECT id FROM TestArg WHERE (argType = ? OR argType = ? or argType = ?) AND arg = ? AND testID = ?");
-            q->addBindValue(Arg::Type::ObjectName);
-            q->addBindValue(Arg::Type::ObjectPath);
-            q->addBindValue(Arg::Type::ObjectNone);
-            q->addBindValue(objectPlaceholder);
-            q->addBindValue(testID);
-            q->exec();
+            QList<QList<QVariant>> answer;
+            emit queryRequest("SELECT id FROM TestArg WHERE (argType = ? OR argType = ? or argType = ?) AND arg = ? AND testID = ?",
+                { QString::number((int)Arg::Type::ObjectName), QString::number((int)Arg::Type::ObjectPath), QString::number((int)Arg::Type::ObjectNone), objectPlaceholder, QString::number(testID) },
+                &answer, 1);
 
-            if (!q->next()) continue;
+            if (!answer.size() || !answer[0].size()) continue;
 
             // run tests
-            QString objectArgID = q->value(0).toString();
+            QString objectArgID = answer[0][0].toString();
             QString testCommand = currentTest.getCMD(objectPlaceholder);
             if (previouslyRunTests.contains(testCommand)) continue;
             previouslyRunTests.insert(testCommand);
@@ -1761,11 +1768,8 @@ void MgedWorker::run() {
                 std::vector<Arg> newArgs = itemToTestMap.at(selected_tests[i]).second.ArgList;
                 for (int j = 0; j < newArgs.size(); j++) {
                     if (newArgs[j].type == Arg::Type::Dynamic) {
-                        q->prepare("UPDATE TestArg SET defaultVal = :newVal WHERE testID = :testId AND argIdx = :argIdx");
-                        q->bindValue(":newVal", newArgs[j].defaultValue);
-                        q->bindValue(":testId", testID);
-                        q->bindValue(":argIdx", newArgs[j].argIdx);
-                        q->exec();
+                        emit queryRequest("UPDATE TestArg SET defaultVal = ? WHERE testID = ? AND argIdx = ?",
+                            { newArgs[j].defaultValue, QString::number(testID), QString::number(newArgs[j].argIdx) });
                     }
                 }
             }
@@ -1792,38 +1796,61 @@ void MgedWorker::run() {
             QString resultCode = QString::number(result->resultCode);
 
             // insert results into db
-            q->prepare("INSERT INTO TestResults (modelID, testID, objectArgID, resultCode, terminalOutput) VALUES (?,?,?,?,?)");
-            q->addBindValue(modelID);
-            q->addBindValue(testID);
-            q->addBindValue(objectArgID);
-            q->addBindValue(resultCode);
-            q->addBindValue(terminalOutput);
-            q->exec();
+            QString testResultID;
+            emit queryRequest("INSERT INTO TestResults (modelID, testID, objectArgID, resultCode, terminalOutput) VALUES (?,?,?,?,?)",
+                { modelID, QString::number(testID), objectArgID, resultCode, terminalOutput },
+                testResultID);
 
-            QString testResultID = q->lastInsertId().toString();
             // insert issues into db
             for (Result::ObjectIssue currentIssue : result->issues) {
-                q->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
-                q->addBindValue(currentIssue.objectName);
-                q->addBindValue(currentIssue.issueDescription);
-                q->exec();
+                QString objectIssueID;
+                emit queryRequest("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)",
+                    { currentIssue.objectName, currentIssue.issueDescription },
+                    objectIssueID);
 
-                QString objectIssueID = q->lastInsertId().toString();
-                q->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
-                q->addBindValue(testResultID);
-                q->addBindValue(objectIssueID);
-                q->exec();
+                emit queryRequest("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)",
+                    { testResultID, objectIssueID });
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
             emit showResultRequest(testResultID);
         }
     }
 
-    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
-    q->addBindValue(modelID);
-    q->exec();
-    if (!q->next()) {
+    QList<QList<QVariant>> answer;
+    emit queryRequest("SELECT uuid, filePath FROM Model WHERE id = ?",
+        { modelID },
+        &answer, 2);
+    if (!answer.size() || !answer[0].size()) {
         std::cout << "Failed to show modelID " << modelID.toStdString() << std::endl;
         return;
     }
+}
+
+void VerificationValidationWidget::performQueryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer, const int& numAnswersExpected) {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare(query);
+    for (const QString& arg : args)
+        q->addBindValue(arg);
+    dbExec(q);
+
+    if (answer) {
+        while (q->next()) {
+            QList<QVariant> current;
+            for (int i = 0; i < numAnswersExpected; i++) {
+                current.append(q->value(i));
+            }
+            answer->append(current);
+        }
+    }
+    delete q;
+}
+
+void VerificationValidationWidget::performQueryRequest(const QString& query, const QStringList& args, QString& lastInsertId) {
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+    q->prepare(query);
+    for (const QString& arg : args)
+        q->addBindValue(arg);
+    dbExec(q);
+    lastInsertId = q->lastInsertId().toString();
+    delete q;
 }
