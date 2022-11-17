@@ -1220,6 +1220,7 @@ void VerificationValidationWidget::setupUI() {
         connect(thread, qOverload<const QString&, const QStringList&, QString&>(&MgedWorker::queryRequest),
                 this, qOverload<const QString&, const QStringList&, QString&>(&VerificationValidationWidget::performQueryRequest),
                 Qt::BlockingQueuedConnection);
+        connect(thread, &MgedWorker::finished, thread, &QObject::deleteLater);
         thread->start();
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
