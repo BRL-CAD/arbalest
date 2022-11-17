@@ -178,15 +178,7 @@ public:
         const QString& modelID, const QString& dbConnectionName, const QString& gFilePath, const QString& dbFilePath) 
         : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap), 
         modelID(modelID), dbConnectionName(dbConnectionName + "_run_tests"), gFilePath(gFilePath), dbFilePath(dbFilePath)
-    {
-        std::cout << "dbconnname: " << this->dbConnectionName.toStdString() << std::endl;
-        std::cout << "dbfilepath: " << this->dbFilePath.toStdString() << std::endl;
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName);
-        db.setDatabaseName(this->dbFilePath);
-
-        if (!db.open() || !db.isOpen())
-            throw std::runtime_error("[MgedWorker] ERROR: db failed to open: " + db.lastError().text().toStdString());
-    }
+    {}
     QSqlDatabase getDatabase() const { return QSqlDatabase::database(this->dbConnectionName, false); }
     void run() override;
 

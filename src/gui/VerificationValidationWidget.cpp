@@ -1202,23 +1202,15 @@ void VerificationValidationWidget::setupUI() {
         QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
 
         // spin up new thread and get to work
-        try {
-            MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, dbConnectionName, *(document->getFilePath()), dbFilePath);
+        MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, dbConnectionName, *(document->getFilePath()), dbFilePath);
 
-            // signal that allows for updating of MainWindow's status bar
-            connect(thread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
-                mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
+        // signal that allows for updating of MainWindow's status bar
+        connect(thread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
+            mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
 
-            // signal that allows Verification Validation Widget's result table to be updated via thread
-            connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult);
-            thread->start();
-        }
-        catch (const std::runtime_error& e) {
-            popup(e.what());
-        }
-        catch (...) {
-            popup("Failed to run tests");
-        }
+        // signal that allows Verification Validation Widget's result table to be updated via thread
+        connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult);
+        thread->start();
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
@@ -1691,6 +1683,15 @@ QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
 }
 
 void MgedWorker::run() {
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName);
+    db.setDatabaseName(this->dbFilePath);
+    // TODO: close this as described in https://stackoverflow.com/questions/66818889/what-is-the-correct-way-to-open-and-close-a-database-connection-for-a-qt-worker
+
+    if (!db.open() || !db.isOpen()) {
+        std::cout << "[MgedWorker] ERROR: db failed to open: " << db.lastError().text().toStdString() << std::endl;
+        return;
+    }
+
     QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
     QSqlQuery* q = new QSqlQuery(getDatabase());
 
@@ -1822,7 +1823,7 @@ void MgedWorker::run() {
     q->addBindValue(modelID);
     q->exec();
     if (!q->next()) {
-        printf("Failed to show modelID %s\n", modelID);
+        std::cout << "Failed to show modelID " << modelID.toStdString() << std::endl;
         return;
     }
 }
