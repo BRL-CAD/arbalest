@@ -12,7 +12,7 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
 document(document), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), dbConnectionName("")
+msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false)
 {
     if (!dbConnectionName.isEmpty()) return;
 
@@ -1166,6 +1166,8 @@ void VerificationValidationWidget::setupUI() {
     resultTable->setColumnHidden(ERROR_TYPE, true);
     resultTable->setContextMenuPolicy(Qt::CustomContextMenu);
 	
+    // setup signal to allow updating of V&V Action's icons
+    connect(this, &VerificationValidationWidget::updateVerifyValidateAct, mainWindow, &MainWindow::updateVerifyValidateAct);
     // Select all signal connect function
     connect(suite_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateSuiteSelectAll(QListWidgetItem *)));
     connect(test_sa, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(updateTestSelectAll(QListWidgetItem *)));
@@ -1179,7 +1181,6 @@ void VerificationValidationWidget::setupUI() {
     connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
     // Run test & exit
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
-
     connect(buttonOptions, &QDialogButtonBox::accepted, this, [this]() {
         // preprocess stuff everytime running tests
         validateChecksum();
@@ -1202,7 +1203,7 @@ void VerificationValidationWidget::setupUI() {
         QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
 
         // spin up new thread and get to work
-        MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, dbConnectionName, *(document->getFilePath()), dbFilePath);
+        MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, *(document->getFilePath()));
 
         // signal that allows for updating of MainWindow's status bar
         connect(thread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
@@ -1221,7 +1222,14 @@ void VerificationValidationWidget::setupUI() {
                 this, qOverload<const QString&, const QStringList&, QString&>(&VerificationValidationWidget::performQueryRequest),
                 Qt::BlockingQueuedConnection);
         connect(thread, &MgedWorker::finished, thread, &QObject::deleteLater);
-        thread->start();
+        connect(thread, &MgedWorker::finished, [this]() {
+            this->runningTests = false;
+            emit updateVerifyValidateAct(this);
+        });
+
+        this->runningTests = true;
+        emit updateVerifyValidateAct(this);
+        thread->start();        
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog

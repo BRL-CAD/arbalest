@@ -59,6 +59,7 @@ private:
     QLabel *statusBarPathLabel;
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
+    QAction* verifyValidateViewportAct;
 	
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
@@ -110,6 +111,13 @@ public slots:
     void setStatusBarMessage(QString msg) {
         statusBar->showMessage(msg, statusBarShortMessageDuration);
         qApp->processEvents();
+    }
+
+    void updateVerifyValidateAct(VerificationValidationWidget* vvWidget) {
+        if (!vvWidget || !vvWidget->isRunningTests())
+            verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+        else
+            verifyValidateViewportAct->setIcon(QIcon(":/icons/verifyValidateCancelIcon.png"));
     }
 };
 #endif // MAINWINDOW_H

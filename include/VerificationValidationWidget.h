@@ -47,6 +47,7 @@ public:
     void updateDockableHeader();
     void showSelectTests();
     QString getDBConnectionName() const { return dbConnectionName; }
+    bool isRunningTests() const { return runningTests; }
 
     void showNewTestDialog();
     void showRemoveTestDialog();
@@ -55,6 +56,7 @@ public:
 
 signals:
     void queryFinished(const QList<QList<QVariant>>& answer);
+    void updateVerifyValidateAct(VerificationValidationWidget* vvWidget);
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
@@ -93,6 +95,9 @@ private:
     QString modelID;
     QString dbFilePath;
     QString dbConnectionName;
+
+    // stateful data
+    bool runningTests;
 
     // user interface data
     QTableWidget* resultTable;

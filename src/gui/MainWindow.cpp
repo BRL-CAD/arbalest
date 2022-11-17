@@ -557,7 +557,7 @@ void MainWindow::prepareUi() {
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
     QMenu* verifyValidateMenu = menuTitleBar->addMenu(tr("&Verify/Validate"));
-    QAction* verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
+    verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
     verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
     verifyValidateViewportAct->setStatusTip(tr("Verify and validate current viewport"));
     verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
@@ -1069,7 +1069,8 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
-            if (documents[activeDocumentId]->getVerificationValidationWidget()) 
+            updateVerifyValidateAct(documents[activeDocumentId]->getVerificationValidationWidget());
+            if (documents[activeDocumentId]->getVerificationValidationWidget())
                 documents[activeDocumentId]->getVerificationValidationWidget()->updateDockableHeader();
             else
                 objectVerificationValidationDockable->setVisible(false);
