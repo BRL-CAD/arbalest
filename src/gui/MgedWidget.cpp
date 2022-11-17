@@ -35,11 +35,8 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 			return;
 		}
 
-		struct ged* dbp = mgedRun(cmd, *(d->getFilePath()));
-		QString* result = (dbp) ? new QString(bu_vls_addr(dbp->ged_result_str)) : nullptr;
-		if (dbp) ged_close(dbp);
-
-		if (result) insertPlainText(*result);
+		QString result = mgedRun(cmd, *(d->getFilePath()));
+		insertPlainText(result);
 
 		insertPlainText("\n");
 		insertPlainText(prefix);

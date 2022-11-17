@@ -597,7 +597,6 @@ void MainWindow::prepareUi() {
             return;
         }
         objectVerificationValidationDockable->setVisible(true);
-        vvWidget->setStatusBar(statusBar);
         vvWidget->showSelectTests();
     });
     verifyValidateMenu->addAction(verifyValidateViewportAct);
@@ -838,9 +837,6 @@ void MainWindow::prepareDockables(){
     objectVerificationValidationDockable = new Dockable("Verification & Validation", this, true, 300);
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
-
-    connect(this, qOverload<bool, int, int, int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
-    connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);

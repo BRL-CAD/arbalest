@@ -111,9 +111,5 @@ public slots:
         statusBar->showMessage(msg, statusBarShortMessageDuration);
         qApp->processEvents();
     }
-
-signals:
-    void changeStatusBarMessage(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
-    void changeStatusBarMessage(QString msg);
 };
 #endif // MAINWINDOW_H

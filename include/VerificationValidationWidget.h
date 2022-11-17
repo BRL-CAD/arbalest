@@ -46,15 +46,12 @@ public:
     ~VerificationValidationWidget();
     void updateDockableHeader();
     void showSelectTests();
-    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
 
     void showNewTestDialog();
     void showRemoveTestDialog();
     void showNewTestSuiteDialog();
     void showRemoveTestSuiteDialog();
-public slots:
-    void runTests();
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
@@ -78,6 +75,7 @@ private slots:
     void rmvArgForm();
     void isVarClicked(int state);
     void resultTableChangeSize();
+    void showResult(const QString& testResultID);
 
 private:
     MainWindow *mainWindow;
@@ -88,6 +86,7 @@ private:
     // widget-specific data
     Document *document;
     QString modelID;
+    QString dbFilePath;
     QString dbConnectionName;
 
     // user interface data
@@ -97,7 +96,6 @@ private:
     QListWidget* test_sa;
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
-    QStatusBar* statusBar;
     QClipboard* clipboard;
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
@@ -127,7 +125,7 @@ private:
     std::map<int, QListWidgetItem*> idToItemMap;
 
     // init functions
-    void dbConnect(QString& dbFilePath);
+    void dbConnect(const QString& dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
@@ -159,15 +157,52 @@ private:
     void dbClearResults();
 
     // ui stuff
-    void showResult(const QString &testResultID);
     void showAllResults();
 
     // Other
     void checkSuiteSA();
     void checkTestSA();
-    QString *runTest(const QString &cmd);
+    QList<QListWidgetItem*> getSelectedTests();
     void validateChecksum();
     void addItemFromTest(QListWidget* &listWidget);
 };
 
 #endif // VVWIDGET_H
+
+#ifndef MGED_WORKER_H
+#define MGED_WORKER_H
+class MgedWorker : public QThread {
+    Q_OBJECT
+public:
+    MgedWorker(const QList<QListWidgetItem*>& selected_tests, const QStringList& selectedObjects, const int& totalTests, const std::map<QListWidgetItem*, std::pair<int, Test>>& itemToTestMap, 
+        const QString& modelID, const QString& dbConnectionName, const QString& gFilePath, const QString& dbFilePath) 
+        : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap), 
+        modelID(modelID), dbConnectionName(dbConnectionName + "_run_tests"), gFilePath(gFilePath), dbFilePath(dbFilePath)
+    {
+        std::cout << "dbconnname: " << this->dbConnectionName.toStdString() << std::endl;
+        std::cout << "dbfilepath: " << this->dbFilePath.toStdString() << std::endl;
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName);
+        db.setDatabaseName(this->dbFilePath);
+
+        if (!db.open() || !db.isOpen())
+            throw std::runtime_error("[MgedWorker] ERROR: db failed to open: " + db.lastError().text().toStdString());
+    }
+    QSqlDatabase getDatabase() const { return QSqlDatabase::database(this->dbConnectionName, false); }
+    void run() override;
+
+signals:
+    void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
+    void showResultRequest(const QString& testResultID);
+
+private:
+    const QList<QListWidgetItem*> selected_tests;
+    const std::map<QListWidgetItem*, std::pair<int, Test>> itemToTestMap;
+    const QStringList selectedObjects;
+    
+    const QString modelID;
+    const QString dbConnectionName;
+    const QString gFilePath;
+    const QString dbFilePath;
+    const int totalTests;
+};
+#endif

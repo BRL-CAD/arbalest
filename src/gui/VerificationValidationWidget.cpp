@@ -9,7 +9,7 @@ using Parser = VerificationValidation::Parser;
 #define SHOW_ERROR_POPUP true
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
-document(document), statusBar(nullptr), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
+document(document), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
 msgBoxRes(NO_SELECTION), dbConnectionName("")
@@ -57,182 +57,11 @@ void VerificationValidationWidget::showSelectTests() {
     selectTestsDialog->exec();
 }
 
-QString* VerificationValidationWidget::runTest(const QString& cmd) {
-    QString filepath = *(document->getFilePath());
-    struct ged* dbp = mgedRun(cmd, filepath);
-    QString* result = (dbp) ? new QString(bu_vls_addr(dbp->ged_result_str)) : nullptr;
-    if (dbp) ged_close(dbp);
-
-    return result;
-}
-
-void VerificationValidationWidget::runTests() {
-    validateChecksum();
-    dbUpdateModelUUID();
-    dbClearResults();
-    resultTable->setRowCount(0);
-    minBtn_toggle = true;
-    
-    // Get list of checked tests
-    QList<QListWidgetItem *> selected_tests;
-    QListWidgetItem* item = 0;
-    for (int i = 0; i < testList->count(); i++) {
-		item = testList->item(i);
-        if(item->checkState()){
-            selected_tests.push_back(item);
-        }
-    }
-
-    // Run tests
-    int totalTests = selected_tests.count();
-    if(!totalTests) {
-        popup("No tests were selected.");
-        return;
-    }
-
-    resultTableChangeSize();
-    dbClearResults();
-    resultTable->setRowCount(0);
-
-    QSqlQuery* q = new QSqlQuery(getDatabase());
-    QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-    QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
-    for (int objIdx = 0; objIdx < selectedObjects.size(); objIdx++) {
-        QString object = selectedObjects[objIdx];
-        for(int i = 0; i < totalTests; i++){
-            emit mainWindow->setStatusBarMessage(false, i+1, totalTests, objIdx+1, selectedObjects.size());
-            int testID = itemToTestMap.at(selected_tests[i]).first;
-            Test currentTest = itemToTestMap.at(selected_tests[i]).second;
-
-            // for the current test, insert any Args that aren't in TestArg
-            for (int j = 0; j < currentTest.ArgList.size(); j++) {
-                Arg::Type type = currentTest.ArgList[j].type;
-                QString arg = currentTest.ArgList[j].argument;
-                if (type == Arg::Type::ObjectName) arg = object.split("/").last();
-                else if (type == Arg::Type::ObjectPath) arg = object;
-
-                int cnt = 0;
-                q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
-                q->addBindValue(testID);
-                q->addBindValue(currentTest.ArgList[j].argIdx);
-                q->addBindValue(arg);
-                q->addBindValue(type);
-                dbExec(q);
-
-                if (q->next()) cnt = q->value(0).toInt();
-
-                if (!cnt) {
-                    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
-                    q->addBindValue(testID);
-                    q->addBindValue(currentTest.ArgList[j].argIdx);
-                    q->addBindValue(arg);
-                    q->addBindValue(type);
-                    q->addBindValue(currentTest.ArgList[j].defaultValue);
-                    dbExec(q);
-                }
-            }
-
-            // find objectArgID associated with this object
-            QString objectPlaceholder = object;
-            Arg::Type type = currentTest.getObjArgType();
-            if (type == Arg::Type::ObjectName)
-                objectPlaceholder = objectPlaceholder.split("/").last();
-            else if (type == Arg::Type::ObjectNone)
-                objectPlaceholder = "";
-            
-            q->prepare("SELECT id FROM TestArg WHERE (argType = ? OR argType = ? or argType = ?) AND arg = ? AND testID = ?");
-            q->addBindValue(Arg::Type::ObjectName);
-            q->addBindValue(Arg::Type::ObjectPath);
-            q->addBindValue(Arg::Type::ObjectNone);
-            q->addBindValue(objectPlaceholder);
-            q->addBindValue(testID);
-            dbExec(q);
-
-            if (!q->next()) continue;
-
-            // run tests
-            QString objectArgID = q->value(0).toString();
-            QString testCommand = currentTest.getCMD(objectPlaceholder);
-            if (previouslyRunTests.contains(testCommand)) continue;
-            previouslyRunTests.insert(testCommand);
-            const QString* terminalOutput = runTest(testCommand);
-
-            // Update db with new arg value
-            if(itemToTestMap.at(selected_tests[i]).second.hasVarArgs()){
-                std::vector<Arg> newArgs = itemToTestMap.at(selected_tests[i]).second.ArgList;
-                for(int j = 0; j < newArgs.size(); j++){
-                    if(newArgs[j].type == Arg::Type::Dynamic){
-                        q->prepare("UPDATE TestArg SET defaultVal = :newVal WHERE testID = :testId AND argIdx = :argIdx");
-                        q->bindValue(":newVal", newArgs[j].defaultValue);
-                        q->bindValue(":testId", testID);
-                        q->bindValue(":argIdx", newArgs[j].argIdx);
-                        q->exec();
-                    }
-                }
-            }
-
-            QString executableName = selected_tests[i]->toolTip().split(' ', Qt::SkipEmptyParts).first();
-            Result* result = nullptr;
-
-            // find proper parser
-            if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
-                result = Parser::search(testCommand, terminalOutput, currentTest);
-            else if (QString::compare(executableName, "lc", Qt::CaseInsensitive) == 0)
-	            result = Parser::lc(testCommand, terminalOutput, *(document->getFilePath()));
-            else if (QString::compare(executableName, "gqa", Qt::CaseInsensitive) == 0)
-                result = Parser::gqa(testCommand, terminalOutput, currentTest);
-            else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
-                result = Parser::title(testCommand, terminalOutput, currentTest);
-
-            // if parser hasn't been implemented, default
-            if (!result) {
-                result = new Result;
-                result->resultCode = Result::Code::UNPARSEABLE;
-            }
-
-            QString resultCode = QString::number(result->resultCode);
-
-            // insert results into db
-            q->prepare("INSERT INTO TestResults (modelID, testID, objectArgID, resultCode, terminalOutput) VALUES (?,?,?,?,?)");
-            q->addBindValue(modelID);
-            q->addBindValue(testID);
-            q->addBindValue(objectArgID);
-            q->addBindValue(resultCode);
-            q->addBindValue((terminalOutput) ? *terminalOutput : "");
-            dbExec(q);
-
-            QString testResultID = q->lastInsertId().toString();
-            // insert issues into db
-            for (Result::ObjectIssue currentIssue : result->issues) {
-                q->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
-                q->addBindValue(currentIssue.objectName);
-                q->addBindValue(currentIssue.issueDescription);
-                dbExec(q);
-
-                QString objectIssueID = q->lastInsertId().toString();
-                q->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
-                q->addBindValue(testResultID);
-                q->addBindValue(objectIssueID);
-                dbExec(q);
-            }
-            emit mainWindow->setStatusBarMessage(true, i+1, totalTests, objIdx+1, selectedObjects.size());
-            showResult(testResultID);
-        }
-    }
-
-    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
-    q->addBindValue(modelID);
-    dbExec(q);
-    if (!q->next()) {
-        popup("Failed to show modelID " + modelID);
-        return;
-    }
-}
-
-void VerificationValidationWidget::dbConnect(QString& dbFilePath) {
+void VerificationValidationWidget::dbConnect(const QString& dbFilePath) {
     if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
         throw std::runtime_error("[Verification & Validation] ERROR: sqlite is not available");
-
+    
+    this->dbFilePath = dbFilePath;
     QString* fp = document->getFilePath();
     
     // if persistent titled file, create UUID and store accordingly
@@ -242,10 +71,10 @@ void VerificationValidationWidget::dbConnect(QString& dbFilePath) {
         QDir dbFolder(cacheFolder + "/" + uuid->left(2) + "/" + uuid->right(uuid->size() - 2));
         if (!dbFolder.exists()) dbFolder.mkpath(".");
 
-        dbFilePath = dbFolder.absolutePath() + "/" + fp->split("/").last() + ".atr";
+        this->dbFilePath = dbFolder.absolutePath() + "/" + fp->split("/").last() + ".atr";
     }
 
-    dbConnectionName = dbFilePath + "-connection";
+    dbConnectionName = this->dbFilePath + "-connection";
     QSqlDatabase db = getDatabase();
 
     // if SQL connection already open, just switch to that tab
@@ -265,10 +94,10 @@ void VerificationValidationWidget::dbConnect(QString& dbFilePath) {
     }
 
     // if file exists, prompt before overwriting
-    if (QFile::exists(dbFilePath)) {
+    if (QFile::exists(this->dbFilePath)) {
         QMessageBox msgBox; 
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("Detected existing test results in " + dbFilePath + ".\n\nDo you want to open or discard the results?");
+        msgBox.setText("Detected existing test results in " + this->dbFilePath + ".\n\nDo you want to open or discard the results?");
         msgBox.setInformativeText("Changes cannot be reverted.");
         msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
         QPushButton* discardButton = msgBox.addButton("Discard", QMessageBox::DestructiveRole);
@@ -290,7 +119,7 @@ void VerificationValidationWidget::dbConnect(QString& dbFilePath) {
     }
 
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName);
-    db.setDatabaseName(dbFilePath);
+    db.setDatabaseName(this->dbFilePath);
 
     if (!db.open() || !db.isOpen())
         throw std::runtime_error("[Verification & Validation] ERROR: db failed to open: " + db.lastError().text().toStdString());
@@ -1193,7 +1022,7 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     }
 }
 
-void VerificationValidationWidget::setupUI() {
+void VerificationValidationWidget::setupUI() {    
     selectTestsDialog = new QDialog();
     testList = new QListWidget();
     suiteList = new QListWidget();
@@ -1350,7 +1179,47 @@ void VerificationValidationWidget::setupUI() {
     connect(testList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(userInputDialogUI(QListWidgetItem *)));
     // Run test & exit
     connect(buttonOptions, &QDialogButtonBox::accepted, selectTestsDialog, &QDialog::accept);
-    connect(buttonOptions, &QDialogButtonBox::accepted, this, &VerificationValidationWidget::runTests);
+
+    connect(buttonOptions, &QDialogButtonBox::accepted, this, [this]() {
+        // preprocess stuff everytime running tests
+        validateChecksum();
+        dbUpdateModelUUID();
+        dbClearResults();
+        resultTable->setRowCount(0);
+        minBtn_toggle = true;
+
+        // get tests + do checks + UI changes
+        QList<QListWidgetItem*> selected_tests = getSelectedTests();
+        int totalTests = selected_tests.count();
+        if (!totalTests) {
+            popup("No tests were selected.");
+            return;
+        }
+        resultTableChangeSize();
+        dbClearResults();
+        resultTable->setRowCount(0);
+
+        QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
+
+        // spin up new thread and get to work
+        try {
+            MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, dbConnectionName, *(document->getFilePath()), dbFilePath);
+
+            // signal that allows for updating of MainWindow's status bar
+            connect(thread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
+                mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
+
+            // signal that allows Verification Validation Widget's result table to be updated via thread
+            connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult);
+            thread->start();
+        }
+        catch (const std::runtime_error& e) {
+            popup(e.what());
+        }
+        catch (...) {
+            popup("Failed to run tests");
+        }
+    });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
     connect(resultTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(setupResultMenu(const QPoint&)));
@@ -1805,4 +1674,155 @@ void VerificationValidationWidget::updateDockableHeader() {
     delete q;
     // Result min button
     connect(minBtn, SIGNAL(clicked()), this, SLOT(resultTableChangeSize()));
+}
+
+QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
+    // Get list of checked tests
+    QList<QListWidgetItem*> selected_tests;
+    QListWidgetItem* item = 0;
+    for (int i = 0; i < testList->count(); i++) {
+        item = testList->item(i);
+        if (item->checkState()) {
+            selected_tests.push_back(item);
+        }
+    }
+
+    return selected_tests;
+}
+
+void MgedWorker::run() {
+    QSet<QString> previouslyRunTests; // don't run duplicate tests (e.g.: "title" for each object)
+    QSqlQuery* q = new QSqlQuery(getDatabase());
+
+    for (int objIdx = 0; objIdx < selectedObjects.size(); objIdx++) {
+        QString object = selectedObjects[objIdx];
+        for (int i = 0; i < totalTests; i++) {
+            emit updateStatusBarRequest(false, i + 1, totalTests, objIdx + 1, selectedObjects.size());
+            int testID = itemToTestMap.at(selected_tests[i]).first;
+            Test currentTest = itemToTestMap.at(selected_tests[i]).second;
+            
+            // for the current test, insert any Args that aren't in TestArg
+            for (int j = 0; j < currentTest.ArgList.size(); j++) {
+                Arg::Type type = currentTest.ArgList[j].type;
+                QString arg = currentTest.ArgList[j].argument;
+                if (type == Arg::Type::ObjectName) arg = object.split("/").last();
+                else if (type == Arg::Type::ObjectPath) arg = object;
+
+                int cnt = 0;
+                q->prepare("SELECT COUNT(*) FROM TestArg WHERE testID = ? AND argIdx = ? AND arg = ? AND argType = ?");
+                q->addBindValue(testID);
+                q->addBindValue(currentTest.ArgList[j].argIdx);
+                q->addBindValue(arg);
+                q->addBindValue(type);
+                q->exec();
+
+                if (q->next()) cnt = q->value(0).toInt();
+
+                if (!cnt) {
+                    q->prepare("INSERT INTO TestArg (testID, argIdx, arg, argType, defaultVal) VALUES (?,?,?,?,?)");
+                    q->addBindValue(testID);
+                    q->addBindValue(currentTest.ArgList[j].argIdx);
+                    q->addBindValue(arg);
+                    q->addBindValue(type);
+                    q->addBindValue(currentTest.ArgList[j].defaultValue);
+                    q->exec();
+                }
+            }
+
+            // find objectArgID associated with this object
+            QString objectPlaceholder = object;
+            Arg::Type type = currentTest.getObjArgType();
+            if (type == Arg::Type::ObjectName)
+                objectPlaceholder = objectPlaceholder.split("/").last();
+            else if (type == Arg::Type::ObjectNone)
+                objectPlaceholder = "";
+
+            q->prepare("SELECT id FROM TestArg WHERE (argType = ? OR argType = ? or argType = ?) AND arg = ? AND testID = ?");
+            q->addBindValue(Arg::Type::ObjectName);
+            q->addBindValue(Arg::Type::ObjectPath);
+            q->addBindValue(Arg::Type::ObjectNone);
+            q->addBindValue(objectPlaceholder);
+            q->addBindValue(testID);
+            q->exec();
+
+            if (!q->next()) continue;
+
+            // run tests
+            QString objectArgID = q->value(0).toString();
+            QString testCommand = currentTest.getCMD(objectPlaceholder);
+            if (previouslyRunTests.contains(testCommand)) continue;
+            previouslyRunTests.insert(testCommand);
+
+            const QString terminalOutput = mgedRun(testCommand, gFilePath);
+
+            // Update db with new arg value
+            if (itemToTestMap.at(selected_tests[i]).second.hasVarArgs()) {
+                std::vector<Arg> newArgs = itemToTestMap.at(selected_tests[i]).second.ArgList;
+                for (int j = 0; j < newArgs.size(); j++) {
+                    if (newArgs[j].type == Arg::Type::Dynamic) {
+                        q->prepare("UPDATE TestArg SET defaultVal = :newVal WHERE testID = :testId AND argIdx = :argIdx");
+                        q->bindValue(":newVal", newArgs[j].defaultValue);
+                        q->bindValue(":testId", testID);
+                        q->bindValue(":argIdx", newArgs[j].argIdx);
+                        q->exec();
+                    }
+                }
+            }
+
+            QString executableName = selected_tests[i]->toolTip().split(' ', Qt::SkipEmptyParts).first();
+            Result* result = nullptr;
+
+            // find proper parser
+            if (QString::compare(executableName, "search", Qt::CaseInsensitive) == 0)
+                result = Parser::search(testCommand, terminalOutput, currentTest);
+            else if (QString::compare(executableName, "lc", Qt::CaseInsensitive) == 0)
+                result = Parser::lc(testCommand, terminalOutput, gFilePath);
+            else if (QString::compare(executableName, "gqa", Qt::CaseInsensitive) == 0)
+                result = Parser::gqa(testCommand, terminalOutput, currentTest);
+            else if (QString::compare(executableName, "title", Qt::CaseInsensitive) == 0)
+                result = Parser::title(testCommand, terminalOutput, currentTest);
+
+            // if parser hasn't been implemented, default
+            if (!result) {
+                result = new Result;
+                result->resultCode = Result::Code::UNPARSEABLE;
+            }
+
+            QString resultCode = QString::number(result->resultCode);
+
+            // insert results into db
+            q->prepare("INSERT INTO TestResults (modelID, testID, objectArgID, resultCode, terminalOutput) VALUES (?,?,?,?,?)");
+            q->addBindValue(modelID);
+            q->addBindValue(testID);
+            q->addBindValue(objectArgID);
+            q->addBindValue(resultCode);
+            q->addBindValue(terminalOutput);
+            q->exec();
+
+            QString testResultID = q->lastInsertId().toString();
+            // insert issues into db
+            for (Result::ObjectIssue currentIssue : result->issues) {
+                q->prepare("INSERT INTO ObjectIssue (objectName, issueDescription) VALUES (?,?)");
+                q->addBindValue(currentIssue.objectName);
+                q->addBindValue(currentIssue.issueDescription);
+                q->exec();
+
+                QString objectIssueID = q->lastInsertId().toString();
+                q->prepare("INSERT INTO Issues (testResultID, objectIssueID) VALUES (?,?)");
+                q->addBindValue(testResultID);
+                q->addBindValue(objectIssueID);
+                q->exec();
+            }
+            emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
+            emit showResultRequest(testResultID);
+        }
+    }
+
+    q->prepare("SELECT uuid, filePath FROM Model WHERE id = ?");
+    q->addBindValue(modelID);
+    q->exec();
+    if (!q->next()) {
+        printf("Failed to show modelID %s\n", modelID);
+        return;
+    }
 }

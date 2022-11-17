@@ -37,9 +37,9 @@ void Parser::finalDefense(Result* r) {
     }
 }
 
-Result* Parser::search(const QString& cmd, const QString* terminalOutput, const Test& test) {
+Result* Parser::search(const QString& cmd, const QString& terminalOutput, const Test& test) {
     Result* r = new Result;
-    r->terminalOutput = terminalOutput->trimmed();
+    r->terminalOutput = terminalOutput.trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
@@ -165,9 +165,9 @@ bool Parser::searchDBNotFoundErrors(Result* r) {
     return false; 
 }
 
-Result* Parser::title(const QString& cmd, const QString* terminalOutput, const Test& test) {
+Result* Parser::title(const QString& cmd, const QString& terminalOutput, const Test& test) {
     Result* r = new Result;
-    r->terminalOutput = terminalOutput->trimmed();
+    r->terminalOutput = terminalOutput.trimmed();
     r->resultCode = Result::Code::PASSED;
 
     QStringList cmdList = cmd.split(" ", Qt::SkipEmptyParts);
@@ -176,39 +176,39 @@ Result* Parser::title(const QString& cmd, const QString* terminalOutput, const T
         r->issues.push_back({"SYNTAX ERROR", "title cannot have any arguments for testing (implies setting database name)"});
     }
 
-    bool suspiciousTitle = terminalOutput->contains("tmp", Qt::CaseInsensitive) || 
-    terminalOutput->contains("temporary", Qt::CaseInsensitive) || 
-    terminalOutput->contains("untitled", Qt::CaseInsensitive);
+    bool suspiciousTitle = terminalOutput.contains("tmp", Qt::CaseInsensitive) || 
+    terminalOutput.contains("temporary", Qt::CaseInsensitive) || 
+    terminalOutput.contains("untitled", Qt::CaseInsensitive);
     
     if (suspiciousTitle) {
         r->resultCode = Result::Code::WARNING;
-        r->issues.push_back({*terminalOutput, "title contains a keyword indicating it is not finalized"});
+        r->issues.push_back({terminalOutput, "title contains a keyword indicating it is not finalized"});
     }
 
     return r;
 }
 
-Result* Parser::lc(const QString& cmd, const QString* terminalOutput, const QString& gFilePath) {
+Result* Parser::lc(const QString& cmd, const QString& terminalOutput, const QString& gFilePath) {
 	Result* r = new Result;
-	r->terminalOutput = terminalOutput->trimmed();
+	r->terminalOutput = terminalOutput.trimmed();
 	
 	/* Check if database exists */
 	if(r->terminalOutput.contains("does not exist.", Qt::CaseInsensitive)) {
 		r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"Database doesn't exist", *terminalOutput});
+        r->issues.push_back({"Database doesn't exist", terminalOutput});
 		return r;
 	}
 
     if(r->terminalOutput.contains("More than one group name was specified", Qt::CaseInsensitive)) {
 		r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"Database doesn't exist", *terminalOutput});
+        r->issues.push_back({"Database doesn't exist", terminalOutput});
 		return r;
 	}
 
 	/* Check if its just usage */
 	if(QString::compare(cmd.trimmed(), "lc", Qt::CaseInsensitive) == 0) {
 		r->resultCode = Result::Code::FAILED;
-        r->issues.push_back({"SYNTAX ERROR", *terminalOutput});
+        r->issues.push_back({"SYNTAX ERROR", terminalOutput});
 		return r;
 	}
 
@@ -270,22 +270,17 @@ Result* Parser::lc(const QString& cmd, const QString* terminalOutput, const QStr
 		QString issueDescription = "(ID,MAT,LOS,AIR,REGION,PARENT) = ("+ID+","+MAT+","+LOS+","+AIR+","+REGION+","+PARENT+")";
         QString objectPath = "COULD NOT OBTAIN FULL PATH";
         QString searchCMD = "search / -path /%1/\\*%2/%3";
-        struct ged* dbp = mgedRun(searchCMD.arg(object).arg(PARENT).arg(REGION), gFilePath);
-        if (dbp) {
-            QString* result = new QString(bu_vls_addr(dbp->ged_result_str));
-            ged_close(dbp);
-            if (result) objectPath = *result;
-        }
-
+        const QString result = mgedRun(searchCMD.arg(object).arg(PARENT).arg(REGION), gFilePath);
+        if (!result.isEmpty()) objectPath = result;
         r->issues.push_back({objectPath, issueDescription});
 	}
 
 	return r;
 }
 
-Result* Parser::gqa(const QString& cmd, const QString* terminalOutput, const Test& test) {
+Result* Parser::gqa(const QString& cmd, const QString& terminalOutput, const Test& test) {
     Result* r = new Result;
-    r->terminalOutput = terminalOutput->trimmed();
+    r->terminalOutput = terminalOutput.trimmed();
     r->resultCode = Result::Code::PASSED;
     Test* type = nullptr;
 
