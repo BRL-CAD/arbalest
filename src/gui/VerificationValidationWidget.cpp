@@ -1459,8 +1459,6 @@ void VerificationValidationWidget::visualizeObjects(QList<QTableWidgetItem*> ite
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
-    std::cout << "attempting to show result " << testResultID.toStdString() << std::endl;
-
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT Tests.testName, TestResults.resultCode, TestResults.terminalOutput FROM Tests INNER JOIN TestResults ON Tests.id=TestResults.testID WHERE TestResults.id = ?");
     q->addBindValue(testResultID);
@@ -1817,7 +1815,6 @@ void MgedWorker::run() {
                 q->exec();
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
-            std::cout << "worker thread says " << testResultID.toStdString() << std::endl;
             emit showResultRequest(testResultID);
         }
     }
