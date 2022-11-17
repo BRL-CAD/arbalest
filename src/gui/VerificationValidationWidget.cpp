@@ -1459,6 +1459,8 @@ void VerificationValidationWidget::visualizeObjects(QList<QTableWidgetItem*> ite
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
+    std::cout << "attempting to show result " << testResultID.toStdString() << std::endl;
+
     QSqlQuery* q = new QSqlQuery(getDatabase());
     q->prepare("SELECT Tests.testName, TestResults.resultCode, TestResults.terminalOutput FROM Tests INNER JOIN TestResults ON Tests.id=TestResults.testID WHERE TestResults.id = ?");
     q->addBindValue(testResultID);
@@ -1685,7 +1687,7 @@ QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
 void MgedWorker::run() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", this->dbConnectionName);
     db.setDatabaseName(this->dbFilePath);
-    // TODO: close this as described in https://stackoverflow.com/questions/66818889/what-is-the-correct-way-to-open-and-close-a-database-connection-for-a-qt-worker
+    // TODO: transition to signals/slots method (e.g.: thread emits signals to main thread to perform DB queries) -- use QString -> template + QStringList ->args
 
     if (!db.open() || !db.isOpen()) {
         std::cout << "[MgedWorker] ERROR: db failed to open: " << db.lastError().text().toStdString() << std::endl;
@@ -1815,6 +1817,7 @@ void MgedWorker::run() {
                 q->exec();
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
+            std::cout << "worker thread says " << testResultID.toStdString() << std::endl;
             emit showResultRequest(testResultID);
         }
     }
