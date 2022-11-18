@@ -12,7 +12,7 @@ VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindo
 document(document), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
 terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false)
+msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), mgedWorkerThread(nullptr)
 {
     if (!dbConnectionName.isEmpty()) return;
 
@@ -437,7 +437,7 @@ void VerificationValidationWidget::addItemFromTest(QListWidget* &listWidget){
     // Get test list from db
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
-    query.exec("Select id, testName, category from Tests ORDER BY category ASC");
+    query.exec("Select id, testName, category from Tests ORDER BY category DESC");
 
     if(listWidget == testList){
         itemToTestMap.clear();
@@ -591,7 +591,6 @@ void VerificationValidationWidget::createTest() {
     q->bindValue(":arg", "$OBJECT");
     q->bindValue(":argType", Arg::Type::ObjectName);
     dbExec(q);
-
 
     setupUI();
 }
@@ -1203,33 +1202,36 @@ void VerificationValidationWidget::setupUI() {
         QStringList selectedObjects = document->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
 
         // spin up new thread and get to work
-        MgedWorker* thread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, *(document->getFilePath()));
+        mgedWorkerThread = new MgedWorker(selected_tests, selectedObjects, totalTests, itemToTestMap, modelID, *(document->getFilePath()));
 
         // signal that allows for updating of MainWindow's status bar
-        connect(thread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
+        connect(mgedWorkerThread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
             mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
 
         // signal that allows Verification Validation Widget's result table to be updated via thread
-        connect(thread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult, Qt::BlockingQueuedConnection);
+        connect(mgedWorkerThread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult, Qt::BlockingQueuedConnection);
 
         // signals that allows V&V Widget's database to be updated from thread
         // note: must be blocking
-        connect(thread, qOverload<const QString&, const QStringList&, QList<QList<QVariant>>*, const int&>(&MgedWorker::queryRequest), 
+        connect(mgedWorkerThread, qOverload<const QString&, const QStringList&, QList<QList<QVariant>>*, const int&>(&MgedWorker::queryRequest),
                 this, qOverload<const QString&, const QStringList&, QList<QList<QVariant>>*, const int&>(&VerificationValidationWidget::performQueryRequest),
                 Qt::BlockingQueuedConnection);
         
-        connect(thread, qOverload<const QString&, const QStringList&, QString&>(&MgedWorker::queryRequest),
+        connect(mgedWorkerThread, qOverload<const QString&, const QStringList&, QString&>(&MgedWorker::queryRequest),
                 this, qOverload<const QString&, const QStringList&, QString&>(&VerificationValidationWidget::performQueryRequest),
                 Qt::BlockingQueuedConnection);
-        connect(thread, &MgedWorker::finished, thread, &QObject::deleteLater);
-        connect(thread, &MgedWorker::finished, [this]() {
+        // thread
+        connect(mgedWorkerThread, &MgedWorker::finished, this, [this]() {
             this->runningTests = false;
             emit updateVerifyValidateAct(this->document);
+
+            mgedWorkerThread->deleteLater();
+            mgedWorkerThread = nullptr;
         });
 
         this->runningTests = true;
         emit updateVerifyValidateAct(this->document);
-        thread->start();        
+        mgedWorkerThread->start();
     });
     connect(buttonOptions, &QDialogButtonBox::rejected, selectTestsDialog, &QDialog::reject);
     // Open details dialog
@@ -1709,6 +1711,8 @@ void MgedWorker::run() {
             emit updateStatusBarRequest(false, i + 1, totalTests, objIdx + 1, selectedObjects.size());
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
+
+            if (isInterruptionRequested()) return;
             
             // for the current test, insert any Args that aren't in TestArg
             for (int j = 0; j < currentTest.ArgList.size(); j++) {

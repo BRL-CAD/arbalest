@@ -160,7 +160,9 @@ public slots:
         else {
             verifyValidateViewportAct->setIcon(QIcon(":/icons/verifyValidateCancelIcon.png"));
             connect(verifyValidateViewportAct, &QAction::triggered, [this, currentDocument]() {
-                std::cout << "canceling here!!!" << std::endl;
+                VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
+                if (!vvWidget) return;
+                vvWidget->stopRunningTests();
             });
         }
     }

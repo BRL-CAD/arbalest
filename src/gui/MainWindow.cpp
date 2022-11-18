@@ -1149,6 +1149,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
     for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
         displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
+        if (!displayGrid) continue;
         int documentId = displayGrid->getDocument()->getDocumentId();
         
         if (maybeSave(documentId, &cancel)) {

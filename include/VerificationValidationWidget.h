@@ -38,6 +38,34 @@ class Dockable;
 using Arg = VerificationValidation::Arg;
 using Test = VerificationValidation::Test;
 
+#ifndef MGED_WORKER_H
+#define MGED_WORKER_H
+class MgedWorker : public QThread {
+    Q_OBJECT
+public:
+    MgedWorker(const QList<QListWidgetItem*>& selected_tests, const QStringList& selectedObjects, const int& totalTests, const std::map<QListWidgetItem*, std::pair<int, Test>>& itemToTestMap,
+        const QString& modelID, const QString& gFilePath)
+        : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap),
+        modelID(modelID), gFilePath(gFilePath)
+    {}
+    void run() override;
+
+signals:
+    void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
+    void showResultRequest(const QString& testResultID);
+    void queryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer = nullptr, const int& numAnswersExpected = 0);
+    void queryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
+
+private:
+    const QList<QListWidgetItem*> selected_tests;
+    const std::map<QListWidgetItem*, std::pair<int, Test>> itemToTestMap;
+    const QStringList selectedObjects;
+    const QString modelID;
+    const QString gFilePath;
+    const int totalTests;
+};
+#endif
+
 class VerificationValidationWidget : public QHBoxWidget
 {
     Q_OBJECT
@@ -48,6 +76,10 @@ public:
     void showSelectTests();
     QString getDBConnectionName() const { return dbConnectionName; }
     bool isRunningTests() const { return runningTests; }
+    void stopRunningTests() {
+        if (!mgedWorkerThread) return;
+        mgedWorkerThread->requestInterruption();
+    }
 
     void showNewTestDialog();
     void showRemoveTestDialog();
@@ -111,6 +143,7 @@ private:
     std::vector<QGroupBox*> argForms;
 
     MgedWidget* terminal;
+    MgedWorker* mgedWorkerThread;
 
     // Test and test suite create remove
     QLineEdit* testNameInput;
@@ -178,31 +211,3 @@ private:
 };
 
 #endif // VVWIDGET_H
-
-#ifndef MGED_WORKER_H
-#define MGED_WORKER_H
-class MgedWorker : public QThread {
-    Q_OBJECT
-public:
-    MgedWorker(const QList<QListWidgetItem*>& selected_tests, const QStringList& selectedObjects, const int& totalTests, const std::map<QListWidgetItem*, std::pair<int, Test>>& itemToTestMap, 
-        const QString& modelID, const QString& gFilePath) 
-        : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap), 
-        modelID(modelID), gFilePath(gFilePath)
-    {}
-    void run() override;
-
-signals:
-    void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
-    void showResultRequest(const QString& testResultID);
-    void queryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer = nullptr, const int& numAnswersExpected = 0);
-    void queryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
-
-private:
-    const QList<QListWidgetItem*> selected_tests;
-    const std::map<QListWidgetItem*, std::pair<int, Test>> itemToTestMap;
-    const QStringList selectedObjects;
-    const QString modelID;
-    const QString gFilePath;
-    const int totalTests;
-};
-#endif
