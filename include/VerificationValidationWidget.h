@@ -51,6 +51,7 @@ public:
     void run() override;
 
 signals:
+    void updateProgressBarRequest(const int& currTest, const int& totalTests);
     void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
     void showResultRequest(const QString& testResultID);
     void queryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer = nullptr, const int& numAnswersExpected = 0);
@@ -141,6 +142,7 @@ private:
     QClipboard* clipboard;
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
+    QProgressBar* vvProgressBar;
 
     MgedWidget* terminal;
     MgedWorker* mgedWorkerThread;

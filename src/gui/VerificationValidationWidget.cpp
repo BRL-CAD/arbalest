@@ -1208,6 +1208,15 @@ void VerificationValidationWidget::setupUI() {
         connect(mgedWorkerThread, qOverload<bool, int, int, int, int>(&MgedWorker::updateStatusBarRequest),
             mainWindow, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
 
+        // signal that allows for updating of progress bar from thread
+        connect(mgedWorkerThread, &MgedWorker::updateProgressBarRequest, this, [this](const int& currTest, const int& totalTests) {
+            if (!vvProgressBar) return;
+            if (currTest < 0 || totalTests <= 0) vvProgressBar->setVisible(false);
+            else vvProgressBar->setVisible(true);
+            int newVal = (totalTests) ? (currTest * 100 / totalTests) : 0;
+            vvProgressBar->setValue(newVal);
+        });
+
         // signal that allows Verification Validation Widget's result table to be updated via thread
         connect(mgedWorkerThread, &MgedWorker::showResultRequest, this, &VerificationValidationWidget::showResult, Qt::BlockingQueuedConnection);
 
@@ -1220,7 +1229,8 @@ void VerificationValidationWidget::setupUI() {
         connect(mgedWorkerThread, qOverload<const QString&, const QStringList&, QString&>(&MgedWorker::queryRequest),
                 this, qOverload<const QString&, const QStringList&, QString&>(&VerificationValidationWidget::performQueryRequest),
                 Qt::BlockingQueuedConnection);
-        // thread
+        
+        // thread finish -> cleanup
         connect(mgedWorkerThread, &MgedWorker::finished, this, [this]() {
             this->runningTests = false;
             emit updateVerifyValidateAct(this->document);
@@ -1665,28 +1675,42 @@ void VerificationValidationWidget::updateDockableHeader() {
     q->addBindValue(modelID);
     q->exec();
     if (q->next()) {
+        // fetch from DB
         QString uuid = q->value(0).toString();
         QString filePath = q->value(1).toString();
 
+        // craft dockable title
         QString dockableTitle = "Verification & Validation\tFile Path: "+filePath+" \tModel UUID: "+uuid;
         QLabel *title = new QLabel(dockableTitle);
         title->setStyleSheet("QLabel { background: transparent; }");
+        title->setObjectName("dockableHeader");
+
         minBtn = new QToolButton();
         minBtn->setIcon(QIcon(":/icons/expand.png"));
         minBtn_toggle = true;
-        QHBoxLayout* h_layout = new QHBoxLayout();
-        h_layout->addWidget(title);
-        h_layout->addWidget(minBtn);
-        QWidget* titleWidget = new QWidget();
-        titleWidget->setLayout(h_layout);
-        title->setObjectName("dockableHeader");
+
+        // put together dockable title + minBtn for top row
+        QHBoxWidget* topRow = new QHBoxWidget;
+        topRow->addWidget(title);
+        topRow->addWidget(minBtn);
+
+        // progress bar when running tests
+        vvProgressBar = new QProgressBar;
+        vvProgressBar->setOrientation(Qt::Horizontal);
+        vvProgressBar->setRange(0, 100);
+        vvProgressBar->setVisible(false);
+
+        QVBoxWidget* titleWidget = new QVBoxWidget;
+        titleWidget->addWidget(topRow);
+        titleWidget->addWidget(vvProgressBar);
+
         parentDockable->setTitleBarWidget(titleWidget);
         parentDockable->widget()->setVisible(false);
         qApp->processEvents();
+
+        connect(minBtn, SIGNAL(clicked()), this, SLOT(resultTableChangeSize()));
     }
-    delete q;
-    // Result min button
-    connect(minBtn, SIGNAL(clicked()), this, SLOT(resultTableChangeSize()));
+    delete q;    
 }
 
 QList<QListWidgetItem*> VerificationValidationWidget::getSelectedTests() {
@@ -1709,6 +1733,7 @@ void MgedWorker::run() {
         QString object = selectedObjects[objIdx];
         for (int i = 0; i < totalTests; i++) {
             emit updateStatusBarRequest(false, i + 1, totalTests, objIdx + 1, selectedObjects.size());
+            emit updateProgressBarRequest(i, totalTests);
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
 
@@ -1808,6 +1833,7 @@ void MgedWorker::run() {
                     { testResultID, objectIssueID });
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
+            emit updateProgressBarRequest((i + 1), totalTests);
             emit showResultRequest(testResultID);
         }
     }
