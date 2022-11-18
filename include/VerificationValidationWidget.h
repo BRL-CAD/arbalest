@@ -79,7 +79,8 @@ public:
     bool isRunningTests() const { return runningTests; }
     void stopRunningTests() {
         if (!mgedWorkerThread) return;
-        mgedWorkerThread->requestInterruption();
+        if (!mgedWorkerThread->isInterruptionRequested()) mgedWorkerThread->requestInterruption();
+        else popup("Please wait... terminating tasks...\n");
     }
 
     void showNewTestDialog();
