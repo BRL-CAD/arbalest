@@ -80,7 +80,7 @@ public:
     void stopRunningTests() {
         if (!mgedWorkerThread) return;
         if (!mgedWorkerThread->isInterruptionRequested()) mgedWorkerThread->requestInterruption();
-        else popup("Please wait... terminating tasks...\n");
+        else popup("Please wait... terminating tasks...");
     }
 
     void showNewTestDialog();
