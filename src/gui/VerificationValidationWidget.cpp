@@ -1213,7 +1213,7 @@ void VerificationValidationWidget::setupUI() {
             if (!vvProgressBar) return;
             if (currTest < 0 || totalTests <= 0) vvProgressBar->setVisible(false);
             else vvProgressBar->setVisible(true);
-            int newVal = (totalTests) ? (currTest * 100 / totalTests) : 0;
+            int newVal = (totalTests) ? ceil(currTest * 100 / (float)totalTests) : 0;
             vvProgressBar->setValue(newVal);
         });
 
