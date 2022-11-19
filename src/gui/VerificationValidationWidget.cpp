@@ -1833,7 +1833,7 @@ void MgedWorker::run() {
                     { testResultID, objectIssueID });
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
-            emit updateProgressBarRequest((i + 1), totalTests);
+            emit updateProgressBarRequest(i + 1, totalTests);
             emit showResultRequest(testResultID);
         }
     }
