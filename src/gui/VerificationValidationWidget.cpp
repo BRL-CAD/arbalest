@@ -708,6 +708,7 @@ void VerificationValidationWidget::showNewTestDialog() {
     content_widget = new QWidget();
     argLayout = new QHBoxLayout();
     content_widget->setLayout(argLayout);
+    content_widget->setStyleSheet("QWidget { background: transparent; }");
     scroll->setWidget(content_widget);
     scroll->setMinimumWidth(275);
     v_layout2->addWidget(scroll);
