@@ -38,6 +38,35 @@ class Dockable;
 using Arg = VerificationValidation::Arg;
 using Test = VerificationValidation::Test;
 
+#ifndef MGED_WORKER_H
+#define MGED_WORKER_H
+class MgedWorker : public QThread {
+    Q_OBJECT
+public:
+    MgedWorker(const QList<QListWidgetItem*>& selected_tests, const QStringList& selectedObjects, const int& totalTests, const std::map<QListWidgetItem*, std::pair<int, Test>>& itemToTestMap,
+        const QString& modelID, const QString& gFilePath)
+        : selected_tests(selected_tests), selectedObjects(selectedObjects), totalTests(totalTests), itemToTestMap(itemToTestMap),
+        modelID(modelID), gFilePath(gFilePath)
+    {}
+    void run() override;
+
+signals:
+    void updateProgressBarRequest(const int& currTest, const int& totalTests);
+    void updateStatusBarRequest(bool testRan, int currTest, int totalTests, int currObject, int totalObjects);
+    void showResultRequest(const QString& testResultID);
+    void queryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer = nullptr, const int& numAnswersExpected = 0);
+    void queryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
+
+private:
+    const QList<QListWidgetItem*> selected_tests;
+    const std::map<QListWidgetItem*, std::pair<int, Test>> itemToTestMap;
+    const QStringList selectedObjects;
+    const QString modelID;
+    const QString gFilePath;
+    const int totalTests;
+};
+#endif
+
 class VerificationValidationWidget : public QHBoxWidget
 {
     Q_OBJECT
@@ -46,15 +75,22 @@ public:
     ~VerificationValidationWidget();
     void updateDockableHeader();
     void showSelectTests();
-    void setStatusBar(QStatusBar* statusBar) { this->statusBar = statusBar; }
     QString getDBConnectionName() const { return dbConnectionName; }
+    bool isRunningTests() const { return runningTests; }
+    void stopRunningTests() {
+        if (!mgedWorkerThread) return;
+        if (!mgedWorkerThread->isInterruptionRequested()) mgedWorkerThread->requestInterruption();
+        else popup("Please wait... terminating tasks...");
+    }
 
     void showNewTestDialog();
     void showRemoveTestDialog();
     void showNewTestSuiteDialog();
     void showRemoveTestSuiteDialog();
-public slots:
-    void runTests();
+
+signals:
+    void queryFinished(const QList<QList<QVariant>>& answer);
+    void updateVerifyValidateAct(Document* currentDocument);
 
 private slots:
 	void updateSuiteSelectAll(QListWidgetItem*);
@@ -78,6 +114,9 @@ private slots:
     void rmvArgForm();
     void isVarClicked(int state);
     void resultTableChangeSize();
+    void showResult(const QString& testResultID);
+    void performQueryRequest(const QString& query, const QStringList& args, QList<QList<QVariant>>* answer, const int& numAnswersExpected);
+    void performQueryRequest(const QString& query, const QStringList& args, QString& lastInsertId);
 
 private:
     MainWindow *mainWindow;
@@ -88,7 +127,11 @@ private:
     // widget-specific data
     Document *document;
     QString modelID;
+    QString dbFilePath;
     QString dbConnectionName;
+
+    // stateful data
+    bool runningTests;
 
     // user interface data
     QTableWidget* resultTable;
@@ -97,12 +140,13 @@ private:
     QListWidget* test_sa;
     QListWidget* suite_sa;
     QDialog* selectTestsDialog;
-    QStatusBar* statusBar;
     QClipboard* clipboard;
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
+    QProgressBar* vvProgressBar;
 
     MgedWidget* terminal;
+    MgedWorker* mgedWorkerThread;
 
     // Test and test suite create remove
     QLineEdit* testNameInput;
@@ -127,7 +171,7 @@ private:
     std::map<int, QListWidgetItem*> idToItemMap;
 
     // init functions
-    void dbConnect(QString& dbFilePath);
+    void dbConnect(const QString& dbFilePath);
     void dbInitTables();
     void dbPopulateDefaults();
     void setupUI();
@@ -159,13 +203,12 @@ private:
     void dbClearResults();
 
     // ui stuff
-    void showResult(const QString &testResultID);
     void showAllResults();
 
     // Other
     void checkSuiteSA();
     void checkTestSA();
-    QString *runTest(const QString &cmd);
+    QList<QListWidgetItem*> getSelectedTests();
     void validateChecksum();
     void addItemFromTest(QListWidget* &listWidget);
 };

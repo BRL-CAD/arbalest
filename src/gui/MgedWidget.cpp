@@ -34,16 +34,13 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 			return;
 		}
 
-		struct ged* dbp = mgedRun(cmd, *(d->getFilePath()));
-		QString* result = (dbp) ? new QString(bu_vls_addr(dbp->ged_result_str)) : nullptr;
-		if (dbp) ged_close(dbp);
+		QString result = mgedRun(cmd, *(d->getFilePath()));
+		insertPlainText(result);
 
 		// TODO: currently no method in ObjectTreeWidget to refresh names (e.g.: "mv all tmp" -> should refresh object names)
 		d->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
 		d->getDisplayGrid()->forceRerenderAllDisplays();
 		d->getObjectTreeWidget()->refreshItemTextColors();
-
-		if (result) insertPlainText(*result);
 
 		insertPlainText("\n");
 		insertPlainText(prefix);

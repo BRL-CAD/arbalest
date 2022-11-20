@@ -557,49 +557,10 @@ void MainWindow::prepareUi() {
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
     QMenu* verifyValidateMenu = menuTitleBar->addMenu(tr("&Verify/Validate"));
-    QAction* verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
-    verifyValidateViewportAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/verifyValidateIcon.png", "$Color-MenuIconVerifyValidate")));
+    verifyValidateViewportAct = new QAction(tr("Verify and validate current viewport"), this);
     verifyValidateViewportAct->setStatusTip(tr("Verify and validate current viewport"));
     verifyValidateViewportAct->setShortcut(Qt::CTRL|Qt::Key_B);
-    connect(verifyValidateViewportAct, &QAction::triggered, this, [this](){
-        if (activeDocumentId == -1) return;
-        Document* currentDocument = documents[activeDocumentId];
-        VerificationValidationWidget* vvWidget = currentDocument->getVerificationValidationWidget();
-        // verification and validation needs persistent .g file
-        if (!vvWidget) {
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("You must save this file before running tests.");
-            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Ok);
-
-            if (msgBox.exec() == QMessageBox::Ok)  {
-                if (!saveAsFileDialogId(currentDocument->getDocumentId())) {
-                    popup("Failed to save.");
-                    return;
-                }
-                statusBar->showMessage("Loading Verification & Validation widget", statusBarShortMessageDuration);
-            }
-            else {
-                statusBar->showMessage("No changes were made.", statusBarShortMessageDuration);
-                return;
-            }
-
-            if (currentDocument->getFilePath()) { 
-                currentDocument->loadVerificationValidationWidget();
-                vvWidget = currentDocument->getVerificationValidationWidget();
-                objectVerificationValidationDockable->setContent(vvWidget);
-            }
-        }
-        QStringList selectedObjects = currentDocument->getObjectTreeWidget()->getSelectedObjects(ObjectTreeWidget::Name::PATHNAME, ObjectTreeWidget::Level::ALL);
-        if (!selectedObjects.size()) { 
-            popup("Cannot run tests with no visible objects.");
-            return;
-        }
-        objectVerificationValidationDockable->setVisible(true);
-        vvWidget->setStatusBar(statusBar);
-        vvWidget->showSelectTests();
-    });
+    updateVerifyValidateAct(documents[activeDocumentId]);
     verifyValidateMenu->addAction(verifyValidateViewportAct);
 
     QAction* verificationValidationNewTest = new QAction(tr("Create new test"), this);
@@ -839,9 +800,6 @@ void MainWindow::prepareDockables(){
     addDockWidget(Qt::BottomDockWidgetArea, objectVerificationValidationDockable);
     objectVerificationValidationDockable->setVisible(false);
 
-    connect(this, qOverload<bool, int, int, int, int>(&MainWindow::changeStatusBarMessage), this, qOverload<bool, int, int, int, int>(&MainWindow::setStatusBarMessage));
-    connect(this, qOverload<QString>(&MainWindow::changeStatusBarMessage), this, qOverload<QString>(&MainWindow::setStatusBarMessage));
-
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
 //    toolboxDockable->hideHeader();
@@ -1073,7 +1031,8 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             objectVerificationValidationDockable->setContent(documents[activeDocumentId]->getVerificationValidationWidget());
-            if (documents[activeDocumentId]->getVerificationValidationWidget()) 
+            updateVerifyValidateAct(documents[activeDocumentId]);
+            if (documents[activeDocumentId]->getVerificationValidationWidget())
                 documents[activeDocumentId]->getVerificationValidationWidget()->updateDockableHeader();
             else
                 objectVerificationValidationDockable->setVisible(false);
@@ -1190,6 +1149,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
     for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
         displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
+        if (!displayGrid) continue;
         int documentId = displayGrid->getDocument()->getDocumentId();
         
         if (maybeSave(documentId, &cancel)) {

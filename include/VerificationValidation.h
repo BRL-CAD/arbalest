@@ -184,14 +184,14 @@ namespace VerificationValidation {
 
     class Parser {
     public:
-        static Result* search(const QString& cmd, const QString* terminalOutput, const Test& test);
+        static Result* search(const QString& cmd, const QString& terminalOutput, const Test& test);
         static void searchSpecificTest(Result* r, const QString& currentLine, const Test* type);
         static bool searchCatchUsageErrors(Result* r, const QString& currentLine);
         static bool searchDBNotFoundErrors(Result* r);
 
-        static Result* title(const QString& cmd, const QString* terminalOutput, const Test& test);
-        static Result* lc(const QString& cmd, const QString* terminalOutput, const QString& gFilePath);
-        static Result* gqa(const QString& cmd, const QString* terminalOutput, const Test& test);
+        static Result* title(const QString& cmd, const QString& terminalOutput, const Test& test);
+        static Result* lc(const QString& cmd, const QString& terminalOutput, const QString& gFilePath);
+        static Result* gqa(const QString& cmd, const QString& terminalOutput, const Test& test);
         static void gqaSpecificTest(Result* r, const QString& currentLine, const Test* type);
 
         static bool catchUsageErrors(Result* r, const QString& currentLine);

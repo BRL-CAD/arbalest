@@ -172,7 +172,7 @@ void popup(const QString& message) {
     msgBox->exec();
 }
 
-struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
+QString mgedRun(const QString& cmd, const QString& gFilePath) {
     struct ged* dbp;
     const QStringList tmp = cmd.split(QRegExp("\\s"), Qt::SkipEmptyParts);
 
@@ -193,7 +193,10 @@ struct ged* mgedRun(const QString& cmd, const QString& gFilePath) {
 
     dbp = ged_open("db", gFilePath.toStdString().c_str(), 0);
     ged_exec(dbp, tmp.size(), cmdList);
-    return dbp;
+
+    QString res = (dbp) ? QString(bu_vls_addr(dbp->ged_result_str)) : "";
+    if (dbp) ged_close(dbp);
+    return res;
 }
 
 QString* generateUUID(const QString& filepath) {
