@@ -1733,7 +1733,7 @@ void MgedWorker::run() {
         QString object = selectedObjects[objIdx];
         for (int i = 0; i < totalTests; i++) {
             emit updateStatusBarRequest(false, i + 1, totalTests, objIdx + 1, selectedObjects.size());
-            emit updateProgressBarRequest(i, totalTests);
+            emit updateProgressBarRequest((totalTests * objIdx) + i, totalTests * selectedObjects.size());
             int testID = itemToTestMap.at(selected_tests[i]).first;
             Test currentTest = itemToTestMap.at(selected_tests[i]).second;
 
@@ -1833,7 +1833,7 @@ void MgedWorker::run() {
                     { testResultID, objectIssueID });
             }
             emit updateStatusBarRequest(true, i + 1, totalTests, objIdx + 1, selectedObjects.size());
-            emit updateProgressBarRequest(i + 1, totalTests);
+            emit updateProgressBarRequest((totalTests * objIdx) + i + 1, totalTests * selectedObjects.size());
             emit showResultRequest(testResultID);
         }
     }
