@@ -87,6 +87,7 @@ public:
     void showRemoveTestDialog();
     void showNewTestSuiteDialog();
     void showRemoveTestSuiteDialog();
+    void exportToCSV();
 
 signals:
     void queryFinished(const QList<QList<QVariant>>& answer);
