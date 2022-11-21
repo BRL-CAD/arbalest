@@ -1138,19 +1138,12 @@ void VerificationValidationWidget::setupUI() {
         if(idx == resultTableSortIdx){
             resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#f4f4f4"));
             resultTable->sortItems(RESULT_TABLE_IDX, Qt::AscendingOrder);
-
-            for(int i = 0; i < nonResultItemList.size(); i++){
-                resultTable->showRow(nonResultItemList[i]);
-            }
             resultTableSortIdx = RESULT_TABLE_IDX;
         } else {
             if(resultTableSortIdx != RESULT_TABLE_IDX){
                 resultTable->horizontalHeaderItem(resultTableSortIdx)->setBackground(QColor("#f4f4f4"));
             }
             resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#87cefa"));
-            for(int i = 0; i < nonResultItemList.size(); i++){
-                resultTable->hideRow(nonResultItemList[i]);
-            }
             if(idx == 0)
                 resultTable->sortItems(ERROR_TYPE, Qt::AscendingOrder);
             else
@@ -1611,18 +1604,6 @@ void VerificationValidationWidget::showResult(const QString& testResultID) {
     QString iconPath = "";
     QString objectName;
     QString issueDescription;
-
-    QTableWidgetItem* previousRowObject = resultTable->item(resultTable->rowCount()-1, OBJECT_COLUMN);
-    if (!previousRowObject || previousRowObject->text() != object) {
-        resultTable->insertRow(resultTable->rowCount());
-        resultTable->setItem(resultTable->rowCount()-1, TEST_NAME_COLUMN, new QTableWidgetItem("Results for '" + ((object.isEmpty()) ? "miscellaneous" : object) + "'"));
-        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setForeground(QBrush(QColor(Globals::theme->process("$Color-FullyVisibleObjectText"))));
-        QFont f;
-        f.setBold(true);
-        resultTable->item(resultTable->rowCount()-1, TEST_NAME_COLUMN)->setFont(f);
-        resultTable->setItem(resultTable->rowCount()-1, RESULT_TABLE_IDX, new QTableWidgetItem(QString::number(resultTable->rowCount()-1)));
-        nonResultItemList.push_back(resultTable->rowCount()-1);
-    }
 
     if (resultCode == Result::Code::PASSED) {
         resultTable->insertRow(resultTable->rowCount());

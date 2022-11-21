@@ -166,7 +166,6 @@ private:
     bool minBtn_toggle;
     QToolButton* minBtn;
     int resultTableSortIdx;
-    std::vector<int> nonResultItemList;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;
