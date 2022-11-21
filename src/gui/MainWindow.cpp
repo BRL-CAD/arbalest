@@ -599,6 +599,15 @@ void MainWindow::prepareUi() {
     });
     verifyValidateMenu->addAction(verificationValidationRemoveTestSuite);
 
+    QAction* verificationValidationExportToCSV = new QAction(tr("Export to CSV"), this);
+    verificationValidationExportToCSV->setIcon(QPixmap::fromImage(coloredIcon(":/icons/exportIcon.png", "$Color-MenuIconVerifyValidate")));
+    verificationValidationExportToCSV->setStatusTip(tr("Export to CSV"));
+    connect(verificationValidationExportToCSV, &QAction::triggered, this, [this](){
+        if (activeDocumentId == -1) return;
+        documents[activeDocumentId]->getVerificationValidationWidget()->exportToCSV();
+    });
+    verifyValidateMenu->addAction(verificationValidationExportToCSV);
+
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
     QAction* aboutAct = new QAction(tr("About"), this);
     connect(aboutAct, &QAction::triggered, this, [this](){

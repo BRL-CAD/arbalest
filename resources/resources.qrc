@@ -58,6 +58,8 @@
     <file>icons/expand.png</file>
     <file>icons/edit.png</file>
     <file>icons/edit_default.png</file>
+    <file>icons/edit_default.png</file>
+    <file>icons/exportIcon.png</file>
 	<file>icons/terminal.png</file>
   </qresource>
 

@@ -2,6 +2,8 @@
 #include <Document.h>
 #include "MainWindow.h"
 #include <QAction>
+#include <fstream>
+
 using Result = VerificationValidation::Result;
 using DefaultTests = VerificationValidation::DefaultTests;
 using Parser = VerificationValidation::Parser;
@@ -50,6 +52,98 @@ VerificationValidationWidget::~VerificationValidationWidget() {
     title->setObjectName("dockableHeader");
     parentDockable->setTitleBarWidget(title);
     dbClose();
+}
+
+QString addDoubleQuote(QString str){
+    str.insert(0, "\"");
+    str.insert(str.size(), "\"");
+    return str;
+}
+
+void VerificationValidationWidget::exportToCSV(){
+    if (resultTable->rowCount() == 0) return;
+	QString filePath = QFileDialog::getSaveFileName(this, tr("Export test results as CSV"), QString(), "CSV (*.csv)");
+    if (!filePath.isEmpty()) {
+        if(!filePath.endsWith(".csv")){
+            filePath.append(".csv");
+        }
+
+        std::ofstream csvFile;
+        csvFile.open(filePath.toStdString());
+
+        QSqlQuery* q = new QSqlQuery(getDatabase());
+        QSqlQuery* q1 = new QSqlQuery(getDatabase());
+        QSqlQuery* q2 = new QSqlQuery(getDatabase());
+        QSqlQuery* q3 = new QSqlQuery(getDatabase());
+        q->prepare("SELECT Tests.testName, TestResults.id, TestResults.resultCode, TestResults.terminalOutput FROM Tests INNER JOIN TestResults ON Tests.id=TestResults.testID");
+        // q->addBindValue(10);
+        dbExec(q);
+        while(q->next()){
+            QString testName = q->value(0).toString();
+            int testResultID = q->value(1).toInt();
+            int resultCode = q->value(2).toInt();
+            QString terminalOutput = q->value(3).toString();
+
+            
+            q1->prepare("SELECT TestArg.arg FROM TestArg INNER JOIN TestResults ON TestArg.id = TestResults.objectArgID WHERE TestResults.id = ?");
+            q1->addBindValue(testResultID);
+            dbExec(q1);
+            
+            QString object;
+            while(q1->next()){
+                object = q1->value(0).toString();
+            }
+            QString objectName;
+            QString issueDescription;
+
+            if (resultCode == Result::Code::PASSED) {
+                csvFile << "Passed" << ",";
+                csvFile << addDoubleQuote(testName).toStdString() << ",";
+                csvFile << addDoubleQuote(object).toStdString() << "\n";
+            } else if (resultCode == Result::Code::UNPARSEABLE) {
+                csvFile << "Unparseable" << ",";
+                csvFile << addDoubleQuote(testName).toStdString() << ",";
+                csvFile << addDoubleQuote(object).toStdString() << "\n";
+            } else {
+                
+                q2->prepare("SELECT objectIssueID FROM Issues WHERE testResultID = ?");
+                q2->addBindValue(testResultID);
+                dbExec(q2, !SHOW_ERROR_POPUP);
+
+                while (q2->next()) {
+                    QString objectIssueID = q2->value(0).toString();
+
+                    q3->prepare("SELECT objectName, issueDescription FROM ObjectIssue WHERE id = ?");
+                    q3->addBindValue(objectIssueID);
+                    dbExec(q3);
+
+                    while(q3->next()){
+                        objectName = q3->value(0).toString();
+                        issueDescription = q3->value(1).toString().replace("\n", "");
+
+                        if (resultCode == VerificationValidation::Result::Code::FAILED){
+                            csvFile << "Failed" << ",";
+                        }
+                        else if (resultCode == VerificationValidation::Result::Code::WARNING){
+                            csvFile << "Warning" << ",";
+                        }
+
+                        csvFile << addDoubleQuote(testName).toStdString() << ",";
+                        csvFile << addDoubleQuote(object).toStdString() << ",";
+                        csvFile << addDoubleQuote(issueDescription).toStdString() << ",";
+                        csvFile << addDoubleQuote(objectName).toStdString() << "\n";
+                    }
+                }
+            }
+        }
+        delete q;
+        delete q1;
+        delete q2;
+        delete q3;
+
+        csvFile.close();
+        popup("[Verification & Validation]\nSuccessfully exported test results to "+filePath);
+    }
 }
 
 void VerificationValidationWidget::showSelectTests() {
