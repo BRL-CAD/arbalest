@@ -1002,7 +1002,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             for(int i = 0; i < argList->size(); i++){
                 if(argList->at(i).type == Arg::Type::Dynamic){
                     QLineEdit* lineEdit = new QLineEdit(argList->at(i).defaultValue);
-                    inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, DefaultTests::nameToTestMap.at(testName).ArgList.at(i).defaultValue));
+                    if(testName == DefaultTests::NO_OVERLAPS.testName || testName == DefaultTests::NO_NULL_REGIONS.testName)
+                        inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, DefaultTests::nameToTestMap.at(testName).ArgList.at(i).defaultValue));
+                    else
+                        inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, ""));
                     formLayout->addRow(argList->at(i).argument, lineEdit);
                     formLayout->setSpacing(10);
                 }
