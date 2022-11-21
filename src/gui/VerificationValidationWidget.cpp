@@ -595,6 +595,21 @@ void VerificationValidationWidget::createTest() {
     setupUI();
 }
 
+void VerificationValidationWidget::isArgTyped(const QString& text) {
+    QObject* obj = sender();
+    for(int i = 0; i < argInputList.size(); i++){
+        if(obj == argInputList[i]){
+            if(text.size() > 0){
+                isVarList[i]->setDisabled(false);
+            }
+            else{
+                isVarList[i]->setCheckState(Qt::Unchecked);
+                isVarList[i]->setDisabled(true);
+            }
+        }
+    }
+}
+
 void VerificationValidationWidget::isVarClicked(int state) {
     QObject* obj = sender();
     for(int i = 0; i < isVarList.size(); i++){
@@ -618,6 +633,7 @@ void VerificationValidationWidget::addArgForm() {
     argForm->addRow("Argument: ", argInput);
     QCheckBox* isVar = new QCheckBox();
     argForm->addRow("Has variable: ", isVar);
+    isVar->setDisabled(true);
     QLineEdit* varInput = new QLineEdit();
     argForm->addRow("Variable: ", varInput);
     varInput->setDisabled(true);
@@ -631,6 +647,7 @@ void VerificationValidationWidget::addArgForm() {
 
     argForms.push_back(argField);
 
+    connect(argInput, SIGNAL(textChanged(const QString&)), this, SLOT(isArgTyped(const QString&)));
     connect(isVar, SIGNAL(stateChanged(int)), this, SLOT(isVarClicked(int)));
 }
 
@@ -1480,13 +1497,16 @@ void VerificationValidationWidget::visualizeObjects(QList<QTableWidgetItem*> ite
     }
     while(iter2.hasNext()) {
         iter2.next();
-        if(objNames.contains(iter2.value()))
+        if(objNames.contains(iter2.value())) {
             objTree->changeVisibilityState(iter2.key(), true);
+        }
     }
 
+    document->getDisplay()->getCamera()->autoview();
     document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
     document->getDisplayGrid()->forceRerenderAllDisplays();
     document->getObjectTreeWidget()->refreshItemTextColors();
+    document->getDisplay()->forceRerenderFrame();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {

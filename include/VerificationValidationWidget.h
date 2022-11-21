@@ -112,6 +112,7 @@ private slots:
     void removeSuites();
     void addArgForm();
     void rmvArgForm();
+    void isArgTyped(const QString& text);
     void isVarClicked(int state);
     void resultTableChangeSize();
     void showResult(const QString& testResultID);
