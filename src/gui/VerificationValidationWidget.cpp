@@ -1162,6 +1162,9 @@ void VerificationValidationWidget::setupUI() {
     connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
         if (!terminal) {
             terminal = new MgedWidget(document);
+
+            terminal->setStyleSheet("QTextEdit { background-color: black; color: #39ff14; font-weight: 600}");
+            
             terminal->setVisible(false);
             this->addWidget(terminal);
         }
@@ -1482,7 +1485,7 @@ void VerificationValidationWidget::setupDetailedResult(QTableWidgetItem* item) {
     rawOutputBox->setPalette(rawOutputBox_palette);
     rawOutputBox->setFontWeight(QFont::DemiBold);
     rawOutputBox->setTextColor(QColor("#39ff14"));
-    rawOutputBox->append("arbalest> "+testCommand+"\n");
+    rawOutputBox->append("mged> "+testCommand+"\n");
     rawOutputBox->setTextColor(Qt::white);
     rawOutputBox->append(terminalOutput);
     rawOutputBox->setReadOnly(true);
