@@ -1405,11 +1405,10 @@ void VerificationValidationWidget::copyToClipboard(QTableWidgetItem* item) {
 }
 
 void VerificationValidationWidget::setupResultMenu(const QPoint& pos) {
-    //currentResultRow = row;
     QList<QTableWidgetItem*> list = resultTable->selectedItems();
     QList<QTableWidgetItem*> selectedItems;
     for(int i = 0; i < list.size(); i++) {
-        if(list.at(i)->column() == OBJPATH_COLUMN)
+        if(list.at(i)->column() == TEST_NAME_COLUMN)
             selectedItems.append(list.at(i));
     }
     QMenu *resultMenu = new QMenu();
