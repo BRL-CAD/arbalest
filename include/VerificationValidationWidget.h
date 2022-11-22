@@ -87,6 +87,7 @@ public:
     void showRemoveTestDialog();
     void showNewTestSuiteDialog();
     void showRemoveTestSuiteDialog();
+    void exportToCSV();
 
 signals:
     void queryFinished(const QList<QList<QVariant>>& answer);
@@ -167,7 +168,6 @@ private:
     bool minBtn_toggle;
     QToolButton* minBtn;
     int resultTableSortIdx;
-    std::vector<int> nonResultItemList;
     
     std::map<QListWidgetItem*, std::pair<int, VerificationValidation::Test>> itemToTestMap;
     std::map<int, QListWidgetItem*> idToItemMap;
@@ -213,6 +213,8 @@ private:
     QList<QListWidgetItem*> getSelectedTests();
     void validateChecksum();
     void addItemFromTest(QListWidget* &listWidget);
+
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 #endif // VVWIDGET_H
