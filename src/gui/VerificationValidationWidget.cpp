@@ -1116,6 +1116,16 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
     }
 }
 
+void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
+    resultTable->setColumnWidth(0, this->width() * 0.025);
+    resultTable->setColumnWidth(1, this->width() * 0.175);
+    resultTable->setColumnWidth(2, this->width() * 0.375);
+    resultTable->setColumnWidth(3, this->width() * 0.35);
+    resultTable->setColumnWidth(4, this->width() * 0.075);
+
+    QHBoxWidget::resizeEvent(event);
+}
+
 void VerificationValidationWidget::setupUI() {    
     selectTestsDialog = new QDialog();
     testList = new QListWidget();
@@ -1125,7 +1135,7 @@ void VerificationValidationWidget::setupUI() {
 
     // setup result table's column headers
     QStringList columnLabels;
-    columnLabels << "   " << "Test Name" << "Description" << "Object Path" << "Object Tested";
+    columnLabels << "Type" << "Test Name" << "Description" << "Object Path" << "Object Tested";
     resultTable->setColumnCount(columnLabels.size() + 3); // add hidden columns for testResultID + object
     resultTable->setHorizontalHeaderLabels(columnLabels);
     resultTable->verticalHeader()->setVisible(false);
@@ -1133,17 +1143,18 @@ void VerificationValidationWidget::setupUI() {
     resultTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     
     QHeaderView* header = resultTable->horizontalHeader();
+    
     resultTableSortIdx = 6;
     connect(header, &QHeaderView::sectionClicked, [this](int idx){
         if(idx == resultTableSortIdx){
-            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#f4f4f4"));
+            resultTable->horizontalHeaderItem(idx)->setForeground(QBrush(QColor("#4b4b4b")));
             resultTable->sortItems(RESULT_TABLE_IDX, Qt::AscendingOrder);
             resultTableSortIdx = RESULT_TABLE_IDX;
         } else {
             if(resultTableSortIdx != RESULT_TABLE_IDX){
-                resultTable->horizontalHeaderItem(resultTableSortIdx)->setBackground(QColor("#f4f4f4"));
+                resultTable->horizontalHeaderItem(resultTableSortIdx)->setForeground(QBrush(QColor("#4b4b4b")));
             }
-            resultTable->horizontalHeaderItem(idx)->setBackground(QColor("#87cefa"));
+            resultTable->horizontalHeaderItem(idx)->setForeground(QBrush(Qt::blue));
             if(idx == 0)
                 resultTable->sortItems(ERROR_TYPE, Qt::AscendingOrder);
             else
@@ -1166,6 +1177,19 @@ void VerificationValidationWidget::setupUI() {
             this->addWidget(terminal);
         }
         terminal->setVisible(!terminal->isVisible());
+        if(terminal->isVisible()){
+            resultTable->setColumnWidth(0, this->width() * 0.025);
+            resultTable->setColumnWidth(1, this->width() * 0.075);
+            resultTable->setColumnWidth(2, this->width() * 0.225);
+            resultTable->setColumnWidth(3, this->width() * 0.10);
+            resultTable->setColumnWidth(4, this->width() * 0.075);
+        } else {
+            resultTable->setColumnWidth(0, this->width() * 0.025);
+            resultTable->setColumnWidth(1, this->width() * 0.175);
+            resultTable->setColumnWidth(2, this->width() * 0.375);
+            resultTable->setColumnWidth(3, this->width() * 0.35);
+            resultTable->setColumnWidth(4, this->width() * 0.075);
+        }
     });
 
     QSqlDatabase db = getDatabase();

@@ -211,6 +211,8 @@ private:
     QList<QListWidgetItem*> getSelectedTests();
     void validateChecksum();
     void addItemFromTest(QListWidget* &listWidget);
+
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 #endif // VVWIDGET_H
