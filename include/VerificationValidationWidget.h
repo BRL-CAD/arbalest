@@ -145,6 +145,7 @@ private:
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
     QProgressBar* vvProgressBar;
+    QPushButton* btnCollapseTerminal;
 
     MgedWidget* terminal;
     MgedWorker* mgedWorkerThread;

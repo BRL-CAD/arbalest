@@ -10,9 +10,9 @@ using Parser = VerificationValidation::Parser;
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
 document(document), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
-terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+terminal(new MgedWidget(document)), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), mgedWorkerThread(nullptr)
+msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), btnCollapseTerminal(new QPushButton()), mgedWorkerThread(nullptr)
 {
     if (!dbConnectionName.isEmpty()) return;
 
@@ -30,7 +30,14 @@ msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), mgedWorkerTh
     dbInitTables();
     dbPopulateDefaults();
     
+    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
+    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    terminal->setVisible(false);
     setupUI();
+
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this]() {
+        terminal->setVisible(!terminal->isVisible());
+    });
 
     updateDockableHeader();
     
@@ -1088,18 +1095,9 @@ void VerificationValidationWidget::setupUI() {
     addWidget(resultTable);
 
     // setup terminal
-    QPushButton* btnCollapseTerminal = new QPushButton;
-    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
-    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     addWidget(btnCollapseTerminal);
-    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
-        if (!terminal) {
-            terminal = new MgedWidget(document);
-            terminal->setVisible(false);
-            this->addWidget(terminal);
-        }
-        terminal->setVisible(!terminal->isVisible());
-    });
+
+    addWidget(terminal);
 
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
