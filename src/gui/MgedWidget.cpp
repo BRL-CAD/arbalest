@@ -7,7 +7,7 @@
 // TODO: implement CTRL+C?
 // TODO: consider case where baseCurPos overflows
 
-MgedWidget::MgedWidget(Document* d, QWidget* parent) : QPlainTextEdit(TERMINAL_PREFIX), d(d), prefix(TERMINAL_PREFIX), baseCurPos(prefix.size()) {}
+MgedWidget::MgedWidget(Document* d, QWidget* parent) : QTextEdit(TERMINAL_PREFIX), d(d), prefix(TERMINAL_PREFIX), baseCurPos(prefix.size()) {}
 
 void MgedWidget::keyPressEvent(QKeyEvent* event) {
 	QTextCursor cursor = textCursor();
@@ -22,7 +22,7 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 		}
 	}
 
-	QPlainTextEdit::keyPressEvent(event);
+	QTextEdit::keyPressEvent(event);
 
 	if (key == Qt::Key_Return) {
 		QTextDocument* doc = document();
@@ -35,6 +35,7 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 		}
 
 		QString result = mgedRun(cmd, *(d->getFilePath()));
+		setTextColor(Qt::white);
 		insertPlainText(result);
 
 		// TODO: currently no method in ObjectTreeWidget to refresh names (e.g.: "mv all tmp" -> should refresh object names)
@@ -42,6 +43,7 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 		d->getDisplayGrid()->forceRerenderAllDisplays();
 		d->getObjectTreeWidget()->refreshItemTextColors();
 
+		setTextColor(QColor("#39ff14"));
 		insertPlainText("\n");
 		insertPlainText(prefix);
 		baseCurPos = textCursor().position();
@@ -50,7 +52,7 @@ void MgedWidget::keyPressEvent(QKeyEvent* event) {
 }
 
 void MgedWidget::clear() {
-	QPlainTextEdit::clear();
+	QTextEdit::clear();
 	setPlainText(prefix);
 	baseCurPos = prefix.size();
 	QTextCursor cursor = textCursor();
