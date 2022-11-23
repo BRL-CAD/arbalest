@@ -10,7 +10,7 @@
 #define TERMINAL_PREFIX "mged> "
 
 class Document;
-class MgedWidget : public QPlainTextEdit {
+class MgedWidget : public QTextEdit {
 public:
 	explicit MgedWidget(Document* d, QWidget* parent = nullptr);
 

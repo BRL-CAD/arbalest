@@ -1157,11 +1157,11 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
-    resultTable->setColumnWidth(0, this->width() * 0.025);
-    resultTable->setColumnWidth(1, this->width() * 0.175);
-    resultTable->setColumnWidth(2, this->width() * 0.375);
-    resultTable->setColumnWidth(3, this->width() * 0.35);
-    resultTable->setColumnWidth(4, this->width() * 0.075);
+    resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+    resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.175);
+    resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.375);
+    resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.35);
+    resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
 
     QHBoxWidget::resizeEvent(event);
 }
@@ -1207,8 +1207,32 @@ void VerificationValidationWidget::setupUI() {
 
     // setup terminal
     addWidget(btnCollapseTerminal);
-
     addWidget(terminal);
+
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this]() {
+        if (!terminal) {
+            terminal = new MgedWidget(document);
+
+            terminal->setStyleSheet("QTextEdit { background-color: black; color: #39ff14; font-weight: 600}");
+            
+            terminal->setVisible(false);
+            this->addWidget(terminal);
+        }
+        terminal->setVisible(!terminal->isVisible());
+        if(terminal->isVisible()){
+            resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+            resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.075);
+            resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.225);
+            resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.10);
+            resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
+        } else {
+            resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+            resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.175);
+            resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.375);
+            resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.35);
+            resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
+        }
+    });
 
     QSqlDatabase db = getDatabase();
     QSqlQuery query(db);
@@ -1523,7 +1547,7 @@ void VerificationValidationWidget::setupDetailedResult(QTableWidgetItem* item) {
     rawOutputBox->setPalette(rawOutputBox_palette);
     rawOutputBox->setFontWeight(QFont::DemiBold);
     rawOutputBox->setTextColor(QColor("#39ff14"));
-    rawOutputBox->append("arbalest> "+testCommand+"\n");
+    rawOutputBox->append("mged> "+testCommand+"\n");
     rawOutputBox->setTextColor(Qt::white);
     rawOutputBox->append(terminalOutput);
     rawOutputBox->setReadOnly(true);
