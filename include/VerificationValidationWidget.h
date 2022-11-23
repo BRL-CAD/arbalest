@@ -113,6 +113,7 @@ private slots:
     void removeSuites();
     void addArgForm();
     void rmvArgForm();
+    void isArgTyped(const QString& text);
     void isVarClicked(int state);
     void resultTableChangeSize();
     void showResult(const QString& testResultID);
@@ -145,6 +146,7 @@ private:
     QWidget* content_widget;
     std::vector<QGroupBox*> argForms;
     QProgressBar* vvProgressBar;
+    QPushButton* btnCollapseTerminal;
 
     MgedWidget* terminal;
     MgedWorker* mgedWorkerThread;

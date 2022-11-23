@@ -12,9 +12,9 @@ using Parser = VerificationValidation::Parser;
 
 VerificationValidationWidget::VerificationValidationWidget(MainWindow* mainWindow, Document* document, QWidget* parent) : 
 document(document), mainWindow(mainWindow), parentDockable(mainWindow->getVerificationValidationDockable()),
-terminal(nullptr), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
+terminal(new MgedWidget(document)), testList(new QListWidget()), resultTable(new QTableWidget()), selectTestsDialog(new QDialog()),
 suiteList(new QListWidget()), test_sa(new QListWidget()), suite_sa(new QListWidget()),
-msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), mgedWorkerThread(nullptr)
+msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), btnCollapseTerminal(new QPushButton()), mgedWorkerThread(nullptr)
 {
     if (!dbConnectionName.isEmpty()) return;
 
@@ -32,7 +32,27 @@ msgBoxRes(NO_SELECTION), dbConnectionName(""), runningTests(false), mgedWorkerTh
     dbInitTables();
     dbPopulateDefaults();
     
+    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
+    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    terminal->setVisible(false);
     setupUI();
+
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this]() {
+        terminal->setVisible(!terminal->isVisible());
+        if(terminal->isVisible()){
+            resultTable->setColumnWidth(0, this->width() * 0.025);
+            resultTable->setColumnWidth(1, this->width() * 0.075);
+            resultTable->setColumnWidth(2, this->width() * 0.225);
+            resultTable->setColumnWidth(3, this->width() * 0.10);
+            resultTable->setColumnWidth(4, this->width() * 0.075);
+        } else {
+            resultTable->setColumnWidth(0, this->width() * 0.025);
+            resultTable->setColumnWidth(1, this->width() * 0.175);
+            resultTable->setColumnWidth(2, this->width() * 0.375);
+            resultTable->setColumnWidth(3, this->width() * 0.35);
+            resultTable->setColumnWidth(4, this->width() * 0.075);
+        }
+    });
 
     updateDockableHeader();
     
@@ -689,6 +709,21 @@ void VerificationValidationWidget::createTest() {
     setupUI();
 }
 
+void VerificationValidationWidget::isArgTyped(const QString& text) {
+    QObject* obj = sender();
+    for(int i = 0; i < argInputList.size(); i++){
+        if(obj == argInputList[i]){
+            if(text.size() > 0){
+                isVarList[i]->setDisabled(false);
+            }
+            else{
+                isVarList[i]->setCheckState(Qt::Unchecked);
+                isVarList[i]->setDisabled(true);
+            }
+        }
+    }
+}
+
 void VerificationValidationWidget::isVarClicked(int state) {
     QObject* obj = sender();
     for(int i = 0; i < isVarList.size(); i++){
@@ -712,6 +747,7 @@ void VerificationValidationWidget::addArgForm() {
     argForm->addRow("Argument: ", argInput);
     QCheckBox* isVar = new QCheckBox();
     argForm->addRow("Has variable: ", isVar);
+    isVar->setDisabled(true);
     QLineEdit* varInput = new QLineEdit();
     argForm->addRow("Variable: ", varInput);
     varInput->setDisabled(true);
@@ -725,6 +761,7 @@ void VerificationValidationWidget::addArgForm() {
 
     argForms.push_back(argField);
 
+    connect(argInput, SIGNAL(textChanged(const QString&)), this, SLOT(isArgTyped(const QString&)));
     connect(isVar, SIGNAL(stateChanged(int)), this, SLOT(isVarClicked(int)));
 }
 
@@ -1079,7 +1116,10 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
             for(int i = 0; i < argList->size(); i++){
                 if(argList->at(i).type == Arg::Type::Dynamic){
                     QLineEdit* lineEdit = new QLineEdit(argList->at(i).defaultValue);
-                    inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, DefaultTests::nameToTestMap.at(testName).ArgList.at(i).defaultValue));
+                    if(testName == DefaultTests::NO_OVERLAPS.testName || testName == DefaultTests::NO_NULL_REGIONS.testName)
+                        inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, DefaultTests::nameToTestMap.at(testName).ArgList.at(i).defaultValue));
+                    else
+                        inputTuples.push_back(std::make_tuple(&argList->at(i), lineEdit, ""));
                     formLayout->addRow(argList->at(i).argument, lineEdit);
                     formLayout->setSpacing(10);
                 }
@@ -1117,11 +1157,11 @@ void VerificationValidationWidget::userInputDialogUI(QListWidgetItem* test) {
 }
 
 void VerificationValidationWidget::resizeEvent(QResizeEvent* event) {
-    resultTable->setColumnWidth(0, this->width() * 0.025);
-    resultTable->setColumnWidth(1, this->width() * 0.175);
-    resultTable->setColumnWidth(2, this->width() * 0.375);
-    resultTable->setColumnWidth(3, this->width() * 0.35);
-    resultTable->setColumnWidth(4, this->width() * 0.075);
+    resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+    resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.175);
+    resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.375);
+    resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.35);
+    resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
 
     QHBoxWidget::resizeEvent(event);
 }
@@ -1166,11 +1206,10 @@ void VerificationValidationWidget::setupUI() {
     addWidget(resultTable);
 
     // setup terminal
-    QPushButton* btnCollapseTerminal = new QPushButton;
-    btnCollapseTerminal->setIcon(QIcon(":/icons/terminal.png"));
-    btnCollapseTerminal->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     addWidget(btnCollapseTerminal);
-    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this, btnCollapseTerminal]() {
+    addWidget(terminal);
+
+    connect(btnCollapseTerminal, &QPushButton::clicked, this, [this]() {
         if (!terminal) {
             terminal = new MgedWidget(document);
 
@@ -1181,17 +1220,17 @@ void VerificationValidationWidget::setupUI() {
         }
         terminal->setVisible(!terminal->isVisible());
         if(terminal->isVisible()){
-            resultTable->setColumnWidth(0, this->width() * 0.025);
-            resultTable->setColumnWidth(1, this->width() * 0.075);
-            resultTable->setColumnWidth(2, this->width() * 0.225);
-            resultTable->setColumnWidth(3, this->width() * 0.10);
-            resultTable->setColumnWidth(4, this->width() * 0.075);
+            resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+            resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.075);
+            resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.225);
+            resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.10);
+            resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
         } else {
-            resultTable->setColumnWidth(0, this->width() * 0.025);
-            resultTable->setColumnWidth(1, this->width() * 0.175);
-            resultTable->setColumnWidth(2, this->width() * 0.375);
-            resultTable->setColumnWidth(3, this->width() * 0.35);
-            resultTable->setColumnWidth(4, this->width() * 0.075);
+            resultTable->setColumnWidth(RESULT_CODE_COLUMN, this->width() * 0.025);
+            resultTable->setColumnWidth(TEST_NAME_COLUMN, this->width() * 0.175);
+            resultTable->setColumnWidth(DESCRIPTION_COLUMN, this->width() * 0.375);
+            resultTable->setColumnWidth(OBJPATH_COLUMN, this->width() * 0.35);
+            resultTable->setColumnWidth(OBJECT_COLUMN, this->width() * 0.075);
         }
     });
 
@@ -1390,11 +1429,10 @@ void VerificationValidationWidget::copyToClipboard(QTableWidgetItem* item) {
 }
 
 void VerificationValidationWidget::setupResultMenu(const QPoint& pos) {
-    //currentResultRow = row;
     QList<QTableWidgetItem*> list = resultTable->selectedItems();
     QList<QTableWidgetItem*> selectedItems;
     for(int i = 0; i < list.size(); i++) {
-        if(list.at(i)->column() == OBJPATH_COLUMN)
+        if(list.at(i)->column() == TEST_NAME_COLUMN)
             selectedItems.append(list.at(i));
     }
     QMenu *resultMenu = new QMenu();
@@ -1594,13 +1632,16 @@ void VerificationValidationWidget::visualizeObjects(QList<QTableWidgetItem*> ite
     }
     while(iter2.hasNext()) {
         iter2.next();
-        if(objNames.contains(iter2.value()))
+        if(objNames.contains(iter2.value())) {
             objTree->changeVisibilityState(iter2.key(), true);
+        }
     }
 
+    document->getDisplay()->getCamera()->autoview();
     document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
     document->getDisplayGrid()->forceRerenderAllDisplays();
     document->getObjectTreeWidget()->refreshItemTextColors();
+    document->getDisplay()->forceRerenderFrame();
 }
 
 void VerificationValidationWidget::showResult(const QString& testResultID) {
