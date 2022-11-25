@@ -91,7 +91,7 @@ Result* Parser::search(const QString& cmd, const QString& terminalOutput, const 
 void Parser::searchSpecificTest(Result* r, const QString& currentLine, const Test* type) {
     if (currentLine.trimmed().isEmpty()) return;
     QString objectPath = currentLine;
-    QString objectName = currentLine.split('/').last();
+    QString objectName = currentLine.split('/').last().trimmed();
 
     if (type == &DefaultTests::NO_NESTED_REGIONS) {
         r->resultCode = Result::Code::FAILED;
