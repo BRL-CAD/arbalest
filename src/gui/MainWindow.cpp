@@ -29,7 +29,7 @@
 #include <brlcad/ParabolicCylinder.h>
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
-
+#include "SelectMouseAction.h"
 
 using namespace BRLCAD;
 using namespace std;
@@ -388,6 +388,29 @@ void MainWindow::prepareUi() {
     });
     editMenu->addAction(relativeRotateAct);
 
+    QAction* selectObjectAct = new QAction(tr("Select object"), this);
+    selectObjectAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")));
+    selectObjectAct->setStatusTip(tr("Select object."));
+    selectObjectAct->setCheckable(true);
+    connect(selectObjectAct, &QAction::toggled, this, [=]() {
+        if (activeDocumentId == -1) {
+            selectObjectAct->setChecked(false);
+            return;
+        }
+
+        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled == false) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
+            selectObjectAct->setToolTip("Select Object OFF");
+            selectObjectButtonAction();
+        }
+        else {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
+            selectObjectAct->setToolTip("Select Object ON");
+            moveCameraButtonAction();
+        }
+    });
+    editMenu->addAction(selectObjectAct);
+
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
@@ -725,6 +748,17 @@ void MainWindow::prepareUi() {
 
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
+    QToolButton* selectObjectButton = new QToolButton(menuTitleBar);
+    selectObjectButton->setDefaultAction(selectObjectAct);
+    selectObjectButton->setObjectName("toolbarButton");
+    QIcon selectObjectButtonIcon;
+    selectObjectButtonIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-IconSelectObject")), QIcon::Normal);
+    selectObjectButton->setIcon(selectObjectButtonIcon);
+    selectObjectButton->setToolTip("Select object");
+    mainTabBarCornerWidget->addWidget(selectObjectButton);
+
+    mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
+
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
     raytraceButton->setDefaultAction(raytraceAct);
     raytraceButton->setObjectName("toolbarButton");
@@ -1047,17 +1081,19 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 }
 
 void MainWindow::moveCameraButtonAction() {
-    /*if (m_mouseAction != nullptr) {
-        delete m_mouseAction;
-    }
-
-    m_mouseAction = new MoveCameraMouseAction();*/
-
     if (activeDocumentId != -1) {
-        DisplayGrid* displayGrid = dynamic_cast<DisplayGrid *>(documentArea->widget(activeDocumentId));
+        DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
 
         if (displayGrid != nullptr) {
             displayGrid->setMoveCameraMouseAction();
         }
+    }
+}
+
+void MainWindow::selectObjectButtonAction() {
+    DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
+
+    if (displayGrid != nullptr) {
+        displayGrid->setSelectObjectMouseAction();
     }
 }

@@ -44,6 +44,7 @@ public:
     void refreshItemTextColors();
     const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
+    void select(QString selected);
 private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;

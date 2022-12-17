@@ -57,6 +57,7 @@ public:
     DisplayManager* getDisplayManager() const;
 
     bool gridEnabled = false;
+    bool selectObjectEnabled = false;
 
 protected:
     void resizeGL(int w, int h) override;
