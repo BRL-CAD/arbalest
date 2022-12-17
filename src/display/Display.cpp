@@ -22,6 +22,7 @@
 #include "Display.h"
 
 #include <iostream>
+#include <QScreen>
 #include <QWidget>
 #include <OrthographicCamera.h>
 #include <include/Globals.h>
@@ -77,9 +78,12 @@ DisplayManager* Display::getDisplayManager() const
 }
 
 void Display::resizeGL(const int w, const int h) {
-    camera->setWH(w,h);
-    this->w = w;
-    this->h = h;
+
+    double ratio = QGuiApplication::primaryScreen()->devicePixelRatio();
+
+    camera->setWH(ratio*w,ratio*h);
+    this->w = ratio*w;
+    this->h = ratio*h;
 }
 
 void Display::paintGL() {
