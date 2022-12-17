@@ -20,13 +20,20 @@
 /** @file AxesRenderer.cpp */
 
 #if defined(WIN32) && !defined(__CYGWIN__)
-#include<windows.h>
+#  include<windows.h>
 #endif
 
-#include <GL/gl.h>
+#if defined(__APPLE__)
+#  include <OpenGL/gl.h>
+#else
+#  include <GL/gl.h>
+#endif
+
 #include "AxesRenderer.h"
 
+
 #define GRID_LINE_LENGTH 100
+
 
 void AxesRenderer::render() {
     //todo implement line drawing in DisplayManager and use it instead of calling OpenGL here
