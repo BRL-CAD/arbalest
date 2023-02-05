@@ -101,15 +101,22 @@ void ObjectTreeWidget::build(const int objectId, QTreeWidgetItem* parent)
 }
 
 void ObjectTreeWidget::select(QString selected) {
-    int size = document->getObjectTree()->getFullPathMap().size();
+    QStringList regionName = selected.split("/");
+    QString path = "/" + regionName[1];
+    int regionNameSize = regionName.size();
+    int regionNameIndex = 1;
+    int mapSize = document->getObjectTree()->getFullPathMap().size();
 
-    for (int objectId = 1; objectId < size; ++objectId) {
-        ObjectTree::VisibilityState visibilityState = document->getObjectTree()->getObjectVisibility()[objectId];
-        if (visibilityState == ObjectTree::FullyVisible || visibilityState == ObjectTree::SomeChildrenVisible) {
-            if (document->getObjectTree()->getFullPathMap()[objectId] == selected) {
+    for (int objectId = 1; objectId < mapSize; ++objectId) {
+        if (document->getObjectTree()->getFullPathMap()[objectId] == path) {
+            if (regionNameIndex == regionNameSize - 1) {
                 objectIdTreeWidgetItemMap[objectId]->setSelected(true);
                 document->getProperties()->bindObject(objectId);
+                break;
             }
+            this->expandItem(objectIdTreeWidgetItemMap[objectId]);
+            ++regionNameIndex;
+            path = path + "/" + regionName[regionNameIndex];
         }
     }
 }
