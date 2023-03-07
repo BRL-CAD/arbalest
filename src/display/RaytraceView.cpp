@@ -80,10 +80,10 @@ void RaytraceView::paintEvent
 }
 
 
-class RayTraceCallback : public BRLCAD::ConstDatabase::HitCallback {
+class RayTraceCallback {
 public:
     RayTraceCallback(const QVector3D &direction, const QColor& color)
-            : BRLCAD::ConstDatabase::HitCallback(), m_direction(direction), m_color(color) {}
+            : m_direction(direction), m_color(color) {}
 
     virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
         double    brightness         = 0;

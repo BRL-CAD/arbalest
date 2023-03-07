@@ -34,10 +34,9 @@ QString SelectMouseAction::getSelected() const {
     return m_selected;
 }
 
-class SelectCallback : public BRLCAD::ConstDatabase::HitCallback {
+class SelectCallback {
 public:
-    SelectCallback()
-        : BRLCAD::ConstDatabase::HitCallback() {}
+    SelectCallback() {}
 
     virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
         m_selected = hit.Name();

@@ -26,10 +26,10 @@
   *
   */
 
-#include <brlcad/Combination.h>
+#include <brlcad/Database/Combination.h>
 #include "ObjectTree.h"
 #include <QStandardItemModel>
-#include "MemoryDatabase.h"
+#include "brlcad/Database/MemoryDatabase.h"
 
 
 void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)

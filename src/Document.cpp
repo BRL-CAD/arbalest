@@ -4,7 +4,7 @@
 
 #include <Document.h>
 #include<Display.h>
-#include <brlcad/Torus.h>
+#include <brlcad/Database/Torus.h>
 
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
@@ -63,11 +63,11 @@ bool Document::Save(const char* fileName) {
     return database->Save(fileName);
 }
 
-class BRLCADConstObjectCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+class BRLCADConstObjectCallback {
 public:
     BRLCADConstObjectCallback(const std::function<void(const BRLCAD::Object&)>& func): m_func(func) {}
 
-    virtual void operator()(const BRLCAD::Object& object) override {
+    virtual void operator()(const BRLCAD::Object& object) {
         m_func(object);
     }
 
@@ -80,11 +80,11 @@ void Document::getBRLCADConstObject(const QString& objectName, const std::functi
     database->Get(objectName.toUtf8(), callback);
 }
 
-class BRLCADObjectCallback : public BRLCAD::Database::ObjectCallback {
+class BRLCADObjectCallback {
 public:
     BRLCADObjectCallback(const std::function<void(BRLCAD::Object&)>& func): m_func(func) {}
 
-    virtual void operator()(BRLCAD::Object& object) override {
+    virtual void operator()(BRLCAD::Object& object) {
         m_func(object);
     }
 

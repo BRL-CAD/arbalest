@@ -3,7 +3,7 @@
 #define RT3_TYPESPECIFICPROPERTIES_H
 
 
-#include <brlcad/MemoryDatabase.h>
+#include <brlcad/Database/MemoryDatabase.h>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QVBoxLayout>
 #include "Document.h"

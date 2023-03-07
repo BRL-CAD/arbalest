@@ -6,8 +6,8 @@
 #include <QHash>
 #include <QSet>
 #include <QVector>
-#include "brlcad/MemoryDatabase.h"
-#include <brlcad/Combination.h>
+#include "brlcad/Database/MemoryDatabase.h"
+#include <brlcad/Database/Combination.h>
 #include <functional>
 #include <set>
 
@@ -89,14 +89,14 @@ private:
     BRLCAD::MemoryDatabase* database;
 	
 	// this class is used for traversing the MemoryDatabase and produce the tree
-    class ObjectTreeCallback : public BRLCAD::ConstDatabase::ObjectCallback {
+    class ObjectTreeCallback {
     public:
         ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const int& parentObjectId) :
             objectTree(objectTree),
             objectName(objectName),
             parentObjectId(parentObjectId),
             currentObjectPath(objectTree->fullPathMap[parentObjectId] + "/" + objectName) {}
-        void operator()(const BRLCAD::Object& object) override;
+        void operator()(const BRLCAD::Object& object);
     private:
         int objectId = -1;
         ObjectTree* objectTree = nullptr;

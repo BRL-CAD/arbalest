@@ -4,8 +4,8 @@
 
 
 #include <include/DataRow.h>
-#include <brlcad/Object.h>
-#include <brlcad/MemoryDatabase.h>
+#include <brlcad/Database/Object.h>
+#include <brlcad/Database/MemoryDatabase.h>
 #include "QVBoxWidget.h"
 #include "Document.h"
 

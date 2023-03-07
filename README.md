@@ -6,11 +6,10 @@ The project aims to create a geometry editor for BRL-CAD. The project should ide
 ## Building
 1. Install and configure Qt. Qt5.14.2 has been used for development of this project.
 2. Clone BRL-CAD (`git clone https://github.com/BRL-CAD/brlcad.git`), build, and install it
-3. Clone rt-cubed (`git clone https://github.com/BRL-CAD/rt-cubed.git`) and build by following its README. If you have done correctly you should be able to run the target QtGUI in rt-cubed (just for verification).
-4. Go to the src directory of rt-cubed repository in terminal.
-5. Clone this project into src. (`git clone https://github.com/BRL-CAD/arbalest.git`)
-6. Add this project to rt-cubed's CMakeList file. (append "ADD_SUBDIRECTORY(./arbalest)" to the end of rt-cubed\src\CMakeLists.txt)
-7. Build and run the target arbalest.
+3. Clone MOOSE (`git clone https://github.com/BRL-CAD/MOOSE.git`), build, and install it
+4. Clone this project (`git clone https://github.com/BRL-CAD/arbalest.git`)
+5. When running the CMake configuration, add BRLCAD_MOOSE_DIR to it and set this entry to the folder of your MOOSE installation
+6. Build and run the target arbalest.
 
 ## What has been implemented and how to use it
 You can keep multiple .g files open. Opened files will be displayed as tabs.

@@ -1,12 +1,11 @@
 #ifndef UTILS_ARBALEST_H
 #define UTILS_ARBALEST_H
 
-#include <brlcad/Combination.h>
-#include <brlcad/MemoryDatabase.h>
+#include <brlcad/Database/Combination.h>
+#include <brlcad/Database/MemoryDatabase.h>
 #include <functional>
 #include <utility>
 #include <QtWidgets/QLabel>
-#include "brlcad/cicommon.h"
 #include "QVBoxWidget.h"
 #include "QHBoxWidget.h"
 #include <chrono>

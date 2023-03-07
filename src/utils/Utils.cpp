@@ -1,12 +1,10 @@
 #include <cmath>
 #include <QString>
 #include <include/Utils.h>
-#include <brlcad/Combination.h>
+#include <brlcad/Database/Combination.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include "Globals.h"
-
-#include "cicommon.h"
 
 BRLCAD::Vector3D operator+(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b)
 {

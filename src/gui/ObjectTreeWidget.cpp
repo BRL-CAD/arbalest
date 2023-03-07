@@ -26,7 +26,7 @@
  *
  */
 
-#include <brlcad/Combination.h>
+#include <brlcad/Database/Combination.h>
 #include "ObjectTreeWidget.h"
 #include <QHBoxLayout>
 #include <QtCore/QtCore>

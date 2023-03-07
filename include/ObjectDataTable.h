@@ -6,7 +6,7 @@
 #include <QtWidgets/QFrame>
 #include "QVBoxWidget.h"
 
-#include <brlcad/Ellipsoid.h>
+#include <brlcad/Database/Ellipsoid.h>
 
 class ObjectDataTable : public QVBoxWidget {
 public:

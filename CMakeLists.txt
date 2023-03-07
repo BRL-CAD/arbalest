@@ -1,3 +1,11 @@
+cmake_minimum_required(VERSION 3.1.3)
+
+project(Arbalest)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+cmake_policy(SET CMP0072 NEW)
+
+find_package(BRLCAD_MOOSE REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -5,8 +13,7 @@ set(arbalest_Include_Dirs
         "${CMAKE_CURRENT_SOURCE_DIR}"
         "src/windows"
         "include"
-        ${BRLCAD_INCLUDE_DIRS}
-        ${RT3_SOURCE_DIR}/include/brlcad)
+        ${BRLCAD_MOOSE_INCLUDE_DIR})
 
 set(arbalest_Sources
         src/gui/MainWindow.cpp
@@ -43,7 +50,7 @@ set(arbalest_Sources
         src/display/SelectMouseAction.cpp)
 
 set(arbalest_Link_Libraries
-        coreinterface
+        ${BRLCAD_MOOSE_LIBRARY}
         Qt5::Widgets
         OpenGL::GL)
 
@@ -55,7 +62,13 @@ qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest
 qt5_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
 include_directories(${arbalest_Include_Dirs})
-link_directories(${BRLCAD_LIB_DIR})
+link_directories(${BRLCAD_MOSE_LIBRARY_DIR})
+
+IF(MSVC)
+    ADD_DEFINITIONS("-DBRLCAD_MOOSE_EXPORT=__declspec(dllimport)")
+ELSE(MSVC)
+    ADD_DEFINITIONS("-DBRLCAD_MOOSE_EXPORT=")
+ENDIF(MSVC)
 
 add_executable(arbalest
         ${arbalest_Sources}
