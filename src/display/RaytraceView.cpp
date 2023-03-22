@@ -80,50 +80,39 @@ void RaytraceView::paintEvent
 }
 
 
-class RayTraceCallback {
-public:
-    RayTraceCallback(const QVector3D &direction, const QColor& color)
-            : m_direction(direction), m_color(color) {}
+static void RayTraceCallback
+(
+    const QVector3D&                  direction,
+    QColor&                           color,
+    const BRLCAD::ConstDatabase::Hit& hit
+) {
+    double    brightness         = 0;
+    double    ambient            = 0.1;
+    double    diffuseWeight      = 0.5;
+    double    specularWeight     = 0.5;
+    int       n                  = 4;
+    QVector3D normal             = QVector3D(hit.SurfaceNormalIn().coordinates[0], hit.SurfaceNormalIn().coordinates[1], hit.SurfaceNormalIn().coordinates[2]);
+    double    dotProduct         = QVector3D::dotProduct(direction, normal); // negative because of opposite directions
 
-    virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
-        double    brightness         = 0;
-        double    ambient            = 0.1;
-        double    diffuseWeight      = 0.5;
-        double    specularWeight     = 0.5;
-        int       n                  = 4;
-        QVector3D normal             = QVector3D(hit.SurfaceNormalIn().coordinates[0], hit.SurfaceNormalIn().coordinates[1], hit.SurfaceNormalIn().coordinates[2]);
-        double    dotProduct         = QVector3D::dotProduct(m_direction, normal); // negative because of opposite directions
+    // value from 0 to 1
+    double    diffuse            = -dotProduct;
 
-        // value from 0 to 1
-        double    diffuse            = -dotProduct;
+    // refleced = incidence - 2 normal
+    QVector3D reflectedDir       = direction - 2. * dotProduct * normal;
+    reflectedDir.normalize();
 
-        // refleced = incidence - 2 normal
-        QVector3D reflectedDir       = m_direction - 2. * dotProduct * normal;
-        reflectedDir.normalize();
+    // value from 0 to 1
+    double    reflectedDotCamDir = std::max(0.f, QVector3D::dotProduct(reflectedDir, direction));
+    double    specular           = pow(reflectedDotCamDir, n);
 
-        // value from 0 to 1
-        double    reflectedDotCamDir = std::max(0.f, QVector3D::dotProduct(reflectedDir, m_direction));
-        double    specular           = pow(reflectedDotCamDir, n);
+    brightness += ambient + diffuse * diffuseWeight;
 
-        brightness += ambient + diffuse * diffuseWeight;
+    double    red                = std::min(hit.Red() * brightness + specular * specularWeight, 1.0);
+    double    green              = std::min(hit.Green() * brightness + specular * specularWeight, 1.0);
+    double    blue               = std::min(hit.Blue() * brightness + specular * specularWeight, 1.0);
 
-        double    red                = std::min(hit.Red() * brightness + specular * specularWeight, 1.0);
-        double    green              = std::min(hit.Green() * brightness + specular * specularWeight, 1.0);
-        double    blue               = std::min(hit.Blue() * brightness + specular * specularWeight, 1.0);
-
-        m_color.setRgbF(red, green, blue);
-
-        return false;
-    }
-
-    const QColor& Color() const {
-        return m_color;
-    }
-
-private:
-    QVector3D m_direction;
-    QColor    m_color;
-};
+    color.setRgbF(red, green, blue);
+}
 
 
 void RaytraceView::UpdateImage() {
@@ -139,10 +128,10 @@ void RaytraceView::UpdateImage() {
 
     for (int column = 0; column < w; column++) {
         for (int row = 0; row < h; row++) {
-            QVector3D        imagePoint(column, h - row - 1., 0.);
-            QVector3D        modelPoint = m_transformation.map(imagePoint);
-            RayTraceCallback callback(direction, color);
-            BRLCAD::Ray3D    ray;
+            QVector3D     imagePoint(column, h - row - 1., 0.);
+            QVector3D     modelPoint = m_transformation.map(imagePoint);
+            QColor        pixelColor(color);
+            BRLCAD::Ray3D ray;
 
             ray.origin.coordinates[0]    = modelPoint.x();
             ray.origin.coordinates[1]    = modelPoint.y();
@@ -151,9 +140,9 @@ void RaytraceView::UpdateImage() {
             ray.direction.coordinates[1] = direction.y();
             ray.direction.coordinates[2] = direction.z();
 
-            m_database.ShootRay(ray, callback, BRLCAD::ConstDatabase::StopAfterFirstHit);
+            m_database.ShootRay(ray, [&direction, &pixelColor](const BRLCAD::ConstDatabase::Hit& hit){RayTraceCallback(direction, pixelColor, hit); return false;}, BRLCAD::ConstDatabase::StopAfterFirstHit);
 
-            m_image.setPixelColor(column, row, callback.Color());
+            m_image.setPixelColor(column, row, pixelColor);
         }
     }
 }

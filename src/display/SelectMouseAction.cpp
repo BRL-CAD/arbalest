@@ -34,24 +34,6 @@ QString SelectMouseAction::getSelected() const {
     return m_selected;
 }
 
-class SelectCallback {
-public:
-    SelectCallback() {}
-
-    virtual bool operator()(const BRLCAD::ConstDatabase::Hit& hit) throw() {
-        m_selected = hit.Name();
-
-        return false;
-    }
-
-    const QString& getSelected() const {
-        return m_selected;
-    }
-
-private:
-    QString m_selected;
-};
-
 bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
     bool ret = false;
     
@@ -87,9 +69,9 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 ray.direction.coordinates[1] = direction.y();
                 ray.direction.coordinates[2] = direction.z();
 
-                SelectCallback callback;
-                m_watched->getDocument()->getDatabase()->ShootRay(ray, callback, BRLCAD::ConstDatabase::StopAfterFirstHit);
-                m_selected = callback.getSelected();
+                //SelectCallback callback;
+                m_watched->getDocument()->getDatabase()->ShootRay(ray, [this](const BRLCAD::ConstDatabase::Hit& hit){m_selected = hit.Name(); return false;}, BRLCAD::ConstDatabase::StopAfterFirstHit);
+                //m_selected = callback.getSelected();
 
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
