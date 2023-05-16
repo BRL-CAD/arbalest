@@ -6,8 +6,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
 #include <include/CollapsibleWidget.h>
-#include <brlcad/Database.h>
-#include <brlcad/MemoryDatabase.h>
+#include <brlcad/Database/Database.h>
+#include <brlcad/Database/MemoryDatabase.h>
 #include "Document.h"
 #include "QVBoxWidget.h"
 #include "TypeSpecificProperties.h"

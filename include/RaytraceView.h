@@ -34,7 +34,7 @@
 #include <QWidget>
 #include <QMatrix4x4>
 
-#include <brlcad/ConstDatabase.h>
+#include <brlcad/Database/ConstDatabase.h>
 #include "Document.h"
 
 

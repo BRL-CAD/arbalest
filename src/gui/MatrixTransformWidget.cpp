@@ -1,6 +1,6 @@
 
-#include <brlcad/Object.h>
-#include <brlcad/Combination.h>
+#include <brlcad/Database/Object.h>
+#include <brlcad/Database/Combination.h>
 #include <QMessageBox>
 #include "MatrixTransformWidget.h"
 

@@ -27,7 +27,7 @@
 #endif
 
 #include "Display.h"
-#include "VectorList.h"
+#include "brlcad/VectorList.h"
 class Display;
 
 class DisplayManager{
@@ -53,7 +53,7 @@ public:
     void loadMatrix(const GLfloat *m);
     void loadPMatrix(const GLfloat *m);
 
-    class DrawVListElementCallback : public BRLCAD::VectorList::ElementCallback {
+    class DrawVListElementCallback {
     public:
         struct DrawVlistVars{
             int first = 1;
@@ -62,7 +62,7 @@ public:
         const DisplayManager * displayManager;
         DrawVlistVars * vars;
         explicit DrawVListElementCallback(const DisplayManager *displayManager, DrawVlistVars *vars);
-        bool operator()(BRLCAD::VectorList::Element* element) override ;
+        bool operator()(BRLCAD::VectorList::Element* element);
     };
 
 private:

@@ -24,7 +24,6 @@
 #define RT3_OrthographicCAMERA_H
 
 
-#include <brlcad/cicommon.h>
 #include "Camera.h"
 #include "Document.h"
 

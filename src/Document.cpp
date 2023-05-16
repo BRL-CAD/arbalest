@@ -4,7 +4,7 @@
 
 #include <Document.h>
 #include<Display.h>
-#include <brlcad/Torus.h>
+#include <brlcad/Database/Torus.h>
 
 
 Document::Document(const int documentId, const QString *filePath) : documentId(documentId) {
@@ -63,38 +63,12 @@ bool Document::Save(const char* fileName) {
     return database->Save(fileName);
 }
 
-class BRLCADConstObjectCallback : public BRLCAD::ConstDatabase::ObjectCallback {
-public:
-    BRLCADConstObjectCallback(const std::function<void(const BRLCAD::Object&)>& func): m_func(func) {}
-
-    virtual void operator()(const BRLCAD::Object& object) override {
-        m_func(object);
-    }
-
-private:
-    const std::function<void(const BRLCAD::Object&)>& m_func;
-};
-
-void Document::getBRLCADConstObject(const QString& objectName, const std::function<void(const BRLCAD::Object&)>& func) {
-    BRLCADConstObjectCallback callback(func);
-    database->Get(objectName.toUtf8(), callback);
+void Document::getBRLCADConstObject(const QString& objectName, const std::function<void(const BRLCAD::Object&)>& func) const {
+    database->Get(objectName.toUtf8(), [func](const BRLCAD::Object& object){func(object);});
 }
 
-class BRLCADObjectCallback : public BRLCAD::Database::ObjectCallback {
-public:
-    BRLCADObjectCallback(const std::function<void(BRLCAD::Object&)>& func): m_func(func) {}
-
-    virtual void operator()(BRLCAD::Object& object) override {
-        m_func(object);
-    }
-
-private:
-    const std::function<void(BRLCAD::Object&)>& m_func;
-};
-
 void Document::getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func) {
-    BRLCADObjectCallback callback(func);
-    database->Get(objectName.toUtf8(), callback);
+    database->Get(objectName.toUtf8(), func);
     modified = true;
 }
 

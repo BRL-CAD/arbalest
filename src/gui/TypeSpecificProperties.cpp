@@ -1,6 +1,6 @@
 
-#include <brlcad/Cone.h>
-#include <brlcad/Arb8.h>
+#include <brlcad/Database/Cone.h>
+#include <brlcad/Database/Arb8.h>
 
 
 #include <QCheckBox>
@@ -12,16 +12,16 @@
 #include <include/DataRow.h>
 #include <include/ObjectDataField.h>
 #include <include/ObjectDataTable.h>
-#include <brlcad/BagOfTriangles.h>
-#include <brlcad/EllipticalTorus.h>
-#include <brlcad/Halfspace.h>
-#include <brlcad/HyperbolicCylinder.h>
-#include <brlcad/Hyperboloid.h>
-#include <brlcad/ParabolicCylinder.h>
-#include <brlcad/Paraboloid.h>
-#include <brlcad/Particle.h>
-#include <brlcad/Sphere.h>
-#include <brlcad/Torus.h>
+#include <brlcad/Database/BagOfTriangles.h>
+#include <brlcad/Database/EllipticalTorus.h>
+#include <brlcad/Database/Halfspace.h>
+#include <brlcad/Database/HyperbolicCylinder.h>
+#include <brlcad/Database/Hyperboloid.h>
+#include <brlcad/Database/ParabolicCylinder.h>
+#include <brlcad/Database/Paraboloid.h>
+#include <brlcad/Database/Particle.h>
+#include <brlcad/Database/Sphere.h>
+#include <brlcad/Database/Torus.h>
 #include <iostream>
 
 using namespace std;
