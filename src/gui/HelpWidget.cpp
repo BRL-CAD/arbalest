@@ -17,9 +17,9 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     QVBoxWidget *container = new QVBoxWidget();
 
     QString
-    text = "New File  <font style=\"color:$Color-ColorText\">Ctrl+N</font> <br><br>"
-           "Open File  <font style=\"color:$Color-ColorText\">Ctrl+O</font> <br><br>"
-           "Save File  <font style=\"color:$Color-ColorText\">Ctrl+S</font> <br><br>"
+    text = "New File  <a href=\"Ctrl+N\" style=\"color:$Color-ColorText\">Ctrl+N</a> <br><br>"
+           "Open File  <a href=\"Ctrl+O\" style=\"color:$Color-ColorText\">Ctrl+O</a> <br><br>"
+           "Save File  <a href=\"Ctrl+S\" style=\"color:$Color-ColorText\">Ctrl+S</a> <br><br>"
            "<br><br>"
            "Drag with <font style=\"color:$Color-ColorText\">Mouse Left Button</font> to rotate viewport camera<br><br>"
            "Drag with <font style=\"color:$Color-ColorText\">Mouse Right Button</font> to move viewport camera<br><br>"
@@ -46,6 +46,9 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     intro->setOpenExternalLinks(true);
     intro->setMargin(80);
 
+    // Connect the link clicked signal to a slot
+    connect(intro, SIGNAL(linkActivated(QString)), this, SLOT(onLinkClicked(QString)));
+
     container->addWidget(intro);
     QScrollArea * scrollArea = new QScrollArea();
     scrollArea->setObjectName("helpWidget");
@@ -53,4 +56,16 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     scrollArea->setWidget(container);
 
 
+}
+
+void HelpWidget::onLinkClicked(const QString& link) {
+    // Check if the link corresponds to Ctrl+N
+    if (link == "Ctrl+N") {
+        // Call your function for Ctrl+N here
+        myCtrlNFunction();
+    }
+}
+
+void HelpWidget::myCtrlNFunction() {
+    emit ctrlNPressed();
 }

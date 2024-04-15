@@ -12,6 +12,7 @@
 #include <QMenuBar>
 #include <QComboBox>
 #include "MouseAction.h"
+#include "HelpWidget.h"
 
 class Document;
 
@@ -21,29 +22,30 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    QStatusBar *getStatusBar() const {
+    QStatusBar* getStatusBar() const {
         return statusBar;
     }
 
     const int statusBarShortMessageDuration = 7000;
 
 private:
-	// UI components
-    Dockable *objectTreeWidgetDockable;
-    Dockable *objectPropertiesDockable;
-    Dockable *toolboxDockable;
-    QStatusBar *statusBar;
+    HelpWidget* helpWidgetInstance;
+    // UI components
+    Dockable* objectTreeWidgetDockable;
+    Dockable* objectPropertiesDockable;
+    Dockable* toolboxDockable;
+    QStatusBar* statusBar;
     QMenuBar* menuTitleBar;
-    QTabWidget *documentArea;
-    QPushButton * maximizeButton;
-    QLabel *statusBarPathLabel;
-    QComboBox * currentViewport;
+    QTabWidget* documentArea;
+    QPushButton* maximizeButton;
+    QLabel* statusBarPathLabel;
+    QComboBox* currentViewport;
     QAction* singleViewAct[4];
-    MouseAction *m_mouseAction;
-	
+    MouseAction* m_mouseAction;
+
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
 
@@ -53,7 +55,7 @@ private:
 
     // The ID of the active document.
     int activeDocumentId = -1;
-	
+
     void prepareUi();
     void loadTheme();
     void prepareDockables();
@@ -61,15 +63,15 @@ private:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
-    bool maybeSave(int documentId, bool *cancel = nullptr);
+    bool maybeSave(int documentId, bool* cancel = nullptr);
 
-    QAction *themeAct[2];
-	
+    QAction* themeAct[2];
+
 protected:
-    void changeEvent(QEvent *e) override;
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    void changeEvent(QEvent* e) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
-	
+
     void moveCameraButtonAction();
     void selectObjectButtonAction();
 
@@ -81,7 +83,7 @@ public slots:
     void saveFileDefaultPath();
     bool saveFileDefaultPathId(int documentId);
     void onActiveDocumentChanged(int newIndex);
-    void tabCloseRequested(int i) ;
+    void tabCloseRequested(int i);
     void objectTreeWidgetSelectionChanged(int objectId);
     void closeButtonPressed();
     void minimizeButtonPressed();

@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     }
     Globals::mainWindow = this;
     
+    connect(helpWidgetInstance, &HelpWidget::ctrlNPressed, this, &MainWindow::newFile);
 }
 
 MainWindow::~MainWindow()
