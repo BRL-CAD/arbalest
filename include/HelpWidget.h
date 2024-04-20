@@ -11,7 +11,6 @@ public:
     HelpWidget();
 private slots:
     void onLinkClicked(const QString& link);
-    void myCtrlNFunction();
 signals:
     void ctrlNPressed();
 };

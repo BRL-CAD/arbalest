@@ -59,13 +59,9 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
 }
 
 void HelpWidget::onLinkClicked(const QString& link) {
-    // Check if the link corresponds to Ctrl+N
     if (link == "Ctrl+N") {
-        // Call your function for Ctrl+N here
-        myCtrlNFunction();
+        emit ctrlNPressed();
     }
 }
 
-void HelpWidget::myCtrlNFunction() {
-    emit ctrlNPressed();
-}
+
