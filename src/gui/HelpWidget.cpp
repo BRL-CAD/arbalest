@@ -19,7 +19,7 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     QString
     text = "New File  <a href=\"Ctrl+N\" style=\"color:$Color-ColorText\">Ctrl+N</a> <br><br>"
            "Open File  <a href=\"Ctrl+O\" style=\"color:$Color-ColorText\">Ctrl+O</a> <br><br>"
-           "Save File  <a href=\"Ctrl+S\" style=\"color:$Color-ColorText\">Ctrl+S</a> <br><br>"
+           "Save File  <font style=\"color:$Color-ColorText\">Ctrl+S</font> <br><br>"
            "<br><br>"
            "Drag with <font style=\"color:$Color-ColorText\">Mouse Left Button</font> to rotate viewport camera<br><br>"
            "Drag with <font style=\"color:$Color-ColorText\">Mouse Right Button</font> to move viewport camera<br><br>"
@@ -45,6 +45,7 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     intro->setTextInteractionFlags(Qt::TextBrowserInteraction);
     intro->setOpenExternalLinks(true);
     intro->setMargin(80);
+    intro->setOpenExternalLinks(false);
 
     // Connect the link clicked signal to a slot
     connect(intro, SIGNAL(linkActivated(QString)), this, SLOT(onLinkClicked(QString)));
@@ -61,6 +62,9 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
 void HelpWidget::onLinkClicked(const QString& link) {
     if (link == "Ctrl+N") {
         emit ctrlNPressed();
+    }
+    if (link == "Ctrl+O") {
+        emit ctrlOPressed();
     }
 }
 

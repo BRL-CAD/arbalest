@@ -13,6 +13,7 @@ private slots:
     void onLinkClicked(const QString& link);
 signals:
     void ctrlNPressed();
+    void ctrlOPressed();
 };
 
 
