@@ -42,12 +42,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_mouseAction{ nu
     prepareUi();
     prepareDockables();
     helpWidgetInstance = new HelpWidget();
+<<<<<<< Updated upstream
     documentArea->addTab(helpWidgetInstance, "Quick Start"); // Modified this line
     if (QCoreApplication::arguments().length() > 1) {
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
 
+=======
+    documentArea->addTab(helpWidgetInstance, "Quick Start");
+    if(QCoreApplication::arguments().length()>1){
+        openFile(QString(QCoreApplication::arguments().at(1)));
+    }
+    Globals::mainWindow = this;
+    
+>>>>>>> Stashed changes
     if (helpWidgetInstance) {
         // Connect the signal to a lambda function for debugging
         connect(helpWidgetInstance, &HelpWidget::ctrlNPressed, this, &MainWindow::newFile);

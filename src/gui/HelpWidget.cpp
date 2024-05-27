@@ -43,7 +43,7 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     intro->setObjectName("helpWidget");
     intro->setTextFormat(Qt::RichText);
     intro->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    intro->setOpenExternalLinks(true);
+    intro->setOpenExternalLinks(false);
     intro->setMargin(80);
     intro->setOpenExternalLinks(false);
 
@@ -56,7 +56,16 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     addWidget(scrollArea);
     scrollArea->setWidget(container);
 
+    connect(intro, SIGNAL(linkActivated(QString)), this, SLOT(onLinkClicked(QString)));
+}
 
+void HelpWidget::onLinkClicked(const QString& link) {
+    if (link == "Ctrl+N") {
+        emit ctrlNPressed();
+    }
+    if (link == "Ctrl+O") {
+        emit ctrlOPressed();
+    }
 }
 
 void HelpWidget::onLinkClicked(const QString& link) {

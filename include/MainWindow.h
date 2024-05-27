@@ -32,12 +32,21 @@ public:
     const int statusBarShortMessageDuration = 7000;
 
 private:
+<<<<<<< Updated upstream
     HelpWidget* helpWidgetInstance;
     // UI components
     Dockable* objectTreeWidgetDockable;
     Dockable* objectPropertiesDockable;
     Dockable* toolboxDockable;
     QStatusBar* statusBar;
+=======
+	// UI components
+    HelpWidget* helpWidgetInstance;
+    Dockable *objectTreeWidgetDockable;
+    Dockable *objectPropertiesDockable;
+    Dockable *toolboxDockable;
+    QStatusBar *statusBar;
+>>>>>>> Stashed changes
     QMenuBar* menuTitleBar;
     QTabWidget* documentArea;
     QPushButton* maximizeButton;
