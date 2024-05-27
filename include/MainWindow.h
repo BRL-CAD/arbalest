@@ -12,6 +12,7 @@
 #include <QMenuBar>
 #include <QComboBox>
 #include "MouseAction.h"
+#include "HelpWidget.h"
 
 class Document;
 
@@ -32,6 +33,7 @@ public:
 
 private:
 	// UI components
+    HelpWidget* helpWidgetInstance;
     Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
     Dockable *toolboxDockable;

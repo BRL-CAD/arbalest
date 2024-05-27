@@ -41,13 +41,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     loadTheme();
     prepareUi();
     prepareDockables();
+    helpWidgetInstance = new HelpWidget();
 
-    documentArea->addTab(new HelpWidget(), "Quick Start");
+    documentArea->addTab(helpWidgetInstance, "Quick Start");
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
     
+    if (helpWidgetInstance) {
+        // Connect the signal to a lambda function for debugging
+        connect(helpWidgetInstance, &HelpWidget::ctrlNPressed, this, &MainWindow::newFile);
+        connect(helpWidgetInstance, &HelpWidget::ctrlOPressed, this, &MainWindow::openFileDialog);
+    }
 }
 
 MainWindow::~MainWindow()
