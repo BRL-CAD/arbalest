@@ -55,13 +55,10 @@ HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget() {
 
     connect(intro, &QLabel::linkActivated, this, &HelpWidget::onLinkClicked);
 
-    if (parent) {
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(parent);
-        if (mainWindow) {
-            connect(this, SIGNAL(ctrlNClicked()), parent, SLOT(newFile()));
-            connect(this, SIGNAL(ctrlOClicked()), parent, SLOT(openFileDialog()));
-        }
-    }
+    
+    connect(this, SIGNAL(ctrlNClicked()), parent, SLOT(newFile()));
+    connect(this, SIGNAL(ctrlOClicked()), parent, SLOT(openFileDialog()));
+    
 
 }
 
