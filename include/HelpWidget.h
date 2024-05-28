@@ -9,6 +9,7 @@ class HelpWidget : public QVBoxWidget{
     Q_OBJECT
 public:
     HelpWidget();
+    explicit HelpWidget(QWidget* parent = nullptr);
 private slots:
     void onLinkClicked(const QString& link);
 signals:

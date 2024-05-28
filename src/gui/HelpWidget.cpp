@@ -9,8 +9,9 @@
 #include <iostream>
 #include "HelpWidget.h"
 #include "Globals.h"
+#include "MainWindow.h"
 
-HelpWidget::HelpWidget() : QVBoxWidget() {
+HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget() {
 
     setObjectName("helpWidget");
 
@@ -53,6 +54,15 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     scrollArea->setWidget(container);
 
     connect(intro, &QLabel::linkActivated, this, &HelpWidget::onLinkClicked);
+
+    if (parent) {
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(parent);
+        if (mainWindow) {
+            connect(this, &HelpWidget::ctrlNClicked, mainWindow, &MainWindow::newFile);
+            connect(this, &HelpWidget::ctrlOClicked, mainWindow, &MainWindow::openFileDialog);
+        }
+    }
+
 }
 
 void HelpWidget::onLinkClicked(const QString& link) {
