@@ -52,14 +52,14 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     addWidget(scrollArea);
     scrollArea->setWidget(container);
 
-    connect(intro, SIGNAL(linkActivated(QString)), this, SLOT(onLinkClicked(QString)));
+    connect(intro, &QLabel::linkActivated, this, &HelpWidget::onLinkClicked);
 }
 
 void HelpWidget::onLinkClicked(const QString& link) {
     if (link == "Ctrl+N") {
-        emit ctrlNPressed();
+        emit ctrlNClicked();
     }
-    if (link == "Ctrl+O") {
-        emit ctrlOPressed();
+    else if (link == "Ctrl+O") {
+        emit ctrlOClicked();
     }
 }

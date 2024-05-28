@@ -33,7 +33,7 @@ public:
 
 private:
 	// UI components
-    HelpWidget* helpWidgetInstance;
+    HelpWidget* helpWidget;
     Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
     Dockable *toolboxDockable;
