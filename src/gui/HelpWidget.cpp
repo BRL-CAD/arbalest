@@ -9,7 +9,6 @@
 #include <iostream>
 #include "HelpWidget.h"
 #include "Globals.h"
-#include "MainWindow.h"
 
 HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget() {
 

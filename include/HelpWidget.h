@@ -8,8 +8,7 @@
 class HelpWidget : public QVBoxWidget{
     Q_OBJECT
 public:
-    HelpWidget();
-    explicit HelpWidget(QWidget* parent = nullptr);
+    explicit HelpWidget(QWidget* parent);
 private slots:
     void onLinkClicked(const QString& link);
 signals:
