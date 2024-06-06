@@ -58,8 +58,6 @@ private:
     void loadTheme();
     void prepareDockables();
 
-    void newFile(); // empty new file
-    void openFile(const QString& filePath);
     bool saveFile(const QString& filePath);
     bool maybeSave(int documentId, bool *cancel = nullptr);
 
@@ -86,7 +84,8 @@ public slots:
     void closeButtonPressed();
     void minimizeButtonPressed();
     void maximizeButtonPressed();
-
+    void newFile(); // empty new file
+    void openFile(const QString& filePath);
 
 };
 #endif // MAINWINDOW_H

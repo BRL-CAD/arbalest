@@ -6,8 +6,14 @@
 #include "QVBoxWidget.h"
 
 class HelpWidget : public QVBoxWidget{
+    Q_OBJECT
 public:
-    HelpWidget();
+    HelpWidget(QWidget* parent);
+private slots:
+    void onLinkClicked(const QString& link);
+signals:
+    void ctrlNClicked();
+    void ctrlOClicked();
 };
 
 

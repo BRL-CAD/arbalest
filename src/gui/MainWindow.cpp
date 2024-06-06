@@ -14,7 +14,6 @@
 #include <QComboBox>
 #include <include/RaytraceView.h>
 #include <include/AboutWindow.h>
-#include <include/HelpWidget.h>
 #include <brlcad/Database/Arb8.h>
 #include <QtWidgets/QtWidgets>
 #include <brlcad/Database/Torus.h>
@@ -42,12 +41,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     prepareUi();
     prepareDockables();
 
-    documentArea->addTab(new HelpWidget(), "Quick Start");
+    documentArea->addTab(new HelpWidget(this), "Quick Start");
     if(QCoreApplication::arguments().length()>1){
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
-    
 }
 
 MainWindow::~MainWindow()
@@ -592,7 +590,7 @@ void MainWindow::prepareUi() {
     connect(helpAct, &QAction::triggered, this, [this](){
         HelpWidget * helpWidget = dynamic_cast<HelpWidget*>(documentArea->widget(0));
         if (helpWidget== nullptr){
-            documentArea->insertTab(0,new HelpWidget,"Quick Start");
+            documentArea->insertTab(0,new HelpWidget(this), "Quick Start");
         }
         documentArea->setCurrentIndex(0);
     });

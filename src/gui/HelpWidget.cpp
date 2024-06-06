@@ -10,15 +10,15 @@
 #include "HelpWidget.h"
 #include "Globals.h"
 
-HelpWidget::HelpWidget() : QVBoxWidget() {
+HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget(parent) {
 
     setObjectName("helpWidget");
 
     QVBoxWidget *container = new QVBoxWidget();
 
     QString
-    text = "New File  <font style=\"color:$Color-ColorText\">Ctrl+N</font> <br><br>"
-           "Open File  <font style=\"color:$Color-ColorText\">Ctrl+O</font> <br><br>"
+    text = "New File  <a href=\"Ctrl+N\" style=\"color:$Color-ColorText\">Ctrl+N</a> <br><br>"
+           "Open File  <a href=\"Ctrl+O\" style=\"color:$Color-ColorText\">Ctrl+O</a> <br><br>"
            "Save File  <font style=\"color:$Color-ColorText\">Ctrl+S</font> <br><br>"
            "<br><br>"
            "Drag with <font style=\"color:$Color-ColorText\">Mouse Left Button</font> to rotate viewport camera<br><br>"
@@ -43,7 +43,7 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     intro->setObjectName("helpWidget");
     intro->setTextFormat(Qt::RichText);
     intro->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    intro->setOpenExternalLinks(true);
+    intro->setOpenExternalLinks(false);
     intro->setMargin(80);
 
     container->addWidget(intro);
@@ -52,5 +52,20 @@ HelpWidget::HelpWidget() : QVBoxWidget() {
     addWidget(scrollArea);
     scrollArea->setWidget(container);
 
+    connect(intro, &QLabel::linkActivated, this, &HelpWidget::onLinkClicked);
 
+    
+    connect(this, SIGNAL(ctrlNClicked()), parent, SLOT(newFile()));
+    connect(this, SIGNAL(ctrlOClicked()), parent, SLOT(openFileDialog()));
+    
+
+}
+
+void HelpWidget::onLinkClicked(const QString& link) {
+    if (link == "Ctrl+N") {
+        emit ctrlNClicked();
+    }
+    else if (link == "Ctrl+O") {
+        emit ctrlOClicked();
+    }
 }
