@@ -10,7 +10,7 @@
 #include "HelpWidget.h"
 #include "Globals.h"
 
-HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget() {
+HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget(parent) {
 
     setObjectName("helpWidget");
 

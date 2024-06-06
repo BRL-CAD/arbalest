@@ -12,7 +12,6 @@
 #include <QMenuBar>
 #include <QComboBox>
 #include "MouseAction.h"
-#include "HelpWidget.h"
 
 class Document;
 
