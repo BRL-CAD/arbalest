@@ -14,6 +14,7 @@
 #include <QComboBox>
 #include <include/RaytraceView.h>
 #include <include/AboutWindow.h>
+#include <include/HelpWidget.h>
 #include <brlcad/Database/Arb8.h>
 #include <QtWidgets/QtWidgets>
 #include <brlcad/Database/Torus.h>
