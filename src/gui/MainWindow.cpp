@@ -408,6 +408,13 @@ void MainWindow::prepareUi() {
             moveCameraButtonAction();
         }
     });
+    connect(this, &MainWindow::documentChanged, this, [=]() {
+        qDebug() << "Received documentChanged signal";
+        selectObjectAct->setChecked(false);
+        if (activeDocumentId != -1) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
+        }
+    });
     editMenu->addAction(selectObjectAct);
 
 
@@ -969,6 +976,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
+    emit documentChanged();
 }
 
 void MainWindow::tabCloseRequested(const int i)
