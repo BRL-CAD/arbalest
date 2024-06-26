@@ -401,11 +401,19 @@ void MainWindow::prepareUi() {
             documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
             selectObjectAct->setToolTip("Select Object OFF");
             selectObjectButtonAction();
+            connect(this, &MainWindow::documentChanged, this, [=]() {
+                documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
+                selectObjectButtonAction();
+            });
         }
         else {
             documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
             selectObjectAct->setToolTip("Select Object ON");
             moveCameraButtonAction();
+            connect(this, &MainWindow::documentChanged, this, [=]() {
+                documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
+                moveCameraButtonAction();
+            });
         }
     });
     editMenu->addAction(selectObjectAct);
@@ -969,6 +977,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
+    emit documentChanged();
 }
 
 void MainWindow::tabCloseRequested(const int i)
