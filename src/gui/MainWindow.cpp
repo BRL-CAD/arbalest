@@ -395,7 +395,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) {
             selectObjectAct->setChecked(false);
             return;
-        }
+        } 
 
         if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled == false) {
             documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
@@ -408,8 +408,25 @@ void MainWindow::prepareUi() {
             moveCameraButtonAction();
         }
     });
-    editMenu->addAction(selectObjectAct);
+    auto updateSelectObjectState = [=]() {
+        if (activeDocumentId == -1) {
+            selectObjectAct->setChecked(false);
+            return;
+        }
 
+        if (selectObjectAct->isChecked()) {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
+            selectObjectAct->setToolTip("Select Object OFF");
+            selectObjectButtonAction();
+        }
+        else {
+            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
+            selectObjectAct->setToolTip("Select Object ON");
+            moveCameraButtonAction();
+        }
+    };
+    connect(selectObjectAct, &QAction::toggled, this, updateSelectObjectState);
+    connect(this, &MainWindow::documentChanged, this, updateSelectObjectState);
 
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
@@ -969,6 +986,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }
+    emit documentChanged();
 }
 
 void MainWindow::tabCloseRequested(const int i)

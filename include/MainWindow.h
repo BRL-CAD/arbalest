@@ -87,5 +87,7 @@ public slots:
     void newFile(); // empty new file
     void openFile(const QString& filePath);
 
+signals:
+    void documentChanged();
 };
 #endif // MAINWINDOW_H
