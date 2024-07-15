@@ -387,27 +387,11 @@ void MainWindow::prepareUi() {
     });
     editMenu->addAction(relativeRotateAct);
 
-    QAction* selectObjectAct = new QAction(tr("Select object"), this);
+    selectObjectAct = new QAction(tr("Select object"), this);
     selectObjectAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")));
     selectObjectAct->setStatusTip(tr("Select object."));
     selectObjectAct->setCheckable(true);
-    connect(selectObjectAct, &QAction::toggled, this, [=]() {
-        if (activeDocumentId == -1) {
-            selectObjectAct->setChecked(false);
-            return;
-        }
-
-        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled == false) {
-            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = true;
-            selectObjectAct->setToolTip("Select Object OFF");
-            selectObjectButtonAction();
-        }
-        else {
-            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->selectObjectEnabled = false;
-            selectObjectAct->setToolTip("Select Object ON");
-            moveCameraButtonAction();
-        }
-    });
+    connect(selectObjectAct, &QAction::toggled, this, &MainWindow::updateMouseButtonObjectState);
     editMenu->addAction(selectObjectAct);
 
 
@@ -652,6 +636,7 @@ void MainWindow::prepareUi() {
     documentArea->tabBar()->setObjectName("documentAreaTabBar");
     connect(documentArea, &QTabWidget::currentChanged, this, &MainWindow::onActiveDocumentChanged);
     connect(documentArea, &QTabWidget::tabCloseRequested, this, &MainWindow::tabCloseRequested);
+    connect(documentArea, &QTabWidget::currentChanged, this, &MainWindow::updateMouseButtonObjectState);
 	
     QHBoxWidget * mainTabBarCornerWidget = new QHBoxWidget();
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
@@ -1094,5 +1079,23 @@ void MainWindow::selectObjectButtonAction() {
 
     if (displayGrid != nullptr) {
         displayGrid->setSelectObjectMouseAction();
+    }
+}
+
+void MainWindow::updateMouseButtonObjectState() {
+    if (activeDocumentId == -1) {
+        selectObjectAct->setChecked(false);
+        return;
+    }
+
+    if (selectObjectAct->isChecked() == true) {
+        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled = false;
+        selectObjectAct->setToolTip("Select Object OFF");
+        selectObjectButtonAction();
+    }
+    else if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled == false) {
+        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled = true;
+        selectObjectAct->setToolTip("Select Object ON");
+        moveCameraButtonAction();
     }
 }
