@@ -43,6 +43,7 @@ private:
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
     MouseAction *m_mouseAction;
+    QAction* selectObjectAct;
 	
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
@@ -86,6 +87,6 @@ public slots:
     void maximizeButtonPressed();
     void newFile(); // empty new file
     void openFile(const QString& filePath);
-
+    void updateMouseButtonObjectState();
 };
 #endif // MAINWINDOW_H

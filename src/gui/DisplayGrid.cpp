@@ -24,8 +24,6 @@ DisplayGrid::DisplayGrid(Document*  document) : document(document) {
     mouseActions.append(nullptr);
     mouseActions.append(nullptr);
 
-    setMoveCameraMouseAction();
-
     horizontalSplitter1->addWidget(displays[0]);
     horizontalSplitter1->addWidget(displays[1]);
     horizontalSplitter2->addWidget(displays[2]);
