@@ -26,9 +26,14 @@
 SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
+    m_selectedObjectDisplayListId = 0;
 }
 
-SelectMouseAction::~SelectMouseAction() {}
+SelectMouseAction::~SelectMouseAction() {
+    if (m_selectedObjectDisplayListId != 0) {
+        m_watched->getDisplayManager()->freeDLists(m_selectedObjectDisplayListId, 1);
+    }
+}
 
 QString SelectMouseAction::getSelected() const {
     return m_selected;
@@ -70,11 +75,31 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 ray.direction.coordinates[2] = direction.z();
 
                 //SelectCallback callback;
+                m_selected.clear();
                 m_watched->getDocument()->getDatabase()->ShootRay(ray, [this](const BRLCAD::ConstDatabase::Hit& hit){m_selected = hit.Name(); return false;}, BRLCAD::ConstDatabase::StopAfterFirstHit);
                 //m_selected = callback.getSelected();
 
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
+                    BRLCAD::VectorList vectorList;
+                    const QString objectFullPath = m_selected;
+                    m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
+                        
+                    // Free existing display list if allocated
+                    if (m_selectedObjectDisplayListId != 0) {
+                        m_watched->getDisplayManager()->freeDLists(m_selectedObjectDisplayListId, 1);
+                    }
+                    // Generate new display list for the selected object
+                    m_selectedObjectDisplayListId = m_watched->getDisplayManager()->genDLists(1);
+                    m_watched->getDisplayManager()->beginDList(m_selectedObjectDisplayListId);
+
+                    // Set a different color and increased width for rendering
+                    m_watched->getDisplayManager()->setFGColor(255, 0, 255, 1); // Red color
+                    m_watched->getDisplayManager()->setLineWidth(3); // Increased width
+
+                    // Render the object using the generated vector list
+                    m_watched->getDisplayManager()->drawVList(&vectorList);
+                    m_watched->getDisplayManager()->endDList();
                 }
 
                 ret = true;

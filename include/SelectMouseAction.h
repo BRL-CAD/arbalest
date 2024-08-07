@@ -35,6 +35,9 @@ public:
 protected:
     QString m_selected;
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
+
+private: 
+    unsigned int m_selectedObjectDisplayListId;
 };
 
 #endif // SELECTMOUSEACTION_H
