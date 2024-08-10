@@ -27,7 +27,7 @@ void GridRenderer::render() {
     float length = lineCount*lineGap;
     float lineColor[] = {.3,.3,.3};
 
-    display->getDisplayManager()->saveState();
+    display->getDisplayManager()->saveState();  
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -53,5 +53,7 @@ void GridRenderer::render() {
 
     display->getDisplayManager()->restoreState();
 }
+
+
 
 GridRenderer::GridRenderer(Display *display) : display(display) {}

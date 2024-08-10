@@ -42,6 +42,7 @@ void GeometryRenderer::render() {
     for (int displayListId : visibleDisplayListIds) {
         document->getDisplay()->getDisplayManager()->drawDList(displayListId);
     }
+    document->getDisplay()->getDisplayManager()->drawSuffix();
     document->getDisplay()->getDisplayManager()->restoreState();
 }
 

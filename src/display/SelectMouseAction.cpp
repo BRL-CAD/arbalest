@@ -21,6 +21,7 @@
 
 #include "SelectMouseAction.h"
 #include "DisplayGrid.h"
+#include "Display.h"
 
 
 SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
@@ -81,25 +82,31 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
+
                     BRLCAD::VectorList vectorList;
                     const QString objectFullPath = m_selected;
-                    m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
-                        
-                    // Free existing display list if allocated
-                    if (m_selectedObjectDisplayListId != 0) {
-                        m_watched->getDisplayManager()->freeDLists(m_selectedObjectDisplayListId, 1);
+
+                    // Assuming m_watched is not null and getDocument and getDatabase are valid methods
+                    if (m_watched && m_watched->getDocument() && m_watched->getDocument()->getDatabase()) {
+                        m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
+
+                        // Assuming getDisplayManager returns a pointer or reference to DisplayManager
+                        DisplayManager* displayManager = m_watched->getDisplayManager();
+                        if (displayManager) {
+                            displayManager->setFGColor(1.0f, 1.0f, 0.0f, 1.0f); // Set color to yellow
+                            displayManager->setSuffix(vectorList);
+                            displayManager->drawSuffix();
+                            m_watched->forceRerenderFrame();
+                        }
+                        else {
+                            // Handle error: displayManager is null
+                            qDebug() << "Error: DisplayManager is null.";
+                        }
                     }
-                    // Generate new display list for the selected object
-                    m_selectedObjectDisplayListId = m_watched->getDisplayManager()->genDLists(1);
-                    m_watched->getDisplayManager()->beginDList(m_selectedObjectDisplayListId);
-
-                    // Set a different color and increased width for rendering
-                    m_watched->getDisplayManager()->setFGColor(255, 0, 255, 1); // Red color
-                    m_watched->getDisplayManager()->setLineWidth(3); // Increased width
-
-                    // Render the object using the generated vector list
-                    m_watched->getDisplayManager()->drawVList(&vectorList);
-                    m_watched->getDisplayManager()->endDList();
+                    else {
+                        // Handle error: m_watched or its methods returned null
+                        qDebug() << "Error: Document or Database is not available.";
+                    }
                 }
 
                 ret = true;
@@ -112,4 +119,11 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
     }
 
     return ret;
+}
+
+void SelectMouseAction::Deselect(Display* m_watched) {
+    DisplayManager* displayManager = m_watched->getDisplayManager();
+    if (displayManager) {
+        displayManager->clearSuffix();
+    }
 }
