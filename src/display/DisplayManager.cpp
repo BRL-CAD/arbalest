@@ -429,5 +429,6 @@ void DisplayManager::clearSuffix(void) {
 }
 
 void DisplayManager::drawSuffix(void) {
+    setFGColor(1.0f, 1.0f, 0.0f, 1.0f);
     drawVList(&suffix);
 }

@@ -27,12 +27,13 @@
 SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
-    m_selectedObjectDisplayListId = 0;
 }
 
 SelectMouseAction::~SelectMouseAction() {
-    if (m_selectedObjectDisplayListId != 0) {
-        m_watched->getDisplayManager()->freeDLists(m_selectedObjectDisplayListId, 1);
+    DisplayManager* displayManager = m_watched->getDisplayManager();
+    if (displayManager) {
+        displayManager->clearSuffix();
+        m_watched->forceRerenderFrame();
     }
 }
 
@@ -85,27 +86,10 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
                     BRLCAD::VectorList vectorList;
                     const QString objectFullPath = m_selected;
-
-                    // Assuming m_watched is not null and getDocument and getDatabase are valid methods
-                    if (m_watched && m_watched->getDocument() && m_watched->getDocument()->getDatabase()) {
-                        m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
-
-                        // Assuming getDisplayManager returns a pointer or reference to DisplayManager
-                        DisplayManager* displayManager = m_watched->getDisplayManager();
-                        if (displayManager) {
-                            displayManager->setFGColor(1.0f, 1.0f, 0.0f, 1.0f); // Set color to yellow
-                            displayManager->setSuffix(vectorList);
-                            displayManager->drawSuffix();
-                            m_watched->forceRerenderFrame();
-                        }
-                        else {
-                            // Handle error: displayManager is null
-                            qDebug() << "Error: DisplayManager is null.";
-                        }
-                    }
-                    else {
-                        // Handle error: m_watched or its methods returned null
-                        qDebug() << "Error: Document or Database is not available.";
+                    m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
+                    m_watched->getDisplayManager()->setSuffix(vectorList);
+                    m_watched->getDisplayManager()->drawSuffix();
+                    m_watched->forceRerenderFrame();
                     }
                 }
 
@@ -116,14 +100,6 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
 
             }
         }
-    }
 
     return ret;
-}
-
-void SelectMouseAction::Deselect(Display* m_watched) {
-    DisplayManager* displayManager = m_watched->getDisplayManager();
-    if (displayManager) {
-        displayManager->clearSuffix();
-    }
 }
