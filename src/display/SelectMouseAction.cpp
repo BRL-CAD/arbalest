@@ -21,7 +21,6 @@
 
 #include "SelectMouseAction.h"
 #include "DisplayGrid.h"
-#include "Display.h"
 
 
 SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
@@ -76,10 +75,8 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 ray.direction.coordinates[1] = direction.y();
                 ray.direction.coordinates[2] = direction.z();
 
-                //SelectCallback callback;
                 m_selected.clear();
                 m_watched->getDocument()->getDatabase()->ShootRay(ray, [this](const BRLCAD::ConstDatabase::Hit& hit){m_selected = hit.Name(); return false;}, BRLCAD::ConstDatabase::StopAfterFirstHit);
-                //m_selected = callback.getSelected();
 
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
@@ -90,16 +87,16 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                     m_watched->getDisplayManager()->setSuffix(vectorList);
                     m_watched->getDisplayManager()->drawSuffix();
                     m_watched->forceRerenderFrame();
-                    }
                 }
+            }
 
                 ret = true;
-            }
+        }
             else {
                 ret = false;
 
             }
-        }
+    }
 
     return ret;
 }
