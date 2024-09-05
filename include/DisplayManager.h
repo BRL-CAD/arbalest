@@ -52,6 +52,10 @@ public:
     void drawBegin();
     void loadMatrix(const GLfloat *m);
     void loadPMatrix(const GLfloat *m);
+    void setSuffix(const BRLCAD::VectorList& vectorList);
+    void clearSuffix(void);
+    void drawSuffix(void);
+
 
     class DrawVListElementCallback {
     public:
@@ -79,6 +83,7 @@ private:
     float backDiffuseColorLight[4];
     float bgColor[3] = {0.0, 0.0, 0.125};
 
+    BRLCAD::VectorList suffix;
 };
 
 

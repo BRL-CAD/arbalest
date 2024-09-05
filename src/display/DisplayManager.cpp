@@ -420,3 +420,15 @@ void DisplayManager::loadPMatrix(const GLfloat *m)
     glLoadMatrixf(m);
 }
 
+void DisplayManager::setSuffix(const BRLCAD::VectorList& vectorList) {
+    suffix = vectorList;
+}
+
+void DisplayManager::clearSuffix(void) {
+    suffix.Clear();
+}
+
+void DisplayManager::drawSuffix(void) {
+    setFGColor(1.0f, 1.0f, 0.0f, 1.0f);
+    drawVList(&suffix);
+}

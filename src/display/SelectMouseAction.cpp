@@ -28,7 +28,13 @@ SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
     m_watched->installEventFilter(this);
 }
 
-SelectMouseAction::~SelectMouseAction() {}
+SelectMouseAction::~SelectMouseAction() {
+    DisplayManager* displayManager = m_watched->getDisplayManager();
+    if (displayManager) {
+        displayManager->clearSuffix();
+        m_watched->forceRerenderFrame();
+    }
+}
 
 QString SelectMouseAction::getSelected() const {
     return m_selected;
@@ -69,21 +75,27 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 ray.direction.coordinates[1] = direction.y();
                 ray.direction.coordinates[2] = direction.z();
 
-                //SelectCallback callback;
+                m_selected.clear();
                 m_watched->getDocument()->getDatabase()->ShootRay(ray, [this](const BRLCAD::ConstDatabase::Hit& hit){m_selected = hit.Name(); return false;}, BRLCAD::ConstDatabase::StopAfterFirstHit);
-                //m_selected = callback.getSelected();
 
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
+
+                    BRLCAD::VectorList vectorList;
+                    const QString objectFullPath = m_selected;
+                    m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
+                    m_watched->getDisplayManager()->setSuffix(vectorList);
+                    m_watched->getDisplayManager()->drawSuffix();
+                    m_watched->forceRerenderFrame();
                 }
+            }
 
                 ret = true;
-            }
+        }
             else {
                 ret = false;
 
             }
-        }
     }
 
     return ret;
