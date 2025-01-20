@@ -79,10 +79,10 @@ void OrthographicCamera::processMoveRequest(const int &deltaX, const int &deltaY
     rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
     QMatrix4x4 rotationMatrix = rotationMatrixAroundZ * rotationMatrixAroundY * rotationMatrixAroundX;
 
-    QVector3D cameraRightDirection(rotationMatrix * axisX);
+    QVector3D cameraRightDirection = rotationMatrix.map(axisX);
     eyePosition -= static_cast<float>(deltaX) * eyeMovementPerMouseDelta * cameraRightDirection * verticalSpan;
 
-    QVector3D cameraUpDirection(rotationMatrix * axisY);
+    QVector3D cameraUpDirection = rotationMatrix.map(axisY);
     eyePosition += static_cast<float>(deltaY) * eyeMovementPerMouseDelta * cameraUpDirection * verticalSpan;
 }
 
@@ -146,7 +146,7 @@ void OrthographicCamera::centerToCurrentSelection() {
     const BRLCAD::Vector3D volume = (a - b);
     double diagonalLength = vector3DLength(volume);
     if (diagonalLength > 0.001) setZoom(diagonalLength * 1.1);
-    document->getDisplay()->forceRerenderFrame();
+    document->getArbDisplay()->forceRerenderFrame();
 }
 
 void OrthographicCamera::autoview() {

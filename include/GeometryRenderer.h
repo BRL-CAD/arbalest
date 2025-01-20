@@ -22,7 +22,7 @@
 #ifndef BRLCAD_GEOMETRYRENDERER_H
 #define BRLCAD_GEOMETRYRENDERER_H
 
-#include "DisplayManager.h"
+#include "ArbDisplayManager.h"
 #include "Renderer.h"
 
 class GeometryRenderer:public Renderer {
@@ -30,7 +30,7 @@ public:
 
     explicit GeometryRenderer(Document* document);
 
-    // this is called by Display to render a single frame
+    // this is called by ArbDisplay to render a single frame
     void render() override;
     void refreshForVisibilityAndSolidChanges();
     void clearSolidIfAvailable(int objectId);
@@ -44,10 +44,10 @@ private:
     void drawSolid(int objectId);
 
     // Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
-    QHash<int, int>             objectIdDisplayListIdMap;
+    QHash<int, int>             objectIdArbDisplayListIdMap;
 
-    QVector<int> visibleDisplayListIds;
-    QVector<int> objectsToBeDisplayedIds;
+    QVector<int> visibleArbDisplayListIds;
+    QVector<int> objectsToBeArbDisplayedIds;
 };
 
 

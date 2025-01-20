@@ -17,7 +17,7 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file Display.h */
+/** @file ArbDisplay.h */
 
 
 #ifndef RT3_DISPLAY_H
@@ -25,28 +25,28 @@
 
 #include <include/Globals.h>
 
-#include <QtWidgets/QOpenGLWidget>
+#include <QOpenGLWidget>
 #include "AxesRenderer.h"
 #include <QMouseEvent>
 #include <include/GridRenderer.h>
 #include "Document.h"
-#include "DisplayManager.h"
+#include "ArbDisplayManager.h"
 #include "OrthographicCamera.h"
 #include "Globals.h"
 #include "QSSPreprocessor.h"
 
 class Document;
-class DisplayManager;
+class ArbDisplayManager;
 class GeometryRenderer;
 class OrthographicCamera;
 class GridRenderer;
 
 
-class Display : public QOpenGLWidget{
+class ArbDisplay : public QOpenGLWidget{
 
 public:
-    Display(Document * document);
-    virtual ~Display();
+    ArbDisplay(Document * document);
+    virtual ~ArbDisplay();
 
     void forceRerenderFrame();
 
@@ -54,7 +54,7 @@ public:
     int getH() const;
     const Document* getDocument() const;
     OrthographicCamera* getCamera() const;
-    DisplayManager* getDisplayManager() const;
+    ArbDisplayManager* getArbDisplayManager() const;
 
     bool gridEnabled = false;
     bool moveCameraEnabled = false;
@@ -73,7 +73,7 @@ private:
     QColor bgColor;
 
     OrthographicCamera  *camera;
-    DisplayManager *displayManager;
+    ArbDisplayManager *displayManager;
     AxesRenderer * axesRenderer;
     GridRenderer * gridRenderer;
 };

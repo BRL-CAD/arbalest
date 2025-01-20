@@ -1,7 +1,7 @@
 
 #include "DragEditLineEdit.h"
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 
 DragEditLineEdit::DragEditLineEdit(const QString &string, QWidget *parent) : DragEditLineEdit(parent) {
     setText(string);
@@ -16,7 +16,7 @@ DragEditLineEdit::DragEditLineEdit(QWidget *parent) : QLineEdit(parent) {
 void DragEditLineEdit::mouseMoveEvent(QMouseEvent *event) {
 
     if(initialY != -1 && (event->buttons() & Qt::MouseButton::LeftButton)) {
-        int globalY = event->globalY();
+        int globalY = event->globalPosition().y();
         int deltaY = initialY-globalY;
         int change = 0;
         if (deltaY > initialTolerance){
@@ -38,11 +38,11 @@ void DragEditLineEdit::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void DragEditLineEdit::mousePressEvent(QMouseEvent *event) {
-    initialY = event->globalY();
+    initialY = event->globalPosition().y();
     initialValue = text().toDouble();
     lastEmittedGlobalY = initialY;
     QLineEdit::mousePressEvent(event);
-    screenHeight = QApplication::desktop()->screenGeometry().height();
+    screenHeight = QApplication::primaryScreen()->geometry().height();
 }
 
 void DragEditLineEdit::mouseReleaseEvent(QMouseEvent *event) {

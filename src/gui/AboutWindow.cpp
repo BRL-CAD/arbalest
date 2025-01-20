@@ -2,7 +2,7 @@
 #include <QtWidgets/QLabel>
 #include <QBitmap>
 #include <QIcon>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QApplication>
 #include <QtWidgets/QScrollArea>
 #include <algorithm>
@@ -195,6 +195,6 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
     scrollArea->setWidget(container);
 
     setMinimumWidth(std::max(icon->width()*1.02,intro->width()*1.02));
-    setFixedHeight(QApplication::desktop()->screenGeometry().height() * .75);
+    setFixedHeight(QApplication::primaryScreen()->geometry().height() * .75);
 
 }

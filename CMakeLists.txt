@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 cmake_policy(SET CMP0072 NEW)
 
 find_package(BRLCAD_MOOSE REQUIRED)
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
@@ -24,8 +24,8 @@ set(arbalest_Sources
         src/display/GeometryRenderer.cpp
         src/display/OrthographicCamera.cpp
         src/display/PerspectiveCamera.cpp
-        src/display/Display.cpp
-        src/display/DisplayManager.cpp
+        src/display/ArbDisplay.cpp
+        src/display/ArbDisplayManager.cpp
         src/display/AxesRenderer.cpp
         src/Globals.cpp
         src/utils/QSSPreprocessor.cpp
@@ -39,7 +39,7 @@ set(arbalest_Sources
         src/gui/DragEditLineEdit.cpp
         src/gui/ObjectTreeRowButtons.cpp
         src/utils/Utils.cpp
-        src/gui/DisplayGrid.cpp
+        src/gui/ArbDisplayGrid.cpp
         src/gui/AboutWindow.cpp
         src/display/RaytraceView.cpp
         src/gui/HelpWidget.cpp
@@ -51,15 +51,18 @@ set(arbalest_Sources
 
 set(arbalest_Link_Libraries
         ${BRLCAD_MOOSE_LIBRARY}
-        Qt5::Widgets
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
+        Qt6::OpenGLWidgets
         OpenGL::GL)
 
 # Meta-Object Compiling
 file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
-qt5_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
+qt6_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
 
 # Resource Compiling
-qt5_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
+qt6_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
 include_directories(${arbalest_Include_Dirs})
 link_directories(${BRLCAD_MOSE_LIBRARY_DIR})

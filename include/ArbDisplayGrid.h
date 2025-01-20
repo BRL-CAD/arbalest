@@ -5,40 +5,40 @@
 
 #include <include/QVBoxWidget.h>
 #include <include/Document.h>
-#include <include/Display.h>
+#include <include/ArbDisplay.h>
 #include <QSplitter>
 
-class Display;
+class ArbDisplay;
 class MouseAction;
 
 
-class DisplayGrid : public QVBoxWidget {
+class ArbDisplayGrid : public QVBoxWidget {
 Q_OBJECT
 public:
-    explicit DisplayGrid(Document*  document);
+    explicit ArbDisplayGrid(Document*  document);
 
-    void forceRerenderAllDisplays();
+    void forceRerenderAllArbDisplays();
 
     Document *getDocument()  {
         return document;
     }
 
-    QVector<Display *> &getDisplays() {
+    QVector<ArbDisplay *> &getArbDisplays() {
         return displays;
     }
 
-    Display *getActiveDisplay(){
-        return activeDisplay;
+    ArbDisplay *getActiveArbDisplay(){
+        return activeArbDisplay;
     }
 
-    bool inQuadDisplayMode();
+    bool inQuadArbDisplayMode();
 
-    int getActiveDisplayId();
+    int getActiveArbDisplayId();
 
-    void setActiveDisplay(Display *display);
+    void setActiveArbDisplay(ArbDisplay *display);
 
-    void singleDisplayMode(int displayId);
-    void quadDisplayMode();
+    void singleArbDisplayMode(int displayId);
+    void quadArbDisplayMode();
 
     void resetViewPort(int displayId);
     void resetAllViewPorts();
@@ -47,16 +47,16 @@ public:
     void setSelectObjectMouseAction();
 
 private:
-    double defaultDisplayCameraRotation[4][3] = {
+    double defaultArbDisplayCameraRotation[4][3] = {
             {0, 0, 270},
             {270, 0, 180},
             {270, 0, 270},
             {295, 0, 235}
     };
     Document*  document;
-    QVector<Display *> displays;
+    QVector<ArbDisplay *> displays;
     QVector<MouseAction *> mouseActions;
-    Display *activeDisplay;
+    ArbDisplay *activeArbDisplay;
     QSplitter *verticalSplitter;
     QSplitter *horizontalSplitter1;
     QSplitter *horizontalSplitter2;
