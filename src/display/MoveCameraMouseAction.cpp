@@ -19,11 +19,11 @@
  */
 /** @file MoveCameraMouseAction.cpp */
 
-#include "DisplayGrid.h"
+#include "ArbDisplayGrid.h"
 #include "MoveCameraMouseAction.h"
 
 
-MoveCameraMouseAction::MoveCameraMouseAction(DisplayGrid* parent, Display* watched)
+MoveCameraMouseAction::MoveCameraMouseAction(ArbDisplayGrid* parent, ArbDisplay* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
 }
@@ -36,10 +36,10 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
     if (watched == m_watched) {
         if (event->type() == QEvent::MouseMove) {
             QMouseEvent* moveCameraEvent = static_cast<QMouseEvent *>(event);
-            const int x = moveCameraEvent->x();
-            const int y = moveCameraEvent->y();
-            int globalX = moveCameraEvent->globalX();
-            int globalY = moveCameraEvent->globalY();
+            const int x = moveCameraEvent->position().x();
+            const int y = moveCameraEvent->position().y();
+            int globalX = moveCameraEvent->globalPosition().x();
+            int globalY = moveCameraEvent->globalPosition().y();
 
             bool resetX = false, resetY = false;
 
@@ -97,11 +97,11 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
             ret = true;
         }
         else if (event->type() == QEvent::MouseButtonPress) {
-            m_parent->setActiveDisplay(m_watched);
+            m_parent->setActiveArbDisplay(m_watched);
 
             QMouseEvent* mouseButtonPressEvent = static_cast<QMouseEvent*>(event);
-            prevMouseX = mouseButtonPressEvent->x();
-            prevMouseY = mouseButtonPressEvent->y();
+            prevMouseX = mouseButtonPressEvent->position().x();
+            prevMouseY = mouseButtonPressEvent->position().y();
 
             ret        = true;
         }

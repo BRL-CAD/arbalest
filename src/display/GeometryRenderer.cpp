@@ -28,22 +28,22 @@ GeometryRenderer::GeometryRenderer(Document* document) : document(document)
 }
 
 void GeometryRenderer::render() {
-    document->getDisplay()->getDisplayManager()->saveState();
-    if (!objectsToBeDisplayedIds.empty()) {
-        for (int objectId : objectsToBeDisplayedIds) {
-            if (!objectIdDisplayListIdMap.contains(objectId)) {
+    document->getArbDisplay()->getArbDisplayManager()->saveState();
+    if (!objectsToBeArbDisplayedIds.empty()) {
+        for (int objectId : objectsToBeArbDisplayedIds) {
+            if (!objectIdArbDisplayListIdMap.contains(objectId)) {
                 drawSolid(objectId);
             }
-            visibleDisplayListIds.append(objectIdDisplayListIdMap[objectId]);
+            visibleArbDisplayListIds.append(objectIdArbDisplayListIdMap[objectId]);
         }
-        objectsToBeDisplayedIds.clear();
+        objectsToBeArbDisplayedIds.clear();
     }
 
-    for (int displayListId : visibleDisplayListIds) {
-        document->getDisplay()->getDisplayManager()->drawDList(displayListId);
+    for (int displayListId : visibleArbDisplayListIds) {
+        document->getArbDisplay()->getArbDisplayManager()->drawDList(displayListId);
     }
-    document->getDisplay()->getDisplayManager()->drawSuffix();
-    document->getDisplay()->getDisplayManager()->restoreState();
+    document->getArbDisplay()->getArbDisplayManager()->drawSuffix();
+    document->getArbDisplay()->getArbDisplayManager()->restoreState();
 }
 
 
@@ -55,42 +55,42 @@ void GeometryRenderer::drawSolid(int objectId) {
 
     clearSolidIfAvailable(objectId);
 
-    const unsigned int displayListId = document->getDisplay()->getDisplayManager()->genDLists(1);
-    document->getDisplay()->getDisplayManager()->beginDList(displayListId);  // begin display list --------------
+    const unsigned int displayListId = document->getArbDisplay()->getArbDisplayManager()->genDLists(1);
+    document->getArbDisplay()->getArbDisplayManager()->beginDList(displayListId);  // begin display list --------------
 
     if (colorInfo.hasColor) {
-        document->getDisplay()->getDisplayManager()->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
+        document->getArbDisplay()->getArbDisplayManager()->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
     }
     else {
-        document->getDisplay()->getDisplayManager()->setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
+        document->getArbDisplay()->getArbDisplayManager()->setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
     }
 
     //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
-    document->getDisplay()->getDisplayManager()->drawVList(&vectorList);
-    document->getDisplay()->getDisplayManager()->endDList();     // end display list --------------
+    document->getArbDisplay()->getArbDisplayManager()->drawVList(&vectorList);
+    document->getArbDisplay()->getArbDisplayManager()->endDList();     // end display list --------------
 
-    objectIdDisplayListIdMap[objectId] = displayListId;
+    objectIdArbDisplayListIdMap[objectId] = displayListId;
 }
 
 
 
 void GeometryRenderer::refreshForVisibilityAndSolidChanges() {
-    visibleDisplayListIds.clear();
+    visibleArbDisplayListIds.clear();
     document->getObjectTree()->traverseSubTree(0, false,[this]
         (int objectId)
         {
             if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::Invisible) return false;
             if (!document->getObjectTree()->getDrawableObjectIds().contains(objectId)) return true;
-            objectsToBeDisplayedIds.append(objectId);
+            objectsToBeArbDisplayedIds.append(objectId);
             return true;
         }
     );
 }
 
 void GeometryRenderer::clearSolidIfAvailable(int objectId) {
-    if (objectIdDisplayListIdMap.contains(objectId)){
-        document->getDisplay()->getDisplayManager()->freeDLists(objectIdDisplayListIdMap[objectId], 1);
-        objectIdDisplayListIdMap.remove(objectId);
+    if (objectIdArbDisplayListIdMap.contains(objectId)){
+        document->getArbDisplay()->getArbDisplayManager()->freeDLists(objectIdArbDisplayListIdMap[objectId], 1);
+        objectIdArbDisplayListIdMap.remove(objectId);
     }
 }
 

@@ -52,10 +52,10 @@ void PerspectiveCamera::processMoveRequest(const int & deltaX, const int & delta
     rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
     QMatrix4x4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
-    QVector3D PerspectiveCameraRightDirection(rotationMatrix * axisX);
+    QVector3D PerspectiveCameraRightDirection = rotationMatrix.map(axisX);
     eyePosition += float(deltaX) * eyeMovementPerMouseDelta * PerspectiveCameraRightDirection;
 
-    QVector3D PerspectiveCameraUpDirection(rotationMatrix * axisY);
+    QVector3D PerspectiveCameraUpDirection = rotationMatrix.map(axisY);
     eyePosition += float(-deltaY) * eyeMovementPerMouseDelta * PerspectiveCameraUpDirection;
 }
 
@@ -66,7 +66,7 @@ void PerspectiveCamera::processZoomRequest(const int & deltaWheelAngle) {
     rotationMatrixAroundX.rotate(-angleAroundAxes.x(), axisX);
     QMatrix4x4 rotationMatrix = rotationMatrixAroundY * rotationMatrixAroundX;
 
-    QVector3D PerspectiveCameraForwardDirection(rotationMatrix * (-axisZ));
+    QVector3D PerspectiveCameraForwardDirection = rotationMatrix.map(-axisZ);
 
     eyePosition += -float(deltaWheelAngle) * eyeMovementPerWheelAngle * PerspectiveCameraForwardDirection;
 }

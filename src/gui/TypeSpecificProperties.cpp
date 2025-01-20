@@ -88,7 +88,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
             });
             this->document.getObjectTree()->buildColorMap(objectId);
             this->document.modifyObjectNoSet(objectId);
-            this->document.getDisplayGrid()->forceRerenderAllDisplays();
+            this->document.getArbDisplayGrid()->forceRerenderAllArbDisplays();
         });*/
     }
 

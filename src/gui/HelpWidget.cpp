@@ -2,7 +2,7 @@
 #include <QtWidgets/QLabel>
 #include <QBitmap>
 #include <QIcon>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QApplication>
 #include <QtWidgets/QScrollArea>
 #include <algorithm>

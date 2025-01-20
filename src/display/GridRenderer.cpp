@@ -18,7 +18,7 @@
 
 
 void GridRenderer::render() {
-    //todo implement line drawing in DisplayManager and use it instead of calling OpenGL here
+    //todo implement line drawing in ArbDisplayManager and use it instead of calling OpenGL here
 
     int lineCount = 1000;
     double lineGap;
@@ -27,7 +27,7 @@ void GridRenderer::render() {
     float length = lineCount*lineGap;
     float lineColor[] = {.3,.3,.3};
 
-    display->getDisplayManager()->saveState();  
+    display->getArbDisplayManager()->saveState();  
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -51,9 +51,9 @@ void GridRenderer::render() {
 
     glEnd();
 
-    display->getDisplayManager()->restoreState();
+    display->getArbDisplayManager()->restoreState();
 }
 
 
 
-GridRenderer::GridRenderer(Display *display) : display(display) {}
+GridRenderer::GridRenderer(ArbDisplay *display) : display(display) {}
