@@ -81,6 +81,8 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 if (!m_selected.isEmpty()) {
                     emit Done(this);
 
+                    m_watched->getDocument()->getObjectTreeWidget()->select(m_selected);
+
                     BRLCAD::VectorList vectorList;
                     const QString objectFullPath = m_selected;
                     m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
