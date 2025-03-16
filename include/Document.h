@@ -20,7 +20,8 @@ class ArbDisplayGrid;
 class RaytraceView;
 class ObjectTreeWidget;
 
-class Document {
+class Document
+{
 private:
     QString *filePath = nullptr;
     BRLCAD::MemoryDatabase *database;
@@ -43,13 +44,14 @@ public:
     // getters setters
     QString* getFilePath() const
     {
-	    return filePath;
+        return filePath;
     }
 
     RaytraceView * getRaytraceWidget() const
     {
         return raytraceWidget;
     }
+
     BRLCAD::ConstDatabase* getDatabase() const
     {
         return database;
@@ -59,12 +61,12 @@ public:
 
     ObjectTreeWidget* getObjectTreeWidget() const
     {
-	    return objectTreeWidget;
+        return objectTreeWidget;
     }
 
     Properties* getProperties() const
     {
-	    return properties;
+        return properties;
     }
 
     ArbDisplayGrid *getArbDisplayGrid()  {
@@ -73,14 +75,16 @@ public:
 
     int getDocumentId() const
     {
-	    return documentId;
+        return documentId;
     }
 
     ObjectTree* getObjectTree() const
     {
-	    return objectTree;
+        return objectTree;
     }
-    GeometryRenderer *getGeometryRenderer(){
+
+    GeometryRenderer *getGeometryRenderer()
+    {
         return geometryRenderer;
     }
 
@@ -96,5 +100,4 @@ public:
     void getBRLCADObject(const QString& objectName, const std::function<void(BRLCAD::Object&)>& func);
 };
 
-
-#endif //RT3_DOCUMENT_H
+#endif  //RT3_DOCUMENT_H

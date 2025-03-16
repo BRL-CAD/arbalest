@@ -11,6 +11,7 @@
 #include <chrono>
 #include <stack>
 #include <iostream>
+
 using namespace std::chrono;
 using namespace std;
 
@@ -26,18 +27,17 @@ struct ColorInfo {
     float red, green, blue;
     bool hasColor;
 
-    QColor toQColor() const{
-        return QColor(red*255,green*255,blue*255);
+    QColor toQColor() const {
+        return QColor(red*255, green*255, blue*255);
     }
 
-    QString toHexString() const{
+    QString toHexString() const {
         return toQColor().name(QColor::HexRgb);
     }
 };
 
 const double * getLeafMatrix(BRLCAD::Combination::ConstTreeNode& node, const QString& name);
 void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, double * matrix);
-
 
 template<typename T>
 inline void addPropertiesTitle(T* l, const QString &title, const QString indexText = "") {
@@ -55,8 +55,7 @@ inline void addPropertiesTitle(T* l, const QString &title, const QString indexTe
             hbox->addWidget(titleWidget);
             l->addWidget(hbox);
             hbox->getBoxLayout()->addStretch();
-        }
-        else{
+        } else {
             QLabel *titleWidget = new QLabel(title);
             titleWidget->setMargin(2);
             l->addWidget(titleWidget);
@@ -64,13 +63,12 @@ inline void addPropertiesTitle(T* l, const QString &title, const QString indexTe
     }
 }
 
-inline QWidget * toolbarSeparator(bool horizontal){
+inline QWidget * toolbarSeparator(bool horizontal) {
     QWidget *widget = new QWidget;
-    if(horizontal){
+    if(horizontal) {
         widget->setFixedHeight(1);
         widget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    }
-    else {
+    } else {
         widget->setFixedWidth(1);
         widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     }
@@ -82,12 +80,12 @@ QImage coloredIcon(QString path, QString colorKey = "");
 
 static std::stack <time_point<high_resolution_clock>> times;
 static std::stack <QString> timerNames;
-inline void ts(QString name = "Timer"){
+inline void ts(QString name = "Timer") {
     times.push(high_resolution_clock::now());
     timerNames.push(name);
 }
 
-inline void te(){
+inline void te() {
     time_point<high_resolution_clock> startTime = times.top();
 
     milliseconds duration = duration_cast<milliseconds>( high_resolution_clock::now()-startTime);
@@ -98,5 +96,4 @@ inline void te(){
 class Document;
 bool getObjectNameFromUser(QWidget* parent, Document& document, QString& name);
 
-
-#endif // UTILS_ARBALEST_H
+#endif  // UTILS_ARBALEST_H

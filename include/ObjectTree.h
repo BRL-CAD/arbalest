@@ -1,4 +1,3 @@
-
 #ifndef RT3_OBJECTTREE_H
 #define RT3_OBJECTTREE_H
 
@@ -10,7 +9,6 @@
 #include <brlcad/Database/Combination.h>
 #include <functional>
 #include <set>
-
 
 #include "Utils.h"
 
@@ -27,9 +25,10 @@
  * multiple times in the tree like all.g\orb and ball.g\orb
  */
 
-class ObjectTree {
+class ObjectTree
+{
 public:
-    enum VisibilityState{
+    enum VisibilityState {
         Invisible,
         SomeChildrenVisible,
         FullyVisible,
@@ -45,10 +44,10 @@ public:
     void buildColorMap(int rootObjectId);
     int addTopObject(QString name);
 
-        // getters
+    // getters
     BRLCAD::MemoryDatabase* getDatabase() const
     {
-	    return database;
+        return database;
     }
 
     QHash<int, QVector<int>>& getChildren()
@@ -70,7 +69,7 @@ public:
     {
         return fullPathMap;
     }
-	
+    
     QHash<int, ColorInfo>& getColorMap()
     {
         return colorMap;
@@ -84,11 +83,11 @@ public:
     QHash<int, VisibilityState> &getObjectVisibility() {
         return objectIdVisibilityStateMap;
     }
-	
+    
 private:
     BRLCAD::MemoryDatabase* database;
-	
-	// this class is used for traversing the MemoryDatabase and produce the tree
+    
+    // this class is used for traversing the MemoryDatabase and produce the tree
     class ObjectTreeCallback {
     public:
         ObjectTreeCallback(ObjectTree* objectTree, QString& objectName, const int& parentObjectId) :
@@ -102,31 +101,31 @@ private:
         ObjectTree* objectTree = nullptr;
         QString objectName;
         const int& parentObjectId;
-    	QString currentObjectPath;
+        QString currentObjectPath;
         QVector<int>* childrenNames = nullptr;
         void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) const; //traverse the boolean tree of the MemoryDatabase
     };
 
     // Stores the object tree in  {parent's object id (key), children's object ids (value)} format
-    QHash<int, QVector<int>>    objectIdChildrenObjectIdsMap;
+    QHash<int, QVector<int>>     objectIdChildrenObjectIdsMap;
 
     // Stores the object tree in  { object id (key), parent's object id (value)} format
-    QHash<int, int>    objectIdParentObjectIdMap;
+    QHash<int, int>              objectIdParentObjectIdMap;
 
-	// Object id to it's name mapping
-    QHash<int, QString>         nameMap;
-
-    // Object id to it's full path mapping
-    QHash<int, QString>         fullPathMap;
+    // Object id to it's name mapping
+    QHash<int, QString>          nameMap;
 
     // Object id to it's full path mapping
-    QHash<int, ColorInfo>         colorMap;
+    QHash<int, QString>          fullPathMap;
+
+    // Object id to it's full path mapping
+    QHash<int, ColorInfo>        colorMap;
 
     // Get all objects that are not combinations. (ie. these are also the objects that can be drawn) //todo _GLOBAL?
-    QSet<int>                   drawableObjectIds;
+    QSet<int>                    drawableObjectIds;
 
 
-    QHash<int, VisibilityState>             objectIdVisibilityStateMap;
+    QHash<int, VisibilityState>  objectIdVisibilityStateMap;
 };
 
-#endif
+#endif  // RT3_OBJECTTREE_H

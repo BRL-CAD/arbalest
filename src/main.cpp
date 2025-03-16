@@ -1,22 +1,23 @@
-//#define ARB_DEBUG
+#define ARB_DEBUG
 
 #include <QApplication>
 #include <QOpenGLWidget>
 #include "MainWindow.h"
 
-int main(int argc, char*argv[]) {
+int main(int argc, char *argv[]) {
 
 #ifdef ARB_DEBUG
     if (argc < 2) {
-        argv = new char* [2]{ argv[0], "C:/Users/Sadeep/Desktop/moss.g" };
+        argv = new char* [2]{ argv[0], "../extra/db/moss.g" };
         argc = 2;
     }
 #endif
 
-
     QApplication app(argc,argv);
+
     MainWindow mainWindow;
     mainWindow.showMaximized();
+
     return app.exec();
 }
 

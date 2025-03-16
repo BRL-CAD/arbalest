@@ -1,4 +1,3 @@
-
 #include <QtWidgets/QLabel>
 #include <QBitmap>
 #include <QIcon>
@@ -8,7 +7,8 @@
 #include <algorithm>
 #include "AboutWindow.h"
 
-AboutWindow::AboutWindow() : QVBoxWidget() {
+AboutWindow::AboutWindow() : QVBoxWidget()
+{
 
     setWindowFlags(Qt::Window| Qt::WindowCloseButtonHint);
     setObjectName("aboutWindow");
@@ -196,5 +196,4 @@ AboutWindow::AboutWindow() : QVBoxWidget() {
 
     setMinimumWidth(std::max(icon->width()*1.02,intro->width()*1.02));
     setFixedHeight(QApplication::primaryScreen()->geometry().height() * .75);
-
 }

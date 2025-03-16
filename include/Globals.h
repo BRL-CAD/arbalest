@@ -6,11 +6,11 @@
 class MainWindow;
 class QSSPreprocessor;
 
-class Globals{
+class Globals
+{
 public:
     static QSSPreprocessor *theme;
     static MainWindow *mainWindow;
 };
 
-
-#endif
+#endif  // GLOBALS_H
