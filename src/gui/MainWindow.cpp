@@ -87,8 +87,9 @@ void MainWindow::prepareUi()
     setMenuBar(menuTitleBar);
 
     // "FILE" MENU
-
-    QMenu *fileMenu = menuTitleBar->addMenu(tr("File"));
+    QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
+    connect(fileMenu, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(fileMenu, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "New" action
     QIcon newActIcon;
@@ -144,8 +145,9 @@ void MainWindow::prepareUi()
     fileMenu->addAction(quitAct);
 
     // "CREATE" MENU
-
-    QMenu* createMenu = menuTitleBar->addMenu(tr("Create"));
+    QMenu* createMenu = menuTitleBar->addMenu(tr("&Create"));
+    connect(createMenu, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(createMenu, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "Arb8" action
     QAction* createArb8Act = new QAction(tr("Arb8"), this);
@@ -357,8 +359,9 @@ void MainWindow::prepareUi()
     createMenu->addAction(createTorusAct);
 
     // "EDIT" MENU
-
-    QMenu* editMenu = menuTitleBar->addMenu(tr("Edit"));
+    QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
+    connect(editMenu, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(editMenu, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "Relative move selected object" action
     QAction* relativeMoveAct = new QAction("Relative move selected object", this);
@@ -402,8 +405,9 @@ void MainWindow::prepareUi()
     editMenu->addAction(selectObjectAct);
 
     // "VIEW" MENU
-
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
+    connect(viewMenu, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(viewMenu, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "Reset current viewport" action
     QAction* resetViewportAct = new QAction("Reset current viewport", this);
@@ -551,8 +555,9 @@ void MainWindow::prepareUi()
     themeAct[settings.value("themeIndex",0).toInt()]->setChecked(true);
 
     // "RAYTRACE" MENU
-
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
+    connect(raytrace, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(raytrace, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "Raytrace current viewport" action
     QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
@@ -579,8 +584,9 @@ void MainWindow::prepareUi()
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
     // "HELP" MENU
-
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
+    connect(help, &QMenu::aboutToShow, this, &MainWindow::increaseMenusOpen);
+    connect(help, &QMenu::aboutToHide, this, &MainWindow::decreaseMenusOpen);
 
     // "About" action
     QAction* aboutAct = new QAction(tr("About"), this);
@@ -602,15 +608,14 @@ void MainWindow::prepareUi()
     help->addAction(helpAct);
 
     // ARBALEST ICON
-
-    QPushButton* applicationIcon = new QPushButton(menuTitleBar);
+    applicationIcon = new QPushButton(menuTitleBar);
     applicationIcon->setIcon(QIcon(":/icons/arbalest_icon.png"));
     applicationIcon->setObjectName("topLeftAppIcon");
     menuTitleBar->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
     setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
+    applicationIcon->installEventFilter(this);
 
     // MINIMIZE/MAXIMIZE/CLOSE BUTTONS
-
     QHBoxLayout* layoutTopRightWidget = new QHBoxLayout;
     layoutTopRightWidget->setContentsMargins(0, 0, 0, 0);
     QWidget* topRightWidget = new QWidget;
@@ -619,11 +624,12 @@ void MainWindow::prepareUi()
     layoutTopRightWidget->setSpacing(0);
 
     // Minimize button
-    QPushButton* minimizeButton = new QPushButton(topRightWidget);
+    minimizeButton = new QPushButton(topRightWidget);
     minimizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_minimize_white_36dp","$Color-WindowTitleButtons")));
     minimizeButton->setObjectName("minimizeButton");
     connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
     layoutTopRightWidget->addWidget(minimizeButton);
+    minimizeButton->installEventFilter(this);
 
     // Maximize button
     maximizeButton = new QPushButton(topRightWidget);
@@ -636,13 +642,15 @@ void MainWindow::prepareUi()
     maximizeButton->setObjectName("maximizeButton");
     connect(maximizeButton, &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
     layoutTopRightWidget->addWidget(maximizeButton);
+    maximizeButton->installEventFilter(this);
 
     // Close button
-    QPushButton* closeButton = new QPushButton(topRightWidget);
+    closeButton = new QPushButton(topRightWidget);
     closeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_close_white_36dp","$Color-WindowTitleButtons")));
     closeButton->setObjectName("closeButton");
     connect(closeButton, &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
     layoutTopRightWidget->addWidget(closeButton);
+    closeButton->installEventFilter(this);
 
 
     // ---------------------------------------- STATUS BAR ----------------------------------------
@@ -1039,25 +1047,49 @@ void MainWindow::maximizeButtonPressed()
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     static QPoint dragPosition{};
-    if (watched == menuTitleBar) {
+    static bool wasButtonPressed;
+
+    // if wasButtonPressed is true, it means that the cursor tried to grab the MENU BAR from a button
+    if ((watched == minimizeButton) || (watched == maximizeButton) || (watched == closeButton)) {
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
             if (mouse_event->button() == Qt::LeftButton) {
+                wasButtonPressed = true;
+                return false;
+            }
+        }
+    // if the cursor was pressed inside MENU BAR and if no menu is open -> save its current coordinates
+    } else if (watched == menuTitleBar || watched == applicationIcon) {
+        if (event->type() == QEvent::MouseButtonPress && nMenusOpen == 0) {
+            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
+            if (mouse_event->button() == Qt::LeftButton) {
+                wasButtonPressed = false;
                 dragPosition = mouse_event->globalPosition().toPoint() - frameGeometry().topLeft();
                 return false;
             }
-        } else if (event->type() == QEvent::MouseMove) {
+        /* If the cursor is trying to drag the MENU BAR, if no menu is open and if no button was pressed:
+         *     resize the MainWindow if it was maximized
+         *     move the MainWindow accordingly to the previously saved coordinates */
+        } else if (event->type() == QEvent::MouseMove && nMenusOpen == 0 && !wasButtonPressed) {
             QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-            if (mouse_event->buttons() & Qt::LeftButton) {
+            if ((mouse_event->buttons() & Qt::LeftButton)) {
                 if(isMaximized()) {
-                    return false;  // showNormal();
-                    // todo showNormal when dragged
+                    showNormal();  // to show the ability to resize the window on Linux
+                    setGeometry(
+                        (mouse_event->globalPosition().toPoint().x() + frameGeometry().left())/ 2,
+                        frameGeometry().top(),
+                        size().width() / 2,
+                        size().height() / 2
+                    );
+                    dragPosition = mouse_event->globalPosition().toPoint() - frameGeometry().topLeft();
+                    return false;
                 }
                 move(mouse_event->globalPosition().toPoint() - dragPosition);
                 return false;
             }
         }
     }
+
     return false;
 }
 
@@ -1122,4 +1154,14 @@ void MainWindow::updateMouseButtonObjectState()
         selectObjectAct->setToolTip("Select Object ON");
         moveCameraButtonAction();
     }
+}
+
+void MainWindow::increaseMenusOpen()
+{
+    nMenusOpen++;
+}
+
+void MainWindow::decreaseMenusOpen()
+{
+    nMenusOpen--;
 }

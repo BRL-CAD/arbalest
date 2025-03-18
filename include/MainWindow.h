@@ -36,8 +36,11 @@ private:
     Dockable *toolboxDockable;
     QStatusBar *statusBar;
     QMenuBar* menuTitleBar;
+    QPushButton *applicationIcon;
+    QPushButton *minimizeButton;
+    QPushButton *maximizeButton;
+    QPushButton *closeButton;
     QTabWidget *documentArea;
-    QPushButton * maximizeButton;
     QLabel *statusBarPathLabel;
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
@@ -50,9 +53,11 @@ private:
     // Total number of documents ever opened in application's life time. This is not decreased when closing documents.
     // A document's ID is set to documentsCount at the moment of opening it.
     int documentsCount = 0;
-
     // The ID of the active document.
     int activeDocumentId = -1;
+
+    // Number of menus open in the MENU BAR
+    int nMenusOpen = 0;
     
     void loadTheme();
     // Prepares MENU BAR, STATUS BAR and DOCUMENT AREA
@@ -92,6 +97,8 @@ public slots:
     void minimizeButtonPressed();
     void maximizeButtonPressed();
     void updateMouseButtonObjectState();
+    void increaseMenusOpen();
+    void decreaseMenusOpen();
 };
 
 #endif  // MAINWINDOW_H
