@@ -21,12 +21,12 @@ set(arbalest_Sources
         src/Document.cpp
         src/ObjectTree.cpp
         src/gui/ObjectTreeWidget.cpp
-        src/display/GeometryRenderer.cpp
-        src/display/OrthographicCamera.cpp
-        src/display/PerspectiveCamera.cpp
-        src/display/ArbDisplay.cpp
-        src/display/ArbDisplayManager.cpp
-        src/display/AxesRenderer.cpp
+        src/viewport/GeometryRenderer.cpp
+        src/viewport/OrthographicCamera.cpp
+        src/viewport/PerspectiveCamera.cpp
+        src/viewport/Viewport.cpp
+        src/viewport/ViewportManager.cpp
+        src/viewport/AxesRenderer.cpp
         src/Globals.cpp
         src/utils/QSSPreprocessor.cpp
         src/gui/Dockable.cpp
@@ -39,15 +39,15 @@ set(arbalest_Sources
         src/gui/DragEditLineEdit.cpp
         src/gui/ObjectTreeRowButtons.cpp
         src/utils/Utils.cpp
-        src/gui/ArbDisplayGrid.cpp
+        src/gui/ViewportGrid.cpp
         src/gui/AboutWindow.cpp
-        src/display/RaytraceView.cpp
+        src/viewport/RaytraceView.cpp
         src/gui/HelpWidget.cpp
         src/gui/MatrixTransformWidget.cpp
-        src/display/GridRenderer.cpp
-        src/display/MouseAction.cpp
-        src/display/MoveCameraMouseAction.cpp
-        src/display/SelectMouseAction.cpp)
+        src/viewport/GridRenderer.cpp
+        src/viewport/MouseAction.cpp
+        src/viewport/MoveCameraMouseAction.cpp
+        src/viewport/SelectMouseAction.cpp)
 
 set(arbalest_Link_Libraries
         ${BRLCAD_MOOSE_LIBRARY}

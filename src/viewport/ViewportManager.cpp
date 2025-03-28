@@ -17,23 +17,23 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file ArbDisplayManager.cpp */
+/** @file ViewportManager.cpp */
 
 #include <QMatrix4x4>
 #include <QScreen>
-#include "ArbDisplayManager.h"
+#include "ViewportManager.h"
 
 #define DM_SOLID_LINE 0
 #define DM_DASHED_LINE 1
 
-ArbDisplayManager::ArbDisplayManager(ArbDisplay &display) : display(display)
+ViewportManager::ViewportManager(Viewport &display) : display(display)
 {
   /* FIXME: these curiously crash on Mac */
     setFGColor(0,0,0, 1);
     glLineStipple(1, 0xCF33);
 }
 
-bool ArbDisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::Element *element) {
+bool ViewportManager::DrawVListElementCallback::operator()(BRLCAD::VectorList::Element *element) {
     const  float black[4] = {0.0, 0.0, 0.0, 0.0};
     if (!element) return true;
 
@@ -82,7 +82,7 @@ bool ArbDisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList:
             QVector3D point(e->ReferencePoint().coordinates[0], e->ReferencePoint().coordinates[1], e->ReferencePoint().coordinates[2]);
             QVector3D tlate = m.transposed().map(point);
             //todo changes to the last few lines are not yet tested.
-            class ArbDisplay;
+            class Viewport;
             glPushMatrix();
             glLoadIdentity();
             glTranslated(tlate[0], tlate[1], tlate[2]);
@@ -233,11 +233,11 @@ bool ArbDisplayManager::DrawVListElementCallback::operator()(BRLCAD::VectorList:
     return true;
 }
 
-ArbDisplayManager::DrawVListElementCallback::DrawVListElementCallback(const ArbDisplayManager *displayManager,
+ViewportManager::DrawVListElementCallback::DrawVListElementCallback(const ViewportManager *displayManager,
                                                                    DrawVlistVars *vars) :
     displayManager(displayManager), vars(vars) {}
 
-void ArbDisplayManager::drawVList(BRLCAD::VectorList *vectorList)
+void ViewportManager::drawVList(BRLCAD::VectorList *vectorList)
 {
     GLfloat originalPointSize, originalLineWidth;
     glGetFloatv(GL_POINT_SIZE, &originalPointSize);
@@ -260,7 +260,7 @@ void ArbDisplayManager::drawVList(BRLCAD::VectorList *vectorList)
 }
 
 
-void ArbDisplayManager::setFGColor(float r, float g, float b, float transparency) {
+void ViewportManager::setFGColor(float r, float g, float b, float transparency) {
     wireColor[0] = r;
     wireColor[1] = g;
     wireColor[2] = b;
@@ -297,7 +297,7 @@ void ArbDisplayManager::setFGColor(float r, float g, float b, float transparency
 }
 
 
-void ArbDisplayManager::setBGColor(float r, float g, float b) {
+void ViewportManager::setBGColor(float r, float g, float b) {
     bgColor[0] = r;
     bgColor[1] = g;
     bgColor[2] = b;
@@ -310,7 +310,7 @@ void ArbDisplayManager::setBGColor(float r, float g, float b) {
  * DM_SOLID_LINE=0
  * DM_DASHED_LINE=1
  */
-void ArbDisplayManager::setLineStyle(int style) {
+void ViewportManager::setLineStyle(int style) {
     if (style == DM_DASHED_LINE) {
         glEnable(GL_LINE_STIPPLE);
     }
@@ -319,7 +319,7 @@ void ArbDisplayManager::setLineStyle(int style) {
     }
 }
 
-void ArbDisplayManager::setLineWidth(int width)
+void ViewportManager::setLineWidth(int width)
 {
     glLineWidth((GLfloat) width);
 }
@@ -331,7 +331,7 @@ void ArbDisplayManager::setLineWidth(int width)
  * DM_SOLID_LINE=0
  * DM_DASHED_LINE=1
  */
-void ArbDisplayManager::setLineAttr(int width, int style)
+void ViewportManager::setLineAttr(int width, int style)
 {
     if (width>0) {
         glLineWidth((GLfloat) width);
@@ -346,16 +346,16 @@ void ArbDisplayManager::setLineAttr(int width, int style)
 }
 
 /*
- * ArbDisplays a saved display list identified by `list`
+ * Viewports a saved display list identified by `list`
  */
-void ArbDisplayManager::drawDList(unsigned int list) {
+void ViewportManager::drawDList(unsigned int list) {
     glCallList((GLuint) list);
 }
 
 /*
  * Generates `range` number of display lists and returns first display list's index
  */
-unsigned int ArbDisplayManager::genDLists(size_t range)
+unsigned int ViewportManager::genDLists(size_t range)
 {
     return glGenLists((GLsizei)range);
 }
@@ -364,7 +364,7 @@ unsigned int ArbDisplayManager::genDLists(size_t range)
  * Supported subsequent opengl commands are compiled into the display list `list` rather than being rendered to the screen.
  * Should have called genDLists and generated the display list before calling this.
  */
-void ArbDisplayManager::beginDList(unsigned int list)
+void ViewportManager::beginDList(unsigned int list)
 {
     glNewList((GLuint)list, GL_COMPILE);
 }
@@ -372,7 +372,7 @@ void ArbDisplayManager::beginDList(unsigned int list)
 /*
  * End of the display list initiated by beginDList.
  */
-void ArbDisplayManager::endDList()
+void ViewportManager::endDList()
 {
     glEndList();
 }
@@ -380,16 +380,16 @@ void ArbDisplayManager::endDList()
 /*
  * End of the display list initiated by beginDList.
  */
-GLboolean ArbDisplayManager::isDListValid(unsigned int list)
+GLboolean ViewportManager::isDListValid(unsigned int list)
 {
     return glIsList(list);
 }
 
-void ArbDisplayManager::freeDLists(unsigned int list, int range)
+void ViewportManager::freeDLists(unsigned int list, int range)
 {
     glDeleteLists((GLuint)list, (GLsizei)range);
 }
-void ArbDisplayManager::drawBegin()
+void ViewportManager::drawBegin()
 {
     glClearColor(bgColor[0],bgColor[1],bgColor[2],1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -400,35 +400,35 @@ void ArbDisplayManager::drawBegin()
 
 }
 
-void ArbDisplayManager::saveState(){
+void ViewportManager::saveState(){
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 }
-void ArbDisplayManager::restoreState(){
+void ViewportManager::restoreState(){
     glPopAttrib();
 }
 
-void ArbDisplayManager::loadMatrix(const GLfloat *m)
+void ViewportManager::loadMatrix(const GLfloat *m)
 {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glLoadMatrixf(m);
 }
-void ArbDisplayManager::loadPMatrix(const GLfloat *m)
+void ViewportManager::loadPMatrix(const GLfloat *m)
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glLoadMatrixf(m);
 }
 
-void ArbDisplayManager::setSuffix(const BRLCAD::VectorList& vectorList) {
+void ViewportManager::setSuffix(const BRLCAD::VectorList& vectorList) {
     suffix = vectorList;
 }
 
-void ArbDisplayManager::clearSuffix(void) {
+void ViewportManager::clearSuffix(void) {
     suffix.Clear();
 }
 
-void ArbDisplayManager::drawSuffix(void) {
+void ViewportManager::drawSuffix(void) {
     setFGColor(1.0f, 1.0f, 0.0f, 1.0f);
     drawVList(&suffix);
 }

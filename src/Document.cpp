@@ -3,7 +3,7 @@
 //
 
 #include <Document.h>
-#include<ArbDisplay.h>
+#include<Viewport.h>
 #include <brlcad/Database/Torus.h>
 
 
@@ -22,9 +22,9 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     properties = new Properties(*this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
-    displayGrid = new ArbDisplayGrid(this);
+    displayGrid = new ViewportGrid(this);
 
-    displayGrid->forceRerenderAllArbDisplays();
+    displayGrid->forceRerenderAllViewports();
 
     raytraceWidget = new RaytraceView(this);
 }
@@ -46,7 +46,7 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     }
     );
     geometryRenderer->refreshForVisibilityAndSolidChanges();
-    for (ArbDisplay * display : displayGrid->getArbDisplays())display->forceRerenderFrame();
+    for (Viewport * display : displayGrid->getViewports())display->forceRerenderFrame();
 }
 
 bool Document::isModified() {
@@ -72,7 +72,7 @@ void Document::getBRLCADObject(const QString& objectName, const std::function<vo
     modified = true;
 }
 
-ArbDisplay* Document::getArbDisplay()
+Viewport* Document::getViewport()
 {
-    return displayGrid->getActiveArbDisplay();
+    return displayGrid->getActiveViewport();
 }

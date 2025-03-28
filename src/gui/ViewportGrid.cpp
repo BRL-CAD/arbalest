@@ -1,11 +1,11 @@
 
 #include <QtOpenGL/QtOpenGL>
-#include <include/ArbDisplay.h>
-#include "ArbDisplayGrid.h"
+#include <include/Viewport.h>
+#include "ViewportGrid.h"
 #include "MoveCameraMouseAction.h"
 #include "SelectMouseAction.h"
 
-ArbDisplayGrid::ArbDisplayGrid(Document*  document) : document(document) {
+ViewportGrid::ViewportGrid(Document*  document) : document(document) {
     verticalSplitter = new QSplitter(this);
     verticalSplitter->setOrientation(Qt::Vertical);
     horizontalSplitter1 = new QSplitter(this);
@@ -14,10 +14,10 @@ ArbDisplayGrid::ArbDisplayGrid(Document*  document) : document(document) {
     verticalSplitter->addWidget(horizontalSplitter1);
     verticalSplitter->addWidget(horizontalSplitter2);
 
-    displays.append(new ArbDisplay(document));
-    displays.append(new ArbDisplay(document));
-    displays.append(new ArbDisplay(document));
-    displays.append(new ArbDisplay(document));
+    displays.append(new Viewport(document));
+    displays.append(new Viewport(document));
+    displays.append(new Viewport(document));
+    displays.append(new Viewport(document));
 
     mouseActions.append(nullptr);
     mouseActions.append(nullptr);
@@ -30,51 +30,51 @@ ArbDisplayGrid::ArbDisplayGrid(Document*  document) : document(document) {
     horizontalSplitter2->addWidget(displays[3]);
 
     for(int i=0;i<4;i++){
-        displays[i]->getCamera()->setAnglesAroundAxes(defaultArbDisplayCameraRotation[i][0],
-                                                      defaultArbDisplayCameraRotation[i][1],
-                                                      defaultArbDisplayCameraRotation[i][2]);
+        displays[i]->getCamera()->setAnglesAroundAxes(defaultViewportCameraRotation[i][0],
+                                                      defaultViewportCameraRotation[i][1],
+                                                      defaultViewportCameraRotation[i][2]);
     }
 
     addWidget(verticalSplitter);
-    activeArbDisplay = displays[3];
+    activeViewport = displays[3];
 
-    singleArbDisplayMode(3);
+    singleViewportMode(3);
 }
 
-void ArbDisplayGrid::forceRerenderAllArbDisplays() {
-    for (ArbDisplay *display : displays){
+void ViewportGrid::forceRerenderAllViewports() {
+    for (Viewport *display : displays){
         display->forceRerenderFrame();
     }
 }
 
-void ArbDisplayGrid::setActiveArbDisplay(ArbDisplay *display) {
-    activeArbDisplay = display;
+void ViewportGrid::setActiveViewport(Viewport *display) {
+    activeViewport = display;
 }
 
-void ArbDisplayGrid::resetViewPort(int displayId) {
-    displays[displayId]->getCamera()->setAnglesAroundAxes(defaultArbDisplayCameraRotation[displayId][0],
-                                                          defaultArbDisplayCameraRotation[displayId][1],
-                                                          defaultArbDisplayCameraRotation[displayId][2]);
+void ViewportGrid::resetViewPort(int displayId) {
+    displays[displayId]->getCamera()->setAnglesAroundAxes(defaultViewportCameraRotation[displayId][0],
+                                                          defaultViewportCameraRotation[displayId][1],
+                                                          defaultViewportCameraRotation[displayId][2]);
 
     displays[displayId]->getCamera()->autoview();
     displays[displayId]->forceRerenderFrame();
 }
 
-void ArbDisplayGrid::resetAllViewPorts() {
+void ViewportGrid::resetAllViewPorts() {
     for(int i=0;i<4;i++)resetViewPort(i);
 }
 
-void ArbDisplayGrid::singleArbDisplayMode(int displayId) {
+void ViewportGrid::singleViewportMode(int displayId) {
     for(int i=0;i<4;i++){
         if (i != displayId)displays[i]->hide();
     }
     displays[displayId]->show();
-    activeArbDisplay = displays[displayId];
+    activeViewport = displays[displayId];
     verticalSplitter->setHandleWidth(0);
 
-    forceRerenderAllArbDisplays();
+    forceRerenderAllViewports();
 }
-void ArbDisplayGrid::quadArbDisplayMode() {
+void ViewportGrid::quadViewportMode() {
     for(int i=0;i<4;i++){
         displays[i]->show();
     }
@@ -84,19 +84,19 @@ void ArbDisplayGrid::quadArbDisplayMode() {
     horizontalSplitter1->setSizes(QList<int>({INT_MAX, INT_MAX}));
     horizontalSplitter2->setSizes(QList<int>({INT_MAX, INT_MAX}));
 
-    forceRerenderAllArbDisplays();
+    forceRerenderAllViewports();
 }
 
-int ArbDisplayGrid::getActiveArbDisplayId() {
-    for(int i=0;i<4;i++)if(displays[i]==activeArbDisplay)return i;
+int ViewportGrid::getActiveViewportId() {
+    for(int i=0;i<4;i++)if(displays[i]==activeViewport)return i;
     return 3;
 }
 
-bool ArbDisplayGrid::inQuadArbDisplayMode() {
+bool ViewportGrid::inQuadViewportMode() {
     return !displays[0]->isHidden() && !displays[1]->isHidden();
 }
 
-void ArbDisplayGrid::setMoveCameraMouseAction() {
+void ViewportGrid::setMoveCameraMouseAction() {
     int displaysSize = displays.size();
     for (int index = 0; index < displaysSize; ++index) {
         if (mouseActions[index] != nullptr) {
@@ -107,7 +107,7 @@ void ArbDisplayGrid::setMoveCameraMouseAction() {
     }
 }
 
-void ArbDisplayGrid::setSelectObjectMouseAction() {
+void ViewportGrid::setSelectObjectMouseAction() {
     int displaysSize = displays.size();
     for (int index = 0; index < displaysSize; ++index) {
         if (mouseActions[index] != nullptr) {

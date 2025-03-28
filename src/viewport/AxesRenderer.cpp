@@ -36,7 +36,7 @@
 
 
 void AxesRenderer::render() {
-    //todo implement line drawing in ArbDisplayManager and use it instead of calling OpenGL here
+    //todo implement line drawing in ViewportManager and use it instead of calling OpenGL here
     glBegin(GL_LINES);
     glColor3f(0,1,0);
     glVertex3f(0, GRID_LINE_LENGTH, 0);

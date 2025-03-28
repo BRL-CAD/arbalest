@@ -19,13 +19,13 @@
  */
 /** @file MouseAction.cpp */
 
-#include "ArbDisplayGrid.h"
+#include "ViewportGrid.h"
 #include "MouseAction.h"
 
 
-MouseAction::MouseAction(ArbDisplayGrid* parent, ArbDisplay* watched)
+MouseAction::MouseAction(ViewportGrid* parent, Viewport* watched)
     : QObject(parent), m_parent(parent), m_watched(watched) {
-    connect(m_watched, &ArbDisplay::destroyed,
+    connect(m_watched, &Viewport::destroyed,
             this,      &MouseAction::WatchedDestroyed);
 }
 

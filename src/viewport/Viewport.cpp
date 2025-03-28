@@ -17,26 +17,26 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file ArbDisplay.cpp */
+/** @file Viewport.cpp */
 
-#include "ArbDisplay.h"
+#include "Viewport.h"
 
 #include <iostream>
 #include <QScreen>
 #include <QWidget>
 #include <OrthographicCamera.h>
 #include <include/Globals.h>
-#include "ArbDisplayManager.h"
+#include "ViewportManager.h"
 #include "GeometryRenderer.h"
 #include "Utils.h"
 
 using namespace std;
 
 
-ArbDisplay::ArbDisplay(Document*  document)
+Viewport::Viewport(Document*  document)
     :document(document) {
     camera = new OrthographicCamera(document);
-    displayManager = new ArbDisplayManager(*this);
+    displayManager = new ViewportManager(*this);
     axesRenderer = new AxesRenderer();
     gridRenderer = new GridRenderer(this);
 
@@ -47,37 +47,37 @@ ArbDisplay::ArbDisplay(Document*  document)
     update();
 }
 
-ArbDisplay::~ArbDisplay() {
+Viewport::~Viewport() {
     delete camera;
     delete displayManager;
     delete axesRenderer;
 }
 
 
-void ArbDisplay::forceRerenderFrame() {
+void Viewport::forceRerenderFrame() {
     makeCurrent();
     update();
 }
 
-int ArbDisplay::getW() const {
+int Viewport::getW() const {
     return w;
 }
 
-int ArbDisplay::getH() const {
+int Viewport::getH() const {
     return h;
 }
 
-const Document* ArbDisplay::getDocument() const
+const Document* Viewport::getDocument() const
 {
     return document;
 }
 
-ArbDisplayManager* ArbDisplay::getArbDisplayManager() const
+ViewportManager* Viewport::getViewportManager() const
 {
 	return displayManager;
 }
 
-void ArbDisplay::resizeGL(const int w, const int h) {
+void Viewport::resizeGL(const int w, const int h) {
 
     double ratio = QGuiApplication::primaryScreen()->devicePixelRatio();
 
@@ -86,7 +86,7 @@ void ArbDisplay::resizeGL(const int w, const int h) {
     this->h = ratio*h;
 }
 
-void ArbDisplay::paintGL() {
+void Viewport::paintGL() {
     displayManager->drawBegin();
 
     glViewport(0,0,w,h);
@@ -103,7 +103,7 @@ void ArbDisplay::paintGL() {
     axesRenderer->render();
 }
 
-void ArbDisplay::keyPressEvent( QKeyEvent *k ) {
+void Viewport::keyPressEvent( QKeyEvent *k ) {
     switch (k->key()) {
         case Qt::Key_Up:
             camera->processMoveRequest(0, keyPressSimulatedMouseMoveDistance);
@@ -124,6 +124,6 @@ void ArbDisplay::keyPressEvent( QKeyEvent *k ) {
     }
 }
 
-OrthographicCamera *ArbDisplay::getCamera() const {
+OrthographicCamera *Viewport::getCamera() const {
     return camera;
 }

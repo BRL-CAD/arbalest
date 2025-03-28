@@ -20,11 +20,11 @@ private:
     const float eyeRotationPerMouseDelta = 60.f;
     const float eyeMovementPerWheelAngle = .1f;
     const int mouseMaxDrag = 500;
-    const float fov = 60; // Field of view (angle from ArbDisplay bottom to top) in degrees
+    const float fov = 60; // Field of view (angle from Viewport bottom to top) in degrees
 
     QVector3D angleAroundAxes = initialAngleAroundAxes; // Camera direction in degrees
     QVector3D eyePosition = initialEyePosition; // Camera coordinates
-    float w = 400, h = 400;         // ArbDisplay width and height.
+    float w = 400, h = 400;         // Viewport width and height.
 
 public:
     PerspectiveCamera();

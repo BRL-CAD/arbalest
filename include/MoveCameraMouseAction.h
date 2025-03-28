@@ -28,7 +28,7 @@
 class MoveCameraMouseAction : public MouseAction
 {
 public:
-    explicit MoveCameraMouseAction(ArbDisplayGrid* parent = nullptr, ArbDisplay* watched = nullptr);
+    explicit MoveCameraMouseAction(ViewportGrid* parent = nullptr, Viewport* watched = nullptr);
     virtual ~MoveCameraMouseAction();
 
 protected:

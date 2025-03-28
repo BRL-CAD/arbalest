@@ -20,16 +20,16 @@
  /** @file SelectMouseAction.cpp */
 
 #include "SelectMouseAction.h"
-#include "ArbDisplayGrid.h"
+#include "ViewportGrid.h"
 
 
-SelectMouseAction::SelectMouseAction(ArbDisplayGrid* parent, ArbDisplay* watched)
+SelectMouseAction::SelectMouseAction(ViewportGrid* parent, Viewport* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
 }
 
 SelectMouseAction::~SelectMouseAction() {
-    ArbDisplayManager* displayManager = m_watched->getArbDisplayManager();
+    ViewportManager* displayManager = m_watched->getViewportManager();
     if (displayManager) {
         displayManager->clearSuffix();
         m_watched->forceRerenderFrame();
@@ -84,8 +84,8 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                     BRLCAD::VectorList vectorList;
                     const QString objectFullPath = m_selected;
                     m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
-                    m_watched->getArbDisplayManager()->setSuffix(vectorList);
-                    m_watched->getArbDisplayManager()->drawSuffix();
+                    m_watched->getViewportManager()->setSuffix(vectorList);
+                    m_watched->getViewportManager()->drawSuffix();
                     m_watched->forceRerenderFrame();
                 }
             }

@@ -174,17 +174,17 @@ void RaytraceView::raytrace() {
     );
 
     QMatrix4x4 transformation;
-    transformation.translate(document->getArbDisplay()->getCamera()->getEyePosition().x(),
-                             document->getArbDisplay()->getCamera()->getEyePosition().y(),
-                             document->getArbDisplay()->getCamera()->getEyePosition().z());
-    transformation.rotate(-document->getArbDisplay()->getCamera()->getAnglesAroundAxes().y(), 0., 1., 0.);
-    transformation.rotate(-document->getArbDisplay()->getCamera()->getAnglesAroundAxes().z(), 0., 0., 1.);
-    transformation.rotate(-document->getArbDisplay()->getCamera()->getAnglesAroundAxes().x(), 1., 0., 0.);
+    transformation.translate(document->getViewport()->getCamera()->getEyePosition().x(),
+                             document->getViewport()->getCamera()->getEyePosition().y(),
+                             document->getViewport()->getCamera()->getEyePosition().z());
+    transformation.rotate(-document->getViewport()->getCamera()->getAnglesAroundAxes().y(), 0., 1., 0.);
+    transformation.rotate(-document->getViewport()->getCamera()->getAnglesAroundAxes().z(), 0., 0., 1.);
+    transformation.rotate(-document->getViewport()->getCamera()->getAnglesAroundAxes().x(), 1., 0., 0.);
     transformation.translate(0, 0, 10000);
-    transformation.scale(document->getArbDisplay()->getCamera()->getVerticalSpan()/document->getArbDisplay()->getH());
-    transformation.translate(-document->getArbDisplay()->getW()/2.,-document->getArbDisplay()->getH()/2.);
+    transformation.scale(document->getViewport()->getCamera()->getVerticalSpan()/document->getViewport()->getH());
+    transformation.translate(-document->getViewport()->getW()/2.,-document->getViewport()->getH()/2.);
 
-    resize(document->getArbDisplay()->getW(),document->getArbDisplay()->getH());
+    resize(document->getViewport()->getW(),document->getViewport()->getH());
     UpdateTrafo(transformation);
     UpdateImage();
 

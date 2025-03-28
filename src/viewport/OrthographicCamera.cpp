@@ -146,7 +146,7 @@ void OrthographicCamera::centerToCurrentSelection() {
     const BRLCAD::Vector3D volume = (a - b);
     double diagonalLength = vector3DLength(volume);
     if (diagonalLength > 0.001) setZoom(diagonalLength * 1.1);
-    document->getArbDisplay()->forceRerenderFrame();
+    document->getViewport()->forceRerenderFrame();
 }
 
 void OrthographicCamera::autoview() {

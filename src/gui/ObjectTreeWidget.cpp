@@ -65,13 +65,13 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
                 break;
         }
         this->document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        this->document->getArbDisplayGrid()->forceRerenderAllArbDisplays();
+        this->document->getViewportGrid()->forceRerenderAllViewports();
         refreshItemTextColors();
     });
 
     connect(visibilityButton, &ObjectTreeRowButtons::centerButtonClicked, this, [this](int objectId){
-        this->document->getArbDisplay()->getCamera()->centerView(objectId);
-        this->document->getArbDisplayGrid()->forceRerenderAllArbDisplays();
+        this->document->getViewport()->getCamera()->centerView(objectId);
+        this->document->getViewportGrid()->forceRerenderAllViewports();
         refreshItemTextColors();
     });
     refreshItemTextColors();

@@ -17,22 +17,22 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file ArbDisplayManager.h */
+/** @file ViewportManager.h */
 
 
-#ifndef RT3_ArbDisplayManager_H
-#define RT3_ArbDisplayManager_H
+#ifndef RT3_VIEWPORTMANAGER_H
+#define RT3_VIEWPORTMANAGER_H
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
-#include "ArbDisplay.h"
+#include "Viewport.h"
 #include "brlcad/VectorList.h"
-class ArbDisplay;
+class Viewport;
 
-class ArbDisplayManager{
+class ViewportManager{
 public:
-    explicit ArbDisplayManager(ArbDisplay &display);
+    explicit ViewportManager(Viewport &display);
 
     // most of the methods below correspond to a method with a similar name from libdm
     void drawVList(BRLCAD::VectorList *vp);
@@ -63,14 +63,14 @@ public:
             int first = 1;
             int mFlag = 1;
         };
-        const ArbDisplayManager * displayManager;
+        const ViewportManager * displayManager;
         DrawVlistVars * vars;
-        explicit DrawVListElementCallback(const ArbDisplayManager *displayManager, DrawVlistVars *vars);
+        explicit DrawVListElementCallback(const ViewportManager *displayManager, DrawVlistVars *vars);
         bool operator()(BRLCAD::VectorList::Element* element);
     };
 
 private:
-    ArbDisplay &display;
+    Viewport &display;
 
     int dmLight = 1;
     bool dmTransparency = false;
@@ -87,4 +87,4 @@ private:
 };
 
 
-#endif //RT3_ArbDisplayManager_H
+#endif //RT3_VIEWPORTMANAGER_H

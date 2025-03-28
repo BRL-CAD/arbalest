@@ -4,19 +4,19 @@
 
 
 #include "Renderer.h"
-#include "ArbDisplay.h"
+#include "Viewport.h"
 
-class ArbDisplay;
+class Viewport;
 
 class GridRenderer: public Renderer {
 
 public:
     void render() override;
 
-    GridRenderer(ArbDisplay *display);
+    GridRenderer(Viewport *display);
 
 private:
-    ArbDisplay * display;
+    Viewport * display;
 };
 
 

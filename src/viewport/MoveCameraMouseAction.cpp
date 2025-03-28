@@ -19,11 +19,11 @@
  */
 /** @file MoveCameraMouseAction.cpp */
 
-#include "ArbDisplayGrid.h"
+#include "ViewportGrid.h"
 #include "MoveCameraMouseAction.h"
 
 
-MoveCameraMouseAction::MoveCameraMouseAction(ArbDisplayGrid* parent, ArbDisplay* watched)
+MoveCameraMouseAction::MoveCameraMouseAction(ViewportGrid* parent, Viewport* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
 }
@@ -97,7 +97,7 @@ bool MoveCameraMouseAction::eventFilter(QObject* watched, QEvent* event) {
             ret = true;
         }
         else if (event->type() == QEvent::MouseButtonPress) {
-            m_parent->setActiveArbDisplay(m_watched);
+            m_parent->setActiveViewport(m_watched);
 
             QMouseEvent* mouseButtonPressEvent = static_cast<QMouseEvent*>(event);
             prevMouseX = mouseButtonPressEvent->position().x();

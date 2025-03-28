@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "ArbDisplay.h"
+#include "Viewport.h"
 
 class MainWindow;
 class QSSPreprocessor;

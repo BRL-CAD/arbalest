@@ -24,8 +24,8 @@
 
 #include <QObject>
 
-class ArbDisplay;
-class ArbDisplayGrid;
+class Viewport;
+class ViewportGrid;
 
 
 class MouseAction : public QObject
@@ -35,10 +35,10 @@ public:
     virtual ~MouseAction();
 
 protected:
-    ArbDisplayGrid* m_parent;
-    ArbDisplay*     m_watched;
+    ViewportGrid* m_parent;
+    Viewport*     m_watched;
 
-    explicit MouseAction(ArbDisplayGrid* parent = nullptr, ArbDisplay* watched = nullptr);
+    explicit MouseAction(ViewportGrid* parent = nullptr, Viewport* watched = nullptr);
 
 signals:
     void Done(MouseAction* myself);
