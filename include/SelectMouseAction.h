@@ -27,9 +27,9 @@
 class SelectMouseAction : public MouseAction
 {
 public:
-    explicit SelectMouseAction(DisplayGrid* parent = nullptr, Display* watched = nullptr);
+    explicit SelectMouseAction(ViewportGrid* parent = nullptr, Viewport* watched = nullptr);
     virtual ~SelectMouseAction();
-    void Deselect(Display* m_watched);
+    void Deselect(Viewport* m_watched);
 
     QString getSelected() const;
 

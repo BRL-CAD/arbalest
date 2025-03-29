@@ -28,22 +28,22 @@ GeometryRenderer::GeometryRenderer(Document* document) : document(document)
 }
 
 void GeometryRenderer::render() {
-    document->getDisplay()->getDisplayManager()->saveState();
-    if (!objectsToBeDisplayedIds.empty()) {
-        for (int objectId : objectsToBeDisplayedIds) {
-            if (!objectIdDisplayListIdMap.contains(objectId)) {
+    document->getViewport()->getViewportManager()->saveState();
+    if (!objectsToBeViewportedIds.empty()) {
+        for (int objectId : objectsToBeViewportedIds) {
+            if (!objectIdViewportListIdMap.contains(objectId)) {
                 drawSolid(objectId);
             }
-            visibleDisplayListIds.append(objectIdDisplayListIdMap[objectId]);
+            visibleViewportListIds.append(objectIdViewportListIdMap[objectId]);
         }
-        objectsToBeDisplayedIds.clear();
+        objectsToBeViewportedIds.clear();
     }
 
-    for (int displayListId : visibleDisplayListIds) {
-        document->getDisplay()->getDisplayManager()->drawDList(displayListId);
+    for (int displayListId : visibleViewportListIds) {
+        document->getViewport()->getViewportManager()->drawDList(displayListId);
     }
-    document->getDisplay()->getDisplayManager()->drawSuffix();
-    document->getDisplay()->getDisplayManager()->restoreState();
+    document->getViewport()->getViewportManager()->drawSuffix();
+    document->getViewport()->getViewportManager()->restoreState();
 }
 
 
@@ -55,42 +55,42 @@ void GeometryRenderer::drawSolid(int objectId) {
 
     clearSolidIfAvailable(objectId);
 
-    const unsigned int displayListId = document->getDisplay()->getDisplayManager()->genDLists(1);
-    document->getDisplay()->getDisplayManager()->beginDList(displayListId);  // begin display list --------------
+    const unsigned int displayListId = document->getViewport()->getViewportManager()->genDLists(1);
+    document->getViewport()->getViewportManager()->beginDList(displayListId);  // begin display list --------------
 
     if (colorInfo.hasColor) {
-        document->getDisplay()->getDisplayManager()->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
+        document->getViewport()->getViewportManager()->setFGColor(colorInfo.red, colorInfo.green, colorInfo.blue, 1);
     }
     else {
-        document->getDisplay()->getDisplayManager()->setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
+        document->getViewport()->getViewportManager()->setFGColor(defaultWireColor[0], defaultWireColor[1], defaultWireColor[2], 1);
     }
 
     //displayManager->setLineStyle(tsp->ts_sofar & (TS_SOFAR_MINUS | TS_SOFAR_INTER));
-    document->getDisplay()->getDisplayManager()->drawVList(&vectorList);
-    document->getDisplay()->getDisplayManager()->endDList();     // end display list --------------
+    document->getViewport()->getViewportManager()->drawVList(&vectorList);
+    document->getViewport()->getViewportManager()->endDList();     // end display list --------------
 
-    objectIdDisplayListIdMap[objectId] = displayListId;
+    objectIdViewportListIdMap[objectId] = displayListId;
 }
 
 
 
 void GeometryRenderer::refreshForVisibilityAndSolidChanges() {
-    visibleDisplayListIds.clear();
+    visibleViewportListIds.clear();
     document->getObjectTree()->traverseSubTree(0, false,[this]
         (int objectId)
         {
             if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::Invisible) return false;
             if (!document->getObjectTree()->getDrawableObjectIds().contains(objectId)) return true;
-            objectsToBeDisplayedIds.append(objectId);
+            objectsToBeViewportedIds.append(objectId);
             return true;
         }
     );
 }
 
 void GeometryRenderer::clearSolidIfAvailable(int objectId) {
-    if (objectIdDisplayListIdMap.contains(objectId)){
-        document->getDisplay()->getDisplayManager()->freeDLists(objectIdDisplayListIdMap[objectId], 1);
-        objectIdDisplayListIdMap.remove(objectId);
+    if (objectIdViewportListIdMap.contains(objectId)){
+        document->getViewport()->getViewportManager()->freeDLists(objectIdViewportListIdMap[objectId], 1);
+        objectIdViewportListIdMap.remove(objectId);
     }
 }
 

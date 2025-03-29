@@ -1,7 +1,7 @@
 //#define ARB_DEBUG
 
 #include <QApplication>
-#include <DisplayGrid.h>
+#include <QOpenGLWidget>
 #include "MainWindow.h"
 
 int main(int argc, char*argv[]) {

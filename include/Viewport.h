@@ -17,36 +17,36 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file Display.h */
+/** @file Viewport.h */
 
 
-#ifndef RT3_DISPLAY_H
-#define RT3_DISPLAY_H
+#ifndef RT3_VIEWPORT_H
+#define RT3_VIEWPORT_H
 
 #include <include/Globals.h>
 
-#include <QtWidgets/QOpenGLWidget>
+#include <QOpenGLWidget>
 #include "AxesRenderer.h"
 #include <QMouseEvent>
 #include <include/GridRenderer.h>
 #include "Document.h"
-#include "DisplayManager.h"
+#include "ViewportManager.h"
 #include "OrthographicCamera.h"
 #include "Globals.h"
 #include "QSSPreprocessor.h"
 
 class Document;
-class DisplayManager;
+class ViewportManager;
 class GeometryRenderer;
 class OrthographicCamera;
 class GridRenderer;
 
 
-class Display : public QOpenGLWidget{
+class Viewport : public QOpenGLWidget{
 
 public:
-    Display(Document * document);
-    virtual ~Display();
+    Viewport(Document * document);
+    virtual ~Viewport();
 
     void forceRerenderFrame();
 
@@ -54,7 +54,7 @@ public:
     int getH() const;
     const Document* getDocument() const;
     OrthographicCamera* getCamera() const;
-    DisplayManager* getDisplayManager() const;
+    ViewportManager* getViewportManager() const;
 
     bool gridEnabled = false;
     bool moveCameraEnabled = false;
@@ -73,10 +73,10 @@ private:
     QColor bgColor;
 
     OrthographicCamera  *camera;
-    DisplayManager *displayManager;
+    ViewportManager *displayManager;
     AxesRenderer * axesRenderer;
     GridRenderer * gridRenderer;
 };
 
 
-#endif //RT3_DISPLAY_H
+#endif //RT3_VIEWPORT_H

@@ -17,26 +17,26 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file Display.cpp */
+/** @file Viewport.cpp */
 
-#include "Display.h"
+#include "Viewport.h"
 
 #include <iostream>
 #include <QScreen>
 #include <QWidget>
 #include <OrthographicCamera.h>
 #include <include/Globals.h>
-#include "DisplayManager.h"
+#include "ViewportManager.h"
 #include "GeometryRenderer.h"
 #include "Utils.h"
 
 using namespace std;
 
 
-Display::Display(Document*  document)
+Viewport::Viewport(Document*  document)
     :document(document) {
     camera = new OrthographicCamera(document);
-    displayManager = new DisplayManager(*this);
+    displayManager = new ViewportManager(*this);
     axesRenderer = new AxesRenderer();
     gridRenderer = new GridRenderer(this);
 
@@ -47,37 +47,37 @@ Display::Display(Document*  document)
     update();
 }
 
-Display::~Display() {
+Viewport::~Viewport() {
     delete camera;
     delete displayManager;
     delete axesRenderer;
 }
 
 
-void Display::forceRerenderFrame() {
+void Viewport::forceRerenderFrame() {
     makeCurrent();
     update();
 }
 
-int Display::getW() const {
+int Viewport::getW() const {
     return w;
 }
 
-int Display::getH() const {
+int Viewport::getH() const {
     return h;
 }
 
-const Document* Display::getDocument() const
+const Document* Viewport::getDocument() const
 {
     return document;
 }
 
-DisplayManager* Display::getDisplayManager() const
+ViewportManager* Viewport::getViewportManager() const
 {
 	return displayManager;
 }
 
-void Display::resizeGL(const int w, const int h) {
+void Viewport::resizeGL(const int w, const int h) {
 
     double ratio = QGuiApplication::primaryScreen()->devicePixelRatio();
 
@@ -86,7 +86,7 @@ void Display::resizeGL(const int w, const int h) {
     this->h = ratio*h;
 }
 
-void Display::paintGL() {
+void Viewport::paintGL() {
     displayManager->drawBegin();
 
     glViewport(0,0,w,h);
@@ -103,7 +103,7 @@ void Display::paintGL() {
     axesRenderer->render();
 }
 
-void Display::keyPressEvent( QKeyEvent *k ) {
+void Viewport::keyPressEvent( QKeyEvent *k ) {
     switch (k->key()) {
         case Qt::Key_Up:
             camera->processMoveRequest(0, keyPressSimulatedMouseMoveDistance);
@@ -124,6 +124,6 @@ void Display::keyPressEvent( QKeyEvent *k ) {
     }
 }
 
-OrthographicCamera *Display::getCamera() const {
+OrthographicCamera *Viewport::getCamera() const {
     return camera;
 }

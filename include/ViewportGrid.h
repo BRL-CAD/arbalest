@@ -1,44 +1,44 @@
 
-#ifndef RT3_DISPLAYGRID_H
-#define RT3_DISPLAYGRID_H
+#ifndef RT3_VIEWPORTGRID_H
+#define RT3_VIEWPORTGRID_H
 
 
 #include <include/QVBoxWidget.h>
 #include <include/Document.h>
-#include <include/Display.h>
+#include <include/Viewport.h>
 #include <QSplitter>
 
-class Display;
+class Viewport;
 class MouseAction;
 
 
-class DisplayGrid : public QVBoxWidget {
+class ViewportGrid : public QVBoxWidget {
 Q_OBJECT
 public:
-    explicit DisplayGrid(Document*  document);
+    explicit ViewportGrid(Document*  document);
 
-    void forceRerenderAllDisplays();
+    void forceRerenderAllViewports();
 
     Document *getDocument()  {
         return document;
     }
 
-    QVector<Display *> &getDisplays() {
+    QVector<Viewport *> &getViewports() {
         return displays;
     }
 
-    Display *getActiveDisplay(){
-        return activeDisplay;
+    Viewport *getActiveViewport(){
+        return activeViewport;
     }
 
-    bool inQuadDisplayMode();
+    bool inQuadViewportMode();
 
-    int getActiveDisplayId();
+    int getActiveViewportId();
 
-    void setActiveDisplay(Display *display);
+    void setActiveViewport(Viewport *display);
 
-    void singleDisplayMode(int displayId);
-    void quadDisplayMode();
+    void singleViewportMode(int displayId);
+    void quadViewportMode();
 
     void resetViewPort(int displayId);
     void resetAllViewPorts();
@@ -47,16 +47,16 @@ public:
     void setSelectObjectMouseAction();
 
 private:
-    double defaultDisplayCameraRotation[4][3] = {
+    double defaultViewportCameraRotation[4][3] = {
             {0, 0, 270},
             {270, 0, 180},
             {270, 0, 270},
             {295, 0, 235}
     };
     Document*  document;
-    QVector<Display *> displays;
+    QVector<Viewport *> displays;
     QVector<MouseAction *> mouseActions;
-    Display *activeDisplay;
+    Viewport *activeViewport;
     QSplitter *verticalSplitter;
     QSplitter *horizontalSplitter1;
     QSplitter *horizontalSplitter2;
@@ -64,4 +64,4 @@ private:
 };
 
 
-#endif //RT3_DISPLAYGRID_H
+#endif //RT3_VIEWPORTGRID_H

@@ -20,16 +20,16 @@
  /** @file SelectMouseAction.cpp */
 
 #include "SelectMouseAction.h"
-#include "DisplayGrid.h"
+#include "ViewportGrid.h"
 
 
-SelectMouseAction::SelectMouseAction(DisplayGrid* parent, Display* watched)
+SelectMouseAction::SelectMouseAction(ViewportGrid* parent, Viewport* watched)
     : MouseAction(parent, watched) {
     m_watched->installEventFilter(this);
 }
 
 SelectMouseAction::~SelectMouseAction() {
-    DisplayManager* displayManager = m_watched->getDisplayManager();
+    ViewportManager* displayManager = m_watched->getViewportManager();
     if (displayManager) {
         displayManager->clearSuffix();
         m_watched->forceRerenderFrame();
@@ -64,7 +64,7 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                 QVector3D direction = directionEnd - directionStart;
                 direction.normalize();
 
-                QVector3D imagePoint(mouseEvent->x(), m_watched->getH() - mouseEvent->y() - 1., 0.);
+                QVector3D imagePoint(mouseEvent->position().x(), m_watched->getH() - mouseEvent->position().y() - 1., 0.);
                 QVector3D modelPoint = transformation.map(imagePoint);
                 
                 BRLCAD::Ray3D    ray;
@@ -84,8 +84,8 @@ bool SelectMouseAction::eventFilter(QObject* watched, QEvent* event) {
                     BRLCAD::VectorList vectorList;
                     const QString objectFullPath = m_selected;
                     m_watched->getDocument()->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
-                    m_watched->getDisplayManager()->setSuffix(vectorList);
-                    m_watched->getDisplayManager()->drawSuffix();
+                    m_watched->getViewportManager()->setSuffix(vectorList);
+                    m_watched->getViewportManager()->drawSuffix();
                     m_watched->forceRerenderFrame();
                 }
             }

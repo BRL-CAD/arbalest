@@ -6,7 +6,7 @@ QVBoxWidget::QVBoxWidget(QWidget *parent, Qt::WindowFlags f) : QFrame(parent, f)
     boxLayout = new QVBoxLayout(this);
     boxLayout->setContentsMargins(0, 0, 0, 0);
     boxLayout->setSpacing(0);
-    boxLayout->setMargin(0);
+    // boxLayout->setMargin(0);
     setLayout(boxLayout);
 }
 

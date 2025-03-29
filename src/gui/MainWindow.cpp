@@ -1,6 +1,6 @@
 #include <QtWidgets/QFileDialog>
 #include "MainWindow.h"
-#include "DisplayGrid.h"
+#include "ViewportGrid.h"
 #include <Document.h>
 #include <QtWidgets/QLabel>
 #include <include/QSSPreprocessor.h>
@@ -152,7 +152,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createArb8Act);
 
@@ -170,7 +170,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createConeAct);
 
@@ -191,7 +191,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createEllipsoidAct);
 
@@ -210,7 +210,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createEllipticalTorusAct);
 
@@ -230,7 +230,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createHalfspaceAct);
 
@@ -250,7 +250,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createHyperbolicCylinderAct);
 
@@ -270,7 +270,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createHyperboloidAct);
 
@@ -291,7 +291,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createParabolicCylinderAct);
 
@@ -312,7 +312,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createParaboloidAct);
 
@@ -332,7 +332,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createParticleAct);
 
@@ -351,7 +351,7 @@ void MainWindow::prepareUi() {
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getDisplayGrid()->forceRerenderAllDisplays();
+        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
     });
     createMenu->addAction(createTorusAct);
 
@@ -401,7 +401,7 @@ void MainWindow::prepareUi() {
     resetViewportAct->setStatusTip(tr("Reset to default camera orientation for the viewport and autoview to currently visible objects"));
     connect(resetViewportAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->resetViewPort(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+        documents[activeDocumentId]->getViewportGrid()->resetViewPort(documents[activeDocumentId]->getViewportGrid()->getActiveViewportId());
     });
     viewMenu->addAction(resetViewportAct);
 
@@ -410,7 +410,7 @@ void MainWindow::prepareUi() {
     resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
     connect(resetAllViewportsAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->resetAllViewPorts();
+        documents[activeDocumentId]->getViewportGrid()->resetAllViewPorts();
     });
     viewMenu->addAction(resetAllViewportsAct);
 
@@ -422,7 +422,7 @@ void MainWindow::prepareUi() {
     autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        for(Display * display : documents[activeDocumentId]->getDisplayGrid()->getDisplays()){
+        for(Viewport * display : documents[activeDocumentId]->getViewportGrid()->getViewports()){
             display->getCamera()->autoview();
             display->forceRerenderFrame();
         }
@@ -433,8 +433,8 @@ void MainWindow::prepareUi() {
     autoViewSingleAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewSingleAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplay()->getCamera()->autoview();
-        documents[activeDocumentId]->getDisplay()->forceRerenderFrame();
+        documents[activeDocumentId]->getViewport()->getCamera()->autoview();
+        documents[activeDocumentId]->getViewport()->forceRerenderFrame();
     });
     viewMenu->addAction(autoViewSingleAct);
 
@@ -446,7 +446,7 @@ void MainWindow::prepareUi() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
-        documents[activeDocumentId]->getDisplay()->getCamera()->centerView(objectId);
+        documents[activeDocumentId]->getViewport()->getCamera()->centerView(objectId);
     });
     viewMenu->addAction(centerViewAct);
     
@@ -461,10 +461,10 @@ void MainWindow::prepareUi() {
         singleViewAct[i] = new QAction("Viewport " + QString::number(i+1), this);
         viewportMenuGroup->addAction(singleViewAct[i]);
         singleViewAct[i]->setCheckable(true);
-        singleViewAct[i]->setStatusTip("Display viewport " + QString::number(i+1));
+        singleViewAct[i]->setStatusTip("Viewport viewport " + QString::number(i+1));
         connect(singleViewAct[i], &QAction::triggered, this, [this,i]() {
             if (activeDocumentId == -1) return;
-            documents[activeDocumentId]->getDisplayGrid()->singleDisplayMode(i);
+            documents[activeDocumentId]->getViewportGrid()->singleViewportMode(i);
             currentViewport->setCurrentIndex(i);
         });
         singleView->addAction(singleViewAct[i]);
@@ -476,10 +476,10 @@ void MainWindow::prepareUi() {
     singleViewAct[3]->setChecked(true);
 
     QAction* quadViewAct = new QAction(tr("All Viewports"), this);
-    quadViewAct->setStatusTip(tr("Display 4 viewports"));
+    quadViewAct->setStatusTip(tr("Viewport 4 viewports"));
     connect(quadViewAct, &QAction::triggered, this, [this](){
         if (activeDocumentId == -1) return;
-        documents[activeDocumentId]->getDisplayGrid()->quadDisplayMode();
+        documents[activeDocumentId]->getViewportGrid()->quadViewportMode();
         for(QAction *i : singleViewAct) i->setChecked(false);
         currentViewport->setCurrentIndex(4);
     });
@@ -498,16 +498,16 @@ void MainWindow::prepareUi() {
             return;
         }
 
-        if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled == false) {
-            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = true;
+        if (documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->gridEnabled == false) {
+            documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->gridEnabled = true;
             toggleGridAct->setToolTip("Toggle grid OFF (G)");
         }
         else {
-            documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->gridEnabled = false;
+            documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->gridEnabled = false;
             toggleGridAct->setToolTip("Toggle grid ON (G)");
         }
 
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->forceRerenderFrame();
+        documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->forceRerenderFrame();
     });
     viewMenu->addAction(toggleGridAct);
 
@@ -715,8 +715,8 @@ void MainWindow::prepareUi() {
     currentViewport->setCurrentIndex(3);
     connect(currentViewport, QOverload<int>::of(&QComboBox::activated),[=](int index){
         if (activeDocumentId == -1) return;
-        if (index <4) documents[activeDocumentId]->getDisplayGrid()->singleDisplayMode(index);
-        else documents[activeDocumentId]->getDisplayGrid()->quadDisplayMode();
+        if (index <4) documents[activeDocumentId]->getViewportGrid()->singleViewportMode(index);
+        else documents[activeDocumentId]->getViewportGrid()->quadViewportMode();
         for(QAction *i : singleViewAct) i->setChecked(false);
         if(index != 4) singleViewAct[index]->setChecked(true);
     });
@@ -779,7 +779,7 @@ void MainWindow::newFile() {
     document->getProperties()->setObjectName("dockableContent");
     documents[documentsCount++] = document;
     QString filename("Untitled");
-    const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
+    const int tabIndex = documentArea->addTab(document->getViewportGrid(), filename);
     documentArea->setCurrentIndex(tabIndex);
     connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
             this, &MainWindow::objectTreeWidgetSelectionChanged);
@@ -806,7 +806,7 @@ void MainWindow::openFile(const QString& filePath) {
         document->getProperties()->setObjectName("dockableContent");
         documents[documentsCount++] = document;
         QString filename(QFileInfo(filePath).fileName());
-        const int tabIndex = documentArea->addTab(document->getDisplayGrid(), filename);
+        const int tabIndex = documentArea->addTab(document->getViewportGrid(), filename);
         documentArea->setCurrentIndex(tabIndex);
         connect(documents[activeDocumentId]->getObjectTreeWidget(), &ObjectTreeWidget::selectionChanged,
                 this, &MainWindow::objectTreeWidgetSelectionChanged);
@@ -896,7 +896,7 @@ bool MainWindow::saveFileDefaultPathId(int documentId) {
 bool MainWindow::maybeSave(int documentId, bool *cancel) {
     // Checks if the document has any unsaved changes
     if (documents[documentId]->isModified()) {
-        QFileInfo pathName = documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled";
+        QFileInfo pathName(documents[documentId]->getFilePath() != nullptr ? *documents[documentId]->getFilePath() : "Untitled");
 
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Warning);
@@ -931,7 +931,7 @@ bool MainWindow::maybeSave(int documentId, bool *cancel) {
 }
 
 void MainWindow::onActiveDocumentChanged(const int newIndex){
-    DisplayGrid * displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(newIndex));
+    ViewportGrid * displayGrid = dynamic_cast<ViewportGrid*>(documentArea->widget(newIndex));
     if (displayGrid != nullptr){
         if (displayGrid->getDocument()->getDocumentId() != activeDocumentId){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
@@ -939,13 +939,13 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
-            if(documents[activeDocumentId]->getDisplayGrid()->inQuadDisplayMode()){
+            if(documents[activeDocumentId]->getViewportGrid()->inQuadViewportMode()){
                 currentViewport->setCurrentIndex(4);
                 for(QAction * action:singleViewAct) action->setChecked(false);
             }else {
-                currentViewport->setCurrentIndex(documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId());
+                currentViewport->setCurrentIndex(documents[activeDocumentId]->getViewportGrid()->getActiveViewportId());
                 for(QAction * action:singleViewAct) action->setChecked(false);
-                singleViewAct[documents[activeDocumentId]->getDisplayGrid()->getActiveDisplayId()]->setChecked(true);
+                singleViewAct[documents[activeDocumentId]->getViewportGrid()->getActiveViewportId()]->setChecked(true);
             }
         }
     }else if (activeDocumentId != -1){
@@ -959,7 +959,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
 void MainWindow::tabCloseRequested(const int i)
 {
     int documentId = -1;
-    DisplayGrid* displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(i));
+    ViewportGrid* displayGrid = dynamic_cast<ViewportGrid*>(documentArea->widget(i));
     
     if (displayGrid != nullptr) {
         documentId = displayGrid->getDocument()->getDocumentId();
@@ -1009,7 +1009,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
             if (mouse_event->button() == Qt::LeftButton)
             {
-                dragPosition = mouse_event->globalPos() - frameGeometry().topLeft();
+                dragPosition = mouse_event->globalPosition().toPoint() - frameGeometry().topLeft();
                 return false;
             }
         }
@@ -1020,7 +1020,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             {
                 if(isMaximized()) return false;//showNormal();
                 //todo showNormal when dragged
-                move(mouse_event->globalPos() - dragPosition);
+                move(mouse_event->globalPosition().toPoint() - dragPosition);
                 return false;
             }
         }
@@ -1042,10 +1042,10 @@ void MainWindow::changeEvent( QEvent* e ) {
 void MainWindow::closeEvent(QCloseEvent* event) {
     int documentSize = documents.size();
     bool cancel = false;
-    DisplayGrid * displayGrid = nullptr;
+    ViewportGrid * displayGrid = nullptr;
 
     for (int documentIndex = 1; documentIndex <= documentSize; ++documentIndex) {
-        displayGrid = dynamic_cast<DisplayGrid*>(documentArea->widget(documentIndex));
+        displayGrid = dynamic_cast<ViewportGrid*>(documentArea->widget(documentIndex));
         int documentId = displayGrid->getDocument()->getDocumentId();
         
         if (maybeSave(documentId, &cancel)) {
@@ -1066,7 +1066,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
 void MainWindow::moveCameraButtonAction() {
     if (activeDocumentId != -1) {
-        DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
+        ViewportGrid* displayGrid = documents[activeDocumentId]->getViewportGrid();
 
         if (displayGrid != nullptr) {
             displayGrid->setMoveCameraMouseAction();
@@ -1075,7 +1075,7 @@ void MainWindow::moveCameraButtonAction() {
 }
 
 void MainWindow::selectObjectButtonAction() {
-    DisplayGrid* displayGrid = documents[activeDocumentId]->getDisplayGrid();
+    ViewportGrid* displayGrid = documents[activeDocumentId]->getViewportGrid();
 
     if (displayGrid != nullptr) {
         displayGrid->setSelectObjectMouseAction();
@@ -1089,12 +1089,12 @@ void MainWindow::updateMouseButtonObjectState() {
     }
 
     if (selectObjectAct->isChecked() == true) {
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled = false;
+        documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->moveCameraEnabled = false;
         selectObjectAct->setToolTip("Select Object OFF");
         selectObjectButtonAction();
     }
-    else if (documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled == false) {
-        documents[activeDocumentId]->getDisplayGrid()->getActiveDisplay()->moveCameraEnabled = true;
+    else if (documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->moveCameraEnabled == false) {
+        documents[activeDocumentId]->getViewportGrid()->getActiveViewport()->moveCameraEnabled = true;
         selectObjectAct->setToolTip("Select Object ON");
         moveCameraButtonAction();
     }

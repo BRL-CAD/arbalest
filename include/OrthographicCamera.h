@@ -48,7 +48,7 @@ private:
     float verticalSpan = 600;
 
     QVector3D angleAroundAxes = initialAngleAroundAxes; // Camera direction in degrees
-    float w = 400, h = 400;         // Display width and height.
+    float w = 400, h = 400;         // Viewport width and height.
 
 public:
     explicit OrthographicCamera(Document * document) : document(document){}
