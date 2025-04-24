@@ -1,0 +1,103 @@
+CODING STYLE & STANDARDS
+------------------------
+
+For anyone who plans on contributing code, the following conventions
+should be followed.  Contributions that do not conform are likely to
+be ridiculed and rejected until they do.  ;-)
+
+Violations of these rules in the existing code are not excuses to
+follow suit.  If code is seen that doesn't conform, it may and should
+be fixed.
+
+Code Organization:
+
+C++ files use the .cpp extension.  Header files use the .h extension.
+
+Language Compliance:
+
+The Arbalest GUI is based on the Qt6 framework, which requires as C++
+minimum version the ISO/IEC 14882:2017 C++ standard (C++17).
+
+Code Conventions:
+
+All code should follow the rules defined in the .clang-format file.
+This config file is based on the standard Windows style.
+Clang-format version 18 should be used.
+
+1) Globals
+
+Globals variables, structures, classes, and other public data
+containers are highly discouraged within application code.  Globals
+are often a quick solution to some deeper coding problem.  However,
+they carry significant maintenance costs, introduce (spaghetti) code
+complexity, make multi-threading support more costly, pollute public
+API (symbol-wise at a minimum), increase security risks, are
+error-prone to use, and usually complicate refactoring and code
+restructuring in the future.
+Using static variables (whether function- or static/file-scoped) is a
+viable alternative.  Restructuring the logic to not be stateful is
+even better.
+
+2) Function return type
+
+Functions should always specify a return type, including functions
+that return int or void.  ANSI C prototypes should be used to declare
+functions, not K&R function prototypes.
+
+3) Names
+
+Variable and function names should almost always begin with a
+lowercase letter.
+  double localVariable; /* ok */
+  double LocalVariable; /* bad (looks like class or constructor) */
+  double _localVar;     /* bad (looks like member variable)      */
+
+Variables are not to be "decorated" to show their type (i.e., do not
+use Hungarian notation or variations thereof) with a slight exception
+for pointers on occasion.  The name should use a concise, meaningful
+name that is not cryptic (typing a descriptive name is preferred over
+someone else hunting down what was meant).
+  char *name;    /* ok  */
+  char *pName;   /* discouraged for new code, but okay */
+  char *fooPtr;  /* bad */
+  char *lpszFoo; /* bad */
+
+Constants should be all upper-case with word boundaries optionally
+separated by underscores.
+  static const int MAX_READ = 2;  /* ok  */
+  static const int arraySize = 8; /* bad */
+
+4) Debugging
+
+Compilation preprocessor defines should never change the size of
+structures.
+  struct Foo {
+  #ifdef DEBUG_CODE  // bad
+    int _magic;
+  #endif
+  };
+
+5) Comments
+
+Comment blocks should utilize an asterisk at the beginning of each new
+line.  Doxygen comments should start on the second line unless it's a
+succinct /** single-line */ comment.
+
+/* This is a
+ * comment block.
+ */
+
+/**
+ * This is a doxygen comment.
+ */
+
+Comments should have an interior space and be without tabs.
+  /** good single-line doxygen */
+  /* good */
+  /*bad*/
+  /*	discouraged */
+  /*  discouraged  */
+  /**
+   * good:
+   * multiple-line doxygen comment
+   */
