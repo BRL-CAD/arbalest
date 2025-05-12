@@ -79,11 +79,10 @@ void MainWindow::loadTheme()
 }
 
 void MainWindow::prepareUi() {
-    setWindowFlags(Qt::FramelessWindowHint);    // Hide window title bar
     setWindowTitle("Arbalest");
+    setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
 	// Menu bar -------------------------------------------------------------------------------------------------------------
     menuTitleBar = new QMenuBar(this);
-    menuTitleBar->installEventFilter(this);
     setMenuBar(menuTitleBar);
 
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
@@ -580,44 +579,7 @@ void MainWindow::prepareUi() {
         documentArea->setCurrentIndex(0);
     });
     help->addAction(helpAct);
-
-    // Title bar [widgets in the menu bar] ----------------------------------------------------------------------------------------
-    QPushButton* applicationIcon = new QPushButton(menuTitleBar);
-    applicationIcon->setIcon(QIcon(":/icons/arbalest_icon.png"));
-    applicationIcon->setObjectName("topLeftAppIcon");
-    menuTitleBar->setCornerWidget(applicationIcon, Qt::TopLeftCorner);
-    setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
-
-    QHBoxLayout* layoutTopRightWidget = new QHBoxLayout;
-    layoutTopRightWidget->setContentsMargins(0, 0, 0, 0);
-    QWidget* topRightWidget = new QWidget;
-    topRightWidget->setLayout(layoutTopRightWidget);
-    menuTitleBar->setCornerWidget(topRightWidget, Qt::TopRightCorner);
-    layoutTopRightWidget->setSpacing(0);
-
-    QPushButton* minimizeButton = new QPushButton(topRightWidget);
-    minimizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_minimize_white_36dp","$Color-WindowTitleButtons")));
-    minimizeButton->setObjectName("minimizeButton");
-    connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::minimizeButtonPressed);
-    layoutTopRightWidget->addWidget(minimizeButton);
-
-
-    maximizeButton = new QPushButton(topRightWidget);
-    if (this->windowState() == Qt::WindowMaximized) {
-        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
-    }
-    else {
-        maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
-    }
-    maximizeButton->setObjectName("maximizeButton");
-    connect(maximizeButton, &QPushButton::clicked, this, &MainWindow::maximizeButtonPressed);
-    layoutTopRightWidget->addWidget(maximizeButton);
-
-    QPushButton* closeButton = new QPushButton(topRightWidget);
-    closeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_close_white_36dp","$Color-WindowTitleButtons")));
-    closeButton->setObjectName("closeButton");
-    connect(closeButton, &QPushButton::clicked, this, &MainWindow::closeButtonPressed);
-    layoutTopRightWidget->addWidget(closeButton);
+    
 
 	// Status bar ----------------------------------------------------------------------------------------------------------
     statusBar = new QStatusBar(this);
@@ -983,60 +945,6 @@ void MainWindow::tabCloseRequested(const int i)
 
 void MainWindow::objectTreeWidgetSelectionChanged(int objectId) {
     documents[activeDocumentId]->getProperties()->bindObject(objectId);
-}
-
-void MainWindow::closeButtonPressed(){
-    close();
-}
-
-void MainWindow::minimizeButtonPressed() {
-    showMinimized();
-}
-
-void MainWindow::maximizeButtonPressed() {
-    if(!isMaximized()) showMaximized();
-    else showNormal();
-}
-
-// drag window by holding from menu bar (now functioning as title bar too)
-bool MainWindow::eventFilter(QObject *watched, QEvent *event)
-{
-    static QPoint dragPosition{};
-    if (watched == menuTitleBar)
-    {
-        if (event->type() == QEvent::MouseButtonPress)
-        {
-            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-            if (mouse_event->button() == Qt::LeftButton)
-            {
-                dragPosition = mouse_event->globalPosition().toPoint() - frameGeometry().topLeft();
-                return false;
-            }
-        }
-        else if (event->type() == QEvent::MouseMove)
-        {
-            QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-            if (mouse_event->buttons() & Qt::LeftButton)
-            {
-                if(isMaximized()) return false;//showNormal();
-                //todo showNormal when dragged
-                move(mouse_event->globalPosition().toPoint() - dragPosition);
-                return false;
-            }
-        }
-    }
-    return false;
-}
-
-void MainWindow::changeEvent( QEvent* e ) {
-    if (e->type() == QEvent::WindowStateChange) {
-        if (this->windowState() == Qt::WindowMaximized) {
-            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sadeep_edited_baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
-        }
-        else{
-            maximizeButton->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_din_white_36dp.png","$Color-WindowTitleButtons")));
-        }
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {

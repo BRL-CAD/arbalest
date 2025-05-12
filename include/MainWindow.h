@@ -38,7 +38,6 @@ private:
     QStatusBar *statusBar;
     QMenuBar* menuTitleBar;
     QTabWidget *documentArea;
-    QPushButton * maximizeButton;
     QLabel *statusBarPathLabel;
     QComboBox * currentViewport;
     QAction* singleViewAct[4];
@@ -65,8 +64,6 @@ private:
     QAction *themeAct[2];
 	
 protected:
-    void changeEvent(QEvent *e) override;
-    bool eventFilter(QObject *watched, QEvent *event) override;
     void closeEvent(QCloseEvent* event) override;
 	
     void moveCameraButtonAction();
@@ -82,9 +79,6 @@ public slots:
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) ;
     void objectTreeWidgetSelectionChanged(int objectId);
-    void closeButtonPressed();
-    void minimizeButtonPressed();
-    void maximizeButtonPressed();
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     void updateMouseButtonObjectState();
