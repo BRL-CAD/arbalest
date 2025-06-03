@@ -12,7 +12,6 @@
 #include <stack>
 #include <iostream>
 using namespace std::chrono;
-using namespace std;
 
 BRLCAD::Vector3D operator+(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
 BRLCAD::Vector3D operator-(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
@@ -91,8 +90,8 @@ inline void te(){
     time_point<high_resolution_clock> startTime = times.top();
 
     milliseconds duration = duration_cast<milliseconds>( high_resolution_clock::now()-startTime);
-    cout << timerNames.top().toStdString()<< "  "<<duration_cast<milliseconds>( high_resolution_clock::now()-startTime).count() <<" ms        "
-    <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< endl;
+    std::cout << timerNames.top().toStdString()<< "  "<<duration_cast<milliseconds>( high_resolution_clock::now()-startTime).count() <<" ms        "
+    <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< std::endl;
 }
 
 class Document;
