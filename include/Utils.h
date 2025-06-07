@@ -11,8 +11,6 @@
 #include <chrono>
 #include <stack>
 #include <iostream>
-using namespace std::chrono;
-using namespace std;
 
 BRLCAD::Vector3D operator+(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
 BRLCAD::Vector3D operator-(const BRLCAD::Vector3D& a, const BRLCAD::Vector3D& b);
@@ -80,19 +78,20 @@ inline QWidget * toolbarSeparator(bool horizontal){
 
 QImage coloredIcon(QString path, QString colorKey = "");
 
-static std::stack <time_point<high_resolution_clock>> times;
+static std::stack <std::chrono::time_point<std::chrono::high_resolution_clock>> times;
 static std::stack <QString> timerNames;
 inline void ts(QString name = "Timer"){
-    times.push(high_resolution_clock::now());
+    times.push(std::chrono::high_resolution_clock::now());
     timerNames.push(name);
 }
 
 inline void te(){
-    time_point<high_resolution_clock> startTime = times.top();
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime = times.top();
 
-    milliseconds duration = duration_cast<milliseconds>( high_resolution_clock::now()-startTime);
-    cout << timerNames.top().toStdString()<< "  "<<duration_cast<milliseconds>( high_resolution_clock::now()-startTime).count() <<" ms        "
-    <<duration_cast<microseconds>( high_resolution_clock::now()-startTime).count()<<" us"<< endl;
+    std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime);
+    std::cout << timerNames.top().toStdString() << "  "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime).count() << " ms        "
+              << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()-startTime).count() << " us" << std::endl;
 }
 
 class Document;

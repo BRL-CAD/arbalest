@@ -83,7 +83,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 editableComb.SetRed(selectedColor.redF());
                 editableComb.SetGreen(selectedColor.greenF());
                 editableComb.SetBlue(selectedColor.blueF());
-                cout<<selectedColor.redF()<<" "<<selectedColor.greenF()<<" "<<selectedColor.blueF()<<endl;
+                std::cout<<selectedColor.redF()<<" "<<selectedColor.greenF()<<" "<<selectedColor.blueF()<<std::endl;
                 this->document.getDatabase()->Set(editableComb);
             });
             this->document.getObjectTree()->buildColorMap(objectId);
