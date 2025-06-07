@@ -24,15 +24,6 @@ QSplitter::handle {
 
 QMainWindow     { background-color:"$Color-Main"; }
 
-
-#minimizeButton, #maximizeButton, #closeButton {
-    border-style: solid;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    padding-left: 13px;
-    padding-right: 13px;
-}
-
 QInputDialog, QMessageBox{
     color: "$Color-DefaultFontColor";
     background: "$Color-Main";
@@ -44,17 +35,22 @@ QLabel {
     color: "$Color-DefaultFontColor";
 }
 
-#toolbarButton { padding: 8px;}
+#toolbarButton {
+    padding: 8px;
+    background-color: transparent;
+}
 
-#minimizeButton { padding-top: 3px; padding-bottom: 11px;}
+#toolbarButton:hover {
+    background-color: "$Color-ButtonHoverMask";
+}
 
-#toolbarButton, #topLeftAppIcon, #minimizeButton, #maximizeButton, #closeButton                     { background-color: transparent;}
+#toolbarButton:pressed {
+    background-color: "$Color-ButtonPressedMask";
+}
 
-#toolbarButton:hover, #minimizeButton:hover,   #maximizeButton:hover,     #closeButton:hover        { background-color:"$Color-ButtonHoverMask" ; }
-
-#toolbarButton:pressed, #minimizeButton:pressed, #maximizeButton:pressed,   #closeButton:pressed    { background-color:"$Color-ButtonPressedMask" ; }
-
-#toolbarButton:checked { background-color:"$Color-ButtonCheckedMask"; }
+#toolbarButton:checked {
+    background-color: "$Color-ButtonCheckedMask";
+    }
 
 /* Scroll bars ----------------------------------------------------------------------------------------------------*/
 QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}

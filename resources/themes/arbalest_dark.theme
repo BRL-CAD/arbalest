@@ -36,7 +36,6 @@ $Color-IconView                         : #25a2c1;
 $Color-IconRaytrace                     : #d61d32;
 $Color-IconSelectObject                 : #000000;
 $Color-Cell                             : #606060;
-$Color-WindowTitleButtons               : #ffffff;
 $Color-ButtonCheckedMask                : #ccb6a3;  // For checkable button
 
 $Color-FullyVisibleObjectText           : #1491e9;  // object tree item text.
