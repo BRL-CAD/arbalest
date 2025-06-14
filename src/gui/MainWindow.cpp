@@ -80,7 +80,7 @@ void MainWindow::loadTheme()
 
 void MainWindow::prepareUi() {
     setWindowTitle("Arbalest");
-    setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
+    setWindowIcon(QIcon(":/icons/arbalest_icon.png"));
 	// Menu bar -------------------------------------------------------------------------------------------------------------
     menuTitleBar = new QMenuBar(this);
     setMenuBar(menuTitleBar);
