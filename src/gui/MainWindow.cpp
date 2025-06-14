@@ -604,21 +604,25 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
     QToolButton* newButton = new QToolButton(menuTitleBar);
+    newButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     newButton->setDefaultAction(newAct);
     newButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(newButton);
     
     QToolButton* openButton = new QToolButton(menuTitleBar);
+    openButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     openButton->setDefaultAction(openAct);
     openButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(openButton);
 
     QToolButton* saveButton = new QToolButton(menuTitleBar);
+    saveButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     saveButton->setDefaultAction(saveAct);
     saveButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(saveButton);
 
     QToolButton* saveAsButton = new QToolButton(menuTitleBar);
+    saveAsButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     saveAsButton->setDefaultAction(saveAsAct);
     saveAsButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(saveAsButton);
@@ -626,16 +630,19 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* focusAll = new QToolButton(menuTitleBar);
+    focusAll->setToolButtonStyle(Qt::ToolButtonIconOnly);
     focusAll->setDefaultAction(autoViewAct);
     focusAll->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(focusAll);
 
     QToolButton* focusCurrent = new QToolButton(menuTitleBar);
+    focusCurrent->setToolButtonStyle(Qt::ToolButtonIconOnly);
     focusCurrent->setDefaultAction(centerViewAct);
     focusCurrent->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(focusCurrent);
 
     QToolButton* resetViewports = new QToolButton(menuTitleBar);
+    resetViewports->setToolButtonStyle(Qt::ToolButtonIconOnly);
     resetViewports->setDefaultAction(resetAllViewportsAct);
     resetViewports->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(resetViewports);
@@ -657,6 +664,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(currentViewport);
 
     QToolButton* toggleGrid = new QToolButton(menuTitleBar);
+    toggleGrid->setToolButtonStyle(Qt::ToolButtonIconOnly);
     toggleGrid->setDefaultAction(toggleGridAct);
     toggleGrid->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(toggleGrid);
@@ -664,6 +672,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* selectObjectButton = new QToolButton(menuTitleBar);
+    selectObjectButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     selectObjectButton->setDefaultAction(selectObjectAct);
     selectObjectButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(selectObjectButton);
@@ -671,6 +680,7 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(toolbarSeparator(false));
 
     QToolButton* raytraceButton = new QToolButton(menuTitleBar);
+    raytraceButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     raytraceButton->setDefaultAction(raytraceAct);
     raytraceButton->setObjectName("toolbarButton");
     mainTabBarCornerWidget->addWidget(raytraceButton);
