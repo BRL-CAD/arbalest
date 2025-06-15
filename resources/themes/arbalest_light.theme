@@ -42,6 +42,7 @@ $Color-CellText: #555555;
 $Color-DataCellHeader: #aaaaaa;
 $Color-DataCellHeaderText: #fdfdfd;
 $Color-DataCellBorder: #aaaaaa;
+$Color-ColorButtonText: #555555;
 $Color-ColorButtonBorder: #cdcdcd;
 $Color-About: #f2f2f2;
 $Color-AboutText: #555555;
