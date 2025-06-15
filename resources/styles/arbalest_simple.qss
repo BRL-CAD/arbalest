@@ -254,6 +254,7 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
 
 #properties-collapsibleTitle{
     margin-top: 6px;
+    border: 0;
     padding: 0;
     background: "$Color-Dockable";
     color: "$Color-PropertiesChildrenButtonText";
@@ -262,6 +263,7 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
 }
 
 #properties-collapsibleCollapseIcon {
+    border: 0;
     padding: 4px 0 0 8px;
     background: "$Color-Dockable";
     color: "$Color-PropertiesChildrenButtonArrow";
