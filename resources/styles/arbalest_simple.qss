@@ -11,7 +11,7 @@ QInputDialog, QMessageBox{
     background: "$Color-Main";
 }
 
-QPushButton, QLineEdit, QToolButton{
+QPushButton, QLineEdit {
     background: "$Color-Secondary";
 }
 
@@ -82,6 +82,20 @@ QMenuBar::item:selected {
 #documentAreaTabBar::close-button {
     image: url(:/icons/sadeep_created_close-tab.png);
     subcontrol-position: right center;
+}
+
+QToolButton {
+    border: 1px solid "$Color-TabBarMoveButtonBorder";
+    background: "$Color-TabBarMoveButton";
+    color: "$Color-TabBarText";
+}
+
+QToolButton:hover {
+    background: "$Color-TabBarMoveButton-Hover";
+}
+
+QToolButton:pressed {
+    background: "$Color-TabBarMoveButton-Pressed";
 }
 
 
