@@ -61,12 +61,13 @@ QMenuBar::item:selected {
 /* ---------- Document area and its tab bar ---------- */
 
 #documentArea::pane {
-    border-style: solid;
+    border: 0;
     background: "$Color-MainWindow";
 }
 
 #documentAreaTabBar::tab {
-    padding: 5px 8px 5px 25px;
+    border: 0;
+    padding: 2px 8px 2px 25px;
     background: "$Color-TabBar";
     color: "$Color-TabBarText";
 }
@@ -80,7 +81,7 @@ QMenuBar::item:selected {
 
 #documentAreaTabBar::close-button {
     image: url(:/icons/sadeep_created_close-tab.png);
-    subcontrol-position: right;
+    subcontrol-position: right center;
 }
 
 
