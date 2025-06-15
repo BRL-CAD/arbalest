@@ -11,14 +11,6 @@ QInputDialog, QMessageBox{
     background: "$Color-Main";
 }
 
-QPushButton, QLineEdit {
-    background: "$Color-Secondary";
-}
-
-QLabel {
-    color: "$Color-DefaultFontColor";
-}
-
 
 /* ---------- MainWindow ---------- */
 
