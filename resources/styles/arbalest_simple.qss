@@ -66,6 +66,7 @@ QMenuBar::item:selected {
 }
 
 #documentAreaTabBar::tab {
+    min-height: 28px;
     border: 0;
     padding: 2px 8px 2px 25px;
     background: "$Color-TabBar";
@@ -106,7 +107,9 @@ QToolButton:pressed {
 #toolbarSeparator {background: "$Color-ToolBarSeparator";}
 
 #toolbarButton {
-    padding: 8px;
+    min-height: 30px;
+    border: 0;
+    padding: 2px 8px;
     background: "$Color-ToolBarButton";
     color: "$Color-ToolBarText";
 }
@@ -121,8 +124,9 @@ QToolButton:pressed {
 /* ---------- Combobox ---------- */
 
 QComboBox {
-    margin: 2px 0 0 6px;
+    min-height: 33px;
     border: 0;
+    padding: 0 6px;
     background: "$Color-ToolBarButton";
     color: "$Color-ToolBarText";
 }
