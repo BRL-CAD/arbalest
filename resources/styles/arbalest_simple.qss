@@ -46,7 +46,7 @@ QMenu::item:selected {
 }
 
 QMenuBar {
-    min-height: 24px;
+    min-height: 1.5em;
 	border: 0;
 	background: "$Color-Menu";
 	color: "$Color-MenuText";
