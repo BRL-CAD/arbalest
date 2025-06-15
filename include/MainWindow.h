@@ -31,19 +31,34 @@ public:
     const int statusBarShortMessageDuration = 7000;
 
 private:
-	// UI components
+    // ---------- UI COMPONENTS ----------
     Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
     Dockable *toolboxDockable;
     QStatusBar *statusBar;
-    QMenuBar* menuTitleBar;
     QTabWidget *documentArea;
     QLabel *statusBarPathLabel;
-    QComboBox * currentViewport;
-    QAction* singleViewAct[4];
     MouseAction *m_mouseAction;
-    QAction* selectObjectAct;
-	
+    // ---------- Menu bar ----------
+    QMenuBar *menuTitleBar;
+    // File menu
+    QAction *newAct;
+    QAction *openAct;
+    QAction *saveAct;
+    QAction *saveAsAct;
+    QAction *quitAct;
+    // Edit menu
+    QAction *selectObjectAct;
+    // View menu
+    QAction *resetAllViewportsAct;
+    QAction *autoViewAct;
+    QAction *centerViewAct;
+    QComboBox *currentViewport;
+    QAction *singleViewAct[4];
+    QAction *toggleGridAct;
+    // Raytrace menu
+    QAction *raytraceAct;
+
     // Stores pointers to all the currently opened documents. Item removed when document is closed. Key is documents ID.
     std::unordered_map<int, Document*> documents;
 
@@ -53,9 +68,10 @@ private:
 
     // The ID of the active document.
     int activeDocumentId = -1;
-	
+
     void prepareUi();
     void loadTheme();
+    void setIcons();
     void prepareDockables();
 
     bool saveFile(const QString& filePath);
