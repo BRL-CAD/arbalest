@@ -36,44 +36,40 @@ using namespace std;
 
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr}
-{
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr} {
     loadTheme();
     prepareUi();
     prepareDockables();
 
     documentArea->addTab(new HelpWidget(this), "Quick Start");
-    if(QCoreApplication::arguments().length()>1){
+    if (QCoreApplication::arguments().length() > 1) {
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
     Globals::mainWindow = this;
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     for (const std::pair<const int, Document*>& pair : documents) {
         Document* document = pair.second;
         delete document;
     }
 }
 
-void MainWindow::loadTheme()
-{
+void MainWindow::loadTheme() {
     QSettings settings("BRLCAD", "arbalest");
-    int themeIndex = settings.value("themeIndex",0).toInt();
+    int themeIndex = settings.value("themeIndex", 0).toInt();
 
-    QStringList themes = {":themes/arbalest_light.theme",":themes/arbalest_dark.theme"};
+    QStringList themes = {":themes/arbalest_light.theme", ":themes/arbalest_dark.theme"};
 
-	QFile themeFile(themes[themeIndex] );
-
-	themeFile.open( QFile::ReadOnly );
-	QString themeStr( themeFile.readAll() );
+	QFile themeFile(themes[themeIndex]);
+	themeFile.open(QFile::ReadOnly);
+	QString themeStr(themeFile.readAll());
 	Globals::theme = new QSSPreprocessor(themeStr);
 	themeFile.close();
 
-	QFile styleFile( ":styles/arbalest_simple.qss" );
-	styleFile.open( QFile::ReadOnly );
-	QString styleStr(styleFile.readAll() );
+	QFile styleFile(":styles/arbalest_simple.qss");
+	styleFile.open(QFile::ReadOnly);
+	QString styleStr(styleFile.readAll());
 	qApp->setStyleSheet(Globals::theme->process(styleStr));
 	styleFile.close();
 }
@@ -81,10 +77,13 @@ void MainWindow::loadTheme()
 void MainWindow::prepareUi() {
     setWindowTitle("Arbalest");
     setWindowIcon(*new QIcon(*new QBitmap(":/icons/arbalest_icon.png")));
-	// Menu bar -------------------------------------------------------------------------------------------------------------
+    
+
+    // ---------- Menu bar ----------
     menuTitleBar = new QMenuBar(this);
     setMenuBar(menuTitleBar);
 
+    // File menu
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
     QIcon newActIcon;
@@ -130,15 +129,16 @@ void MainWindow::prepareUi() {
     QAction* quitAct = new QAction(quitActIcon, tr("Quit"), this);
     quitAct->setShortcut(QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit"));
-    connect(quitAct, &QAction::triggered, this,[this](){
+    connect(quitAct, &QAction::triggered, this, [this]() {
         QCoreApplication::quit();
     });
     fileMenu->addAction(quitAct);
 
+    // Create menu
     QMenu* createMenu = menuTitleBar->addMenu(tr("&Create"));
 
     QAction* createArb8Act = new QAction(tr("Arb8"), this);
-    connect(createArb8Act, &QAction::triggered, this,[this](){
+    connect(createArb8Act, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -147,7 +147,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -156,7 +156,7 @@ void MainWindow::prepareUi() {
     createMenu->addAction(createArb8Act);
 
     QAction* createConeAct = new QAction(tr("Cone"), this);
-    connect(createConeAct, &QAction::triggered, this,[this](){
+    connect(createConeAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -165,7 +165,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -173,11 +173,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createConeAct);
 
-
-
-
     QAction* createEllipsoidAct = new QAction(tr("Ellipsoid"), this);
-    connect(createEllipsoidAct, &QAction::triggered, this,[this](){
+    connect(createEllipsoidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -186,7 +183,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -194,9 +191,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createEllipsoidAct);
 
-
     QAction* createEllipticalTorusAct = new QAction(tr("Elliptical Torus"), this);
-    connect(createEllipticalTorusAct, &QAction::triggered, this,[this](){
+    connect(createEllipticalTorusAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -205,7 +201,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -213,10 +209,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createEllipticalTorusAct);
 
-
-
     QAction* createHalfspaceAct = new QAction(tr("Halfspace"), this);
-    connect(createHalfspaceAct, &QAction::triggered, this,[this](){
+    connect(createHalfspaceAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -225,7 +219,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -233,10 +227,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createHalfspaceAct);
 
-
-
     QAction* createHyperbolicCylinderAct = new QAction(tr("Hyperbolic Cylinder"), this);
-    connect(createHyperbolicCylinderAct, &QAction::triggered, this,[this](){
+    connect(createHyperbolicCylinderAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -245,7 +237,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -253,10 +245,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createHyperbolicCylinderAct);
 
-
-
     QAction* createHyperboloidAct = new QAction(tr("Hyperboloid"), this);
-    connect(createHyperboloidAct, &QAction::triggered, this,[this](){
+    connect(createHyperboloidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -265,7 +255,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -273,11 +263,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createHyperboloidAct);
 
-
-
-
     QAction* createParabolicCylinderAct = new QAction(tr("Parabolic Cylinder"), this);
-    connect(createParabolicCylinderAct, &QAction::triggered, this,[this](){
+    connect(createParabolicCylinderAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -286,7 +273,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -294,11 +281,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createParabolicCylinderAct);
 
-
-
-
     QAction* createParaboloidAct = new QAction(tr("Paraboloid"), this);
-    connect(createParaboloidAct, &QAction::triggered, this,[this](){
+    connect(createParaboloidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -307,7 +291,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -315,10 +299,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createParaboloidAct);
 
-
-
     QAction* createParticleAct = new QAction(tr("Particle"), this);
-    connect(createParticleAct, &QAction::triggered, this,[this](){
+    connect(createParticleAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -327,7 +309,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -335,9 +317,8 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createParticleAct);
 
-
     QAction* createTorusAct = new QAction(tr("Torus"), this);
-    connect(createTorusAct, &QAction::triggered, this,[this](){
+    connect(createTorusAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
 
         QString name;
@@ -346,7 +327,7 @@ void MainWindow::prepareUi() {
         object->SetName(name.toUtf8());
         documents[activeDocumentId]->Add(*object);
         int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId,true);
+        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
         documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
         documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
         documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -354,11 +335,12 @@ void MainWindow::prepareUi() {
     });
     createMenu->addAction(createTorusAct);
 
+    // Edit menu
     QMenu* editMenu = menuTitleBar->addMenu(tr("&Edit"));
 
     QAction* relativeMoveAct = new QAction("Relative move selected object", this);
     relativeMoveAct->setStatusTip(tr("Relative move selected object. Top objects cannot be moved."));
-    connect(relativeMoveAct, &QAction::triggered, this, [this](){
+    connect(relativeMoveAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
@@ -368,7 +350,7 @@ void MainWindow::prepareUi() {
 
     QAction* relativeScaleAct = new QAction("Relative scale selected object", this);
     relativeScaleAct->setStatusTip(tr("Relative scale selected object. Top objects cannot be scaled."));
-    connect(relativeScaleAct, &QAction::triggered, this, [this](){
+    connect(relativeScaleAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
@@ -378,7 +360,7 @@ void MainWindow::prepareUi() {
 
     QAction* relativeRotateAct = new QAction("Relative rotate selected object", this);
     relativeRotateAct->setStatusTip(tr("Relative rotate selected object. Top objects cannot be rotated."));
-    connect(relativeRotateAct, &QAction::triggered, this, [this](){
+    connect(relativeRotateAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
@@ -393,12 +375,12 @@ void MainWindow::prepareUi() {
     connect(selectObjectAct, &QAction::toggled, this, &MainWindow::updateMouseButtonObjectState);
     editMenu->addAction(selectObjectAct);
 
-
+    // View menu
     QMenu* viewMenu = menuTitleBar->addMenu(tr("&View"));
 
     QAction* resetViewportAct = new QAction("Reset current viewport", this);
     resetViewportAct->setStatusTip(tr("Reset to default camera orientation for the viewport and autoview to currently visible objects"));
-    connect(resetViewportAct, &QAction::triggered, this, [this](){
+    connect(resetViewportAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         documents[activeDocumentId]->getViewportGrid()->resetViewPort(documents[activeDocumentId]->getViewportGrid()->getActiveViewportId());
     });
@@ -407,7 +389,7 @@ void MainWindow::prepareUi() {
     QAction* resetAllViewportsAct = new QAction("Reset all viewports", this);
     resetAllViewportsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-MenuIconView")));
     resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
-    connect(resetAllViewportsAct, &QAction::triggered, this, [this](){
+    connect(resetAllViewportsAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         documents[activeDocumentId]->getViewportGrid()->resetAllViewPorts();
     });
@@ -419,9 +401,9 @@ void MainWindow::prepareUi() {
     autoViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-MenuIconView")));
     autoViewAct->setShortcut(Qt::Key_F|Qt::CTRL);
     autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
-    connect(autoViewAct, &QAction::triggered, this, [this](){
+    connect(autoViewAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-        for(Viewport * display : documents[activeDocumentId]->getViewportGrid()->getViewports()){
+        for(Viewport * display : documents[activeDocumentId]->getViewportGrid()->getViewports()) {
             display->getCamera()->autoview();
             display->forceRerenderFrame();
         }
@@ -430,7 +412,7 @@ void MainWindow::prepareUi() {
 
     QAction* autoViewSingleAct = new QAction(tr("Focus visible objects (current viewport)"), this);
     autoViewSingleAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
-    connect(autoViewSingleAct, &QAction::triggered, this, [this](){
+    connect(autoViewSingleAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         documents[activeDocumentId]->getViewport()->getCamera()->autoview();
         documents[activeDocumentId]->getViewport()->forceRerenderFrame();
@@ -441,7 +423,7 @@ void MainWindow::prepareUi() {
     centerViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-MenuIconView")));
     centerViewAct->setStatusTip(tr("Resize and center the view based on the selected objects"));
     centerViewAct->setShortcut(Qt::Key_F);
-    connect(centerViewAct, &QAction::triggered, this, [this](){
+    connect(centerViewAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
         int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
@@ -510,7 +492,6 @@ void MainWindow::prepareUi() {
     });
     viewMenu->addAction(toggleGridAct);
 
-
     QMenu* selectThemeAct = viewMenu->addMenu(tr("Select theme"));
     QActionGroup *selectThemeActGroup = new QActionGroup(this);
 
@@ -534,11 +515,13 @@ void MainWindow::prepareUi() {
     });
     selectThemeActGroup->addAction(themeAct[1]);
     selectThemeAct->addAction(themeAct[1]);
+
     QSettings settings("BRLCAD", "arbalest");
     themeAct[settings.value("themeIndex",0).toInt()]->setChecked(true);
 
-
+    // Raytrace menu
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
+
     QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
     raytraceAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-MenuIconRaytrace")));
     raytraceAct->setStatusTip(tr("Raytrace current viewport"));
@@ -561,8 +544,9 @@ void MainWindow::prepareUi() {
     });
     raytrace->addAction(setRaytraceBackgroundColorAct);
 
-
+    // Help menu
     QMenu* help = menuTitleBar->addMenu(tr("&Help"));
+
     QAction* aboutAct = new QAction(tr("About"), this);
     connect(aboutAct, &QAction::triggered, this, [this](){
         (new AboutWindow())->show();
@@ -580,16 +564,16 @@ void MainWindow::prepareUi() {
     });
     help->addAction(helpAct);
     
-
-	// Status bar ----------------------------------------------------------------------------------------------------------
+    
+    // ---------- Status bar ----------
     statusBar = new QStatusBar(this);
     setStatusBar(statusBar);
     statusBarPathLabel = new QLabel("No document open");
     statusBarPathLabel->setObjectName("statusBarPathLabel");
     statusBar->addWidget(statusBarPathLabel);
-	
 
-    // Document area --------------------------------------------------------------------------------------------------------
+
+    // ---------- Document area ----------
     documentArea = new QTabWidget(this);
     documentArea->setObjectName("documentArea");
     documentArea->setMovable(true);
@@ -599,7 +583,7 @@ void MainWindow::prepareUi() {
     connect(documentArea, &QTabWidget::currentChanged, this, &MainWindow::onActiveDocumentChanged);
     connect(documentArea, &QTabWidget::tabCloseRequested, this, &MainWindow::tabCloseRequested);
     connect(documentArea, &QTabWidget::currentChanged, this, &MainWindow::updateMouseButtonObjectState);
-	
+
     QHBoxWidget * mainTabBarCornerWidget = new QHBoxWidget();
     mainTabBarCornerWidget->setObjectName("mainTabBarCornerWidget");
 
