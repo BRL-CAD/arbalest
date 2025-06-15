@@ -39,6 +39,7 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nullptr} {
     loadTheme();
     prepareUi();
+    setIcons();
     prepareDockables();
 
     documentArea->addTab(new HelpWidget(this), "Quick Start");
@@ -86,37 +87,25 @@ void MainWindow::prepareUi() {
     // File menu
     QMenu *fileMenu = menuTitleBar->addMenu(tr("&File"));
 
-    QIcon newActIcon;
-    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
-    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    QAction* newAct = new QAction(newActIcon, tr("&New"), this);
+    newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("New .g file"));
     connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
     fileMenu->addAction(newAct);
 
-    QIcon openActIcon;
-    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
-    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    QAction* openAct = new QAction(openActIcon, tr("&Open..."), this);
+    openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Opens a .g file"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFileDialog);
     fileMenu->addAction(openAct);
 
-    QIcon saveActIcon;
-    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-MenuIconFile")), QIcon::Normal);
-    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-Menu")), QIcon::Active);
-    QAction* saveAct = new QAction(saveActIcon, tr("Save"), this);
+    saveAct = new QAction(tr("Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save database"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::saveFileDefaultPath);
     fileMenu->addAction(saveAct);
 
-    QIcon saveAsActIcon;
-    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-MenuIconFile")), QIcon::Normal);
-    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-Menu")), QIcon::Active);
-    QAction* saveAsAct = new QAction(saveAsActIcon, tr("Save As..."), this);
+    saveAsAct = new QAction(tr("Save As..."), this);
     saveAsAct->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
     saveAsAct->setStatusTip(tr("Save database as"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAsFileDialog);
@@ -124,9 +113,7 @@ void MainWindow::prepareUi() {
     
     fileMenu->addSeparator();
 
-    QIcon quitActIcon;
-    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-MenuIconQuit")), QIcon::Normal);
-    QAction* quitAct = new QAction(quitActIcon, tr("Quit"), this);
+    quitAct = new QAction(tr("Quit"), this);
     quitAct->setShortcut(QKeySequence(tr("Ctrl+Q")));
     quitAct->setStatusTip(tr("Quit"));
     connect(quitAct, &QAction::triggered, this, [this]() {
@@ -369,7 +356,6 @@ void MainWindow::prepareUi() {
     editMenu->addAction(relativeRotateAct);
 
     selectObjectAct = new QAction(tr("Select object"), this);
-    selectObjectAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-MenuIconEdit")));
     selectObjectAct->setStatusTip(tr("Select object."));
     selectObjectAct->setCheckable(true);
     connect(selectObjectAct, &QAction::toggled, this, &MainWindow::updateMouseButtonObjectState);
@@ -386,8 +372,7 @@ void MainWindow::prepareUi() {
     });
     viewMenu->addAction(resetViewportAct);
 
-    QAction* resetAllViewportsAct = new QAction("Reset all viewports", this);
-    resetAllViewportsAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-MenuIconView")));
+    resetAllViewportsAct = new QAction("Reset all viewports", this);
     resetAllViewportsAct->setStatusTip(tr("Reset to default camera orientation for each viewport and autoview to visible objects"));
     connect(resetAllViewportsAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
@@ -397,8 +382,7 @@ void MainWindow::prepareUi() {
 
     viewMenu->addSeparator();
 
-    QAction* autoViewAct = new QAction(tr("Focus visible objects (all viewports)"), this);
-    autoViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-MenuIconView")));
+    autoViewAct = new QAction(tr("Focus visible objects (all viewports)"), this);
     autoViewAct->setShortcut(Qt::Key_F|Qt::CTRL);
     autoViewAct->setStatusTip(tr("Resize and center the view based on the current visible objects"));
     connect(autoViewAct, &QAction::triggered, this, [this]() {
@@ -419,8 +403,7 @@ void MainWindow::prepareUi() {
     });
     viewMenu->addAction(autoViewSingleAct);
 
-    QAction* centerViewAct = new QAction(tr("Focus selected object"), this);
-    centerViewAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-MenuIconView")));
+    centerViewAct = new QAction(tr("Focus selected object"), this);
     centerViewAct->setStatusTip(tr("Resize and center the view based on the selected objects"));
     centerViewAct->setShortcut(Qt::Key_F);
     connect(centerViewAct, &QAction::triggered, this, [this]() {
@@ -469,8 +452,7 @@ void MainWindow::prepareUi() {
 
     viewMenu->addSeparator();
     
-    QAction* toggleGridAct = new QAction(tr("Toggle grid on/off"), this);
-    toggleGridAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-MenuIconView")));
+    toggleGridAct = new QAction(tr("Toggle grid on/off"), this);
     toggleGridAct->setCheckable(true);
     toggleGridAct->setShortcut(Qt::Key_G);
     connect(toggleGridAct, &QAction::toggled, this, [=]() {
@@ -522,8 +504,7 @@ void MainWindow::prepareUi() {
     // Raytrace menu
     QMenu* raytrace = menuTitleBar->addMenu(tr("&Raytrace"));
 
-    QAction* raytraceAct = new QAction(tr("Raytrace current viewport"), this);
-    raytraceAct->setIcon(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-MenuIconRaytrace")));
+    raytraceAct = new QAction(tr("Raytrace current viewport"), this);
     raytraceAct->setStatusTip(tr("Raytrace current viewport"));
     raytraceAct->setShortcut(Qt::CTRL|Qt::Key_R);
     connect(raytraceAct, &QAction::triggered, this, [this](){
@@ -699,6 +680,67 @@ void MainWindow::prepareUi() {
     mainTabBarCornerWidget->addWidget(raytraceButton);
 
     documentArea->setCornerWidget(mainTabBarCornerWidget,Qt::Corner::TopRightCorner);
+}
+
+void MainWindow::setIcons() {
+    // File menu
+    QIcon newActIcon;
+    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-NewActIcon")), QIcon::Normal);
+    newActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_note_add_black_48dp.png", "$Color-NewActIcon-Active")), QIcon::Active);
+    newAct->setIcon(newActIcon);
+
+    QIcon openActIcon;
+    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-OpenActIcon")), QIcon::Normal);
+    openActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_folder_black_48dp.png", "$Color-OpenActIcon-Active")), QIcon::Active);
+    openAct->setIcon(openActIcon);
+
+    QIcon saveActIcon;
+    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-SaveActIcon")), QIcon::Normal);
+    saveActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_save_black_48dp.png", "$Color-SaveActIcon-Active")), QIcon::Active);
+    saveAct->setIcon(saveActIcon);
+
+    QIcon saveAsActIcon;
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-SaveAsActIcon")), QIcon::Normal);
+    saveAsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/saveAsIcon.png", "$Color-SaveAsActIcon-Active")), QIcon::Active);
+    saveAsAct->setIcon(saveAsActIcon);
+
+    QIcon quitActIcon;
+    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-QuitActIcon")), QIcon::Normal);
+    quitActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/quitIcon.png", "$Color-QuitActIcon-Active")), QIcon::Active);
+    quitAct->setIcon(quitActIcon);
+
+    // Edit menu
+    QIcon selectObjectActIcon;
+    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-SelectObjectActIcon")), QIcon::Normal);
+    selectObjectActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/select_object.png", "$Color-SelectObjectActIcon-Active")), QIcon::Active);
+    selectObjectAct->setIcon(selectObjectActIcon);
+
+    // View menu
+    QIcon resetAllViewportsActIcon;
+    resetAllViewportsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-ResetAllViewportsActIcon")), QIcon::Normal);
+    resetAllViewportsActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_refresh_black_48dp.png", "$Color-ResetAllViewportsActIcon-Active")), QIcon::Active);
+    resetAllViewportsAct->setIcon(resetAllViewportsActIcon);
+
+    QIcon autoViewActIcon;
+    autoViewActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-AutoViewActIcon")), QIcon::Normal);
+    autoViewActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_crop_free_black_48dp.png", "$Color-AutoViewActIcon-Active")), QIcon::Active);
+    autoViewAct->setIcon(autoViewActIcon);
+
+    QIcon centerViewActIcon;
+    centerViewActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-CenterViewActIcon")), QIcon::Normal);
+    centerViewActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_center_focus_strong_black_48dp.png", "$Color-CenterViewActIcon-Active")), QIcon::Active);
+    centerViewAct->setIcon(centerViewActIcon);
+
+    QIcon toggleGridActIcon;
+    toggleGridActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-ToggleGridActIcon")), QIcon::Normal);
+    toggleGridActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/sharp_grid_on_black_48dp.png", "$Color-ToggleGridActIcon-Active")), QIcon::Active);
+    toggleGridAct->setIcon(toggleGridActIcon);
+
+    // Raytrace menu
+    QIcon raytraceActIcon;
+    raytraceActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-RaytraceActIcon")), QIcon::Normal);
+    raytraceActIcon.addPixmap(QPixmap::fromImage(coloredIcon(":/icons/baseline_filter_vintage_black_48dp.png", "$Color-RaytraceActIcon-Active")), QIcon::Active);
+    raytraceAct->setIcon(raytraceActIcon);
 }
 
 void MainWindow::prepareDockables(){
