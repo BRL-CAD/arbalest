@@ -1,28 +1,9 @@
 
-QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
-
 QWidget {
     outline: none; /* removes ugly dotted lines around focused widgets*/
     font-size: 10pt; 
     color: "$Color-DefaultFontColor";
 }
-
-
-QComboBox {
-    margin-top:2px;
-    margin-left:6px;
-    background-color: transparent;
-    border: 0px solid transparent;
-}
-QComboBox QAbstractItemView {
-    background-color: "$Color-Main";
-}
-
-QSplitter::handle {
-    background: "$Color-Main";
-}
-
-QMainWindow     { background-color:"$Color-Main"; }
 
 QInputDialog, QMessageBox{
     color: "$Color-DefaultFontColor";
@@ -35,41 +16,11 @@ QLabel {
     color: "$Color-DefaultFontColor";
 }
 
-#toolbarButton {
-    padding: 8px;
-    background-color: transparent;
-}
-
-#toolbarButton:hover {
-    background-color: "$Color-ButtonHoverMask";
-}
-
-#toolbarButton:pressed {
-    background-color: "$Color-ButtonPressedMask";
-}
-
-#toolbarButton:checked {
-    background-color: "$Color-ButtonCheckedMask";
-    }
-
-/* Scroll bars ----------------------------------------------------------------------------------------------------*/
-QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
-QScrollBar:vertical     {border: none; background-color: transparent; width : 9px;margin: 0px 0 0px 0;}
-QScrollBar:horizontal   {border: none; background-color: transparent; height: 9px;margin: 0px 0 0px 0;}
-QScrollBar::handle{
-    border-radius: 0px;
-    border-color: "$Color-ScrollBars";
-    border-width: 0px;
-    border-style: solid;
-    background-color: "$Color-ScrollBars";
-}
-QScrollBar::handle:vertical{min-height: 25px;}
-QScrollBar::handle:horizontal{min-width: 14px;}
-QScrollBar::add-line{width: 0px; height: 0px;}
-QScrollBar::sub-line{width: 0px; height: 0px;}
-QScrollBar::add-page{background-color: transparent;}
-QScrollBar::sub-page{background-color: transparent;}
 /* -------------------------------------------------------------------------------------------------------------------*/
+
+QMainWindow     { background-color:"$Color-Main"; }
+
+QMainWindow::separator { width: 1px; background-color: "$Color-SeparatorLine"; }
 
 
 /* Menu bar --------------------------------------------------------------------------------------------------------*/
@@ -103,9 +54,103 @@ QMenuBar::item:selected {
 }
 
 
+/* Document area and its tab bar -------------------------------------------------------------------------------------*/
+
+#documentArea::pane {
+    background-color: "$Color-Main";
+    border-style: solid;
+}
+
+#documentAreaTabBar::tab {
+    padding-left: 25px;
+    padding-right: 8px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: "$Color-Main";
+}
+
+#documentAreaTabBar::tab:selected {
+    background: "$Color-SelectedTab";
+	border-bottom-color: "$Color-SelectedTabLine";
+    border-bottom-width: 2px;
+    border-style: solid;
+}
+#documentAreaTabBar::close-button {
+    image: url(:/icons/sadeep_created_close-tab.png);
+    subcontrol-position: right;
+}
+
+
 /* -------------------------------------------------------------------------------------------------------------------*/
 
-/* Status bar --------------------------------------------------------------------------------------------------------*/
+#mainTabBarCornerWidget {
+    border-style:solid;
+}
+
+#toolbarSeparator {
+    background-color: "$Color-ToolbarSeparator";
+}
+
+#toolbarButton {
+    padding: 8px;
+    background-color: transparent;
+}
+
+#toolbarButton:hover {
+    background-color: "$Color-ButtonHoverMask";
+}
+
+#toolbarButton:pressed {
+    background-color: "$Color-ButtonPressedMask";
+}
+
+#toolbarButton:checked {
+    background-color: "$Color-ButtonCheckedMask";
+    }
+
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+QComboBox {
+    margin-top:2px;
+    margin-left:6px;
+    background-color: transparent;
+    border: 0px solid transparent;
+}
+QComboBox QAbstractItemView {
+    background-color: "$Color-Main";
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------------*/
+
+QSplitter::handle {
+    background: "$Color-Main";
+}
+
+
+/* Scroll bars ----------------------------------------------------------------------------------------------------*/
+
+QScrollArea     { border-style: solid; border-width: 0px;   background: transparent;}
+QScrollBar:vertical     {border: none; background-color: transparent; width : 9px;margin: 0px 0 0px 0;}
+QScrollBar:horizontal   {border: none; background-color: transparent; height: 9px;margin: 0px 0 0px 0;}
+QScrollBar::handle{
+    border-radius: 0px;
+    border-color: "$Color-ScrollBars";
+    border-width: 0px;
+    border-style: solid;
+    background-color: "$Color-ScrollBars";
+}
+QScrollBar::handle:vertical{min-height: 25px;}
+QScrollBar::handle:horizontal{min-width: 14px;}
+QScrollBar::add-line{width: 0px; height: 0px;}
+QScrollBar::sub-line{width: 0px; height: 0px;}
+QScrollBar::add-page{background-color: transparent;}
+QScrollBar::sub-page{background-color: transparent;}
+
+
+* Status bar --------------------------------------------------------------------------------------------------------*/
+
 QStatusBar {
     border-top-color: "$Color-SeparatorLine";
     border-top-width: 0px;
@@ -125,10 +170,10 @@ QStatusBar::item {
     padding-right: 20px;
     color: "$Color-StatusBarText";
 }
-/* -------------------------------------------------------------------------------------------------------------------*/
 
 
 /* Dockable ----------------------------------------------------------------------------------------------------------*/
+
 #dockableHeader {
     color: "$Color-DockableHeaderText";
     background-color: "$Color-DockableHeader";
@@ -149,9 +194,10 @@ QStatusBar::item {
     padding-top: 5px;
     background-color:"$Color-Secondary";
 }
-/* -------------------------------------------------------------------------------------------------------------------*/
+
 
 /* ObjectTreeWidget --------------------------------------------------------------------------------------------------------*/
+
 ObjectTreeWidget::item {
     padding-right:5px;
     margin-right:2px;
@@ -162,9 +208,10 @@ ObjectTreeWidget::item:hover {
 ObjectTreeWidget::item:selected {
     background: "$Color-SelectedObjectRow";
 }
-/* -------------------------------------------------------------------------------------------------------------------*/
+
 
 /* Properties --------------------------------------------------------------------------------------------------------*/
+
 #properties-nameWidget {
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
     padding-right: 4px;
@@ -226,40 +273,6 @@ ObjectTreeWidget::item:selected {
     border: 1px solid "$Color-SeparatorLine";
 }
 
-/* -------------------------------------------------------------------------------------------------------------------*/
-
-/* Document area and its tab bar -------------------------------------------------------------------------------------*/
-#documentArea::pane {
-    background-color: "$Color-Main";
-    border-style: solid;
-}
-
-#documentAreaTabBar::tab {
-    padding-left: 25px;
-    padding-right: 8px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    background: "$Color-Main";
-}
-
-#documentAreaTabBar::tab:selected {
-    background: "$Color-SelectedTab";
-	border-bottom-color: "$Color-SelectedTabLine";
-    border-bottom-width: 2px;
-    border-style: solid;
-}
-#documentAreaTabBar::close-button {
-    image: url(:/icons/sadeep_created_close-tab.png);
-    subcontrol-position: right;
-}
-
-#mainTabBarCornerWidget {
-    border-style:solid;
-}
-
-#toolbarSeparator {
-    background-color: "$Color-ToolbarSeparator";
-}
 
 /* -------------------------------------------------------------------------------------------------------------------*/
 
@@ -272,6 +285,8 @@ ObjectTreeWidget::item:selected {
     background: "$Color-Secondary";
 }
 
+
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 #helpWidget  {
     color: "$Color-LightText";
