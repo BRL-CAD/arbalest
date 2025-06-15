@@ -136,6 +136,12 @@ QComboBox::drop-down {
     background: "$Color-ToolBarButton";
 }
 
+QComboBox::down-arrow {
+    image: url(:/icons/baseline_down_arrow_black_48dp.png);
+    width: 12px;
+    height: 12px;
+}
+
 QComboBox QAbstractItemView {
     border: 1px solid "$Color-ToolBarSeparator";
     background: "$Color-ToolBarButton";
