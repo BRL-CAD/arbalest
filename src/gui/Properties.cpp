@@ -36,7 +36,7 @@ void Properties::bindObject(const int objectId) {
     current = new TypeSpecificProperties(document, object, objectId);
     typeSpecificPropertiesArea->addWidget(current);
 
-    QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font><font color='$Color-DefaultFontColor'> ( "
-                        "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font><font color='$Color-DefaultFontColor'> )";
+    QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font> ("
+                       "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font>)";
     nameWidget->setText(Globals::theme->process(nameType));
 }

@@ -40,7 +40,7 @@ Viewport::Viewport(Document*  document)
     axesRenderer = new AxesRenderer();
     gridRenderer = new GridRenderer(this);
 
-    bgColor = Globals::theme->getColor("$Color-GraphicsView");
+    bgColor = Globals::theme->getColor("$Color-Viewport");
     displayManager->setBGColor(bgColor.redF(),bgColor.greenF(),bgColor.blueF());
 
     makeCurrent();

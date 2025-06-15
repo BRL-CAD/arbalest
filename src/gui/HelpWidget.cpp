@@ -17,21 +17,21 @@ HelpWidget::HelpWidget(QWidget* parent) : QVBoxWidget(parent) {
     QVBoxWidget *container = new QVBoxWidget();
 
     QString
-    text = "New File  <a href=\"Ctrl+N\" style=\"color:$Color-ColorText\">Ctrl+N</a> <br><br>"
-           "Open File  <a href=\"Ctrl+O\" style=\"color:$Color-ColorText\">Ctrl+O</a> <br><br>"
-           "Save File  <font style=\"color:$Color-ColorText\">Ctrl+S</font> <br><br>"
+    text = "New File  <a href=\"Ctrl+N\" style=\"color:$Color-HelpTextColored\">Ctrl+N</a> <br><br>"
+           "Open File  <a href=\"Ctrl+O\" style=\"color:$Color-HelpTextColored\">Ctrl+O</a> <br><br>"
+           "Save File  <font style=\"color:$Color-HelpTextColored\">Ctrl+S</font> <br><br>"
            "<br><br>"
-           "Drag with <font style=\"color:$Color-ColorText\">Mouse Left Button</font> to rotate viewport camera<br><br>"
-           "Drag with <font style=\"color:$Color-ColorText\">Mouse Right Button</font> to move viewport camera<br><br>"
-           "Zoom In / Zoom Out <font style=\"color:$Color-ColorText\">Mouse Wheel</font> <br><br>"
+           "Drag with <font style=\"color:$Color-HelpTextColored\">Mouse Left Button</font> to rotate viewport camera<br><br>"
+           "Drag with <font style=\"color:$Color-HelpTextColored\">Mouse Right Button</font> to move viewport camera<br><br>"
+           "Zoom In / Zoom Out <font style=\"color:$Color-HelpTextColored\">Mouse Wheel</font> <br><br>"
            "<br><br>"
-           "Focus camera on selected item <font style=\"color:$Color-ColorText\">F</font> <br><br>"
-           "Focus camera on all visible items <font style=\"color:$Color-ColorText\">Ctrl+F</font> <br><br>"
-           "Use keys <font style=\"color:$Color-ColorText\">1 2 3 4</font> to switch between viewports<br><br>"
-           "Open all viewports in quad view <font style=\"color:$Color-ColorText\">5</font> <br><br>"
-           "Toggle grid on / off <font style=\"color:$Color-ColorText\">G</font> <br><br>"
+           "Focus camera on selected item <font style=\"color:$Color-HelpTextColored\">F</font> <br><br>"
+           "Focus camera on all visible items <font style=\"color:$Color-HelpTextColored\">Ctrl+F</font> <br><br>"
+           "Use keys <font style=\"color:$Color-HelpTextColored\">1 2 3 4</font> to switch between viewports<br><br>"
+           "Open all viewports in quad view <font style=\"color:$Color-HelpTextColored\">5</font> <br><br>"
+           "Toggle grid on / off <font style=\"color:$Color-HelpTextColored\">G</font> <br><br>"
            "<br><br>"
-           "Raytrace current viewport <font style=\"color:$Color-ColorText\">Ctrl+R</font> <br><br>"
+           "Raytrace current viewport <font style=\"color:$Color-HelpTextColored\">Ctrl+R</font> <br><br>"
 
            ;
 
