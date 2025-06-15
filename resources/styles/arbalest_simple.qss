@@ -131,7 +131,13 @@ QComboBox {
     color: "$Color-ToolBarText";
 }
 
+QComboBox::drop-down {
+    border: 0;
+    background: "$Color-ToolBarButton";
+}
+
 QComboBox QAbstractItemView {
+    border: 1px solid "$Color-ToolBarSeparator";
     background: "$Color-ToolBarButton";
     color: "$Color-ToolBarText";
 }
