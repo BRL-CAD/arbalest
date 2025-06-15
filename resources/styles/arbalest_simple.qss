@@ -26,6 +26,7 @@ QMainWindow {background: "$Color-MainWindow";}
 
 QMainWindow::separator {
     width: 1px;
+    height: 1px;
     background: "$Color-MainWindowSeparator";
 }
 
