@@ -6,11 +6,6 @@ QWidget {
     color: "$Color-DefaultFontColor";
 }
 
-QInputDialog, QMessageBox{
-    color: "$Color-DefaultFontColor";
-    background: "$Color-Main";
-}
-
 
 /* ---------- MainWindow ---------- */
 
@@ -305,4 +300,12 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
     background: "$Color-Help";
     color: "$Color-HelpText";
     font-size: 11pt;
+}
+
+
+/* ---------- Message box & input dialog ---------- */
+
+QInputDialog, QMessageBox {
+    background: "$Color-MessageBox";
+    color: "$Color-MessageBoxText";
 }

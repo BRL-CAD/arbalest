@@ -1,5 +1,7 @@
 $Color-MainWindow: #f2f2f2;
 $Color-MainWindowSeparator: #cdcdcd;
+$Color-MessageBox: #f2f2f2;
+$Color-MessageBoxText: #555555;
 $Color-Menu: #68217A;
 $Color-Menu-Selected: #ffffff;
 $Color-MenuText: #ffffff;
