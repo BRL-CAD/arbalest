@@ -215,8 +215,6 @@ QStatusBar::item {border: 0;}
     color: "$Color-DockableHeaderText";
 }
 
-#dockableHeader:focus {background: blue;}
-
 #dockableContent {
     border-style: solid;
     padding-top: 5px;
