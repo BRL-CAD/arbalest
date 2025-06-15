@@ -22,38 +22,38 @@ QLabel {
 
 /* ---------- MainWindow ---------- */
 
-QMainWindow {background: "$Color-Main";}
+QMainWindow {background: "$Color-MainWindow";}
 
 QMainWindow::separator {
     width: 1px;
-    background: "$Color-SeparatorLine";
+    background: "$Color-MainWindowSeparator";
 }
 
 
 /* ---------- Menu bar ---------- */
 
-QMenu {background: "$Color-Menu";}
+QMenu {background: "$Color-MenuItem";}
 
 QMenu::item {
-    background: "$Color-Menu";
-	color: "$Color-MenuText";
+    background: "$Color-MenuItem";
+	color: "$Color-MenuItemText";
 }
 
 QMenu::item:selected {
-    color: "$Color-Menu";
-	background: "$Color-MenuText";
+    background: "$Color-MenuItem-Selected";
+    color: "$Color-MenuItemText-Selected";
 }
 
 QMenuBar {
     min-height: 24px;
 	border: 0;
-	background:"$Color-MainMenu";
-	color:"$Color-MainMenuText";
+	background: "$Color-Menu";
+	color: "$Color-MenuText";
 }
 
 QMenuBar::item:selected {
-	background:"$Color-MainMenuText";
-    color: "$Color-MainMenu";
+    background: "$Color-Menu-Selected";
+    color: "$Color-MenuText-Selected";
 }
 
 
@@ -61,18 +61,20 @@ QMenuBar::item:selected {
 
 #documentArea::pane {
     border-style: solid;
-    background: "$Color-Main";
+    background: "$Color-MainWindow";
 }
 
 #documentAreaTabBar::tab {
     padding: 5px 8px 5px 25px;
-    background: "$Color-Main";
+    background: "$Color-TabBar";
+    color: "$Color-TabBarText";
 }
 
 #documentAreaTabBar::tab:selected {
-	border: 0 solid "$Color-SelectedTabLine";
+    border: 0 solid "$Color-TabBarBottomBorder-Selected";
     border-bottom-width: 2px;
-    background: "$Color-SelectedTab";
+    background: "$Color-TabBar-Selected";
+    color: "$Color-TabBarText-Selected";
 }
 
 #documentAreaTabBar::close-button {
@@ -85,18 +87,19 @@ QMenuBar::item:selected {
 
 #mainTabBarCornerWidget {border-style: solid;}
 
-#toolbarSeparator {background: "$Color-ToolbarSeparator";}
+#toolbarSeparator {background: "$Color-ToolBarSeparator";}
 
 #toolbarButton {
     padding: 8px;
-    background: transparent;
+    background: "$Color-ToolBarButton";
+    color: "$Color-ToolBarText";
 }
 
-#toolbarButton:hover {background: "$Color-ButtonHoverMask";}
+#toolbarButton:hover {background: "$Color-ToolBarButton-Hover";}
 
-#toolbarButton:pressed {background: "$Color-ButtonPressedMask";}
+#toolbarButton:pressed {background: "$Color-ToolBarButton-Pressed";}
 
-#toolbarButton:checked {background: "$Color-ButtonCheckedMask";}
+#toolbarButton:checked {background: "$Color-ToolBarButton-Checked";}
 
 
 /* ---------- Combobox ---------- */
@@ -104,22 +107,26 @@ QMenuBar::item:selected {
 QComboBox {
     margin: 2px 0 0 6px;
     border: 0;
-    background: transparent;
+    background: "$Color-ToolBarButton";
+    color: "$Color-ToolBarText";
 }
 
-QComboBox QAbstractItemView {background: "$Color-Main";}
+QComboBox QAbstractItemView {
+    background: "$Color-ToolBarButton";
+    color: "$Color-ToolBarText";
+}
 
 
 /* ---------- Viewport ---------- */
 
-QSplitter::handle {background: "$Color-Main";}
+QSplitter::handle {background: "$Color-ViewportSeparator";}
 
 
 /* ---------- Scroll bars ---------- */
 
 QScrollArea {
     border: 0;
-    background: transparent;
+    background: "$Color-ScrollArea";
 }
 
 QScrollBar:vertical, QScrollBar:horizontal {
@@ -135,7 +142,7 @@ QScrollBar:horizontal {height: 9px;}
 QScrollBar::handle {
     border: 0;
     border-radius: 0;
-    background: "$Color-ScrollBars";
+    background: "$Color-ScrollBar";
 }
 
 QScrollBar::handle:vertical {min-height: 25px;}
@@ -181,20 +188,25 @@ QStatusBar::item {border: 0;}
 #dockableContent {
     border-style: solid;
     padding-top: 5px;
-    background: "$Color-Secondary";
+    background: "$Color-Dockable";
 }
 
 
 /* ---------- ObjectTreeWidget ---------- */
 
+ObjectTreeWidget {
+    color: "$Color-ObjectRowArrow";
+}
+
 ObjectTreeWidget::item {
     margin-right: 2px;
     padding-right: 5px;
+    background: "$Color-Dockable";
 }
 
-ObjectTreeWidget::item:hover {background: "$Color-HoverObjectRow";}
+ObjectTreeWidget::item:hover {background: "$Color-ObjectRowText-Hover";}
 
-ObjectTreeWidget::item:selected {background: "$Color-SelectedObjectRow";}
+ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
 
 
 /* ---------- Properties ---------- */
@@ -202,22 +214,27 @@ ObjectTreeWidget::item:selected {background: "$Color-SelectedObjectRow";}
 #properties-nameWidget {
     padding: 0 4px;
     font-family:  "Arial Black", "Arial Bold", "Gadget", "sans-serif";
+    color: "$Color-PropertiesChildrenText";
 }
 
 #properties-fullPathWidget{
     padding: 0 0 4px 4px;
+    color: "$Color-PropertiesPathText";
 }
 
 #properties-collapsibleTitle{
     margin-top: 6px;
     padding: 0;
-	background: transparent;
+    background: "$Color-Dockable";
+    color: "$Color-PropertiesChildrenButtonText";
     font-weight: bold;
     text-align: left;
 }
+
 #properties-collapsibleCollapseIcon {
     padding: 4px 0 0 8px;
-    background: transparent;
+    background: "$Color-Dockable";
+    color: "$Color-PropertiesChildrenButtonArrow";
     font-size: 6pt;
     font-weight: bold;
     text-align: left;
@@ -228,39 +245,40 @@ ObjectTreeWidget::item:selected {background: "$Color-SelectedObjectRow";}
 }
 
 #cell, #cellLastInRow {
-    border: 1px solid "$Color-DataCellBordersAndHeader";
+    border: 1px solid "$Color-DataCellBorder";
     border-right-width: 0;
     padding: 0 6px;
     background: "$Color-Cell";
+    color: "$Color-CellText";
 }
 
 #cellLastInRow {border-right-width: 1px;}
 
 #dataRowHeader {
     padding-top: 1.3px 0;
-    background: "$Color-DataCellBordersAndHeader";
+    background: "$Color-DataCellHeader";
+    color: "$Color-DataCellHeaderText";
     font-size: 7pt;
     font-weight: bold;
-    color: white;
 }
 
-#colorButton {border: 1px solid "$Color-SeparatorLine";}
+#colorButton {border: 1px solid "$Color-ColorButtonBorder";}
 
 
 /* ---------- About window ---------- */
 
-#aboutWindow {background: "$Color-Secondary";}
+#aboutWindow {background: "$Color-About";}
 
 #aboutText {
-    background: "$Color-Secondary";
-    color: black;
+    background: "$Color-About";
+    color: "$Color-AboutText";
 }
 
 
 /* ---------- Help window ---------- */
 
 #helpWidget {
-    background: "$Color-HelpWidget";
-    color: "$Color-LightText";
+    background: "$Color-Help";
+    color: "$Color-HelpText";
     font-size: 11pt;
 }
