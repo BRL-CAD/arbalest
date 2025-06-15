@@ -78,13 +78,9 @@ QToolButton {
     color: "$Color-TabBarText";
 }
 
-QToolButton:hover {
-    background: "$Color-TabBarMoveButton-Hover";
-}
+QToolButton:hover {background: "$Color-TabBarMoveButton-Hover";}
 
-QToolButton:pressed {
-    background: "$Color-TabBarMoveButton-Pressed";
-}
+QToolButton:pressed {background: "$Color-TabBarMoveButton-Pressed";}
 
 
 /* ---------- Toolbar buttons ---------- */
@@ -234,12 +230,12 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
     color: "$Color-PropertiesChildrenText";
 }
 
-#properties-fullPathWidget{
+#properties-fullPathWidget {
     padding: 0 0 4px 4px;
     color: "$Color-PropertiesPathText";
 }
 
-#properties-collapsibleTitle{
+#properties-collapsibleTitle {
     margin-top: 6px;
     border: 0;
     padding: 0;
@@ -262,6 +258,8 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
 #properties-TypeSpecificProperties {
     padding: 0 12px 12px 12px;
 }
+
+#properties-TypeSpecificProperties QLabel {color: "$Color-PropertiesChildrenText";}
 
 #cell, #cellLastInRow {
     border: 1px solid "$Color-DataCellBorder";
