@@ -1,41 +1,65 @@
-$Color-Main                             : #3b3b3b;  // Used as the main background color. Used in main window,  etc.
-$Color-MainMenu                         : #3b3b3b;  //
-$Color-Menu                             : #3b3b3b;  //
-$Color-MenuText                         : #ffffff;  //
-$Color-MainMenuText                     : #ffffff;  //
-$Color-Secondary                        : #4e4e4e;  // Used as the background color for some main UI components like objects tree
-$Color-SeparatorLine                    : #2f2f2f;  // Used as the border color for some widgets (menu bar, status bar, and dock widgets)
-$Color-DockableHeader                   : #5f5f5f; // Titlebar color of all dockable widgets like objects tree
-$Color-DockableHeaderText               : #d6d6d6; // Titlebar text color of all dockable widgets like objects tree
-$Color-DefaultFontColor                 : #e5e5e5;  // Text color for all text in status bar
-$Color-SelectedTab                      : #5f5f5f;  // Background color for selected tab of the file switcher tab bar
-$Color-SelectedTabLine                  : #38afcb;  // Bottom border color for selected tab of the file switcher tab bar
-$Color-PropertiesObjectNameText         : #ff3567;  // Name text color of selected object in properties.
-$Color-PropertiesObjectTypeText         : #3ed9ff; // Title of CollapsibleWidget
-$Color-SelectedObjectRow                : #646464;  // Background of the object selected in the object tree.
-$Color-HoverObjectRow                   : #00000000;  // Background of the object selected in the object tree.
-$Color-LightText                        : #eaeaea;  // for non important text
-$Color-ScrollBars                       : #626262;
-$Color-DataCellBordersAndHeader         : #30374a;
-$Color-ButtonHoverMask                  : #22000000;  // Alpha mask
-$Color-ButtonPressedMask                : #11000000;  // Alpha mask
-$Color-StatusBar                        : #0a5466;
-$Color-StatusBarText                    : #ffffff;
-$Color-ObjectTreeWidgetItemText         : #000000;
-$Color-ToolbarSeparator                 : #151515;
-$Color-HelpWidget                       : #797979;
-$Color-GraphicsView                     : #797979;
-$Color-ColorText                        : #9fc1ff;  // for colorful text
-$Color-IconFile                         : #7b14e3;
-$Color-IconView                         : #25a2c1;
-$Color-IconRaytrace                     : #d61d32;
-$Color-IconSelectObject                 : #000000;
-$Color-Cell                             : #606060;
-$Color-ButtonCheckedMask                : #ccb6a3;  // For checkable button
+$Color-MainWindow: #3b3b3b;
+$Color-MainWindowSeparator: #2f2f2f;
+$Color-MessageBox: #3b3b3b;
+$Color-MessageBoxText: #e5e5e5;
+$Color-Menu: #3b3b3b;
+$Color-Menu-Selected: #e5e5e5;
+$Color-MenuText: #e5e5e5;
+$Color-MenuText-Selected: #3b3b3b;
+$Color-MenuItem: #3b3b3b;
+$Color-MenuItem-Selected: #e5e5e5;
+$Color-MenuItemText: #e5e5e5;
+$Color-MenuItemText-Selected: #3b3b3b;
+$Color-TabBar: #3b3b3b;
+$Color-TabBar-Selected: #5f5f5f;
+$Color-TabBarBottomBorder-Selected: #38afcb;
+$Color-TabBarText: #e5e5e5;
+$Color-TabBarText-Selected: #f5f5f5;
+$Color-TabBarMoveButton: #3b3b3b;
+$Color-TabBarMoveButton-Hover: #5f5f5f;
+$Color-TabBarMoveButton-Pressed: #848484;
+$Color-TabBarMoveButtonBorder: #2f2f2f;
+$Color-ToolBarText: #e5e5e5;
+$Color-ToolBarSeparator: #151515;
+$Color-ToolBarButton: #3b3b3b;
+$Color-ToolBarButton-Hover: #5f5f5f;
+$Color-ToolBarButton-Pressed: #848484;
+$Color-ToolBarButton-Checked: #ccb6a3;
+$Color-Viewport: #797979;
+$Color-ViewportSeparator: #3b3b3b;
+$Color-ScrollArea: #3b3b3b;
+$Color-ScrollBar: #626262;
+$Color-StatusBar: #0a5466;
+$Color-StatusBarText: #e5e5e5;
+$Color-DockableHeader: #5f5f5f;
+$Color-DockableHeaderText: #d6d6d6;
+$Color-Dockable: #4e4e4e;
+$Color-ObjectRowArrow: #e5e5e5;
+$Color-ObjectRowText-Hover: #646464;
+$Color-ObjectRowText-Selected: #848484;
+$Color-PropertiesChildrenButtonText: #e5e5e5;
+$Color-PropertiesChildrenButtonArrow: #e5e5e5;
+$Color-PropertiesPathText: #e5e5e5;
+$Color-PropertiesChildrenText: #e5e5e5;
+$Color-Cell: #606060;
+$Color-CellText: #e5e5e5;
+$Color-DataCellHeader: #30374a;
+$Color-DataCellHeaderText: #e5e5e5;
+$Color-DataCellBorder: #30374a;
+$Color-ColorButtonText: #e5e5e5;
+$Color-ColorButtonBorder: #2f2f2f;
+$Color-About: #3b3b3b;
+$Color-AboutText: #e5e5e5;
+$Color-Help: #797979;
+$Color-HelpText: #e5e5e5;
+$Color-HelpTextColored: #9fc1ff;
 
-$Color-FullyVisibleObjectText           : #1491e9;  // object tree item text.
-$Color-SomeChildrenVisibleObjectText    : #26d7c0;  // object tree item text.
-$Color-InvisibleObjectText              : #dedede;  // object tree item text.
+$Color-PropertiesObjectNameText: #ff3567;
+$Color-PropertiesObjectTypeText: #3ed9ff;
+$Color-FullyVisibleObjectText: #1491e9;
+$Color-SomeChildrenVisibleObjectText: #26d7c0;
+$Color-InvisibleObjectText: #dedede;
+
 $Color-NewActIcon: #586fad;
 $Color-NewActIcon-Active: #3b3b3b;
 $Color-OpenActIcon: #586fad;

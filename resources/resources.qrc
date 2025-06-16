@@ -22,5 +22,6 @@
         <file>icons/saveAsIcon.png</file>
         <file>icons/quitIcon.png</file>
         <file>icons/select_object.png</file>
+        <file>icons/baseline_down_arrow_black_48dp.png</file>
     </qresource>
 </RCC>
