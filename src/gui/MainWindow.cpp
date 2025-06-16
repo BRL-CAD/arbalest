@@ -480,6 +480,7 @@ void MainWindow::prepareUi() {
     themeAct[0] = new QAction(tr("Arbalest Light"), this);
     themeAct[0]->setCheckable(true);
     connect(themeAct[0], &QAction::triggered, this, [this](){
+        delete Globals::theme;
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 0);
         this->loadTheme();
@@ -498,6 +499,7 @@ void MainWindow::prepareUi() {
     themeAct[1] = new QAction(tr("Arbalest Dark"), this);
     themeAct[1]->setCheckable(true);
     connect(themeAct[1], &QAction::triggered, this, [this](){
+        delete Globals::theme;
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 1);
         this->loadTheme();
