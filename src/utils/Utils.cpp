@@ -119,7 +119,7 @@ void setLeafMatrix(BRLCAD::Combination::TreeNode& node, const QString& name, dou
 QImage coloredIcon(QString path, QString colorKey){
     QColor color;
     if (colorKey == ""){
-        color = Globals::theme->getColor("$Color-Icon");
+        color = QColor(0, 0, 0);
     }else {
         color = Globals::theme->getColor(colorKey);
     }
