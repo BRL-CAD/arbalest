@@ -40,8 +40,7 @@ Viewport::Viewport(Document*  document)
     axesRenderer = new AxesRenderer();
     gridRenderer = new GridRenderer(this);
 
-    bgColor = Globals::theme->getColor("$Color-Viewport");
-    displayManager->setBGColor(bgColor.redF(),bgColor.greenF(),bgColor.blueF());
+    setBGColor();
 
     makeCurrent();
     update();
@@ -126,4 +125,9 @@ void Viewport::keyPressEvent( QKeyEvent *k ) {
 
 OrthographicCamera *Viewport::getCamera() const {
     return camera;
+}
+
+void Viewport::setBGColor() {
+    bgColor = Globals::theme->getColor("$Color-Viewport");
+    displayManager->setBGColor(bgColor.redF(),bgColor.greenF(),bgColor.blueF());
 }

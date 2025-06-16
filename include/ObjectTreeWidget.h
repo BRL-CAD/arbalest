@@ -45,6 +45,7 @@ public:
     const QHash<int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
     void build(int objectId, QTreeWidgetItem* parent = nullptr);
     void select(QString selected);
+    void setTextColor();
 private:
     Document* document;
     QHash <int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;

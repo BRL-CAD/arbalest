@@ -55,6 +55,7 @@ public:
     const Document* getDocument() const;
     OrthographicCamera* getCamera() const;
     ViewportManager* getViewportManager() const;
+    void setBGColor();
 
     bool gridEnabled = false;
     bool moveCameraEnabled = false;

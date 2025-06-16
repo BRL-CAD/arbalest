@@ -35,10 +35,7 @@
 
 ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : document(document)
 {
-
-    colorFullVisible = QColor(Globals::theme->process("$Color-FullyVisibleObjectText"));
-    colorSomeChildrenVisible = QColor(Globals::theme->process("$Color-SomeChildrenVisibleObjectText"));
-    colorInvisible = QColor(Globals::theme->process("$Color-InvisibleObjectText"));
+    setTextColor();
 
 	this->setHeaderHidden(true);
 	setColumnCount(1);
@@ -148,4 +145,10 @@ void ObjectTreeWidget::refreshItemTextColors() {
     if (currentItem()){
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+currentItem()->foreground(0).color().name()+";}");
     }
+}
+
+void ObjectTreeWidget::setTextColor() {
+    colorFullVisible = QColor(Globals::theme->process("$Color-FullyVisibleObjectText"));
+    colorSomeChildrenVisible = QColor(Globals::theme->process("$Color-SomeChildrenVisibleObjectText"));
+    colorInvisible = QColor(Globals::theme->process("$Color-InvisibleObjectText"));
 }

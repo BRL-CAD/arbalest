@@ -482,7 +482,15 @@ void MainWindow::prepareUi() {
     connect(themeAct[0], &QAction::triggered, this, [this](){
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 0);
-        QMessageBox::information(this, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
+        this->loadTheme();
+        this->setIcons();
+        for (auto& [key, value]: documents) {
+            for (Viewport *display : value->getViewportGrid()->getViewports())
+                display->setBGColor();
+            value->getObjectTreeWidget()->setTextColor();
+            value->getObjectTreeWidget()->refreshItemTextColors();
+            value->getProperties()->rewriteObjectNameAndType();
+        }
     });
     selectThemeActGroup->addAction(themeAct[0]);
     selectThemeAct->addAction(themeAct[0]);
@@ -492,8 +500,15 @@ void MainWindow::prepareUi() {
     connect(themeAct[1], &QAction::triggered, this, [this](){
         QSettings settings("BRLCAD", "arbalest");
         settings.setValue("themeIndex", 1);
-        QMessageBox::information(this, "Application Restart Needed", "Selected theme will be set after next restart of Arbalest", QMessageBox::Ok);
-
+        this->loadTheme();
+        this->setIcons();
+        for (auto& [key, value]: documents) {
+            for (Viewport *display : value->getViewportGrid()->getViewports())
+                display->setBGColor();
+            value->getObjectTreeWidget()->setTextColor();
+            value->getObjectTreeWidget()->refreshItemTextColors();
+            value->getProperties()->rewriteObjectNameAndType();
+        }
     });
     selectThemeActGroup->addAction(themeAct[1]);
     selectThemeAct->addAction(themeAct[1]);
