@@ -40,3 +40,10 @@ void Properties::bindObject(const int objectId) {
                        "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font>)";
     nameWidget->setText(Globals::theme->process(nameType));
 }
+
+void Properties::rewriteObjectNameAndType() {
+    if (name == "") return;  // To avoid rewriting if no object is selected (meaning that properties is empty)
+    QString nameType = "<font color='$Color-PropertiesObjectNameText'>"+name+"</font> ("
+                       "<font color='$Color-PropertiesObjectTypeText'>"+breakStringAtCaps(objectType)+"</font>)";
+    nameWidget->setText(Globals::theme->process(nameType));
+}
