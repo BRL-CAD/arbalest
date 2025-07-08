@@ -11,7 +11,6 @@ find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
         "${CMAKE_CURRENT_SOURCE_DIR}"
-        "src/windows"
         "include"
         ${BRLCAD_MOOSE_INCLUDE_DIR})
 
