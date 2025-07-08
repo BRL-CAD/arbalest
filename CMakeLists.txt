@@ -6,13 +6,16 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 cmake_policy(SET CMP0072 NEW)
 
 find_package(BRLCAD_MOOSE REQUIRED)
+find_package(BRLCAD REQUIRED)
 find_package(Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(arbalest_Include_Dirs
         "${CMAKE_CURRENT_SOURCE_DIR}"
         "include"
-        ${BRLCAD_MOOSE_INCLUDE_DIR})
+        ${BRLCAD_MOOSE_INCLUDE_DIR}
+        ${BRLCAD_INCLUDE_DIR}
+        ${BRLCAD_OPENNURBS_INCLUDE_DIR})
 
 set(arbalest_Sources
         src/gui/MainWindow.cpp
@@ -50,6 +53,7 @@ set(arbalest_Sources
 
 set(arbalest_Link_Libraries
         ${BRLCAD_MOOSE_LIBRARY}
+        ${BRLCAD_QTCAD_LIBRARY}
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets
@@ -57,14 +61,14 @@ set(arbalest_Link_Libraries
         OpenGL::GL)
 
 # Meta-Object Compiling
-file(GLOB arbalest_HEADERS_TO_MOC ./include/*)
+file(GLOB arbalest_HEADERS_TO_MOC "./include/*")
 qt6_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest OPTIONS --no-notes)
 
 # Resource Compiling
 qt6_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
 include_directories(${arbalest_Include_Dirs})
-link_directories(${BRLCAD_MOOSE_LIBRARY_DIR})
+link_directories(${BRLCAD_MOOSE_LIBRARY_DIR} ${BRLCAD_LIBRARY_DIR})
 
 IF(MSVC)
     ADD_DEFINITIONS("-DBRLCAD_MOOSE_EXPORT=__declspec(dllimport)")
