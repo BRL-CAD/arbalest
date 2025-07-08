@@ -64,7 +64,7 @@ qt6_wrap_cpp(arbalest_PROCESSED_MOCS  ${arbalest_HEADERS_TO_MOC} TARGET arbalest
 qt6_add_resources(arbalest_PROCESSED_RCC resources/resources.qrc)
 
 include_directories(${arbalest_Include_Dirs})
-link_directories(${BRLCAD_MOSE_LIBRARY_DIR})
+link_directories(${BRLCAD_MOOSE_LIBRARY_DIR})
 
 IF(MSVC)
     ADD_DEFINITIONS("-DBRLCAD_MOOSE_EXPORT=__declspec(dllimport)")
