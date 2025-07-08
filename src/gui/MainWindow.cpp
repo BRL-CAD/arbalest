@@ -30,6 +30,7 @@
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
 #include "SelectMouseAction.h"
+#include <qtcad/QgConsole.h>
 
 using namespace BRLCAD;
 using namespace std;
@@ -732,6 +733,10 @@ void MainWindow::setIcons() {
 }
 
 void MainWindow::prepareDockables(){
+    // makes BottomLeftCorner/BottomRightCorner occupied by LeftDockable/RightDockable respectively
+    this->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+    this->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
     // Object tree
     objectTreeWidgetDockable = new Dockable("Objects", this, false, 200);
     addDockWidget(Qt::LeftDockWidgetArea, objectTreeWidgetDockable);
@@ -740,6 +745,13 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
+    // Console
+    consoleDockable = new Dockable("Command Line Interface", this, true);
+    addDockWidget(Qt::BottomDockWidgetArea, consoleDockable);
+    console = new QgConsole(consoleDockable);
+    console->prompt("$ ");
+    console->setObjectName("console");
+    consoleDockable->setContent(console);
 
 
     // Toolbox
