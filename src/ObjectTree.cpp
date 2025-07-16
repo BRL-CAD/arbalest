@@ -30,6 +30,41 @@
 #include "ObjectTree.h"
 #include <QStandardItemModel>
 #include "brlcad/Database/MemoryDatabase.h"
+#include <QString>
+#include <brlcad/CommandString/CommandString.h>
+
+
+// ---------- OBJECT TREE ITEM DATA ----------
+
+void ObjectTreeItemData::addChild(ObjectTreeItem *itemParent) {
+    children.append(itemParent);
+}
+
+void ObjectTreeItemData::addOp(BRLCAD::Combination::ConstTreeNode::Operator op) {
+    childrenOps.append(op);
+}
+
+
+// ---------- OBJECT TREE ITEM ----------
+
+ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data) : data(data) {
+    // When I create an item, I also need to give the item to the item data that it references 
+    getItemsWithSameData().append(this);
+}
+
+bool ObjectTreeItem::isRoot(void) {
+    if (getParent() == nullptr)
+        return true;
+    return false;
+}
+
+QString ObjectTreeItem::getPath(void) {
+    if (isRoot())
+        return "";
+    return getParent()->getPath() + "/" + getName();
+
+}
+
 
 
 void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
@@ -77,6 +112,7 @@ void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::
 	}
 }
 
+// ---------- OBJECT TREE ----------
 
 int ObjectTree::addTopObject(QString name) {
 	QVector<int>* childrenNames = &getChildren()[0];

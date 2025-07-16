@@ -10,9 +10,165 @@
 #include <brlcad/Database/Combination.h>
 #include <functional>
 #include <set>
+#include <QString>
+#include <brlcad/CommandString/CommandString.h>
 
 
 #include "Utils.h"
+
+
+/* Generates and stores the object tree of a database.
+
+   The ObjectTree is composed of:
+       - a QHash where a (unique) name is mapped to a ObjectTreeItemData
+       - a QSet of all ObjectTreeItem that make up the tree
+    
+   ObjectTreeItemData is the representation of an unique object in the database. As such, for example,
+   all occurrences in a database of "obj":
+       - have the same name,
+       - have the same children (which are treated with the same operations),
+       - are all either drawable or not,
+       - are all either alive or dead (killed).
+
+   ObjectTreeItem is the representation of an object in the database tree. As such, for example, all
+   occurrences in a database of "obj":
+       - might have a different parent, for example:
+             comb1.c
+                |_____ u obj
+               ...
+             comb2.c
+                |_____ u obj
+       - might have a different visibility state:
+
+   So with the use of these 2 classes, we can represent what is SHARED across ALL occurrences in a database
+   of an object through ObjectTreeItemData, and what is UNIQUE FOR EACH occurrences in a database of an
+   object through ObjectTreeItem */
+
+class ObjectTreeItem;
+
+
+class ObjectTreeItemData {
+public:
+    ObjectTreeItemData(QString name) : name(name) {};
+
+    void addChild(ObjectTreeItem *itemParent);
+
+    void addOp(BRLCAD::Combination::ConstTreeNode::Operator op);
+
+    // Setters
+    void setIsAliveFlag(bool isAlive) {
+        isAliveFlag = isAlive;
+    }
+
+    void setIsDrawableFlag(bool isDrawable) {
+        isDrawableFlag = isDrawable;
+    }
+
+    // Getters
+    QVector<ObjectTreeItem *>& getItemsWithThisData(void) {
+        return itemsWithThisData;
+    }
+
+    QString getName(void) {
+        return name;
+    }
+
+    QVector<ObjectTreeItem *>& getChildren(void) {
+        return children;
+    }
+
+    QVector<BRLCAD::Combination::ConstTreeNode::Operator>& getChildrenOps(void) {
+        return childrenOps;
+    }
+
+    bool isAlive(void) {
+        return isAliveFlag;
+    }
+
+    bool isDrawable(void) {
+        return isDrawableFlag;
+    }
+
+private:
+    QVector<ObjectTreeItem *> itemsWithThisData;
+
+    QString name;
+    QVector<ObjectTreeItem *> children;
+    QVector<BRLCAD::Combination::ConstTreeNode::Operator> childrenOps;
+
+    bool isAliveFlag = false;
+    bool isDrawableFlag = false;
+};
+
+
+class ObjectTreeItem {
+public:
+    enum VisibilityState{
+        Invisible,
+        SomeChildrenVisible,
+        FullyVisible,
+    };
+
+    ObjectTreeItem(ObjectTreeItemData* data);
+
+    bool isRoot(void);
+
+    QString getPath(void);
+
+    // Getters
+    ObjectTreeItem *getParent(void) {
+        return parent;
+    }
+
+    ObjectTreeItemData *getData(void) {
+        return data;
+    }
+
+    VisibilityState getVisibilityState(void) {
+        return visibilityState;
+    }
+
+    // Getters for data
+    QVector<ObjectTreeItem *>& getItemsWithSameData(void) {
+        return data->getItemsWithThisData();
+    }
+
+    QString getName(void) {
+        return data->getName();
+    }
+
+    QVector<ObjectTreeItem *>& getChildren(void) {
+        return data->getChildren();
+    }
+
+    QVector<BRLCAD::Combination::ConstTreeNode::Operator>& getChildrenOps(void) {
+        return data->getChildrenOps();
+    }
+
+    bool isAlive(void) {
+        return data->isAlive();
+    }
+
+    bool isDrawable(void) {
+        return data->isDrawable();
+    }
+
+    // Setters
+    void setParent(ObjectTreeItem *itemParent) {
+        parent = itemParent;
+    }
+
+    void setVisibilityState(VisibilityState newVisibilityState) {
+        visibilityState = newVisibilityState;
+    }
+
+private:
+    ObjectTreeItemData *data;
+
+    ObjectTreeItem *parent;
+
+    VisibilityState visibilityState = Invisible;
+};
 
 /*
  * Generates and stores the object tree by reading a database.
@@ -127,6 +283,13 @@ private:
 
 
     QHash<int, VisibilityState>             objectIdVisibilityStateMap;
+
+
+    // All items (except rootItem)
+    QHash<unsigned int, ObjectTreeItem*> items;
+
+    // Unique name to item data
+    QHash<QString, ObjectTreeItemData*> itemsData;
 };
 
 #endif
