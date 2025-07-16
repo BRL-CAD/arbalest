@@ -65,6 +65,69 @@ QString ObjectTreeItem::getPath(void) {
 
 }
 
+// ---------- OBJECT TREE CALLBACK ----------
+
+/* Warning: nObjectTreeCallback() (used to construct the object tree of a database) assumes that in a database
+   all occurrences of a certain object (with a unique name) must have all the same children and operations.
+   This means that, if there was a situation where the same combination appears more times in the database with
+   different children/operations, for example:
+        "combination.c"                            "combination.c"
+               |__________ u "sph1.s"                     |__________ u "sph3.s"
+               |__________ - "sph2.s"                     |__________ u "sph2.s"
+   then the tree would be constructed so that the "combination.c" item data will have the children and operations
+   equal to that of the first occurrence that it meets while creating the tree */
+void ObjectTree::nObjectTreeCallback::operator()(const BRLCAD::Object& object) {
+    currItem = objectTree->getItems()[objectTree->nLastAllocatedId];
+
+    // If the object is a combination, iter through its children, else it means that it is drawable
+	if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
+		traverseSubTree(combination->Tree());
+	} else
+        currItem->getData()->setIsDrawableFlag(true);
+
+    /* The fact that I am in this function in the first place means that the item data exists.
+       If a combination refers to objects that are not present in the database, then the callback
+       function would not be called by Database::Get().
+       The isAlive property is set to true AFTER iterating through all children of the current item data
+       (if it is a combination), so that, if during the tree construction I meet this same item data, I
+       will know that it is already fully constructed and that his children are already assigned */
+    currItem->getData()->setIsAliveFlag(true);
+}
+
+
+void ObjectTree::nObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
+	switch (node.Operation()) {
+        // If Union/Intersection/Subtraction/ExclusiveOr, access children
+        case BRLCAD::Combination::ConstTreeNode::Union:
+        case BRLCAD::Combination::ConstTreeNode::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+            currOp = node.Operation();
+            traverseSubTree(node.LeftOperand());
+            currOp = node.Operation();
+            traverseSubTree(node.RightOperand());
+            break;
+
+        // If Not, access child
+        case BRLCAD::Combination::ConstTreeNode::Not:
+            currOp = node.Operation();
+            traverseSubTree(node.Operand());
+            break;
+        
+        // If Leaf, then create a new item
+        case BRLCAD::Combination::ConstTreeNode::Leaf:
+            ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
+            newItem->setParent(currItem);
+            // If the current item is "not alive", it means the it is not fully created yet, so addChild and addOp
+            if (!currItem->isAlive()) {
+                currItem->getData()->addChild(newItem);
+                currItem->getData()->addOp(currOp);
+            }
+            // Get new object and loop through his children with nCallback
+            nObjectTreeCallback nCallback(objectTree);
+            objectTree->getDatabase()->Get(node.Name(), nCallback);
+	}
+}
 
 
 void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
@@ -134,14 +197,51 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 	nameMap[0] = "";
 	colorMap[0] = {1,1,1,false };
 
-
 	while (it.Good()) {
 		QString childName = it.Name();
 		addTopObject(childName);
 		++it;
 	}
 
+    // Create parser for GED commands
+    parser = new BRLCAD::CommandString(*database);
+
+    // Create root item and root item data (root has parent nullptr and empty name)
+    ObjectTreeItem *rootItem = addNewObjectTreeItem(QString(""));
+    rootItem->getData()->setIsAliveFlag(true);
+    rootItem->setParent(nullptr);
+    --nLastAllocatedId;
+
+    // Loop through all top level objects
+	it = database->FirstTopObject();
+    while (it.Good()) {
+        QString childName = it.Name();
+        ObjectTreeItem *topLevelItem = addNewObjectTreeItem(childName);
+        topLevelItem->setParent(rootItem);
+        rootItem->getData()->addChild(topLevelItem);
+        // Get top level object and loop through his children with nCallback
+        nObjectTreeCallback nCallback(this);
+        database->Get(childName.toUtf8(), nCallback);
+        ++it;
+    }
 }
+
+ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
+    // If the item name is new, it means that the item data is new, so create it. Else grab the existing one
+    ObjectTreeItemData *newItemData;
+    QHash<QString, ObjectTreeItemData*>::const_iterator it = itemsData.find(name);
+    if (it == itemsData.end()) {
+        newItemData = new ObjectTreeItemData(name);
+        itemsData.insert(name, newItemData);
+    } else
+        newItemData = it.value();
+    
+    // Then create the actual item with the grabbed item data
+    ObjectTreeItem *newItem = new ObjectTreeItem(newItemData);
+    items.insert(++nLastAllocatedId, newItem);
+    return newItem;
+}
+
 
 void ObjectTree::traverseSubTree(const int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>& callback)
 {

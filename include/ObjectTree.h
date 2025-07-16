@@ -195,13 +195,20 @@ public:
 
     int lastAllocatedId = 0;
 
+    unsigned int nLastAllocatedId = 0;
+
     void traverseSubTree(int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>&);
+    void nTraverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback);
 
     void changeVisibilityState(int objectId, bool visible);
+    void nChangeVisibilityState(ObjectTreeItem *item, bool visible);
     void buildColorMap(int rootObjectId);
     int addTopObject(QString name);
 
-        // getters
+    // Given a name, create a new item and assign its item data (if the name is new, create a new item data)
+    ObjectTreeItem *addNewObjectTreeItem(QString name);
+
+    // getters
     BRLCAD::MemoryDatabase* getDatabase() const
     {
 	    return database;
@@ -240,9 +247,32 @@ public:
     QHash<int, VisibilityState> &getObjectVisibility() {
         return objectIdVisibilityStateMap;
     }
+
+    QHash<unsigned int, ObjectTreeItem*> &getItems() {
+        return items;
+    }
+
+    QHash<QString, ObjectTreeItemData*> &getItemsData() {
+        return itemsData;
+    }
 	
 private:
     BRLCAD::MemoryDatabase* database;
+
+    BRLCAD::CommandString* parser;
+
+    class nObjectTreeCallback {
+    public:
+        nObjectTreeCallback(ObjectTree* objectTree) : objectTree(objectTree) {}
+        void operator()(const BRLCAD::Object& object);
+
+    private:
+        void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node);
+
+        ObjectTree* objectTree = nullptr;
+        ObjectTreeItem* currItem = nullptr;
+        BRLCAD::Combination::ConstTreeNode::Operator currOp = BRLCAD::Combination::ConstTreeNode::Null;
+    };
 	
 	// this class is used for traversing the MemoryDatabase and produce the tree
     class ObjectTreeCallback {
