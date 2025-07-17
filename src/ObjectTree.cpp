@@ -327,6 +327,64 @@ void ObjectTree::changeVisibilityState(int objectId, bool visible) {
     }
 }
 
+
+void ObjectTree::nChangeVisibilityState(unsigned int objectId, bool visible) {
+    ObjectTreeItem *item = getItems()[objectId];
+    qDebug() << item->getPath();
+    if (visible) {
+        item->setVisibilityState(ObjectTreeItem::FullyVisible);
+
+        // First we go up in the tree and make the necessary changes
+        ObjectTreeItem *parentItem = item->getParent();
+        while (!parentItem->isRoot()) {
+            // If all children of the ancestor are FullyVisible after the change ancestor's visibility should be FullyVisible
+            parentItem->setVisibilityState(ObjectTreeItem::FullyVisible);
+
+            // But if there is a not FullyVisible child it should be SomeChildrenVisible
+            for (ObjectTreeItem *parentItemChild : parentItem->getChildren()){
+                if (parentItemChild->getVisibilityState() != ObjectTreeItem::FullyVisible) {
+                    parentItem->setVisibilityState(ObjectTreeItem::SomeChildrenVisible);
+                    break;
+                }
+            }
+            parentItem = parentItem->getParent();
+        }
+
+        // Then we go down in the tree and make all children FullyVisible
+        nTraverseSubTree(item, false, [](ObjectTreeItem *item) {
+            item->setVisibilityState(ObjectTreeItem::FullyVisible);
+            return true;
+        });
+    } else {
+        item->setVisibilityState(ObjectTreeItem::Invisible);
+
+        // First we go up in the tree and make the necessary changes
+        ObjectTreeItem *parentItem = item->getParent();
+        while (!parentItem->isRoot()) {
+            // If all children of the ancestor are Invisible after the change ancestor's visibility should be Invisible
+            parentItem->setVisibilityState(ObjectTreeItem::Invisible);
+
+            // But if there is a not Invisible child it should be SomeChildrenVisible
+            for (ObjectTreeItem *parentItemChild : parentItem->getChildren()){
+                if (parentItemChild->getVisibilityState() != ObjectTreeItem::Invisible) {
+                    parentItem->setVisibilityState(ObjectTreeItem::SomeChildrenVisible);
+                    break;
+                }
+            }
+            parentItem = parentItem->getParent();
+        }
+
+        // Then we go down in the tree and make all children Invisible
+        nTraverseSubTree(item, false, [](ObjectTreeItem *item) {
+            item->setVisibilityState(ObjectTreeItem::Invisible);
+            return true;
+        });
+    }
+
+    printTree();
+}
+
+
 void ObjectTree::buildColorMap(int rootObjectId) {
 	traverseSubTree(rootObjectId,true,[&](int objectId){
 		if(objectId==0)return true;

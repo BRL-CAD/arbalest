@@ -51,14 +51,14 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
         // Qt changes foreground color for selected items. We don't want it changed
         setStyleSheet("ObjectTreeWidget::item:selected { color: "+current->foreground(0).color().name()+";}");
     });
-    connect(visibilityButton, &ObjectTreeRowButtons::visibilityButtonClicked, this, [this](int objectId){
-        switch(this->document->getObjectTree()->getObjectVisibility()[objectId]){
+    connect(visibilityButton, &ObjectTreeRowButtons::visibilityButtonClicked, this, [this](unsigned int objectId){
+        switch(this->document->getObjectTree()->getItems()[objectId]->getVisibilityState()){
             case ObjectTree::Invisible:
             case ObjectTree::SomeChildrenVisible:
-                this->document->getObjectTree()->changeVisibilityState(objectId, true);
+                this->document->getObjectTree()->nChangeVisibilityState(objectId, true);
                 break;
             case ObjectTree::FullyVisible:
-                this->document->getObjectTree()->changeVisibilityState(objectId, false);
+                this->document->getObjectTree()->nChangeVisibilityState(objectId, false);
                 break;
         }
         this->document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -66,7 +66,7 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
         refreshItemTextColors();
     });
 
-    connect(visibilityButton, &ObjectTreeRowButtons::centerButtonClicked, this, [this](int objectId){
+    connect(visibilityButton, &ObjectTreeRowButtons::centerButtonClicked, this, [this](unsigned int objectId){
         this->document->getViewport()->getCamera()->centerView(objectId);
         this->document->getViewportGrid()->forceRerenderAllViewports();
         refreshItemTextColors();
@@ -74,26 +74,25 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
     refreshItemTextColors();
 }
 
-void ObjectTreeWidget::build(const int objectId, QTreeWidgetItem* parent)
-{
-	QTreeWidgetItem* item = nullptr;
+void ObjectTreeWidget::build(const unsigned int objectId, QTreeWidgetItem* parent) {
+    ObjectTreeItem *objTreeItem = document->getObjectTree()->getItems()[objectId];
+
+	QTreeWidgetItem* item;
 
 	if (objectId != 0) {
         item = new QTreeWidgetItem();
         objectIdTreeWidgetItemMap[objectId] = item;
-        item->setText(0,document->getObjectTree()->getNameMap()[objectId]);
+        item->setText(0, objTreeItem->getName());
         item->setData(0, Qt::UserRole, objectId);
 
-        if (parent != nullptr) {
+        if (parent != nullptr)
             parent->addChild(item);
-        } else {
+        else
             addTopLevelItem(item);
-        }
     }
 
-	for (int childObjectId : document->getObjectTree()->getChildren()[objectId])
-	{
-		build(childObjectId, objectId ? item: nullptr);
+	for (ObjectTreeItem *objTreeItemChild : objTreeItem->getChildren()) {
+		build(objTreeItemChild->getObjectId(), (objectId != 0) ? item: nullptr);
 	}
 }
 
@@ -104,7 +103,7 @@ void ObjectTreeWidget::select(QString selected) {
     int regionNameIndex = 1;
     int mapSize = document->getObjectTree()->getFullPathMap().size();
 
-    for (int objectId = 1; objectId < mapSize; ++objectId) {
+    for (unsigned int objectId = 1; objectId < mapSize; ++objectId) {
         if (document->getObjectTree()->getFullPathMap()[objectId] == path) {
             if (regionNameIndex == regionNameSize - 1) {
                 objectIdTreeWidgetItemMap[objectId]->setSelected(true);
@@ -119,14 +118,13 @@ void ObjectTreeWidget::select(QString selected) {
 }
 
 
-const QHash<int, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetItemMap() const {
+const QHash<unsigned int, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetItemMap() const {
     return objectIdTreeWidgetItemMap;
 }
 
 void ObjectTreeWidget::refreshItemTextColors() {
-    document->getObjectTree()->traverseSubTree(0,false,[this](int objectId){
-        switch (document->getObjectTree()->getObjectVisibility()[objectId]){
-
+    document->getObjectTree()->nTraverseSubTree(0, false, [this](unsigned int objectId) {
+        switch (document->getObjectTree()->getItems()[objectId]->getVisibilityState()) {
             case ObjectTree::Invisible:
                 objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorInvisible));
                 break;
