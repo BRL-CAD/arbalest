@@ -36,20 +36,20 @@
 
 // ---------- OBJECT TREE ITEM DATA ----------
 
-void ObjectTreeItemData::addChild(ObjectTreeItem *itemParent) {
-    children.append(itemParent);
-}
-
 void ObjectTreeItemData::addOp(BRLCAD::Combination::ConstTreeNode::Operator op) {
-    childrenOps.append(op);
+    getChildrenOps().append(op);
 }
 
 
 // ---------- OBJECT TREE ITEM ----------
 
-ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data) : data(data) {
+ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data, unsigned int uniqueObjectId) : data(data), uniqueObjectId(uniqueObjectId) {
     // When I create an item, I also need to give the item to the item data that it references 
     getItemsWithSameData().append(this);
+}
+
+void ObjectTreeItem::addChild(ObjectTreeItem *itemParent) {
+    getChildren().append(itemParent);
 }
 
 bool ObjectTreeItem::isRoot(void) {
@@ -118,11 +118,10 @@ void ObjectTree::nObjectTreeCallback::traverseSubTree(const BRLCAD::Combination:
         case BRLCAD::Combination::ConstTreeNode::Leaf:
             ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
             newItem->setParent(currItem);
-            // If the current item is "not alive", it means the it is not fully created yet, so addChild and addOp
-            if (!currItem->isAlive()) {
-                currItem->getData()->addChild(newItem);
+            currItem->addChild(newItem);
+            // If the current item data is "not alive", it means the it is not fully created yet, so addOp
+            if (!currItem->isAlive())
                 currItem->getData()->addOp(currOp);
-            }
             // Get new object and loop through his children with nCallback
             nObjectTreeCallback nCallback(objectTree);
             objectTree->getDatabase()->Get(node.Name(), nCallback);
@@ -206,11 +205,11 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
     // Create parser for GED commands
     parser = new BRLCAD::CommandString(*database);
 
-    // Create root item and root item data (root has parent nullptr and empty name)
+    // Create root item and root item data (parent = nullptr, empty name, objectId = 0)
     QString rootName = ""; 
     ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
     itemsData.insert(rootName, rootItemData);
-    ObjectTreeItem *rootItem = new ObjectTreeItem(rootItemData);
+    ObjectTreeItem *rootItem = new ObjectTreeItem(rootItemData, 0);
     items.insert(0, rootItem);
     rootItem->getData()->setIsAliveFlag(true);
     rootItem->setParent(nullptr);
@@ -221,7 +220,7 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
         QString childName = it.Name();
         ObjectTreeItem *topLevelItem = addNewObjectTreeItem(childName);
         topLevelItem->setParent(rootItem);
-        rootItem->getData()->addChild(topLevelItem);
+        rootItem->addChild(topLevelItem);
         // Get top level object and loop through his children with nCallback
         nObjectTreeCallback nCallback(this);
         database->Get(childName.toUtf8(), nCallback);
@@ -240,8 +239,8 @@ ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
         newItemData = it.value();
     
     // Then create the actual item with the grabbed item data
-    ObjectTreeItem *newItem = new ObjectTreeItem(newItemData);
-    items.insert(++nLastAllocatedId, newItem);
+    ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++nLastAllocatedId);
+    items.insert(nLastAllocatedId, newItem);
     return newItem;
 }
 
@@ -252,6 +251,26 @@ void ObjectTree::traverseSubTree(const int rootOfSubTreeId, bool traverseRoot, c
 	for (int objectId : objectIdChildrenObjectIdsMap[rootOfSubTreeId]) {
 		if (!callback(objectId)) continue;
 		if (objectIdChildrenObjectIdsMap.contains(rootOfSubTreeId)) traverseSubTree(objectId, false, callback);
+	}
+}
+
+
+void ObjectTree::nTraverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback) {
+	if (traverseRoot) callback(rootOfSubTree);
+	for (ObjectTreeItem *item : rootOfSubTree->getChildren()) {
+		if (!callback(item)) continue;
+		if (!item->getChildren().empty()) nTraverseSubTree(item, false, callback);
+	}
+}
+
+
+void ObjectTree::nTraverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback) {
+	ObjectTreeItem *item = getItems()[rootOfSubTreeId];
+    if (traverseRoot) callback(item->getObjectId());
+	for (ObjectTreeItem *itemChild : item->getChildren()) {
+        const unsigned childId = itemChild->getObjectId();
+		if (!callback(childId)) continue;
+		if (!itemChild->getChildren().empty()) nTraverseSubTree(childId, false, callback);
 	}
 }
 

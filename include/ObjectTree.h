@@ -26,12 +26,21 @@
    ObjectTreeItemData is the representation of an unique object in the database. As such, for example,
    all occurrences in a database of "obj":
        - have the same name,
-       - have the same children (which are treated with the same operations),
-       - are all either drawable or not,
+       - have the same children operations (all children items of an item with this item data will be
+         treated with the same operations),
+       - are all either drawable or not (solid or combination),
        - are all either alive or dead (killed).
 
    ObjectTreeItem is the representation of an object in the database tree. As such, for example, all
    occurrences in a database of "obj":
+       - will have different children items (which share the same item data), for example:
+             obj
+              |_____ u sph1.s  (different item from the other sph1.s, but same item data)
+              |_____ - sph2.s  (different item from the other sph2.s, but same item data)
+             ...
+             obj
+              |_____ u sph1.s  (different item from the other sph1.s, but same item data)
+              |_____ - sph2.s  (different item from the other sph2.s, but same item data)
        - might have a different parent, for example:
              comb1.c
                 |_____ u obj
@@ -50,8 +59,6 @@ class ObjectTreeItem;
 class ObjectTreeItemData {
 public:
     ObjectTreeItemData(QString name) : name(name) {};
-
-    void addChild(ObjectTreeItem *itemParent);
 
     void addOp(BRLCAD::Combination::ConstTreeNode::Operator op);
 
@@ -73,10 +80,6 @@ public:
         return name;
     }
 
-    QVector<ObjectTreeItem *>& getChildren(void) {
-        return children;
-    }
-
     QVector<BRLCAD::Combination::ConstTreeNode::Operator>& getChildrenOps(void) {
         return childrenOps;
     }
@@ -93,7 +96,6 @@ private:
     QVector<ObjectTreeItem *> itemsWithThisData;
 
     QString name;
-    QVector<ObjectTreeItem *> children;
     QVector<BRLCAD::Combination::ConstTreeNode::Operator> childrenOps;
 
     bool isAliveFlag = false;
@@ -109,19 +111,29 @@ public:
         FullyVisible,
     };
 
-    ObjectTreeItem(ObjectTreeItemData* data);
+    ObjectTreeItem(ObjectTreeItemData* data, unsigned int uniqueObjectId);
+
+    void addChild(ObjectTreeItem *itemParent);
 
     bool isRoot(void);
 
     QString getPath(void);
 
     // Getters
+    ObjectTreeItemData *getData(void) {
+        return data;
+    }
+
+    unsigned int getObjectId(void) {
+        return uniqueObjectId;
+    }
+
     ObjectTreeItem *getParent(void) {
         return parent;
     }
 
-    ObjectTreeItemData *getData(void) {
-        return data;
+    QVector<ObjectTreeItem *>& getChildren(void) {
+        return children;
     }
 
     VisibilityState getVisibilityState(void) {
@@ -135,10 +147,6 @@ public:
 
     QString getName(void) {
         return data->getName();
-    }
-
-    QVector<ObjectTreeItem *>& getChildren(void) {
-        return data->getChildren();
     }
 
     QVector<BRLCAD::Combination::ConstTreeNode::Operator>& getChildrenOps(void) {
@@ -164,8 +172,10 @@ public:
 
 private:
     ObjectTreeItemData *data;
+    unsigned int uniqueObjectId;
 
     ObjectTreeItem *parent;
+    QVector<ObjectTreeItem *> children;
 
     VisibilityState visibilityState = Invisible;
 };
@@ -199,9 +209,10 @@ public:
 
     void traverseSubTree(int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>&);
     void nTraverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback);
+    void nTraverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback);
 
     void changeVisibilityState(int objectId, bool visible);
-    void nChangeVisibilityState(ObjectTreeItem *item, bool visible);
+    void nChangeVisibilityState(unsigned int objectId, bool visible);
     void buildColorMap(int rootObjectId);
     int addTopObject(QString name);
 
