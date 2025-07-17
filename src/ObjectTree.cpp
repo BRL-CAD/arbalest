@@ -60,7 +60,7 @@ bool ObjectTreeItem::isRoot(void) {
 
 QString ObjectTreeItem::getPath(void) {
     if (isRoot())
-        return "";
+        return QString("");
     return getParent()->getPath() + "/" + getName();
 
 }
@@ -207,10 +207,13 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
     parser = new BRLCAD::CommandString(*database);
 
     // Create root item and root item data (root has parent nullptr and empty name)
-    ObjectTreeItem *rootItem = addNewObjectTreeItem(QString(""));
+    QString rootName = ""; 
+    ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
+    itemsData.insert(rootName, rootItemData);
+    ObjectTreeItem *rootItem = new ObjectTreeItem(rootItemData);
+    items.insert(0, rootItem);
     rootItem->getData()->setIsAliveFlag(true);
     rootItem->setParent(nullptr);
-    --nLastAllocatedId;
 
     // Loop through all top level objects
 	it = database->FirstTopObject();
