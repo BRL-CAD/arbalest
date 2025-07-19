@@ -47,7 +47,8 @@ set(arbalest_Sources
         src/viewport/GridRenderer.cpp
         src/viewport/MouseAction.cpp
         src/viewport/MoveCameraMouseAction.cpp
-        src/viewport/SelectMouseAction.cpp)
+        src/viewport/SelectMouseAction.cpp
+        src/gui/Console.cpp)
 
 set(arbalest_Link_Libraries
         ${BRLCAD_MOOSE_LIBRARY}
