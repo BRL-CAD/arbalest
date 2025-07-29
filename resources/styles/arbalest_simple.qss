@@ -288,6 +288,19 @@ ObjectTreeWidget::item:selected {background: "$Color-ObjectRowText-Selected";}
 #colorButton {border: 1px solid "$Color-ColorButtonBorder";}
 
 
+/* ---------- Console ---------- */
+
+#console {
+    background: "$Color-Console";
+    color: "$Color-ConsoleText";
+}
+
+#consoleCompleter {
+    background: "$Color-ConsoleCompleter";
+    color: "$Color-ConsoleCompleterText";
+}
+
+
 /* ---------- About window ---------- */
 
 #aboutWindow {background: "$Color-About";}
