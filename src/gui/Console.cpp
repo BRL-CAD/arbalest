@@ -246,18 +246,19 @@ void Console::executeCommand(void) {
         c.insertText("\n");
         prompt();
         return;
-    } else if (!parser) {
+    }
+
+    if (!parser) {
         // If no document is open, don't execute anything
         c.insertText(QString("\nNo active document, can't execute!\n"));
         prompt();
         return;
     }
-    // Update command history
-    commandHistory.push_back("");
-    commandPosition = commandHistory.size() - 1;
-    c.insertText("\n");
 
+    if (handlingMultiInputs)
+        command = multiInputBuffer + command;
 
+    // Create command argv
     QRegularExpression regExForSpaces("(\\ )");  // RegEx for ' '
     QStringList commandComponents = command.split(regExForSpaces);
     QByteArrayList argvByteArray;
@@ -271,12 +272,40 @@ void Console::executeCommand(void) {
         }
     }
 
-    if (!parser->Parse(argv))
+    // Execute command
+    BRLCAD::CommandString::ParseErrorType errorType;
+    int ret = parser->Parse(argv, errorType);
+
+    // If command is multi input handle it differently
+    if (!ret && errorType == BRLCAD::CommandString::ParseErrorType::More) {
+        handlingMultiInputs = true;
+        multiInputBuffer = command + QString(" ");
+        c.insertText(QString("\n"));
+        c.insertText(QString(parser->Results()));
+        parser->ClearResults();
+        interactivePosition = documentEnd();
+        ensureCursorVisible();
+        return;
+    }
+    if (handlingMultiInputs) {
+        multiInputBuffer.clear();
+        commandBuffer() = command;
+        handlingMultiInputs = false;
+    }
+
+    // Update command history
+    commandHistory.push_back("");
+    commandPosition = commandHistory.size() - 1;
+
+    // Print result
+    c.insertText(QString("\n"));
+    if (!ret)
         c.insertText(QString("PARSER ERROR:\n"));
     c.insertText(QString(parser->Results()));
     parser->ClearResults();
-    c.insertText("\n");
 
+    // Prepare for next command
+    c.insertText("\n");
     interactivePosition = documentEnd();
     prompt();
 }

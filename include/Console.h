@@ -71,6 +71,12 @@ private:
     // Split slashes
     bool splitSlash = false;
 
+    // Currently handling a multi inputs command
+    bool handlingMultiInputs = false;
+
+    // Command buffer for multi input command
+    QString multiInputBuffer = "";
+
     // A custom completer
     ConsoleCompleter *completer = nullptr;
 
