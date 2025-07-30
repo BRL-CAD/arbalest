@@ -442,8 +442,6 @@ void Console::keyPressEvent(QKeyEvent* e) {
             updateCompleterIfVisible();
             break;
     }
-
-    qDebug() << commandBuffer();
 }
 
 
@@ -456,7 +454,6 @@ void Console::focusOutEvent(QFocusEvent *e) {
 
 
 void Console::insertCompletion(const QString& completion) {
-    qDebug() << "final: " << completion;
     QTextCursor c = textCursor();
     c.setPosition(c.position(), QTextCursor::MoveAnchor);
     QString text = c.selectedText();

@@ -59,8 +59,6 @@ public:
     QString commandFromHistory(size_t index);
 
 private:
-    //void prepareUi();
-
     // Beginning of the area of interactive input, outside which changes can't be made to the text edit contents
     int interactivePosition;
 
