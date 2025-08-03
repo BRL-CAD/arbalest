@@ -12,7 +12,6 @@
 #include <QMenuBar>
 #include <QComboBox>
 #include "MouseAction.h"
-#include "Console.h"
 
 
 class Document;
@@ -42,7 +41,6 @@ private:
     QTabWidget *documentArea;
     QLabel *statusBarPathLabel;
     MouseAction *m_mouseAction;
-    Console *console;
     // ---------- Menu bar ----------
     QMenuBar *menuTitleBar;
     // File menu

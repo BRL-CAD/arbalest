@@ -34,14 +34,10 @@ class Console : public QPlainTextEdit {
     Q_OBJECT
 
 public:
-    Console(QWidget *parent = nullptr);
+    Console(Document *document, QWidget *parent = nullptr);
     ~Console();
 
     // Setters
-
-    // Set the active document (pass nullptr if no document is opened)
-    void setActiveDocument(Document *currDocument);
-
     void setSplitSlash(bool newSplitSlash) {
         splitSlash = newSplitSlash;
     }

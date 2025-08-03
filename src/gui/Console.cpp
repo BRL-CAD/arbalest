@@ -125,13 +125,15 @@ public:
 
 /* ---------- Console QWidget ---------- */
 
-Console::Console(QWidget *parent) : QPlainTextEdit(parent), interactivePosition(documentEnd()) {
+Console::Console(Document *document, QWidget *parent) : activeDocument(document), QPlainTextEdit(parent), interactivePosition(documentEnd()) {
     setObjectName("console");
 
     setAcceptDrops(false);
     setTabChangesFocus(false);
     setUndoRedoEnabled(false);
     setMaximumBlockCount(10000);
+
+    parser = new BRLCAD::CommandString(*getActiveDocument()->getObjectTree()->getDatabase());
 
     commandHistory.append("");
     commandPosition = 0;
@@ -147,20 +149,6 @@ Console::Console(QWidget *parent) : QPlainTextEdit(parent), interactivePosition(
 Console::~Console(void) {
     if (parser)
         delete parser;
-}
-
-    
-void Console::setActiveDocument(Document *currDocument) {
-    // Delete parser if it exists
-    if (parser)
-        delete parser;
-
-    // If no document is opened, set it to nullptr, and create parser accordingly
-    activeDocument = currDocument;
-    if (!activeDocument)
-        parser = nullptr;
-    else
-        parser = new BRLCAD::CommandString(*activeDocument->getObjectTree()->getDatabase());
 }
 
 

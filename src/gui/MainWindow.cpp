@@ -30,7 +30,6 @@
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
 #include "SelectMouseAction.h"
-#include "Console.h"
 
 
 using namespace BRLCAD;
@@ -749,8 +748,6 @@ void MainWindow::prepareDockables(){
     // Console
     consoleDockable = new Dockable("Console", this, true);
     addDockWidget(Qt::BottomDockWidgetArea, consoleDockable);
-    console = new Console(consoleDockable);
-    consoleDockable->setContent(console);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -923,8 +920,8 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            consoleDockable->setContent(documents[activeDocumentId]->getConsole());
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
-            console->setActiveDocument(documents[activeDocumentId]);
 
             if(documents[activeDocumentId]->getViewportGrid()->inQuadViewportMode()){
                 currentViewport->setCurrentIndex(4);
@@ -938,9 +935,9 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        consoleDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
-        console->setActiveDocument(nullptr);
     }
 }
 

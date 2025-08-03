@@ -4,6 +4,7 @@
 
 #include <Document.h>
 #include<Viewport.h>
+#include "Console.h"
 #include <brlcad/Database/Torus.h>
 
 
@@ -20,6 +21,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
     modified = false;
     objectTree = new ObjectTree(database);
     properties = new Properties(*this);
+    console = new Console(this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
     displayGrid = new ViewportGrid(this);
