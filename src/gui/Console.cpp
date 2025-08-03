@@ -261,11 +261,10 @@ void Console::executeCommand(void) {
     }
 
     // Execute command
-    BRLCAD::CommandString::ParseErrorType errorType;
-    int ret = parser->Parse(argv, errorType);
+    BRLCAD::CommandString::State parserState = parser->Parse(argv);
 
     // If command is multi input handle it differently
-    if (!ret && errorType == BRLCAD::CommandString::ParseErrorType::More) {
+    if (parserState == BRLCAD::CommandString::State::Incomplete) {
         handlingMultiInputs = true;
         multiInputBuffer = command + QString(" ");
         c.insertText(QString("\n"));
@@ -287,13 +286,18 @@ void Console::executeCommand(void) {
 
     // Print result
     c.insertText(QString("\n"));
-    if (!ret)
-        c.insertText(QString("PARSER ERROR:\n"));
-    c.insertText(QString(parser->Results()));
+    if (parserState == BRLCAD::CommandString::State::NoDatabase || parserState == BRLCAD::CommandString::State::InternalError)
+        c.insertText(QString("PARSER ERROR!\n"));
+    else if (parserState == BRLCAD::CommandString::State::Success || parserState == BRLCAD::CommandString::State::Incomplete)
+        c.insertText(QString(parser->Results()));
+    else if (parserState == BRLCAD::CommandString::State::SyntaxError || parserState == BRLCAD::CommandString::State::UnknownCommand) {
+        c.insertText(QString(parser->Results()));
+        c.insertText(QString("\n"));
+    }
+
     parser->ClearResults();
 
     // Prepare for next command
-    c.insertText("\n");
     interactivePosition = documentEnd();
     prompt();
 }
