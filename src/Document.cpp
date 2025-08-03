@@ -53,9 +53,15 @@ bool Document::isModified() {
     return modified;
 }
 
-bool Document::Add(const BRLCAD::Object& object) {
+bool Document::AddObject(const BRLCAD::Object& object, const bool isVisible) {
     modified = true;
     return database->Add(object);
+    unsigned int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
+    getObjectTree()->nChangeVisibilityState(objectId, isVisible);
+    getObjectTreeWidget()->build(objectId);
+    getObjectTreeWidget()->refreshItemTextColors();
+    getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    getViewportGrid()->forceRerenderAllViewports();
 }
 
 bool Document::Save(const char* fileName) {

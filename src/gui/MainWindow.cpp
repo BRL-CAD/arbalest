@@ -127,198 +127,121 @@ void MainWindow::prepareUi() {
     QAction* createArb8Act = new QAction(tr("Arb8"), this);
     connect(createArb8Act, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Arb8 * object = new BRLCAD::Arb8();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createArb8Act);
 
     QAction* createConeAct = new QAction(tr("Cone"), this);
     connect(createConeAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Cone * object = new BRLCAD::Cone();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createConeAct);
 
     QAction* createEllipsoidAct = new QAction(tr("Ellipsoid"), this);
     connect(createEllipsoidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Ellipsoid * object = new BRLCAD::Ellipsoid();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createEllipsoidAct);
 
     QAction* createEllipticalTorusAct = new QAction(tr("Elliptical Torus"), this);
     connect(createEllipticalTorusAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::EllipticalTorus * object = new BRLCAD::EllipticalTorus();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createEllipticalTorusAct);
 
     QAction* createHalfspaceAct = new QAction(tr("Halfspace"), this);
     connect(createHalfspaceAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Halfspace * object = new BRLCAD::Halfspace();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createHalfspaceAct);
 
     QAction* createHyperbolicCylinderAct = new QAction(tr("Hyperbolic Cylinder"), this);
     connect(createHyperbolicCylinderAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::HyperbolicCylinder * object = new BRLCAD::HyperbolicCylinder();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createHyperbolicCylinderAct);
 
     QAction* createHyperboloidAct = new QAction(tr("Hyperboloid"), this);
     connect(createHyperboloidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Hyperboloid * object = new BRLCAD::Hyperboloid();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createHyperboloidAct);
 
     QAction* createParabolicCylinderAct = new QAction(tr("Parabolic Cylinder"), this);
     connect(createParabolicCylinderAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::ParabolicCylinder * object = new BRLCAD::ParabolicCylinder();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createParabolicCylinderAct);
 
     QAction* createParaboloidAct = new QAction(tr("Paraboloid"), this);
     connect(createParaboloidAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Paraboloid * object = new BRLCAD::Paraboloid();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createParaboloidAct);
 
     QAction* createParticleAct = new QAction(tr("Particle"), this);
     connect(createParticleAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Particle * object = new BRLCAD::Particle();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createParticleAct);
 
     QAction* createTorusAct = new QAction(tr("Torus"), this);
     connect(createTorusAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
-
         QString name;
         if (!getObjectNameFromUser(this, *documents[activeDocumentId], name)) return;
         BRLCAD::Torus * object = new BRLCAD::Torus();
         object->SetName(name.toUtf8());
-        documents[activeDocumentId]->Add(*object);
-        int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-        documents[activeDocumentId]->getObjectTree()->changeVisibilityState(objectId, true);
-        documents[activeDocumentId]->getObjectTreeWidget()->build(objectId);
-        documents[activeDocumentId]->getObjectTreeWidget()->refreshItemTextColors();
-        documents[activeDocumentId]->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-        documents[activeDocumentId]->getViewportGrid()->forceRerenderAllViewports();
+        documents[activeDocumentId]->AddObject(*object, true);
     });
     createMenu->addAction(createTorusAct);
 
