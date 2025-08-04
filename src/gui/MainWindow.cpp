@@ -43,11 +43,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     setIcons();
     prepareDockables();
 
+    Globals::mainWindow = this;
+
     documentArea->addTab(new HelpWidget(this), "Quick Start");
     if (QCoreApplication::arguments().length() > 1) {
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
-    Globals::mainWindow = this;
 }
 
 MainWindow::~MainWindow() {
