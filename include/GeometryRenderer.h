@@ -33,15 +33,15 @@ public:
     // this is called by Viewport to render a single frame
     void render() override;
     void refreshForVisibilityAndSolidChanges();
-    void clearSolidIfAvailable(int objectId);
-    void clearObject(int objectId);
+    void clearSolidIfAvailable(unsigned int objectId);
+    void clearObject(unsigned int objectId);
 
 private:
     Document* document;
     float defaultWireColor[3] = {1.0,.1,.4};
 
 
-    void drawSolid(int objectId);
+    void drawSolid(unsigned int objectId);
 
     // Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
     QHash<int, int>             objectIdViewportListIdMap;

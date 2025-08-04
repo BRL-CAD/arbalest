@@ -78,13 +78,13 @@ void ObjectTreeRowButtons::paint(QPainter *painter, const QStyleOptionViewItem &
     QStyledItemDelegate::paint(painter, option, index);
     if (option.state & QStyle::State_MouseOver) {
         switch (visibilityState){
-            case ObjectTree::Invisible:
+            case ObjectTreeItem::Invisible:
                 painter->drawImage(visibilityIconPosition(option), iconInvisible);
                 break;
-            case ObjectTree::SomeChildrenVisible:
+            case ObjectTreeItem::SomeChildrenVisible:
                 painter->drawImage(visibilityIconPosition(option), iconSomeChildrenVisible);
                 break;
-            case ObjectTree::FullyVisible:
+            case ObjectTreeItem::FullyVisible:
                 painter->drawImage(visibilityIconPosition(option), iconFullVisible);
                 break;
         }

@@ -32,6 +32,7 @@
 #include "brlcad/Database/MemoryDatabase.h"
 #include <QString>
 #include <brlcad/CommandString/CommandString.h>
+#include <QDebug>
 
 
 // ---------- OBJECT TREE ITEM DATA ----------
@@ -67,7 +68,7 @@ QString ObjectTreeItem::getPath(void) {
 
 // ---------- OBJECT TREE CALLBACK ----------
 
-/* Warning: nObjectTreeCallback() (used to construct the object tree of a database) assumes that in a database
+/* Warning: objectTreeCallback() (used to construct the object tree of a database) assumes that in a database
    all occurrences of a certain object (with a unique name) must have all the same children and operations.
    This means that, if there was a situation where the same combination appears more times in the database with
    different children/operations, for example:
@@ -76,8 +77,8 @@ QString ObjectTreeItem::getPath(void) {
                |__________ - "sph2.s"                     |__________ u "sph2.s"
    then the tree would be constructed so that the "combination.c" item data will have the children and operations
    equal to that of the first occurrence that it meets while creating the tree */
-void ObjectTree::nObjectTreeCallback::operator()(const BRLCAD::Object& object) {
-    currItem = objectTree->getItems()[objectTree->nLastAllocatedId];
+void ObjectTree::objectTreeCallback::operator()(const BRLCAD::Object& object) {
+    currItem = objectTree->getItems()[objectTree->lastAllocatedId];
 
     // If the object is a combination, iter through its children, else it means that it is drawable
     if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
@@ -101,7 +102,7 @@ void ObjectTree::nObjectTreeCallback::operator()(const BRLCAD::Object& object) {
 }
 
 
-void ObjectTree::nObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
+void ObjectTree::objectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
 	switch (node.Operation()) {
         // If Union/Intersection/Subtraction/ExclusiveOr, access children
         case BRLCAD::Combination::ConstTreeNode::Union:
@@ -128,215 +129,86 @@ void ObjectTree::nObjectTreeCallback::traverseSubTree(const BRLCAD::Combination:
             // If the current item data is "not alive", it means the it is not fully created yet, so addOp
             if (!currItem->isAlive())
                 currItem->getData()->addOp(currOp);
-            // Get new object and loop through his children with nCallback
-            nObjectTreeCallback nCallback(objectTree);
-            objectTree->getDatabase()->Get(node.Name(), nCallback);
+            // Get new object and loop through his children with callback
+            objectTreeCallback callback(objectTree);
+            objectTree->getDatabase()->Get(node.Name(), callback);
 	}
 }
 
-
-void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object)
-{
-	objectId = ++objectTree->lastAllocatedId;
-    objectTree->getChildren()[objectId] = QVector<int>();
-	objectTree->objectIdParentObjectIdMap[objectId] = parentObjectId;
-	childrenNames = &objectTree->getChildren()[objectId];
-
-	objectTree->getFullPathMap()[objectId] = currentObjectPath;
-
-
-	if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
-
-		traverseSubTree(combination->Tree());
-	}
-	else
-	{
-		objectTree->getDrawableObjectIds().insert(objectId);
-	}
-}
-
-void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) const
-{
-	switch (node.Operation())
-	{
-	case BRLCAD::Combination::ConstTreeNode::Union:
-	case BRLCAD::Combination::ConstTreeNode::Intersection:
-	case BRLCAD::Combination::ConstTreeNode::Subtraction:
-	case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-		traverseSubTree(node.LeftOperand());
-		traverseSubTree(node.RightOperand());
-		break;
-
-	case BRLCAD::Combination::ConstTreeNode::Not:
-		traverseSubTree(node.Operand());
-		break;
-
-	case BRLCAD::Combination::ConstTreeNode::Leaf:
-        objectTree->getChildren()[objectId].append(objectTree->lastAllocatedId + 1);
-		QString childName = QString(node.Name());
-		objectTree->getNameMap()[objectTree->lastAllocatedId + 1] = childName;
-		ObjectTreeCallback callback(objectTree, childName, objectId);
-		objectTree->getDatabase()->Get(node.Name(), callback);
-	}
-}
 
 // ---------- OBJECT TREE ----------
 
-int ObjectTree::addTopObject(QString name) {
-	QVector<int>* childrenNames = &getChildren()[0];
-    int topObjectId = lastAllocatedId + 1;
-	childrenNames->append(topObjectId);
-	getNameMap()[topObjectId] = name;
-	ObjectTreeCallback callback(this, name, 0);
-	database->Get(name.toUtf8(), callback);
-    buildColorMap(topObjectId);
-	return topObjectId;
-}
-
-
-ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
-	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
-
-    objectIdChildrenObjectIdsMap[0] = QVector<int>(); // objectId of root is 0
-    objectIdParentObjectIdMap[0] = -1;
-	nameMap[0] = "";
-	colorMap[0] = {1,1,1,false };
-
-	while (it.Good()) {
-		QString childName = it.Name();
-		addTopObject(childName);
-		++it;
-	}
-
-    // Create parser for GED commands
-    parser = new BRLCAD::CommandString(*database);
-
+ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database, Document *document) : database(database), document(document) {
     // Create root item and root item data (parent = nullptr, empty name, objectId = 0)
-    QString rootName = ""; 
+    QString rootName = "";
     ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
-    itemsData.insert(rootName, rootItemData);
+    getItemsData().insert(rootName, rootItemData);
     ObjectTreeItem *rootItem = new ObjectTreeItem(rootItemData, 0);
-    items.insert(0, rootItem);
+    getItems().insert(0, rootItem);
     rootItem->getData()->setIsAliveFlag(true);
     rootItem->setParent(nullptr);
 
     // Loop through all top level objects
-	it = database->FirstTopObject();
+	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
     while (it.Good()) {
-        QString childName = it.Name();
-        ObjectTreeItem *topLevelItem = addNewObjectTreeItem(childName);
-        topLevelItem->setParent(rootItem);
-        rootItem->addChild(topLevelItem);
-        // Get top level object and loop through his children with nCallback
-        nObjectTreeCallback nCallback(this);
-        database->Get(childName.toUtf8(), nCallback);
+        addTopObject(QString(it.Name()));
         ++it;
     }
+
+    printTree();
 }
 
 ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
     // If the item name is new, it means that the item data is new, so create it. Else grab the existing one
     ObjectTreeItemData *newItemData;
-    QHash<QString, ObjectTreeItemData*>::const_iterator it = itemsData.find(name);
-    if (it == itemsData.end()) {
+    QHash<QString, ObjectTreeItemData*>::const_iterator it = getItemsData().find(name);
+    if (it == getItemsData().end()) {
         newItemData = new ObjectTreeItemData(name);
-        itemsData.insert(name, newItemData);
+        getItemsData().insert(name, newItemData);
     } else
         newItemData = it.value();
     
     // Then create the actual item with the grabbed item data
-    ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++nLastAllocatedId);
-    items.insert(nLastAllocatedId, newItem);
+    ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++lastAllocatedId);
+    getItems().insert(lastAllocatedId, newItem);
     return newItem;
 }
 
 
-void ObjectTree::traverseSubTree(const int rootOfSubTreeId, bool traverseRoot, const std::function<bool(int)>& callback)
-{
-	if(traverseRoot) callback(rootOfSubTreeId);
-	for (int objectId : objectIdChildrenObjectIdsMap[rootOfSubTreeId]) {
-		if (!callback(objectId)) continue;
-		if (objectIdChildrenObjectIdsMap.contains(rootOfSubTreeId)) traverseSubTree(objectId, false, callback);
-	}
+void ObjectTree::printTree(void) {
+    // Print tree of new method
+    for (ObjectTreeItem *it : getItems()) {
+        qDebug() << it->getObjectId() << "\t->" << it->getPath() << "\n\t\tisAlive =" << it->isAlive() << ", isDrawable =" << it->isDrawable() << ", visibilityState =" << it->getVisibilityState();
+        for (ObjectTreeItem *itChild : it->getChildren())
+            qDebug() << "\t\t" << itChild->getPath();
+        for (BRLCAD::Combination::ConstTreeNode::Operator itChildOp : it->getChildrenOps())
+            qDebug() << "\t\t" << itChildOp;
+    }
 }
 
 
-void ObjectTree::nTraverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback) {
+void ObjectTree::traverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback) {
 	if (traverseRoot) callback(rootOfSubTree);
 	for (ObjectTreeItem *item : rootOfSubTree->getChildren()) {
 		if (!callback(item)) continue;
-		if (!item->getChildren().empty()) nTraverseSubTree(item, false, callback);
+		if (!item->getChildren().empty()) traverseSubTree(item, false, callback);
 	}
 }
 
 
-void ObjectTree::nTraverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback) {
+void ObjectTree::traverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback) {
 	ObjectTreeItem *item = getItems()[rootOfSubTreeId];
     if (traverseRoot) callback(item->getObjectId());
 	for (ObjectTreeItem *itemChild : item->getChildren()) {
         const unsigned childId = itemChild->getObjectId();
 		if (!callback(childId)) continue;
-		if (!itemChild->getChildren().empty()) nTraverseSubTree(childId, false, callback);
+		if (!itemChild->getChildren().empty()) traverseSubTree(childId, false, callback);
 	}
 }
 
 
-void ObjectTree::changeVisibilityState(int objectId, bool visible) {
-    if (visible){
-        objectIdVisibilityStateMap[objectId] = FullyVisible;
-
-        // First we go up in the tree and make necessary changes
-        int ancestorId = getParent()[objectId];
-        while (ancestorId != -1){
-            // if all children of the ancestor are fully visible after the change ancestor's visibility should be FullyVisible
-            objectIdVisibilityStateMap[ancestorId] = FullyVisible;
-
-            // but if there is a not fully visible child it should be SomeChildrenVisible
-            for (int ancestorChildId : getChildren()[ancestorId]){
-                if (objectIdVisibilityStateMap[ancestorChildId] != FullyVisible){
-                    objectIdVisibilityStateMap[ancestorId] = SomeChildrenVisible;
-                }
-            }
-            ancestorId = getParent()[ancestorId];
-        }
-
-        // All children of objectId should be fully visible
-        traverseSubTree(objectId, false,[this] (int childId){
-            objectIdVisibilityStateMap[childId] = FullyVisible;
-            return true;
-        });
-    }
-
-    else{
-        objectIdVisibilityStateMap[objectId] = Invisible;
-
-        // First we go up in the tree and make necessary changes
-        int ancestorId = getParent()[objectId];
-        while (ancestorId != -1){
-            // if all children of the ancestor are invisible after the change ancestor's visibility should be Invisible
-            objectIdVisibilityStateMap[ancestorId] = Invisible;
-
-            // but if there is a not fully visible child it should be SomeChildrenVisible
-            for (int ancestorChildId : getChildren()[ancestorId]){
-                if (objectIdVisibilityStateMap[ancestorChildId] != Invisible){
-                    objectIdVisibilityStateMap[ancestorId] = SomeChildrenVisible;
-                }
-            }
-            ancestorId = getParent()[ancestorId];
-        }
-
-        // All children of objectId should be invisible
-        traverseSubTree(objectId, false,[this] (int childId){
-            objectIdVisibilityStateMap[childId] = Invisible;
-            return true;
-        });
-    }
-}
-
-
-void ObjectTree::nChangeVisibilityState(unsigned int objectId, bool visible) {
+void ObjectTree::changeVisibilityState(unsigned int objectId, bool visible) {
     ObjectTreeItem *item = getItems()[objectId];
-    qDebug() << item->getPath();
     if (visible) {
         item->setVisibilityState(ObjectTreeItem::FullyVisible);
 
@@ -357,7 +229,7 @@ void ObjectTree::nChangeVisibilityState(unsigned int objectId, bool visible) {
         }
 
         // Then we go down in the tree and make all children FullyVisible
-        nTraverseSubTree(item, false, [](ObjectTreeItem *item) {
+        traverseSubTree(item, false, [](ObjectTreeItem *item) {
             item->setVisibilityState(ObjectTreeItem::FullyVisible);
             return true;
         });
@@ -381,7 +253,7 @@ void ObjectTree::nChangeVisibilityState(unsigned int objectId, bool visible) {
         }
 
         // Then we go down in the tree and make all children Invisible
-        nTraverseSubTree(item, false, [](ObjectTreeItem *item) {
+        traverseSubTree(item, false, [](ObjectTreeItem *item) {
             item->setVisibilityState(ObjectTreeItem::Invisible);
             return true;
         });
@@ -391,9 +263,21 @@ void ObjectTree::nChangeVisibilityState(unsigned int objectId, bool visible) {
 }
 
 
-void ObjectTree::buildColorMap(int rootObjectId) {
-	traverseSubTree(rootObjectId,true,[&](int objectId){
-		if(objectId==0)return true;
+unsigned int ObjectTree::addTopObject(QString name) {
+    ObjectTreeItem *topLevelItem = addNewObjectTreeItem(name);
+    ObjectTreeItem *rootItem = getItems()[0];
+    topLevelItem->setParent(rootItem);
+    rootItem->addChild(topLevelItem);
+    // Get top level object and loop through his children with callback
+    objectTreeCallback callback(this);
+    database->Get(name.toUtf8(), callback);
+	return lastAllocatedId;
+}
+
+
+/*void ObjectTree::buildColorMap(int rootObjectId) {
+	traverseSubTree(rootObjectId,true,[&](unsigned int objectId){
+		if (objectId == 0)return true;
 		const QString objectName = fullPathMap[objectId];
 		const QByteArray &name = objectName.toUtf8();
 		BRLCAD::Object *object = database->Get(name);
@@ -408,4 +292,4 @@ void ObjectTree::buildColorMap(int rootObjectId) {
 		}
 		return true;
 	});
-}
+}*/

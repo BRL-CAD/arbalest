@@ -53,12 +53,12 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
     });
     connect(visibilityButton, &ObjectTreeRowButtons::visibilityButtonClicked, this, [this](unsigned int objectId){
         switch(this->document->getObjectTree()->getItems()[objectId]->getVisibilityState()){
-            case ObjectTree::Invisible:
-            case ObjectTree::SomeChildrenVisible:
-                this->document->getObjectTree()->nChangeVisibilityState(objectId, true);
+            case ObjectTreeItem::Invisible:
+            case ObjectTreeItem::SomeChildrenVisible:
+                this->document->getObjectTree()->changeVisibilityState(objectId, true);
                 break;
-            case ObjectTree::FullyVisible:
-                this->document->getObjectTree()->nChangeVisibilityState(objectId, false);
+            case ObjectTreeItem::FullyVisible:
+                this->document->getObjectTree()->changeVisibilityState(objectId, false);
                 break;
         }
         this->document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -91,9 +91,8 @@ void ObjectTreeWidget::build(const unsigned int objectId, QTreeWidgetItem* paren
             addTopLevelItem(item);
     }
 
-	for (ObjectTreeItem *objTreeItemChild : objTreeItem->getChildren()) {
+	for (ObjectTreeItem *objTreeItemChild : objTreeItem->getChildren())
 		build(objTreeItemChild->getObjectId(), (objectId != 0) ? item: nullptr);
-	}
 }
 
 void ObjectTreeWidget::select(QString selected) {
@@ -101,10 +100,10 @@ void ObjectTreeWidget::select(QString selected) {
     QString path = "/" + regionName[1];
     int regionNameSize = regionName.size();
     int regionNameIndex = 1;
-    int mapSize = document->getObjectTree()->getFullPathMap().size();
+    int mapSize = document->getObjectTree()->getItems().size();
 
     for (unsigned int objectId = 1; objectId < mapSize; ++objectId) {
-        if (document->getObjectTree()->getFullPathMap()[objectId] == path) {
+        if (document->getObjectTree()->getItems()[objectId]->getPath() == path) {
             if (regionNameIndex == regionNameSize - 1) {
                 objectIdTreeWidgetItemMap[objectId]->setSelected(true);
                 document->getProperties()->bindObject(objectId);
@@ -123,15 +122,15 @@ const QHash<unsigned int, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeW
 }
 
 void ObjectTreeWidget::refreshItemTextColors() {
-    document->getObjectTree()->nTraverseSubTree(0, false, [this](unsigned int objectId) {
+    document->getObjectTree()->traverseSubTree(0, false, [this](unsigned int objectId) {
         switch (document->getObjectTree()->getItems()[objectId]->getVisibilityState()) {
-            case ObjectTree::Invisible:
+            case ObjectTreeItem::Invisible:
                 objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorInvisible));
                 break;
-            case ObjectTree::SomeChildrenVisible:
+            case ObjectTreeItem::SomeChildrenVisible:
                 objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorSomeChildrenVisible));
                 break;
-            case ObjectTree::FullyVisible:
+            case ObjectTreeItem::FullyVisible:
                 objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorFullVisible));
                 break;
         }

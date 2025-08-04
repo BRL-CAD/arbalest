@@ -10,8 +10,9 @@ MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObject
         : DataRow(3, true) {
     setWindowFlags( Qt::Window| Qt::WindowCloseButtonHint);
     setAttribute( Qt::WA_QuitOnClose, false );
-    QString parentObjectName = document->getObjectTree()->getNameMap()[document->getObjectTree()->getParent()[childObjectId]];
-    QString childNodeName = document->getObjectTree()->getNameMap()[childObjectId];
+    ObjectTreeItem *childItem = document->getObjectTree()->getItems()[childObjectId];
+    QString childNodeName = childItem->getName();
+    QString parentObjectName = childItem->getParent()->getName();
     setWindowTitle(childNodeName);
     if (parentObjectName == ""){
         QMessageBox::information(this, "Can't Transform Top Object", "You cannot transform top objects", QMessageBox::Ok);

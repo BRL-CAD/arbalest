@@ -55,8 +55,8 @@ private:
     QColor colorInvisible;
 
 signals:
-    void visibilityButtonClicked(int objectId);
-    void selectionChanged(int objectId);
+    void visibilityButtonClicked(unsigned int objectId);
+    void selectionChanged(unsigned int objectId);
 
 
 };

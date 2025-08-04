@@ -77,7 +77,7 @@ public:
 
     void autoview();
 
-    void centerView(int objectId);
+    void centerView(unsigned int objectId);
 
     void centerToCurrentSelection();
 

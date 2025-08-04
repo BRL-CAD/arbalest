@@ -158,14 +158,15 @@ void RaytraceView::raytrace() {
     hide();
     document->getDatabase()->UnSelectAll();
     document->getObjectTree()->traverseSubTree(0, false, [this]
-                                                       (int objectId){
-                                                   switch(document->getObjectTree()->getObjectVisibility()[objectId]){
-                                                       case ObjectTree::Invisible:
+                                                       (unsigned int objectId){
+                                                   ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
+                                                   switch(item->getVisibilityState()){
+                                                       case ObjectTreeItem::Invisible:
                                                            return false;
-                                                       case ObjectTree::SomeChildrenVisible:
+                                                       case ObjectTreeItem::SomeChildrenVisible:
                                                            return true;
-                                                       case ObjectTree::FullyVisible:
-                                                           QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
+                                                       case ObjectTreeItem::FullyVisible:
+                                                           QString fullPath = item->getPath();
                                                            document->getDatabase()->Select(fullPath.toUtf8());
                                                            return false;
                                                    }

@@ -30,7 +30,7 @@ GeometryRenderer::GeometryRenderer(Document* document) : document(document)
 void GeometryRenderer::render() {
     document->getViewport()->getViewportManager()->saveState();
     if (!objectsToBeViewportedIds.empty()) {
-        for (int objectId : objectsToBeViewportedIds) {
+        for (unsigned int objectId : objectsToBeViewportedIds) {
             if (!objectIdViewportListIdMap.contains(objectId)) {
                 drawSolid(objectId);
             }
@@ -47,9 +47,10 @@ void GeometryRenderer::render() {
 }
 
 
-void GeometryRenderer::drawSolid(int objectId) {
-    const ColorInfo colorInfo = document->getObjectTree()->getColorMap()[objectId];
-    const QString objectFullPath = document->getObjectTree()->getFullPathMap()[objectId];
+void GeometryRenderer::drawSolid(unsigned int objectId) {
+    ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
+    const ColorInfo colorInfo = item->getColorInfo();
+    const QString objectFullPath = item->getPath();
     BRLCAD::VectorList vectorList;
     document->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
 
@@ -76,26 +77,26 @@ void GeometryRenderer::drawSolid(int objectId) {
 
 void GeometryRenderer::refreshForVisibilityAndSolidChanges() {
     visibleViewportListIds.clear();
-    document->getObjectTree()->traverseSubTree(0, false,[this]
-        (int objectId)
+    document->getObjectTree()->traverseSubTree(0, false, [this](unsigned int objectId)
         {
-            if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::Invisible) return false;
-            if (!document->getObjectTree()->getDrawableObjectIds().contains(objectId)) return true;
+            ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
+            if (item->getVisibilityState() == ObjectTreeItem::Invisible) return false;
+            if (!item->isDrawable()) return true;
             objectsToBeViewportedIds.append(objectId);
             return true;
         }
     );
 }
 
-void GeometryRenderer::clearSolidIfAvailable(int objectId) {
+void GeometryRenderer::clearSolidIfAvailable(unsigned int objectId) {
     if (objectIdViewportListIdMap.contains(objectId)){
         document->getViewport()->getViewportManager()->freeDLists(objectIdViewportListIdMap[objectId], 1);
         objectIdViewportListIdMap.remove(objectId);
     }
 }
 
-void GeometryRenderer::clearObject(int objectId) {
-    document->getObjectTree()->traverseSubTree(objectId, true, [this](int objectId){
+void GeometryRenderer::clearObject(unsigned int objectId) {
+    document->getObjectTree()->traverseSubTree(objectId, true, [this](unsigned int objectId){
         clearSolidIfAvailable(objectId);
         return true;
     });

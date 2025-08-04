@@ -17,7 +17,7 @@ class TypeSpecificProperties;
 class Properties: public QVBoxWidget{
 public:
     explicit Properties(Document & document);
-    void bindObject(const int objectId);
+    void bindObject(const unsigned int objectId);
     void rewriteObjectNameAndType();
 
 private:

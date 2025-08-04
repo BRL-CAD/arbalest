@@ -37,14 +37,11 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     modified = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
-    getObjectTree()->traverseSubTree(0,false,[this, objectName]
-    (int objectId){
-        if (getObjectTree()->getNameMap()[objectId] == objectName){
+    getObjectTree()->traverseSubTree(0, false, [this, objectName](unsigned int objectId) {
+        if (getObjectTree()->getItems()[objectId]->getName() == objectName)
             geometryRenderer->clearObject(objectId);
-        }
         return true;
-    }
-    );
+    });
     geometryRenderer->refreshForVisibilityAndSolidChanges();
     for (Viewport * display : displayGrid->getViewports())display->forceRerenderFrame();
 }
@@ -56,8 +53,8 @@ bool Document::isModified() {
 bool Document::AddObject(const BRLCAD::Object& object, const bool isVisible) {
     modified = true;
     return database->Add(object);
-    unsigned int objectId = documents[activeDocumentId]->getObjectTree()->addTopObject(name);
-    getObjectTree()->nChangeVisibilityState(objectId, isVisible);
+    unsigned int objectId = getObjectTree()->addTopObject(QString(object.Name()));
+    getObjectTree()->changeVisibilityState(objectId, isVisible);
     getObjectTreeWidget()->build(objectId);
     getObjectTreeWidget()->refreshItemTextColors();
     getGeometryRenderer()->refreshForVisibilityAndSolidChanges();

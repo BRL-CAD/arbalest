@@ -94,7 +94,7 @@ public slots:
     bool saveFileDefaultPathId(int documentId);
     void onActiveDocumentChanged(int newIndex);
     void tabCloseRequested(int i) ;
-    void objectTreeWidgetSelectionChanged(int objectId);
+    void objectTreeWidgetSelectionChanged(unsigned int objectId);
     void newFile(); // empty new file
     void openFile(const QString& filePath);
     void updateMouseButtonObjectState();
