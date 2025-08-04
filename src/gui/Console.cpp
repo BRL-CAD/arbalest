@@ -33,6 +33,8 @@
 #include <brlcad/CommandString/CommandString.h>
 #include <brlcad/Database/Database.h>
 #include "Document.h"
+#include "Globals.h"
+#include "MainWindow.h"
 
 #include "Console.h"
 
@@ -141,6 +143,8 @@ Console::Console(Document *document, QWidget *parent) : activeDocument(document)
     completer = new ConsoleCompleter(this);
     completer->setWidget(this);
     connect(completer, QOverload<const QString &>::of(&QCompleter::activated), this, &Console::insertCompletion);
+
+    connect(this, &Console::exitRequested, Globals::mainWindow, &MainWindow::tabCloseRequested);
 
     prompt();
 }
@@ -293,6 +297,9 @@ void Console::executeCommand(void) {
     else if (parserState == BRLCAD::CommandString::State::SyntaxError || parserState == BRLCAD::CommandString::State::UnknownCommand) {
         c.insertText(QString(parser->Results()));
         c.insertText(QString("\n"));
+    } else if (parserState == BRLCAD::CommandString::State::ExitRequested) {
+        c.insertText(QString(parser->Results()));
+        emit exitRequested(tabToCloseId);
     }
 
     parser->ClearResults();

@@ -921,6 +921,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
             consoleDockable->setContent(documents[activeDocumentId]->getConsole());
+            documents[activeDocumentId]->getConsole()->setTabToCloseId(newIndex);  // used to handle ExitRequested commands
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getViewportGrid()->inQuadViewportMode()){

@@ -42,6 +42,10 @@ public:
         splitSlash = newSplitSlash;
     }
 
+    void setTabToCloseId(int newIndex) {
+        tabToCloseId = newIndex;
+    }
+
     // Getters
     Document *getActiveDocument(void) {
         return activeDocument;
@@ -63,6 +67,9 @@ private:
     
     // Stores the current position in the command-history
     size_t commandPosition;
+
+    // Id of the DocumentArea tab to close when ExitRequested
+    int tabToCloseId = -1;
 
     // Split slashes
     bool splitSlash = false;
@@ -113,6 +120,9 @@ private:
 
 public slots:
     void insertCompletion(const QString& completion);
+
+signals:
+    void exitRequested(int tabToCloseId);
 };
 
 
