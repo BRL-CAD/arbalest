@@ -80,9 +80,15 @@ void ObjectTree::nObjectTreeCallback::operator()(const BRLCAD::Object& object) {
     currItem = objectTree->getItems()[objectTree->nLastAllocatedId];
 
     // If the object is a combination, iter through its children, else it means that it is drawable
-	if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
-		traverseSubTree(combination->Tree());
-	} else
+    if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
+        if (combination->HasColor()) {
+            currItem->getColorInfo().red = combination->Red();
+            currItem->getColorInfo().green = combination->Green();
+            currItem->getColorInfo().blue = combination->Blue();
+            currItem->getColorInfo().hasColor = true;
+        }
+        traverseSubTree(combination->Tree());
+    } else
         currItem->getData()->setIsDrawableFlag(true);
 
     /* The fact that I am in this function in the first place means that the item data exists.

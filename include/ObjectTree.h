@@ -12,8 +12,6 @@
 #include <set>
 #include <QString>
 #include <brlcad/CommandString/CommandString.h>
-
-
 #include "Utils.h"
 
 
@@ -52,6 +50,7 @@
    So with the use of these 2 classes, we can represent what is SHARED across ALL occurrences in a database
    of an object through ObjectTreeItemData, and what is UNIQUE FOR EACH occurrences in a database of an
    object through ObjectTreeItem */
+
 
 class ObjectTreeItem;
 
@@ -92,6 +91,10 @@ public:
         return isDrawableFlag;
     }
 
+    ColorInfo& getColorInfo(void) {
+        return colorInfo;
+    }
+
 private:
     QVector<ObjectTreeItem *> itemsWithThisData;
 
@@ -100,6 +103,7 @@ private:
 
     bool isAliveFlag = false;
     bool isDrawableFlag = false;
+    ColorInfo colorInfo = {0, 0, 0, false};
 };
 
 
@@ -161,6 +165,10 @@ public:
         return data->isDrawable();
     }
 
+    ColorInfo& getColorInfo(void) {
+        return data->getColorInfo();
+    }
+
     // Setters
     void setParent(ObjectTreeItem *itemParent) {
         parent = itemParent;
@@ -179,6 +187,7 @@ private:
 
     VisibilityState visibilityState = Invisible;
 };
+
 
 /*
  * Generates and stores the object tree by reading a database.
