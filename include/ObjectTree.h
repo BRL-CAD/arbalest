@@ -205,8 +205,6 @@ public:
 
     unsigned int addTopObject(QString name);
 
-    void printTree(void);
-
     // getters
     BRLCAD::MemoryDatabase* getDatabase() const
     {

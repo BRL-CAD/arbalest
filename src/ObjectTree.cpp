@@ -138,7 +138,7 @@ void ObjectTree::objectTreeCallback::traverseSubTree(const BRLCAD::Combination::
 
 // ---------- OBJECT TREE ----------
 
-ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database, Document *document) : database(database), document(document) {
+ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
     // Create root item and root item data (parent = nullptr, empty name, objectId = 0)
     QString rootName = "";
     ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
@@ -154,8 +154,6 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database, Document *document) : d
         addTopObject(QString(it.Name()));
         ++it;
     }
-
-    printTree();
 }
 
 ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
@@ -172,18 +170,6 @@ ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
     ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++lastAllocatedId);
     getItems().insert(lastAllocatedId, newItem);
     return newItem;
-}
-
-
-void ObjectTree::printTree(void) {
-    // Print tree of new method
-    for (ObjectTreeItem *it : getItems()) {
-        qDebug() << it->getObjectId() << "\t->" << it->getPath() << "\n\t\tisAlive =" << it->isAlive() << ", isDrawable =" << it->isDrawable() << ", visibilityState =" << it->getVisibilityState();
-        for (ObjectTreeItem *itChild : it->getChildren())
-            qDebug() << "\t\t" << itChild->getPath();
-        for (BRLCAD::Combination::ConstTreeNode::Operator itChildOp : it->getChildrenOps())
-            qDebug() << "\t\t" << itChildOp;
-    }
 }
 
 
@@ -258,8 +244,6 @@ void ObjectTree::changeVisibilityState(unsigned int objectId, bool visible) {
             return true;
         });
     }
-
-    printTree();
 }
 
 
