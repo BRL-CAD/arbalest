@@ -32,7 +32,6 @@
 #include "brlcad/Database/MemoryDatabase.h"
 #include <QString>
 #include <brlcad/CommandString/CommandString.h>
-#include <QDebug>
 
 
 // ---------- OBJECT TREE ITEM DATA ----------
