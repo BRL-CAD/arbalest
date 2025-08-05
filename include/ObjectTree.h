@@ -222,9 +222,9 @@ public:
 private:
     BRLCAD::MemoryDatabase* database;
 
-    class objectTreeCallback {
+    class ObjectTreeCallback {
     public:
-        objectTreeCallback(ObjectTree* objectTree) : objectTree(objectTree) {}
+        ObjectTreeCallback(ObjectTree* objectTree) : objectTree(objectTree) {}
         void operator()(const BRLCAD::Object& object);
 
     private:

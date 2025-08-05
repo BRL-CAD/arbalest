@@ -68,7 +68,7 @@ QString ObjectTreeItem::getPath(void) {
 
 // ---------- OBJECT TREE CALLBACK ----------
 
-/* Warning: objectTreeCallback() (used to construct the object tree of a database) assumes that in a database
+/* Warning: ObjectTreeCallback() (used to construct the object tree of a database) assumes that in a database
    all occurrences of a certain object (with a unique name) must have all the same children and operations.
    This means that, if there was a situation where the same combination appears more times in the database with
    different children/operations, for example:
@@ -77,7 +77,7 @@ QString ObjectTreeItem::getPath(void) {
                |__________ - "sph2.s"                     |__________ u "sph2.s"
    then the tree would be constructed so that the "combination.c" item data will have the children and operations
    equal to that of the first occurrence that it meets while creating the tree */
-void ObjectTree::objectTreeCallback::operator()(const BRLCAD::Object& object) {
+void ObjectTree::ObjectTreeCallback::operator()(const BRLCAD::Object& object) {
     currItem = objectTree->getItems()[objectTree->lastAllocatedId];
 
     // If the object is a combination, iter through its children, else it means that it is drawable
@@ -102,7 +102,7 @@ void ObjectTree::objectTreeCallback::operator()(const BRLCAD::Object& object) {
 }
 
 
-void ObjectTree::objectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
+void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
 	switch (node.Operation()) {
         // If Union/Intersection/Subtraction/ExclusiveOr, access children
         case BRLCAD::Combination::ConstTreeNode::Union:
@@ -130,7 +130,7 @@ void ObjectTree::objectTreeCallback::traverseSubTree(const BRLCAD::Combination::
             if (!currItem->isAlive())
                 currItem->getData()->addOp(currOp);
             // Get new object and loop through his children with callback
-            objectTreeCallback callback(objectTree);
+            ObjectTreeCallback callback(objectTree);
             objectTree->getDatabase()->Get(node.Name(), callback);
 	}
 }
@@ -253,7 +253,7 @@ unsigned int ObjectTree::addTopObject(QString name) {
     topLevelItem->setParent(rootItem);
     rootItem->addChild(topLevelItem);
     // Get top level object and loop through his children with callback
-    objectTreeCallback callback(this);
+    ObjectTreeCallback callback(this);
     database->Get(name.toUtf8(), callback);
 	return lastAllocatedId;
 }
