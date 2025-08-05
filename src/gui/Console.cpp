@@ -288,11 +288,15 @@ void Console::executeCommand(void) {
     commandHistory.push_back("");
     commandPosition = commandHistory.size() - 1;
 
-    // Print result
+    // Print result (trying to keep the newlines consistent)
     c.insertText(QString("\n"));
     if (parserState == BRLCAD::CommandString::State::NoDatabase || parserState == BRLCAD::CommandString::State::InternalError)
         c.insertText(QString("PARSER ERROR!\n"));
-    else if (parserState == BRLCAD::CommandString::State::Success || parserState == BRLCAD::CommandString::State::Incomplete)
+    else if (parserState == BRLCAD::CommandString::State::Success) {
+        c.insertText(QString(parser->Results()));
+        if (argvByteArray.first() == "clear")
+            document()->clear();  // Handle "clear" command differently
+    } else if (parserState == BRLCAD::CommandString::State::Incomplete)
         c.insertText(QString(parser->Results()));
     else if (parserState == BRLCAD::CommandString::State::SyntaxError || parserState == BRLCAD::CommandString::State::UnknownCommand) {
         c.insertText(QString(parser->Results()));
