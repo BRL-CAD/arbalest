@@ -45,7 +45,7 @@
                ...
              comb2.c
                 |_____ u obj
-       - might have a different visibility state:
+       - might have a different visibility state
 
    So with the use of these 2 classes, we can represent what is SHARED across ALL occurrences in a database
    of an object through ObjectTreeItemData, and what is UNIQUE FOR EACH occurrences in a database of an

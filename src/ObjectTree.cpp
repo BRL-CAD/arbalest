@@ -258,6 +258,7 @@ unsigned int ObjectTree::addTopObject(QString name) {
 }
 
 
+// This method comes from the old ObjectTree (before PR#66)
 /*void ObjectTree::buildColorMap(int rootObjectId) {
 	traverseSubTree(rootObjectId,true,[&](unsigned int objectId){
 		if (objectId == 0)return true;
