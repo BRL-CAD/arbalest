@@ -30,6 +30,7 @@
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
 #include "SelectMouseAction.h"
+#include "Console.h"
 
 
 using namespace BRLCAD;

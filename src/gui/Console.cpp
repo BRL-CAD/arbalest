@@ -32,6 +32,7 @@
 #include <QStringListModel>
 #include "Globals.h"
 #include "MainWindow.h"
+#include "Document.h"
 
 #include "Console.h"
 

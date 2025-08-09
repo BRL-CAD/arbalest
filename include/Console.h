@@ -24,10 +24,10 @@
 
 #include <QPlainTextEdit>
 #include <brlcad/CommandString/CommandString.h>
-#include "Document.h"
 
 
 class ConsoleCompleter;
+class Document;
 
 
 class Console : public QPlainTextEdit {

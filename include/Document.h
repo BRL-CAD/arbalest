@@ -12,7 +12,6 @@
 #include "GeometryRenderer.h"
 #include "ViewportGrid.h"
 #include <include/RaytraceView.h>
-#include "Console.h"
 
 class Properties;
 class Viewport;
