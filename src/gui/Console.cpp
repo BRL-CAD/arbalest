@@ -293,6 +293,22 @@ void Console::executeCommand(void) {
 
     // Print result
     QString result = parser->Results();
+    // Try to keep the newlines consistent
+    if (!result.isEmpty()) {
+        int i;
+        for (i = result.size() - 1 ; i >= 0; --i) {
+            if (result[i] != '\n') {
+                ++i;
+                break;
+            }
+        }
+        // If last char is not a newline, add it
+        if (i == result.size())
+            result.append('\n');
+        // Else if there are more than one newline, keep only one
+        else if (result.size() - i > 1)
+            result.chop(result.size() - i - 1);
+    }
     c.insertText(QString("\n"));
     c.insertText(result);
     switch (parserState) {
