@@ -233,20 +233,21 @@ void Console::executeCommand(void) {
     QTextCursor c(document());
     c.movePosition(QTextCursor::End);
 
+    // Don't store empty commands in the history, and don't execute anything
     if (command.isEmpty()) {
-        // Don't store empty commands in the history, and don't execute anything
         c.insertText("\n");
         prompt();
         return;
     }
 
+    // If no document is open, don't execute anything
     if (!parser) {
-        // If no document is open, don't execute anything
         c.insertText(QString("\nNo active document, can't execute!\n"));
         prompt();
         return;
     }
 
+    // If we are currently handling a multi input command, create the correct final command
     if (handlingMultiInputs)
         command = multiInputBuffer + command;
 
@@ -267,7 +268,7 @@ void Console::executeCommand(void) {
     // Execute command
     BRLCAD::CommandString::State parserState = parser->Parse(argv);
 
-    // If command is multi input handle it differently
+    // If command is multi input, handle it differently
     if (parserState == BRLCAD::CommandString::State::Incomplete) {
         handlingMultiInputs = true;
         multiInputBuffer = command + QString(" ");
@@ -278,6 +279,8 @@ void Console::executeCommand(void) {
         ensureCursorVisible();
         return;
     }
+    /* If we were handling a multi input command, but the last executed command is not a multi input anymore,
+       it means that it is now complete, so clear all the multi input related stuff */
     if (handlingMultiInputs) {
         multiInputBuffer.clear();
         commandBuffer() = command;
@@ -288,27 +291,32 @@ void Console::executeCommand(void) {
     commandHistory.push_back("");
     commandPosition = commandHistory.size() - 1;
 
-    // Print result (trying to keep the newlines consistent)
+    // Print result
+    QString result = parser->Results();
     c.insertText(QString("\n"));
-    if (parserState == BRLCAD::CommandString::State::NoDatabase || parserState == BRLCAD::CommandString::State::InternalError)
-        c.insertText(QString("PARSER ERROR!\n"));
-    else if (parserState == BRLCAD::CommandString::State::Success) {
-        c.insertText(QString(parser->Results()));
-        if (argvByteArray.first() == "clear")
-            document()->clear();  // Handle "clear" command differently
-    } else if (parserState == BRLCAD::CommandString::State::Incomplete)
-        c.insertText(QString(parser->Results()));
-    else if (parserState == BRLCAD::CommandString::State::SyntaxError || parserState == BRLCAD::CommandString::State::UnknownCommand) {
-        c.insertText(QString(parser->Results()));
-        c.insertText(QString("\n"));
-    } else if (parserState == BRLCAD::CommandString::State::ExitRequested) {
-        c.insertText(QString(parser->Results()));
-        emit exitRequested(tabToCloseId);
+    c.insertText(result);
+    switch (parserState) {
+        case BRLCAD::CommandString::State::Success:
+            // Handle "clear" command differently
+            if (argvByteArray.first() == "clear")
+                document()->clear();
+            break;
+
+        case BRLCAD::CommandString::State::ExitRequested:
+            emit exitRequested(tabToCloseId);
+            break;
+
+        case BRLCAD::CommandString::State::NoDatabase:
+            c.insertText(QString("PARSER ERROR! (NoDatabase)\n"));
+            break;
+
+        case BRLCAD::CommandString::State::InternalError:
+            c.insertText(QString("PARSER ERROR! (InternalError)\n"));
+            break;
     }
 
-    parser->ClearResults();
-
     // Prepare for next command
+    parser->ClearResults();
     interactivePosition = documentEnd();
     prompt();
 }
