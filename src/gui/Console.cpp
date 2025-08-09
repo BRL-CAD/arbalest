@@ -30,9 +30,6 @@
 #include <QRegularExpression>
 #include <QScrollBar>
 #include <QStringListModel>
-#include <brlcad/CommandString/CommandString.h>
-#include <brlcad/Database/Database.h>
-#include "Document.h"
 #include "Globals.h"
 #include "MainWindow.h"
 
