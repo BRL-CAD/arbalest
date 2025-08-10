@@ -30,6 +30,8 @@
 #include <include/MatrixTransformWidget.h>
 #include "MoveCameraMouseAction.h"
 #include "SelectMouseAction.h"
+#include "Console.h"
+
 
 using namespace BRLCAD;
 using namespace std;
@@ -42,11 +44,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), m_mouseAction{nul
     setIcons();
     prepareDockables();
 
+    Globals::mainWindow = this;
+
     documentArea->addTab(new HelpWidget(this), "Quick Start");
     if (QCoreApplication::arguments().length() > 1) {
         openFile(QString(QCoreApplication::arguments().at(1)));
     }
-    Globals::mainWindow = this;
 }
 
 MainWindow::~MainWindow() {
@@ -732,6 +735,10 @@ void MainWindow::setIcons() {
 }
 
 void MainWindow::prepareDockables(){
+    // makes BottomLeftCorner/BottomRightCorner occupied by LeftDockable/RightDockable respectively
+    this->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+    this->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
     // Object tree
     objectTreeWidgetDockable = new Dockable("Objects", this, false, 200);
     addDockWidget(Qt::LeftDockWidgetArea, objectTreeWidgetDockable);
@@ -740,7 +747,9 @@ void MainWindow::prepareDockables(){
     objectPropertiesDockable = new Dockable("Properties", this,true,300);
     addDockWidget(Qt::RightDockWidgetArea, objectPropertiesDockable);
 
-
+    // Console
+    consoleDockable = new Dockable("Console", this, true);
+    addDockWidget(Qt::BottomDockWidgetArea, consoleDockable);
 
     // Toolbox
 //    toolboxDockable = new Dockable("Make", this,true,30);
@@ -905,7 +914,7 @@ bool MainWindow::maybeSave(int documentId, bool *cancel) {
 
     return true;
 }
-
+#include <QDebug>
 void MainWindow::onActiveDocumentChanged(const int newIndex){
     ViewportGrid * displayGrid = dynamic_cast<ViewportGrid*>(documentArea->widget(newIndex));
     if (displayGrid != nullptr){
@@ -913,6 +922,8 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
             activeDocumentId = displayGrid->getDocument()->getDocumentId();
             objectTreeWidgetDockable->setContent(documents[activeDocumentId]->getObjectTreeWidget());
             objectPropertiesDockable->setContent(documents[activeDocumentId]->getProperties());
+            consoleDockable->setContent(documents[activeDocumentId]->getConsole());
+            documents[activeDocumentId]->getConsole()->setTabToCloseId(newIndex);  // used to handle ExitRequested commands
             statusBarPathLabel->setText(documents[activeDocumentId]->getFilePath()  != nullptr ? *documents[activeDocumentId]->getFilePath() : "Untitled");
 
             if(documents[activeDocumentId]->getViewportGrid()->inQuadViewportMode()){
@@ -927,6 +938,7 @@ void MainWindow::onActiveDocumentChanged(const int newIndex){
     }else if (activeDocumentId != -1){
         objectTreeWidgetDockable->clear();
         objectPropertiesDockable->clear();
+        consoleDockable->clear();
         statusBarPathLabel->setText("");
         activeDocumentId = -1;
     }

@@ -13,6 +13,7 @@
 #include <QComboBox>
 #include "MouseAction.h"
 
+
 class Document;
 
 
@@ -34,6 +35,7 @@ private:
     // ---------- UI COMPONENTS ----------
     Dockable *objectTreeWidgetDockable;
     Dockable *objectPropertiesDockable;
+    Dockable *consoleDockable;
     Dockable *toolboxDockable;
     QStatusBar *statusBar;
     QTabWidget *documentArea;

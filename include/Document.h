@@ -19,6 +19,7 @@ class GeometryRenderer;
 class ViewportGrid;
 class RaytraceView;
 class ObjectTreeWidget;
+class Console;
 
 class Document {
 private:
@@ -27,6 +28,7 @@ private:
     ViewportGrid *displayGrid;
     ObjectTreeWidget *objectTreeWidget;
     Properties *properties;
+    Console *console;
     const int documentId;
     ObjectTree* objectTree;
     GeometryRenderer * geometryRenderer;
@@ -65,6 +67,11 @@ public:
     Properties* getProperties() const
     {
 	    return properties;
+    }
+
+    Console* getConsole() const
+    {
+	    return console;
     }
 
     ViewportGrid *getViewportGrid()  {
