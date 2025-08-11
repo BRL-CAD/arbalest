@@ -253,7 +253,7 @@ void MainWindow::prepareUi() {
     connect(relativeMoveAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
-        unsigned int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        size_t objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Translate);
     });
     editMenu->addAction(relativeMoveAct);
@@ -263,7 +263,7 @@ void MainWindow::prepareUi() {
     connect(relativeScaleAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
-        unsigned int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        size_t objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Scale);
     });
     editMenu->addAction(relativeScaleAct);
@@ -273,7 +273,7 @@ void MainWindow::prepareUi() {
     connect(relativeRotateAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
-        unsigned int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        size_t objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         MatrixTransformWidget * matrixTransformWidget = new MatrixTransformWidget(documents[activeDocumentId],objectId, MatrixTransformWidget::Rotate);
     });
     editMenu->addAction(relativeRotateAct);
@@ -332,7 +332,7 @@ void MainWindow::prepareUi() {
     connect(centerViewAct, &QAction::triggered, this, [this]() {
         if (activeDocumentId == -1) return;
         if (documents[activeDocumentId]->getObjectTreeWidget()->currentItem() == nullptr) return;
-        unsigned int objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
+        size_t objectId = documents[activeDocumentId]->getObjectTreeWidget()->currentItem()->data(0, Qt::UserRole).toInt();
         documents[activeDocumentId]->getViewport()->getCamera()->centerView(objectId);
     });
     viewMenu->addAction(centerViewAct);
@@ -880,7 +880,7 @@ void MainWindow::tabCloseRequested(const int i)
     }
 }
 
-void MainWindow::objectTreeWidgetSelectionChanged(unsigned int objectId) {
+void MainWindow::objectTreeWidgetSelectionChanged(size_t objectId) {
     documents[activeDocumentId]->getProperties()->bindObject(objectId);
 }
 

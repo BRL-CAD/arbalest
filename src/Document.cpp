@@ -37,7 +37,7 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     modified = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
-    getObjectTree()->traverseSubTree(0, false, [this, objectName](unsigned int objectId) {
+    getObjectTree()->traverseSubTree(0, false, [this, objectName](size_t objectId) {
         if (getObjectTree()->getItems()[objectId]->getName() == objectName)
             geometryRenderer->clearObject(objectId);
         return true;
@@ -54,7 +54,7 @@ bool Document::AddObject(const BRLCAD::Object& object, const bool isVisible) {
     bool ret = database->Add(object);
     if (ret) {
         modified = true;
-        unsigned int objectId = getObjectTree()->addTopObject(QString(object.Name()));
+        size_t objectId = getObjectTree()->addTopObject(QString(object.Name()));
         getObjectTree()->changeVisibilityState(objectId, isVisible);
         getObjectTreeWidget()->build(objectId);
         getObjectTreeWidget()->refreshItemTextColors();

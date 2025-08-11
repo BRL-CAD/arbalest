@@ -115,7 +115,7 @@ public:
         FullyVisible,
     };
 
-    ObjectTreeItem(ObjectTreeItemData* data, unsigned int uniqueObjectId);
+    ObjectTreeItem(ObjectTreeItemData* data, size_t uniqueObjectId);
 
     void addChild(ObjectTreeItem *itemParent);
 
@@ -128,7 +128,7 @@ public:
         return data;
     }
 
-    unsigned int getObjectId(void) {
+    size_t getObjectId(void) {
         return uniqueObjectId;
     }
 
@@ -180,7 +180,7 @@ public:
 
 private:
     ObjectTreeItemData *data;
-    unsigned int uniqueObjectId;
+    size_t uniqueObjectId;
 
     ObjectTreeItem *parent;
     QVector<ObjectTreeItem *> children;
@@ -193,17 +193,17 @@ class ObjectTree {
 public:
     ObjectTree(BRLCAD::MemoryDatabase* database);
 
-    unsigned int lastAllocatedId = 0;
+    size_t lastAllocatedId = 0;
 
-    void traverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback);
-    void traverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback);
+    void traverseSubTree(ObjectTreeItem *rootOfSubTree, const bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback);
+    void traverseSubTree(const size_t rootOfSubTreeId, const bool traverseRoot, const std::function<bool(size_t)>& callback);
 
-    void changeVisibilityState(unsigned int objectId, bool visible);
+    void changeVisibilityState(size_t objectId, bool visible);
 
     // Given a name, create a new item and assign its item data (if the name is new, create a new item data)
     ObjectTreeItem *addNewObjectTreeItem(QString name);
 
-    unsigned int addTopObject(QString name);
+    size_t addTopObject(QString name);
 
     // getters
     BRLCAD::MemoryDatabase* getDatabase() const
@@ -211,7 +211,7 @@ public:
 	    return database;
     }
 
-    QHash<unsigned int, ObjectTreeItem*> &getItems() {
+    QHash<size_t, ObjectTreeItem*> &getItems() {
         return items;
     }
 
@@ -236,7 +236,7 @@ private:
     };
 
     // All items
-    QHash<unsigned int, ObjectTreeItem*> items;
+    QHash<size_t, ObjectTreeItem*> items;
 
     // Unique name to item data
     QHash<QString, ObjectTreeItemData*> itemsData;

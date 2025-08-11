@@ -30,7 +30,7 @@ private:
 
     QImage iconCenter;
 
-    unsigned int objectId = 0;
+    size_t objectId = 0;
     ObjectTree *objectTree;
     ObjectTreeItem::VisibilityState visibilityState = ObjectTreeItem::Invisible;
     static const int margin = 0;
@@ -39,8 +39,8 @@ private:
     Q_DISABLE_COPY(ObjectTreeRowButtons)
 
 signals:
-    void visibilityButtonClicked(unsigned int objectId);
-    void centerButtonClicked(unsigned int objectId);
+    void visibilityButtonClicked(size_t objectId);
+    void centerButtonClicked(size_t objectId);
 
 };
 

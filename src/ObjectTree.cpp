@@ -43,7 +43,7 @@ void ObjectTreeItemData::addOp(BRLCAD::Combination::ConstTreeNode::Operator op) 
 
 // ---------- OBJECT TREE ITEM ----------
 
-ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data, unsigned int uniqueObjectId) : data(data), uniqueObjectId(uniqueObjectId) {
+ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data, size_t uniqueObjectId) : data(data), uniqueObjectId(uniqueObjectId) {
     // When I create an item, I also need to give the item to the item data that it references 
     getItemsWithSameData().append(this);
 }
@@ -181,7 +181,7 @@ void ObjectTree::traverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoo
 }
 
 
-void ObjectTree::traverseSubTree(const unsigned rootOfSubTreeId, bool traverseRoot, const std::function<bool(unsigned int)>& callback) {
+void ObjectTree::traverseSubTree(const size_t rootOfSubTreeId, bool traverseRoot, const std::function<bool(size_t)>& callback) {
 	ObjectTreeItem *item = getItems()[rootOfSubTreeId];
     if (traverseRoot) callback(item->getObjectId());
 	for (ObjectTreeItem *itemChild : item->getChildren()) {
@@ -192,7 +192,7 @@ void ObjectTree::traverseSubTree(const unsigned rootOfSubTreeId, bool traverseRo
 }
 
 
-void ObjectTree::changeVisibilityState(unsigned int objectId, bool visible) {
+void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
     ObjectTreeItem *item = getItems()[objectId];
     if (visible) {
         item->setVisibilityState(ObjectTreeItem::FullyVisible);
@@ -246,7 +246,7 @@ void ObjectTree::changeVisibilityState(unsigned int objectId, bool visible) {
 }
 
 
-unsigned int ObjectTree::addTopObject(QString name) {
+size_t ObjectTree::addTopObject(QString name) {
     ObjectTreeItem *topLevelItem = addNewObjectTreeItem(name);
     ObjectTreeItem *rootItem = getItems()[0];
     topLevelItem->setParent(rootItem);
@@ -260,7 +260,7 @@ unsigned int ObjectTree::addTopObject(QString name) {
 
 // This method comes from the old ObjectTree (before PR#66)
 /*void ObjectTree::buildColorMap(int rootObjectId) {
-	traverseSubTree(rootObjectId,true,[&](unsigned int objectId){
+	traverseSubTree(rootObjectId,true,[&](size_t objectId){
 		if (objectId == 0)return true;
 		const QString objectName = fullPathMap[objectId];
 		const QByteArray &name = objectName.toUtf8();

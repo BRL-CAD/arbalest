@@ -10,7 +10,7 @@
 
 class TypeSpecificProperties: public QVBoxWidget {
 public:
-    TypeSpecificProperties(Document &document, BRLCAD::Object *object, const unsigned int objectId);
+    TypeSpecificProperties(Document &document, BRLCAD::Object *object, const size_t objectId);
 
 protected:
     Document& document;

@@ -23,7 +23,7 @@ Properties::Properties(Document & document) : document(document), object(nullptr
 }
 
 
-void Properties::bindObject(const unsigned int objectId) {
+void Properties::bindObject(const size_t objectId) {
     this->fullPath = document.getObjectTree()->getItems()[objectId]->getPath();
     this->name = fullPath.split("/").last();
     fullPathWidget->setText(QString(fullPath).replace("/"," / "));

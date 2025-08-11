@@ -152,7 +152,7 @@ void OrthographicCamera::centerToCurrentSelection() {
 void OrthographicCamera::autoview() {
     document->getDatabase()->UnSelectAll();
     document->getObjectTree()->traverseSubTree(0, false, [this]
-    (unsigned int objectId){
+    (size_t objectId){
         ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
         switch(item->getVisibilityState()){
             case ObjectTreeItem::Invisible:
@@ -170,7 +170,7 @@ void OrthographicCamera::autoview() {
     centerToCurrentSelection();
 }
 
-void OrthographicCamera::centerView(unsigned int objectId) {
+void OrthographicCamera::centerView(size_t objectId) {
     document->getDatabase()->UnSelectAll();
     QString fullPath = document->getObjectTree()->getItems()[objectId]->getPath();
     document->getDatabase()->Select(fullPath.toUtf8());

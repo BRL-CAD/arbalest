@@ -42,21 +42,21 @@ class ObjectTreeWidget : public QTreeWidget {
 public:
     explicit ObjectTreeWidget(Document *objectTree,   QWidget *parent = nullptr);
     void refreshItemTextColors();
-    const QHash<unsigned int, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
-    void build(const unsigned int objectId, QTreeWidgetItem* parent = nullptr);
+    const QHash<size_t, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
+    void build(const size_t objectId, QTreeWidgetItem* parent = nullptr);
     void select(QString selected);
     void setTextColor();
 private:
     Document* document;
-    QHash <unsigned int, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
+    QHash <size_t, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
 
     QColor colorFullVisible;
     QColor colorSomeChildrenVisible;
     QColor colorInvisible;
 
 signals:
-    void visibilityButtonClicked(unsigned int objectId);
-    void selectionChanged(unsigned int objectId);
+    void visibilityButtonClicked(size_t objectId);
+    void selectionChanged(size_t objectId);
 
 
 };

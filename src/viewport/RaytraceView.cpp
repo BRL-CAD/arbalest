@@ -158,7 +158,7 @@ void RaytraceView::raytrace() {
     hide();
     document->getDatabase()->UnSelectAll();
     document->getObjectTree()->traverseSubTree(0, false, [this]
-                                                       (unsigned int objectId){
+                                                       (size_t objectId){
                                                    ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
                                                    switch(item->getVisibilityState()){
                                                        case ObjectTreeItem::Invisible:

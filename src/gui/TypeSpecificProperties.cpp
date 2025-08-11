@@ -28,7 +28,7 @@ using namespace std;
 
 
 
-TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Object *object, const unsigned int objectId)
+TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Object *object, const size_t objectId)
         : document(document), object(object) {
     setObjectName("properties-TypeSpecificProperties");
     l = getBoxLayout();
