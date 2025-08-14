@@ -83,7 +83,7 @@ void ObjectTreeWidget::build(const size_t objectId, QTreeWidgetItem* parent) {
         item = new QTreeWidgetItem();
         objectIdTreeWidgetItemMap[objectId] = item;
         item->setText(0, objTreeItem->getName());
-        item->setData(0, Qt::UserRole, (unsigned int)objectId);
+        item->setData(0, Qt::UserRole, (quint64)objectId);
 
         if (parent != nullptr)
             parent->addChild(item);
