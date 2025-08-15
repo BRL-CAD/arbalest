@@ -76,12 +76,10 @@ void GeometryRenderer::drawSolid(size_t objectId) {
 
 void GeometryRenderer::refreshForVisibilityAndSolidChanges() {
     visibleViewportListIds.clear();
-    document->getObjectTree()->traverseSubTree(0, false, [this](size_t objectId)
-        {
-            ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
-            if (item->getVisibilityState() == ObjectTreeItem::Invisible) return false;
-            if (!item->isDrawable()) return true;
-            objectsToBeViewportedIds.append(objectId);
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem) {
+            if (currItem->getVisibilityState() == ObjectTreeItem::Invisible) return false;
+            if (!currItem->isDrawable()) return true;
+            objectsToBeViewportedIds.append(currItem->getObjectId());
             return true;
         }
     );
@@ -95,8 +93,8 @@ void GeometryRenderer::clearSolidIfAvailable(size_t objectId) {
 }
 
 void GeometryRenderer::clearObject(size_t objectId) {
-    document->getObjectTree()->traverseSubTree(objectId, true, [this](size_t objectId){
-        clearSolidIfAvailable(objectId);
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), true, [this](ObjectTreeItem* currItem){
+        clearSolidIfAvailable(currItem->getObjectId());
         return true;
     });
 }

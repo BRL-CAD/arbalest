@@ -181,17 +181,6 @@ void ObjectTree::traverseSubTree(ObjectTreeItem *rootOfSubTree, bool traverseRoo
 }
 
 
-void ObjectTree::traverseSubTree(const size_t rootOfSubTreeId, bool traverseRoot, const std::function<bool(size_t)>& callback) {
-	ObjectTreeItem *item = getItems()[rootOfSubTreeId];
-    if (traverseRoot) callback(item->getObjectId());
-	for (ObjectTreeItem *itemChild : item->getChildren()) {
-        const size_t childId = itemChild->getObjectId();
-		if (!callback(childId)) continue;
-		if (!itemChild->getChildren().empty()) traverseSubTree(childId, false, callback);
-	}
-}
-
-
 void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
     ObjectTreeItem *item = getItems()[objectId];
     if (visible) {

@@ -196,7 +196,6 @@ public:
     size_t lastAllocatedId = 0;
 
     void traverseSubTree(ObjectTreeItem *rootOfSubTree, const bool traverseRoot, const std::function<bool(ObjectTreeItem*)>& callback);
-    void traverseSubTree(const size_t rootOfSubTreeId, const bool traverseRoot, const std::function<bool(size_t)>& callback);
 
     void changeVisibilityState(size_t objectId, bool visible);
 
@@ -217,6 +216,10 @@ public:
 
     QHash<QString, ObjectTreeItemData*> &getItemsData() {
         return itemsData;
+    }
+
+    ObjectTreeItem* getRootItem() {
+        return getItems()[0];
     }
 	
 private:

@@ -122,16 +122,16 @@ const QHash<size_t, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetI
 }
 
 void ObjectTreeWidget::refreshItemTextColors() {
-    document->getObjectTree()->traverseSubTree(0, false, [this](size_t objectId) {
-        switch (document->getObjectTree()->getItems()[objectId]->getVisibilityState()) {
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem) {
+        switch (currItem->getVisibilityState()) {
             case ObjectTreeItem::Invisible:
-                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorInvisible));
+                objectIdTreeWidgetItemMap[currItem->getObjectId()]->setForeground(0, QBrush(colorInvisible));
                 break;
             case ObjectTreeItem::SomeChildrenVisible:
-                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorSomeChildrenVisible));
+                objectIdTreeWidgetItemMap[currItem->getObjectId()]->setForeground(0, QBrush(colorSomeChildrenVisible));
                 break;
             case ObjectTreeItem::FullyVisible:
-                objectIdTreeWidgetItemMap[objectId]->setForeground(0, QBrush(colorFullVisible));
+                objectIdTreeWidgetItemMap[currItem->getObjectId()]->setForeground(0, QBrush(colorFullVisible));
                 break;
         }
 

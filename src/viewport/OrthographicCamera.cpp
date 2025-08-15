@@ -151,16 +151,14 @@ void OrthographicCamera::centerToCurrentSelection() {
 
 void OrthographicCamera::autoview() {
     document->getDatabase()->UnSelectAll();
-    document->getObjectTree()->traverseSubTree(0, false, [this]
-    (size_t objectId){
-        ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
-        switch(item->getVisibilityState()){
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem){
+        switch(currItem->getVisibilityState()){
             case ObjectTreeItem::Invisible:
                 return false;
             case ObjectTreeItem::SomeChildrenVisible:
                 return true;
             case ObjectTreeItem::FullyVisible:
-                document->getDatabase()->Select(item->getPath().toUtf8());
+                document->getDatabase()->Select(currItem->getPath().toUtf8());
                 return false;
         }
         return true;
