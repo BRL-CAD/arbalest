@@ -62,7 +62,7 @@ $Color-PropertiesObjectNameText: #bf1919;
 $Color-PropertiesObjectTypeText: #007acc;
 $Color-FullyVisibleObjectText: #0000ff;
 $Color-SomeChildrenVisibleObjectText: #26d7c0;
-$Color-InvisibleObjectText: #7c7c7c;
+$Color-InvisibleObjectText: #555555;
 $Color-DeadObjectText: #9c9c9c;
 
 $Color-NewActIcon: #7167a3;
