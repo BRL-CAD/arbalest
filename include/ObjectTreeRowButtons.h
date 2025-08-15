@@ -30,17 +30,17 @@ private:
 
     QImage iconCenter;
 
-    int objectId = 0;
+    size_t objectId = 0;
     ObjectTree *objectTree;
-    ObjectTree::VisibilityState visibilityState = ObjectTree::Invisible;
+    ObjectTreeItem::VisibilityState visibilityState = ObjectTreeItem::Invisible;
     static const int margin = 0;
     const char *const visibilityIconFilePath = ":/icons/baseline_visibility_black_18dp.png";
     const char *const centerIconFilePath = ":/icons/baseline_center_focus_strong_black_18dp.png";
     Q_DISABLE_COPY(ObjectTreeRowButtons)
 
 signals:
-    void visibilityButtonClicked(int objectId);
-    void centerButtonClicked(int objectId);
+    void visibilityButtonClicked(size_t objectId);
+    void centerButtonClicked(size_t objectId);
 
 };
 

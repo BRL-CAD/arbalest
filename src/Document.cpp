@@ -39,14 +39,11 @@ void Document::modifyObject(BRLCAD::Object *newObject) {
     modified = true;
     database->Set(*newObject);
     QString objectName = newObject->Name();
-    getObjectTree()->traverseSubTree(0,false,[this, objectName]
-    (int objectId){
-        if (getObjectTree()->getNameMap()[objectId] == objectName){
-            geometryRenderer->clearObject(objectId);
-        }
+    getObjectTree()->traverseSubTree(getObjectTree()->getRootItem(), false, [this, objectName](ObjectTreeItem* currItem) {
+        if (currItem->getName() == objectName)
+            geometryRenderer->clearObject(currItem->getObjectId());
         return true;
-    }
-    );
+    });
     geometryRenderer->refreshForVisibilityAndSolidChanges();
     for (Viewport * display : displayGrid->getViewports())display->forceRerenderFrame();
 }
@@ -55,9 +52,18 @@ bool Document::isModified() {
     return modified;
 }
 
-bool Document::Add(const BRLCAD::Object& object) {
-    modified = true;
-    return database->Add(object);
+bool Document::AddObject(const BRLCAD::Object& object, const bool isVisible) {
+    bool ret = database->Add(object);
+    if (ret) {
+        modified = true;
+        size_t objectId = getObjectTree()->addTopObject(QString(object.Name()));
+        getObjectTree()->changeVisibilityState(objectId, isVisible);
+        getObjectTreeWidget()->build(objectId);
+        getObjectTreeWidget()->refreshItemTextColors();
+        getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+        getViewportGrid()->forceRerenderAllViewports();
+    }
+    return ret;
 }
 
 bool Document::Save(const char* fileName) {

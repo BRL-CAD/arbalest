@@ -41,12 +41,12 @@ public:
     void setLineAttr(int width, int style);
     void setLineStyle(int style);
     void setLineWidth(int width);
-    unsigned int genDLists(size_t range);
-    void beginDList(unsigned int list);
+    size_t genDLists(size_t range);
+    void beginDList(size_t list);
     void endDList();
-    void drawDList(unsigned int list);
-    void freeDLists(unsigned int list, int range);
-    GLboolean isDListValid(unsigned int list);
+    void drawDList(size_t list);
+    void freeDLists(size_t list, size_t range);
+    GLboolean isDListValid(size_t list);
     void saveState();
     void restoreState();
     void drawBegin();

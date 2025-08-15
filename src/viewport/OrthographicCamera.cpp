@@ -22,7 +22,7 @@
 #include "OrthographicCamera.h"
 #include "Utils.h"
 #include <cmath>
-#include <QDebug>
+
 
 QMatrix4x4 OrthographicCamera::modelViewMatrix() const {
     QMatrix4x4 rotationMatrixAroundX;
@@ -151,16 +151,14 @@ void OrthographicCamera::centerToCurrentSelection() {
 
 void OrthographicCamera::autoview() {
     document->getDatabase()->UnSelectAll();
-    document->getObjectTree()->traverseSubTree(0, false, [this]
-    (int objectId){
-        switch(document->getObjectTree()->getObjectVisibility()[objectId]){
-            case ObjectTree::Invisible:
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem){
+        switch(currItem->getVisibilityState()){
+            case ObjectTreeItem::Invisible:
                 return false;
-            case ObjectTree::SomeChildrenVisible:
+            case ObjectTreeItem::SomeChildrenVisible:
                 return true;
-            case ObjectTree::FullyVisible:
-                QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
-                document->getDatabase()->Select(fullPath.toUtf8());
+            case ObjectTreeItem::FullyVisible:
+                document->getDatabase()->Select(currItem->getPath().toUtf8());
                 return false;
         }
         return true;
@@ -170,9 +168,9 @@ void OrthographicCamera::autoview() {
     centerToCurrentSelection();
 }
 
-void OrthographicCamera::centerView(int objectId) {
+void OrthographicCamera::centerView(size_t objectId) {
     document->getDatabase()->UnSelectAll();
-    QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
+    QString fullPath = document->getObjectTree()->getItems()[objectId]->getPath();
     document->getDatabase()->Select(fullPath.toUtf8());
     centerToCurrentSelection();
 }

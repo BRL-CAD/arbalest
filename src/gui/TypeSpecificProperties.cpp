@@ -28,7 +28,7 @@ using namespace std;
 
 
 
-TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Object *object, const int objectId)
+TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Object *object, const size_t objectId)
         : document(document), object(object) {
     setObjectName("properties-TypeSpecificProperties");
     l = getBoxLayout();
@@ -46,9 +46,9 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         childrenListCollapsible->setTitle("Children");
         childrenListCollapsible->setWidget(childrenList);
 
-        for (int childId : document.getObjectTree()->getChildren()[objectId]){
-            QString childName = document.getObjectTree()->getNameMap()[childId];
-            childrenList->addWidget(new QLabel(childName));
+        ObjectTreeItem* item = document.getObjectTree()->getItems()[objectId];
+        for (ObjectTreeItem *child : item->getChildren()){
+            childrenList->addWidget(new QLabel(child->getName()));
         }
 
         QCheckBox *hasColorCheck = new QCheckBox();
@@ -57,8 +57,8 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         colorHolder->setStyleSheet("margin-top:11px;");
         hasColorCheck->setText("Has Color");
         hasColorCheck->setCheckState(comb->HasColor() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-        connect(hasColorCheck,&QCheckBox::stateChanged,[this,objectId](int newState){
-            this->document.getBRLCADObject(this->document.getObjectTree()->getFullPathMap()[objectId],[newState](BRLCAD::Object &object){
+        connect(hasColorCheck,&QCheckBox::stateChanged,[this,item](int newState){
+            this->document.getBRLCADObject(item->getPath(),[newState](BRLCAD::Object &object){
                 if(newState == Qt::CheckState::Checked){
                     dynamic_cast<BRLCAD::Combination&>(object).SetHasColor(true);
                 }
@@ -72,7 +72,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
 
         QPushButton *colorButton = new QPushButton();
         colorButton->setObjectName("colorButton");
-        colorButton->setStyleSheet("background-color:"+document.getObjectTree()->getColorMap()[objectId].toHexString());
+        colorButton->setStyleSheet("background-color:"+item->getColorInfo().toHexString());
         colorHolder->addWidget(colorButton);
         /*connect(colorButton, &QPushButton::clicked, this, [this,objectId](){
             const QColor &initial = this->document.getObjectTree()->getColorMap()[objectId].toQColor();

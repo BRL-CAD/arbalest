@@ -348,14 +348,14 @@ void ViewportManager::setLineAttr(int width, int style)
 /*
  * Viewports a saved display list identified by `list`
  */
-void ViewportManager::drawDList(unsigned int list) {
-    glCallList((GLuint) list);
+void ViewportManager::drawDList(size_t list) {
+    glCallList((GLsizei) list);
 }
 
 /*
  * Generates `range` number of display lists and returns first display list's index
  */
-unsigned int ViewportManager::genDLists(size_t range)
+size_t ViewportManager::genDLists(size_t range)
 {
     return glGenLists((GLsizei)range);
 }
@@ -364,9 +364,9 @@ unsigned int ViewportManager::genDLists(size_t range)
  * Supported subsequent opengl commands are compiled into the display list `list` rather than being rendered to the screen.
  * Should have called genDLists and generated the display list before calling this.
  */
-void ViewportManager::beginDList(unsigned int list)
+void ViewportManager::beginDList(size_t list)
 {
-    glNewList((GLuint)list, GL_COMPILE);
+    glNewList((GLsizei)list, GL_COMPILE);
 }
 
 /*
@@ -380,14 +380,14 @@ void ViewportManager::endDList()
 /*
  * End of the display list initiated by beginDList.
  */
-GLboolean ViewportManager::isDListValid(unsigned int list)
+GLboolean ViewportManager::isDListValid(size_t list)
 {
     return glIsList(list);
 }
 
-void ViewportManager::freeDLists(unsigned int list, int range)
+void ViewportManager::freeDLists(size_t list, size_t range)
 {
-    glDeleteLists((GLuint)list, (GLsizei)range);
+    glDeleteLists((GLsizei)list, (GLsizei)range);
 }
 void ViewportManager::drawBegin()
 {

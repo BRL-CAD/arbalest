@@ -157,21 +157,19 @@ void RaytraceView::raytrace() {
 
     hide();
     document->getDatabase()->UnSelectAll();
-    document->getObjectTree()->traverseSubTree(0, false, [this]
-                                                       (int objectId){
-                                                   switch(document->getObjectTree()->getObjectVisibility()[objectId]){
-                                                       case ObjectTree::Invisible:
-                                                           return false;
-                                                       case ObjectTree::SomeChildrenVisible:
-                                                           return true;
-                                                       case ObjectTree::FullyVisible:
-                                                           QString fullPath = document->getObjectTree()->getFullPathMap()[objectId];
-                                                           document->getDatabase()->Select(fullPath.toUtf8());
-                                                           return false;
-                                                   }
-                                                   return true;
-                                               }
-    );
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem) {
+        switch(currItem->getVisibilityState()){
+            case ObjectTreeItem::Invisible:
+                return false;
+            case ObjectTreeItem::SomeChildrenVisible:
+                return true;
+            case ObjectTreeItem::FullyVisible:
+                QString fullPath = currItem->getPath();
+                document->getDatabase()->Select(fullPath.toUtf8());
+                return false;
+        }
+        return true;
+    });
 
     QMatrix4x4 transformation;
     transformation.translate(document->getViewport()->getCamera()->getEyePosition().x(),

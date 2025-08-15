@@ -30,32 +30,32 @@ GeometryRenderer::GeometryRenderer(Document* document) : document(document)
 void GeometryRenderer::render() {
     document->getViewport()->getViewportManager()->saveState();
     if (!objectsToBeViewportedIds.empty()) {
-        for (int objectId : objectsToBeViewportedIds) {
-            if (!objectIdViewportListIdMap.contains(objectId)) {
+        for (size_t objectId : objectsToBeViewportedIds) {
+            if (!objectIdViewportListIdMap.contains(objectId))
                 drawSolid(objectId);
-            }
             visibleViewportListIds.append(objectIdViewportListIdMap[objectId]);
         }
         objectsToBeViewportedIds.clear();
     }
 
-    for (int displayListId : visibleViewportListIds) {
+    for (size_t displayListId : visibleViewportListIds)
         document->getViewport()->getViewportManager()->drawDList(displayListId);
-    }
+
     document->getViewport()->getViewportManager()->drawSuffix();
     document->getViewport()->getViewportManager()->restoreState();
 }
 
 
-void GeometryRenderer::drawSolid(int objectId) {
-    const ColorInfo colorInfo = document->getObjectTree()->getColorMap()[objectId];
-    const QString objectFullPath = document->getObjectTree()->getFullPathMap()[objectId];
+void GeometryRenderer::drawSolid(size_t objectId) {
+    ObjectTreeItem *item = document->getObjectTree()->getItems()[objectId];
+    const ColorInfo colorInfo = item->getColorInfo();
+    const QString objectFullPath = item->getPath();
     BRLCAD::VectorList vectorList;
     document->getDatabase()->Plot(objectFullPath.toUtf8(), vectorList);
 
     clearSolidIfAvailable(objectId);
 
-    const unsigned int displayListId = document->getViewport()->getViewportManager()->genDLists(1);
+    const size_t displayListId = document->getViewport()->getViewportManager()->genDLists(1);
     document->getViewport()->getViewportManager()->beginDList(displayListId);  // begin display list --------------
 
     if (colorInfo.hasColor) {
@@ -76,27 +76,25 @@ void GeometryRenderer::drawSolid(int objectId) {
 
 void GeometryRenderer::refreshForVisibilityAndSolidChanges() {
     visibleViewportListIds.clear();
-    document->getObjectTree()->traverseSubTree(0, false,[this]
-        (int objectId)
-        {
-            if (document->getObjectTree()->getObjectVisibility()[objectId] == ObjectTree::Invisible) return false;
-            if (!document->getObjectTree()->getDrawableObjectIds().contains(objectId)) return true;
-            objectsToBeViewportedIds.append(objectId);
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem) {
+            if (currItem->getVisibilityState() == ObjectTreeItem::Invisible) return false;
+            if (!currItem->isDrawable()) return true;
+            objectsToBeViewportedIds.append(currItem->getObjectId());
             return true;
         }
     );
 }
 
-void GeometryRenderer::clearSolidIfAvailable(int objectId) {
+void GeometryRenderer::clearSolidIfAvailable(size_t objectId) {
     if (objectIdViewportListIdMap.contains(objectId)){
         document->getViewport()->getViewportManager()->freeDLists(objectIdViewportListIdMap[objectId], 1);
         objectIdViewportListIdMap.remove(objectId);
     }
 }
 
-void GeometryRenderer::clearObject(int objectId) {
-    document->getObjectTree()->traverseSubTree(objectId, true, [this](int objectId){
-        clearSolidIfAvailable(objectId);
+void GeometryRenderer::clearObject(size_t objectId) {
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), true, [this](ObjectTreeItem* currItem){
+        clearSolidIfAvailable(currItem->getObjectId());
         return true;
     });
 }

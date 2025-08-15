@@ -9,9 +9,9 @@
 class MatrixTransformWidget : public DataRow{
 public:
     enum TransformType {Translate, Rotate, Scale};
-    MatrixTransformWidget(Document * document, int childObjectId, TransformType transformType );
+    MatrixTransformWidget(Document * document, size_t childObjectId, TransformType transformType);
 private:
-    static QHash<int,QWidget*> widgets;
+    static QHash<size_t,QWidget*> widgets;
 };
 
 
