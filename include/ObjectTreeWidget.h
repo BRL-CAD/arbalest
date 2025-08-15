@@ -53,6 +53,7 @@ private:
     QColor colorFullVisible;
     QColor colorSomeChildrenVisible;
     QColor colorInvisible;
+    QColor colorDead;
 
 signals:
     void visibilityButtonClicked(size_t objectId);

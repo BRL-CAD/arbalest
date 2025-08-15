@@ -33,6 +33,7 @@ private:
     size_t objectId = 0;
     ObjectTree *objectTree;
     ObjectTreeItem::VisibilityState visibilityState = ObjectTreeItem::Invisible;
+    bool alive = false;
     static const int margin = 0;
     const char *const visibilityIconFilePath = ":/icons/baseline_visibility_black_18dp.png";
     const char *const centerIconFilePath = ":/icons/baseline_center_focus_strong_black_18dp.png";

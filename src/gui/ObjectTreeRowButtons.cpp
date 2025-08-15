@@ -76,7 +76,7 @@ QPoint ObjectTreeRowButtons::centerIconPosition(const QStyleOptionViewItem &opti
 
 void ObjectTreeRowButtons::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
     QStyledItemDelegate::paint(painter, option, index);
-    if (option.state & QStyle::State_MouseOver) {
+    if (option.state & QStyle::State_MouseOver && alive) {
         switch (visibilityState){
             case ObjectTreeItem::Invisible:
                 painter->drawImage(visibilityIconPosition(option), iconInvisible);
@@ -102,6 +102,11 @@ QSize ObjectTreeRowButtons::sizeHint(const QStyleOptionViewItem &option, const Q
 bool ObjectTreeRowButtons::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {
     objectId = index.data(Qt::UserRole).toULongLong();
     ObjectTreeItem *objTreeItem = objectTree->getItems()[objectId];
+
+    alive = objTreeItem->isAlive();
+    if (!alive)
+        return true;
+
     visibilityState = objTreeItem->getVisibilityState();
     QRect visibilityIconRect = iconFullVisible.rect().translated(visibilityIconPosition(option));
     QRect centerIconRect = iconFullVisible.rect().translated(centerIconPosition(option));
