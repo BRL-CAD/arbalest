@@ -31,17 +31,16 @@ void GeometryRenderer::render() {
     document->getViewport()->getViewportManager()->saveState();
     if (!objectsToBeViewportedIds.empty()) {
         for (size_t objectId : objectsToBeViewportedIds) {
-            if (!objectIdViewportListIdMap.contains(objectId)) {
+            if (!objectIdViewportListIdMap.contains(objectId))
                 drawSolid(objectId);
-            }
             visibleViewportListIds.append(objectIdViewportListIdMap[objectId]);
         }
         objectsToBeViewportedIds.clear();
     }
 
-    for (int displayListId : visibleViewportListIds) {
+    for (size_t displayListId : visibleViewportListIds)
         document->getViewport()->getViewportManager()->drawDList(displayListId);
-    }
+
     document->getViewport()->getViewportManager()->drawSuffix();
     document->getViewport()->getViewportManager()->restoreState();
 }

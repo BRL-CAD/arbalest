@@ -44,10 +44,10 @@ private:
     void drawSolid(size_t objectId);
 
     // Contains generated display list alone with corresponding objectId. objectId is the key. displayListId is value.
-    QHash<int, int>             objectIdViewportListIdMap;
+    QHash<size_t, size_t>             objectIdViewportListIdMap;
 
-    QVector<int> visibleViewportListIds;
-    QVector<int> objectsToBeViewportedIds;
+    QVector<size_t> visibleViewportListIds;
+    QVector<size_t> objectsToBeViewportedIds;
 };
 
 

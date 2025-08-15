@@ -185,7 +185,7 @@ void ObjectTree::traverseSubTree(const size_t rootOfSubTreeId, bool traverseRoot
 	ObjectTreeItem *item = getItems()[rootOfSubTreeId];
     if (traverseRoot) callback(item->getObjectId());
 	for (ObjectTreeItem *itemChild : item->getChildren()) {
-        const unsigned childId = itemChild->getObjectId();
+        const size_t childId = itemChild->getObjectId();
 		if (!callback(childId)) continue;
 		if (!itemChild->getChildren().empty()) traverseSubTree(childId, false, callback);
 	}

@@ -100,8 +100,9 @@ QSize ObjectTreeRowButtons::sizeHint(const QStyleOptionViewItem &option, const Q
 }
 
 bool ObjectTreeRowButtons::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {
-    objectId = index.data(Qt::UserRole).toInt();
-    visibilityState = objectTree->getItems()[objectId]->getVisibilityState();
+    objectId = index.data(Qt::UserRole).toULongLong();
+    ObjectTreeItem *objTreeItem = objectTree->getItems()[objectId];
+    visibilityState = objTreeItem->getVisibilityState();
     QRect visibilityIconRect = iconFullVisible.rect().translated(visibilityIconPosition(option));
     QRect centerIconRect = iconFullVisible.rect().translated(centerIconPosition(option));
     // Emit a signal when the icon is clicked
@@ -109,7 +110,7 @@ bool ObjectTreeRowButtons::editorEvent(QEvent *event, QAbstractItemModel *model,
         QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(event);
         if (visibilityIconRect.contains(mouseEvent->pos())) {
             emit visibilityButtonClicked(objectId);
-            visibilityState = objectTree->getItems()[objectId]->getVisibilityState();
+            visibilityState = objTreeItem->getVisibilityState();
             return true;
         }
         else if (centerIconRect.contains(mouseEvent->pos())) {

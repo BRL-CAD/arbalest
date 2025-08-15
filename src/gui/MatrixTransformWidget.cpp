@@ -4,9 +4,9 @@
 #include <QMessageBox>
 #include "MatrixTransformWidget.h"
 
-QHash<int,QWidget*> MatrixTransformWidget::widgets;
+QHash<size_t,QWidget*> MatrixTransformWidget::widgets;
 
-MatrixTransformWidget::MatrixTransformWidget(Document *document, int childObjectId, TransformType transformType)
+MatrixTransformWidget::MatrixTransformWidget(Document *document, size_t childObjectId, TransformType transformType)
         : DataRow(3, true) {
     setWindowFlags( Qt::Window| Qt::WindowCloseButtonHint);
     setAttribute( Qt::WA_QuitOnClose, false );
