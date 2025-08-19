@@ -1,7 +1,7 @@
-/*                    O B J E C T S T R E E V I E W . C P P
+/*                        O B J E C T T R E E . C P P
  * BRL-CAD
  *
- * Copyright (c) 2018 United States Government as represented by
+ * Copyright (c) 2018-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,9 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
- /** @file ObjectTree.cpp
-  *
-  */
+ /** @file ObjectTree.cpp */
+
 
 #include <brlcad/Database/Combination.h>
 #include "ObjectTree.h"
