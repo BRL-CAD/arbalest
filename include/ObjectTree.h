@@ -246,11 +246,10 @@ public:
 private:
     BRLCAD::MemoryDatabase* database;
 
-    class ObjectTreeCallback {
+    class BuildObjectTreeClbk {
     public:
-        ObjectTreeCallback(ObjectTree* objectTree) : objectTree(objectTree) {}
+        BuildObjectTreeClbk(ObjectTree* objectTree) : objectTree(objectTree) {}
         void operator()(const BRLCAD::Object& object);
-
     private:
         void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node);
 
