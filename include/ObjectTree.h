@@ -63,16 +63,13 @@
 #ifndef RT3_OBJECTTREE_H
 #define RT3_OBJECTTREE_H
 
-#include <QString>
 #include <QHash>
-#include <QSet>
-#include <QVector>
-#include "brlcad/Database/MemoryDatabase.h"
-#include <brlcad/Database/Combination.h>
-#include <functional>
-#include <set>
+#include <QObject>
 #include <QString>
-#include <brlcad/CommandString/CommandString.h>
+#include <QVector>
+#include <brlcad/Database/Combination.h>
+#include "brlcad/Database/ConstDatabase.h"
+#include "brlcad/Database/MemoryDatabase.h"
 #include "Utils.h"
 
 

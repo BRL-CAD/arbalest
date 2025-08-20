@@ -24,13 +24,10 @@
  */
  /** @file ObjectTree.cpp */
 
+#include "Globals.h"
+#include "MainWindow.h"
 
-#include <brlcad/Database/Combination.h>
 #include "ObjectTree.h"
-#include <QStandardItemModel>
-#include "brlcad/Database/MemoryDatabase.h"
-#include <QString>
-#include <brlcad/CommandString/CommandString.h>
 
 
 // ---------- OBJECT TREE ITEM DATA ----------
@@ -43,19 +40,22 @@ void ObjectTreeItemData::addOp(BRLCAD::Combination::ConstTreeNode::Operator op) 
 // ---------- OBJECT TREE ITEM ----------
 
 ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data, size_t uniqueObjectId) : data(data), uniqueObjectId(uniqueObjectId) {
-    // When I create an item, I also need to give the item to the item data that it references 
+    // When I create an item, I also need to give the item to the item data that it references
     getItemsWithSameData().append(this);
 }
+
 
 void ObjectTreeItem::addChild(ObjectTreeItem *itemParent) {
     getChildren().append(itemParent);
 }
+
 
 bool ObjectTreeItem::isRoot(void) {
     if (getParent() == nullptr)
         return true;
     return false;
 }
+
 
 QString ObjectTreeItem::getPath(void) {
     if (isRoot())
@@ -118,7 +118,7 @@ void ObjectTree::ObjectTreeCallback::traverseSubTree(const BRLCAD::Combination::
             currOp = node.Operation();
             traverseSubTree(node.Operand());
             break;
-        
+
         // If Leaf, then create a new item
         case BRLCAD::Combination::ConstTreeNode::Leaf:
             ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
@@ -163,7 +163,7 @@ ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
         getItemsData().insert(name, newItemData);
     } else
         newItemData = it.value();
-    
+
     // Then create the actual item with the grabbed item data
     ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++lastAllocatedId);
     getItems().insert(lastAllocatedId, newItem);
