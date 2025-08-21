@@ -85,6 +85,8 @@ void ObjectTreeWidget::build(const size_t objectId, QTreeWidgetItem* parent) {
         item->setText(0, objTreeItem->getName());
         item->setData(0, Qt::UserRole, (qulonglong)objectId);
 
+        item->setDisabled(!objTreeItem->isAlive());
+
         if (parent != nullptr)
             parent->addChild(item);
         else
@@ -123,6 +125,11 @@ const QHash<size_t, QTreeWidgetItem *> &ObjectTreeWidget::getObjectIdTreeWidgetI
 
 void ObjectTreeWidget::refreshItemTextColors() {
     document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* currItem) {
+        if (!currItem->isAlive()) {
+            objectIdTreeWidgetItemMap[currItem->getObjectId()]->setForeground(0, QBrush(colorDead));
+            return true;
+        }
+
         switch (currItem->getVisibilityState()) {
             case ObjectTreeItem::Invisible:
                 objectIdTreeWidgetItemMap[currItem->getObjectId()]->setForeground(0, QBrush(colorInvisible));
@@ -148,4 +155,5 @@ void ObjectTreeWidget::setTextColor() {
     colorFullVisible = QColor(Globals::theme->process("$Color-FullyVisibleObjectText"));
     colorSomeChildrenVisible = QColor(Globals::theme->process("$Color-SomeChildrenVisibleObjectText"));
     colorInvisible = QColor(Globals::theme->process("$Color-InvisibleObjectText"));
+    colorDead = QColor(Globals::theme->process("$Color-DeadObjectText"));
 }
