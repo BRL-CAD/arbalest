@@ -254,7 +254,7 @@ void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
 
 size_t ObjectTree::addTopObject(QString name) {
     ObjectTreeItem *topLevelItem = addNewObjectTreeItem(name);
-    ObjectTreeItem *rootItem = getItems()[0];
+    ObjectTreeItem *rootItem = getRootItem();
     topLevelItem->setParent(rootItem);
     rootItem->addChild(topLevelItem);
     // Get top level object and loop through his children with callback
