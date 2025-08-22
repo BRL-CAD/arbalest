@@ -177,6 +177,65 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
 }
 
 
+// ---------- UPDATE OBJECT TREE CALLBACK ----------
+
+void ObjectTree::UpdateObjectTreeClbk::operator()(const BRLCAD::Object& object) {
+    // If the object is a combination, iter through its children, else it means that it is drawable
+    if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
+        traverseSubTree(combination->Tree());
+    }
+    if (!currItemData->getItemsWithThisData().isEmpty()) {
+        ObjectTreeItem* item = currItemData->getItemsWithThisData()[0];
+        for (qsizetype i = 0; i != item->getChildren().size(); ++i) {
+            tempBufferPos = tempBuffer.indexOf(item->getChildren()[i]->getName());
+            if (tempBufferPos != -1)
+                tempBuffer.remove(tempBufferPos);
+            else {
+                for (ObjectTreeItem* sharedItem : currItemData->getItemsWithThisData()) {
+                    ObjectTreeItem* child = sharedItem->getChildren()[i];
+                    sharedItem->getChildren().remove(i);
+                    objectTree->deleteObjectTreeItem(child);
+                }
+                --i;
+            }
+        }
+    }
+    for (tempBufferPos = 0; tempBufferPos < tempBuffer.size(); ++tempBufferPos) {
+        for (ObjectTreeItem* sharedItem : currItemData->getItemsWithThisData()) {
+            ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(tempBuffer.at(tempBufferPos));
+            newItem->setParent(sharedItem);
+            sharedItem->addChild(newItem);
+        }
+    }
+}
+
+
+void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
+	switch (node.Operation()) {
+        // If Union/Intersection/Subtraction/ExclusiveOr, access children
+        case BRLCAD::Combination::ConstTreeNode::Union:
+        case BRLCAD::Combination::ConstTreeNode::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+            tempOpBuffer.append(node.Operation());
+            traverseSubTree(node.LeftOperand());
+            tempOpBuffer.append(node.Operation());
+            traverseSubTree(node.RightOperand());
+            break;
+
+        // If Not, access child
+        case BRLCAD::Combination::ConstTreeNode::Not:
+            tempOpBuffer.append(node.Operation());
+            traverseSubTree(node.Operand());
+            break;
+
+        // If Leaf, then create a new item
+        case BRLCAD::Combination::ConstTreeNode::Leaf:
+            tempBuffer.append(QString(node.Name()));
+	}
+}
+
+
 // ---------- OBJECT TREE ----------
 
 ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
@@ -206,6 +265,67 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
 
 ObjectTree::~ObjectTree() {
     database->DeRegisterChangeSignalHandler(databaseChangeHandlerVar);
+}
+
+
+void ObjectTree::updateObjectTree() {
+    QVector<QString> tempBuffer   = {};
+	qsizetype        tempBufferPos;
+
+    // Loop through all top level objects (which are the children of root)
+	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
+    while (it.Good()) {
+        tempBuffer.append(QString(it.Name()));
+        ++it;
+    }
+    for (qsizetype i = 0; i != getRootItem()->getChildren().size(); ++i) {
+        ObjectTreeItem* child = getRootItem()->getChildren()[i];
+        tempBufferPos = tempBuffer.indexOf(child->getName());
+        if (tempBufferPos != -1)
+            tempBuffer.remove(tempBufferPos);
+        else {
+            getRootItem()->getChildren().remove(i);
+            deleteObjectTreeItem(child);
+            --i;
+        }
+    }
+    for (tempBufferPos = 0; tempBufferPos < tempBuffer.size(); ++tempBufferPos) {
+        ObjectTreeItem *newItem = addNewObjectTreeItem(tempBuffer.at(tempBufferPos));
+        ObjectTreeItem *rootItem = getRootItem();
+        newItem->setParent(rootItem);
+        rootItem->addChild(newItem);
+    }
+
+    // Loop through all items
+    for (ObjectTreeItemData* itemData : getItemsData()) {
+        if (itemData == getRootItem()->getData())
+            continue;
+        // Get through all objects with callback
+        UpdateObjectTreeClbk callback(itemData, this);
+        database->Get(itemData->getName().toUtf8().data(), callback);
+        if (!itemData->isAlive()) {
+            // Then it is only a reference, so clear it
+            for (ObjectTreeItem* sharedItem : itemData->getItemsWithThisData()) {
+                for (ObjectTreeItem* childOfReference : sharedItem->getChildren())
+                    deleteObjectTreeItem(childOfReference);
+                sharedItem->getChildren().clear();
+            }
+        }
+    }
+
+    for (ObjectTreeItemData* itemData : getItemsData()) {
+        // If the item data is not referenced by any item, delete it
+        if (itemData->getItemsWithThisData().isEmpty()) {
+            getItemsData().remove(itemData->getName());
+            delete itemData;
+        }
+    }
+
+    Document* currDocument = Globals::mainWindow->getActiveDocument();
+    currDocument->getObjectTreeWidget()->build(0);
+    currDocument->getObjectTreeWidget()->refreshItemTextColors();
+    currDocument->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    currDocument->getViewportGrid()->forceRerenderAllViewports();
 }
 
 

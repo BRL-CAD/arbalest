@@ -230,6 +230,8 @@ public:
 
     size_t addTopObject(QString name);
 
+    void updateObjectTree();
+
     static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
 
     void queueAddObjectHandler(QString objectName);
@@ -267,6 +269,23 @@ private:
         ObjectTree* objectTree = nullptr;
         ObjectTreeItem* currItem = nullptr;
         BRLCAD::Combination::ConstTreeNode::Operator currOp = BRLCAD::Combination::ConstTreeNode::Null;
+    };
+
+    class UpdateObjectTreeClbk {
+    public:
+        UpdateObjectTreeClbk(ObjectTreeItemData* currItemData, ObjectTree* objectTree) : currItemData(currItemData), objectTree(objectTree) {}
+        void operator()(const BRLCAD::Object& object);
+    private:
+        void traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node);
+
+        ObjectTree* objectTree = nullptr;
+        ObjectTreeItemData* currItemData = nullptr;
+
+        QVector<QString>                                      tempBuffer   = {};
+        QVector<BRLCAD::Combination::ConstTreeNode::Operator> tempOpBuffer = {};
+
+        qsizetype tempBufferPos = 0;
+        qsizetype tempOpBufferPos = 0;
     };
 
     BRLCAD::ConstDatabase::ChangeSignalHandler databaseChangeHandlerVar = this->databaseChangeHandler;
