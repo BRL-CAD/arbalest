@@ -956,3 +956,10 @@ void MainWindow::updateMouseButtonObjectState() {
         moveCameraButtonAction();
     }
 }
+
+Document* MainWindow::getActiveDocument() {
+    if (activeDocumentId != -1)
+        return documents[activeDocumentId];
+    else
+        return nullptr;
+}
