@@ -74,6 +74,9 @@ QString ObjectTreeItem::getPath(void) {
 
 // Function given to BRLCAD::ConstDatabase::RegisterObjChangeSignalHandler
 void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType) {
+    if (objectName == nullptr)
+        return;
+
     // If no document is open, return
     Document* currDocument = Globals::mainWindow->getActiveDocument();
     if (currDocument == nullptr)
@@ -82,9 +85,6 @@ void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstData
     // If a GED command is not being executed, return
     ObjectTree* currObjectTree = currDocument->getObjectTree();
     if (!currObjectTree->isCmdBeingExecuted())
-        return;
-
-    if (objectName == nullptr)
         return;
 
     QString name = objectName;
@@ -179,11 +179,13 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
 
 // ---------- UPDATE OBJECT TREE CALLBACK ----------
 
+// Used to update the object tree of a database
 void ObjectTree::UpdateObjectTreeClbk::operator()(const BRLCAD::Object& object) {
     // If the object is a combination, iter through its children, else it means that it is drawable
     if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
         traverseSubTree(combination->Tree());
     }
+
     if (!currItemData->getItemsWithThisData().isEmpty()) {
         ObjectTreeItem* item = currItemData->getItemsWithThisData()[0];
         for (qsizetype i = 0; i != item->getChildren().size(); ++i) {
