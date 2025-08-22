@@ -211,9 +211,11 @@ private:
 };
 
 
-class ObjectTree {
+class ObjectTree : public QObject {
+    Q_OBJECT
 public:
     ObjectTree(BRLCAD::MemoryDatabase* database);
+    ~ObjectTree();
 
     size_t lastAllocatedId = 0;
 
@@ -229,6 +231,10 @@ public:
     size_t addTopObject(QString name);
 
     static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
+
+    void queueAddObjectHandler(QString objectName);
+    void queueModifyObjectHandler(QString objectName);
+    void queueRemoveObjectHandler(QString objectName);
 
     // getters
     BRLCAD::MemoryDatabase* getDatabase() const
@@ -270,6 +276,16 @@ private:
 
     // Unique name to item data
     QHash<QString, ObjectTreeItemData*> itemsData;
+
+signals:
+    void addObjectHandlerSignal(QString objectName);
+    void modifyObjectHandlerSignal(QString objectName);
+    void removeObjectHandlerSignal(QString objectName);
+
+public slots:
+    void addObjectHandler(QString objectName);
+    void modifyObjectHandler(QString objectName);
+    void removeObjectHandler(QString objectName);
 };
 
 #endif

@@ -90,12 +90,15 @@ void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstData
     QString name = objectName;
     switch (changeType) {
         case BRLCAD::ConstDatabase::ChangeType::Addition:
+            currObjectTree->queueAddObjectHandler(name);
             break;
 
         case BRLCAD::ConstDatabase::ChangeType::Modification:
+            currObjectTree->queueModifyObjectHandler(name);
             break;
 
         case BRLCAD::ConstDatabase::ChangeType::Removal:
+            currObjectTree->queueRemoveObjectHandler(name);
             break;
 
         default:
@@ -194,6 +197,10 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
     }
 
     database->RegisterChangeSignalHandler(databaseChangeHandlerVar);
+
+    connect(this, &ObjectTree::addObjectHandlerSignal, this, &ObjectTree::addObjectHandler, Qt::QueuedConnection);
+    connect(this, &ObjectTree::modifyObjectHandlerSignal, this, &ObjectTree::modifyObjectHandler, Qt::QueuedConnection);
+    connect(this, &ObjectTree::removeObjectHandlerSignal, this, &ObjectTree::removeObjectHandler, Qt::QueuedConnection);
 }
 
 
@@ -325,3 +332,61 @@ size_t ObjectTree::addTopObject(QString name) {
 		return true;
 	});
 }*/
+
+
+// ---------- OBJECT TREE SIGNALS AND SLOTS ----------
+
+void ObjectTree::queueAddObjectHandler(QString objectName) {
+    emit addObjectHandlerSignal(objectName);
+}
+
+
+void ObjectTree::queueModifyObjectHandler(QString objectName) {
+    emit modifyObjectHandlerSignal(objectName);
+}
+
+
+void ObjectTree::queueRemoveObjectHandler(QString objectName) {
+    emit removeObjectHandlerSignal(objectName);
+}
+
+
+void ObjectTree::addObjectHandler(QString objectName) {
+    // Create itemData if it doesn't exist
+    ObjectTreeItemData* newItemData;;
+    QHash<QString, ObjectTreeItemData*>::const_iterator it = getItemsData().find(objectName);
+    if (it == getItemsData().end()) {
+        newItemData = new ObjectTreeItemData(objectName);
+        getItemsData().insert(objectName, newItemData);
+    }
+
+    modifyObjectHandler(objectName);
+}
+
+
+void ObjectTree::modifyObjectHandler(QString objectName) {
+    // Get all the informations for the itemData
+    ObjectTreeItemData *itemData = getItemsData()[objectName];
+    database->Get(objectName.toUtf8().data(), [&itemData](const BRLCAD::Object& object) {
+        if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
+            if (combination->HasColor()) {
+                itemData->getColorInfo().red = combination->Red();
+                itemData->getColorInfo().green = combination->Green();
+                itemData->getColorInfo().blue = combination->Blue();
+                itemData->getColorInfo().hasColor = true;
+            }
+        } else
+            itemData->setIsDrawableFlag(true);
+        itemData->setIsAliveFlag(true);
+    });
+}
+
+
+void ObjectTree::removeObjectHandler(QString objectName) {
+    // Clear itemData informations
+    ObjectTreeItemData *itemData = getItemsData()[objectName];
+    itemData->getChildrenOps().clear();
+    itemData->setIsAliveFlag(false);
+    itemData->setIsDrawableFlag(false);
+    itemData->getColorInfo() = {0, 0, 0, false};
+}
