@@ -228,6 +228,8 @@ public:
 
     size_t addTopObject(QString name);
 
+    static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
+
     // getters
     BRLCAD::MemoryDatabase* getDatabase() const
     {
@@ -260,6 +262,8 @@ private:
         ObjectTreeItem* currItem = nullptr;
         BRLCAD::Combination::ConstTreeNode::Operator currOp = BRLCAD::Combination::ConstTreeNode::Null;
     };
+
+    BRLCAD::ConstDatabase::ChangeSignalHandler databaseChangeHandlerVar = this->databaseChangeHandler;
 
     // All items
     QHash<size_t, ObjectTreeItem*> items;

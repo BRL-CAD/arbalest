@@ -70,6 +70,40 @@ QString ObjectTreeItem::getPath(void) {
 }
 
 
+// ---------- DATABASE CHANGE HANDLER ----------
+
+// Function given to BRLCAD::ConstDatabase::RegisterObjChangeSignalHandler
+void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType) {
+    // If no document is open, return
+    Document* currDocument = Globals::mainWindow->getActiveDocument();
+    if (currDocument == nullptr)
+        return;
+
+    // If a GED command is not being executed, return
+    ObjectTree* currObjectTree = currDocument->getObjectTree();
+    if (!currObjectTree->isCmdBeingExecuted())
+        return;
+
+    if (objectName == nullptr)
+        return;
+
+    QString name = objectName;
+    switch (changeType) {
+        case BRLCAD::ConstDatabase::ChangeType::Addition:
+            break;
+
+        case BRLCAD::ConstDatabase::ChangeType::Modification:
+            break;
+
+        case BRLCAD::ConstDatabase::ChangeType::Removal:
+            break;
+
+        default:
+            break;
+    }
+}
+
+
 // ---------- BUILD OBJECT TREE CALLBACK ----------
 
 /* Warning: BuildObjectTreeClbk() (used to construct the object tree of a database) assumes that in a database
@@ -158,7 +192,15 @@ ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
         addTopObject(QString(it.Name()));
         ++it;
     }
+
+    database->RegisterChangeSignalHandler(databaseChangeHandlerVar);
 }
+
+
+ObjectTree::~ObjectTree() {
+    database->DeRegisterChangeSignalHandler(databaseChangeHandlerVar);
+}
+
 
 ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
     // If the item name is new, it means that the item data is new, so create it. Else grab the existing one
