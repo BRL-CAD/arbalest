@@ -265,6 +265,7 @@ void Console::executeCommand(void) {
 
     // Execute command
     BRLCAD::CommandString::State parserState = parser->Parse(argv);
+    getActiveDocument()->setModified();
 
     // If command is multi input, handle it differently
     if (parserState == BRLCAD::CommandString::State::Incomplete) {
