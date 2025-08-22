@@ -234,6 +234,9 @@ public:
 
     static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
 
+    void cmdExecutionStarted();
+    void cmdExecutionEnded();
+
     void queueAddObjectHandler(QString objectName);
     void queueModifyObjectHandler(QString objectName);
     void queueRemoveObjectHandler(QString objectName);
@@ -254,6 +257,10 @@ public:
 
     ObjectTreeItem* getRootItem() {
         return getItems()[0];
+    }
+
+    bool isCmdBeingExecuted() {
+        return cmdBeingExecuted;
     }
 	
 private:
@@ -289,6 +296,10 @@ private:
     };
 
     BRLCAD::ConstDatabase::ChangeSignalHandler databaseChangeHandlerVar = this->databaseChangeHandler;
+
+    bool cmdBeingExecuted = false;
+
+    size_t queuedSignals = 0;
 
     // All items
     QHash<size_t, ObjectTreeItem*> items;

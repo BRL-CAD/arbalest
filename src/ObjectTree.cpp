@@ -454,19 +454,37 @@ size_t ObjectTree::addTopObject(QString name) {
 }*/
 
 
+void ObjectTree::cmdExecutionStarted() {
+    cmdBeingExecuted = true;
+}
+
+
+void ObjectTree::cmdExecutionEnded() {
+    if (!cmdBeingExecuted)
+        return;
+
+    cmdBeingExecuted = false;
+    if (queuedSignals == 0)
+        updateObjectTree();
+}
+
+
 // ---------- OBJECT TREE SIGNALS AND SLOTS ----------
 
 void ObjectTree::queueAddObjectHandler(QString objectName) {
+    ++queuedSignals;
     emit addObjectHandlerSignal(objectName);
 }
 
 
 void ObjectTree::queueModifyObjectHandler(QString objectName) {
+    ++queuedSignals;
     emit modifyObjectHandlerSignal(objectName);
 }
 
 
 void ObjectTree::queueRemoveObjectHandler(QString objectName) {
+    ++queuedSignals;
     emit removeObjectHandlerSignal(objectName);
 }
 
@@ -499,6 +517,9 @@ void ObjectTree::modifyObjectHandler(QString objectName) {
             itemData->setIsDrawableFlag(true);
         itemData->setIsAliveFlag(true);
     });
+
+    if (--queuedSignals == 0)
+        updateObjectTree();
 }
 
 
@@ -509,4 +530,7 @@ void ObjectTree::removeObjectHandler(QString objectName) {
     itemData->setIsAliveFlag(false);
     itemData->setIsDrawableFlag(false);
     itemData->getColorInfo() = {0, 0, 0, false};
+
+    if (--queuedSignals == 0)
+        updateObjectTree();
 }
