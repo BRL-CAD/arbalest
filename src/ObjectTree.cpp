@@ -44,6 +44,11 @@ ObjectTreeItem::ObjectTreeItem(ObjectTreeItemData* data, size_t uniqueObjectId) 
     getItemsWithSameData().append(this);
 }
 
+ObjectTreeItem::~ObjectTreeItem() {
+    // When I destroy an item, I also need to delete the item from the item data that it references
+    getItemsWithSameData().remove(getItemsWithSameData().indexOf(this));
+}
+
 
 void ObjectTreeItem::addChild(ObjectTreeItem *itemParent) {
     getChildren().append(itemParent);
@@ -169,6 +174,18 @@ ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
     ObjectTreeItem *newItem = new ObjectTreeItem(newItemData, ++lastAllocatedId);
     getItems().insert(lastAllocatedId, newItem);
     return newItem;
+}
+
+
+void ObjectTree::deleteObjectTreeItem(ObjectTreeItem* item) {
+    for (ObjectTreeItem* child : item->getChildren())
+        deleteObjectTreeItem(child);
+
+    ObjectTreeItemData* data = item->getData();
+
+    // Delete item
+    getItems().remove(item->getObjectId());
+    delete item;
 }
 
 

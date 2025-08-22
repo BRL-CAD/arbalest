@@ -137,6 +137,7 @@ public:
     };
 
     ObjectTreeItem(ObjectTreeItemData* data, size_t uniqueObjectId);
+    ~ObjectTreeItem();
 
     void addChild(ObjectTreeItem *itemParent);
 
@@ -222,6 +223,8 @@ public:
 
     // Given a name, create a new item and assign its item data (if the name is new, create a new item data)
     ObjectTreeItem *addNewObjectTreeItem(QString name);
+
+    void deleteObjectTreeItem(ObjectTreeItem* item);
 
     size_t addTopObject(QString name);
 
