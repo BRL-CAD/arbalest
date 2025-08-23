@@ -288,11 +288,8 @@ private:
         ObjectTree* objectTree = nullptr;
         ObjectTreeItemData* currItemData = nullptr;
 
-        QVector<QString>                                      tempBuffer   = {};
-        QVector<BRLCAD::Combination::ConstTreeNode::Operator> tempOpBuffer = {};
-
-        qsizetype tempBufferPos = 0;
-        qsizetype tempOpBufferPos = 0;
+        QVector<QString> childrenBuffer = {};
+        QVector<BRLCAD::Combination::ConstTreeNode::Operator> childrenOpBuffer = {};
     };
 
     BRLCAD::ConstDatabase::ChangeSignalHandler databaseChangeHandlerVar = this->databaseChangeHandler;

@@ -72,7 +72,7 @@ QString ObjectTreeItem::getPath(void) {
 
 // ---------- DATABASE CHANGE HANDLER ----------
 
-// Function given to BRLCAD::ConstDatabase::RegisterObjChangeSignalHandler
+// Function given to BRLCAD::ConstDatabase::RegisterChangeSignalHandler
 void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType) {
     if (objectName == nullptr)
         return;
@@ -181,17 +181,27 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
 
 // Used to update the object tree of a database
 void ObjectTree::UpdateObjectTreeClbk::operator()(const BRLCAD::Object& object) {
-    // If the object is a combination, iter through its children, else it means that it is drawable
-    if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
+    // If the object is a combination, iter through its children, and build tempBuffer and tempOpBuffer
+    if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object))
         traverseSubTree(combination->Tree());
-    }
 
-    if (!currItemData->getItemsWithThisData().isEmpty()) {
-        ObjectTreeItem* item = currItemData->getItemsWithThisData()[0];
-        for (qsizetype i = 0; i != item->getChildren().size(); ++i) {
-            tempBufferPos = tempBuffer.indexOf(item->getChildren()[i]->getName());
-            if (tempBufferPos != -1)
-                tempBuffer.remove(tempBufferPos);
+	qsizetype childrenBufferPos;
+	qsizetype childrenOpBufferPos;
+
+    QVector<ObjectTreeItem *>& itemsWithThisData = currItemData->getItemsWithThisData();
+    if (!itemsWithThisData.isEmpty()) {
+        /* All itemsWithThisData have the same children (different items, but with same item data),
+           so I can loop through the children of the first itemWithThisData, and using its children
+           position in the QVector (var "i") to modify the children of ALL itemsWithThisData.
+           This means that we are basically iterating over the children of the ObjectTreeItemData */
+        ObjectTreeItem* firstItem = itemsWithThisData[0];
+        QVector<ObjectTreeItem *>& childrenOfFirstItem = firstItem->getChildren();
+        for (qsizetype i = 0; i != childrenOfFirstItem.size(); ++i) {
+            childrenBufferPos = childrenBuffer.indexOf(childrenOfFirstItem[i]->getName());
+            // If the child already is a child of the item data, remove it from the childrenBuffer
+            if (childrenBufferPos != -1)
+                childrenBuffer.remove(childrenBufferPos);
+            // Else, it means that the child should not be a child of the item data, so remove it
             else {
                 for (ObjectTreeItem* sharedItem : currItemData->getItemsWithThisData()) {
                     ObjectTreeItem* child = sharedItem->getChildren()[i];
@@ -202,9 +212,10 @@ void ObjectTree::UpdateObjectTreeClbk::operator()(const BRLCAD::Object& object) 
             }
         }
     }
-    for (tempBufferPos = 0; tempBufferPos < tempBuffer.size(); ++tempBufferPos) {
+    // All the names that are that are still in childrenBuffer are new children of item data, so add them
+    for (childrenBufferPos = 0; childrenBufferPos < childrenBuffer.size(); ++childrenBufferPos) {
         for (ObjectTreeItem* sharedItem : currItemData->getItemsWithThisData()) {
-            ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(tempBuffer.at(tempBufferPos));
+            ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(childrenBuffer.at(childrenBufferPos));
             newItem->setParent(sharedItem);
             sharedItem->addChild(newItem);
         }
@@ -219,21 +230,21 @@ void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination
         case BRLCAD::Combination::ConstTreeNode::Intersection:
         case BRLCAD::Combination::ConstTreeNode::Subtraction:
         case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
-            tempOpBuffer.append(node.Operation());
+            childrenOpBuffer.append(node.Operation());
             traverseSubTree(node.LeftOperand());
-            tempOpBuffer.append(node.Operation());
+            childrenOpBuffer.append(node.Operation());
             traverseSubTree(node.RightOperand());
             break;
 
         // If Not, access child
         case BRLCAD::Combination::ConstTreeNode::Not:
-            tempOpBuffer.append(node.Operation());
+            childrenOpBuffer.append(node.Operation());
             traverseSubTree(node.Operand());
             break;
 
         // If Leaf, then create a new item
         case BRLCAD::Combination::ConstTreeNode::Leaf:
-            tempBuffer.append(QString(node.Name()));
+            childrenBuffer.append(QString(node.Name()));
 	}
 }
 
@@ -271,58 +282,70 @@ ObjectTree::~ObjectTree() {
 
 
 void ObjectTree::updateObjectTree() {
-    QVector<QString> tempBuffer   = {};
-	qsizetype        tempBufferPos;
+    QVector<QString> childrenBuffer = {};
+	qsizetype childrenBufferPos;
 
     // Loop through all top level objects (which are the children of root)
 	BRLCAD::ConstDatabase::TopObjectIterator it = database->FirstTopObject();
     while (it.Good()) {
-        tempBuffer.append(QString(it.Name()));
+        childrenBuffer.append(QString(it.Name()));
         ++it;
     }
-    for (qsizetype i = 0; i != getRootItem()->getChildren().size(); ++i) {
-        ObjectTreeItem* child = getRootItem()->getChildren()[i];
-        tempBufferPos = tempBuffer.indexOf(child->getName());
-        if (tempBufferPos != -1)
-            tempBuffer.remove(tempBufferPos);
+    ObjectTreeItem *rootItem = getRootItem();
+    QVector<ObjectTreeItem *>& childrenOfRoot = rootItem->getChildren();
+    for (qsizetype i = 0; i != childrenOfRoot.size(); ++i) {
+        ObjectTreeItem* child = childrenOfRoot[i];
+        childrenBufferPos = childrenBuffer.indexOf(child->getName());
+        // If the child already is a child of root, remove it from the childrenBuffer
+        if (childrenBufferPos != -1)
+            childrenBuffer.remove(childrenBufferPos);
+        // Else, it means that the child should not be a child of root, so remove it
         else {
-            getRootItem()->getChildren().remove(i);
+            childrenOfRoot.remove(i);
             deleteObjectTreeItem(child);
             --i;
         }
     }
-    for (tempBufferPos = 0; tempBufferPos < tempBuffer.size(); ++tempBufferPos) {
-        ObjectTreeItem *newItem = addNewObjectTreeItem(tempBuffer.at(tempBufferPos));
-        ObjectTreeItem *rootItem = getRootItem();
+    // All the names that are that are still in childrenBuffer are new children of root, so add them
+    for (childrenBufferPos = 0; childrenBufferPos < childrenBuffer.size(); ++childrenBufferPos) {
+        ObjectTreeItem *newItem = addNewObjectTreeItem(childrenBuffer.at(childrenBufferPos));
         newItem->setParent(rootItem);
         rootItem->addChild(newItem);
     }
 
     // Loop through all items
     for (ObjectTreeItemData* itemData : getItemsData()) {
-        if (itemData == getRootItem()->getData())
+        // If it's root, skip (we already did root, as it has to be treated differently)
+        if (itemData == rootItem->getData())
             continue;
-        // Get through all objects with callback
-        UpdateObjectTreeClbk callback(itemData, this);
-        database->Get(itemData->getName().toUtf8().data(), callback);
+
+        /* If the object is dead, the UpdateObjectTreeClbk won't be called, because Get() can't get anything.
+           Dead object should be checked, because they must not have children */
         if (!itemData->isAlive()) {
-            // Then it is only a reference, so clear it
             for (ObjectTreeItem* sharedItem : itemData->getItemsWithThisData()) {
                 for (ObjectTreeItem* childOfReference : sharedItem->getChildren())
                     deleteObjectTreeItem(childOfReference);
                 sharedItem->getChildren().clear();
             }
+            continue;
+        }
+
+        // Get the object is not a solid, go through its children with UpdateObjectTreeClbk
+        if (!itemData->isDrawable()) {
+            UpdateObjectTreeClbk callback(itemData, this);
+            database->Get(itemData->getName().toUtf8().data(), callback);
         }
     }
 
+    // If the item data is not referenced by any item, delete it
     for (ObjectTreeItemData* itemData : getItemsData()) {
-        // If the item data is not referenced by any item, delete it
         if (itemData->getItemsWithThisData().isEmpty()) {
             getItemsData().remove(itemData->getName());
             delete itemData;
         }
     }
 
+    // Temporary solution to rebuild the objectTreeWidget
     Document* currDocument = Globals::mainWindow->getActiveDocument();
     currDocument->getObjectTreeWidget()->build(0);
     currDocument->getObjectTreeWidget()->refreshItemTextColors();
@@ -349,10 +372,9 @@ ObjectTreeItem *ObjectTree::addNewObjectTreeItem(QString name) {
 
 
 void ObjectTree::deleteObjectTreeItem(ObjectTreeItem* item) {
+    // Recursively delete all children
     for (ObjectTreeItem* child : item->getChildren())
         deleteObjectTreeItem(child);
-
-    ObjectTreeItemData* data = item->getData();
 
     // Delete item
     getItems().remove(item->getObjectId());
@@ -466,6 +488,9 @@ void ObjectTree::cmdExecutionEnded() {
         return;
 
     cmdBeingExecuted = false;
+
+    /* If there aren't any queued signals, this method should call updateObjectTree.
+       Else, updateObjectTree will be called by the last queued signal */
     if (queuedSignals == 0)
         updateObjectTree();
 }
@@ -500,6 +525,7 @@ void ObjectTree::addObjectHandler(QString objectName) {
         getItemsData().insert(objectName, newItemData);
     }
 
+    // Call the modify object handler to retrieve information about the created object
     modifyObjectHandler(objectName);
 }
 
@@ -508,6 +534,7 @@ void ObjectTree::modifyObjectHandler(QString objectName) {
     // Get all the informations for the itemData
     ObjectTreeItemData *itemData = getItemsData()[objectName];
     database->Get(objectName.toUtf8().data(), [&itemData](const BRLCAD::Object& object) {
+        itemData->setIsAliveFlag(true);
         if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(&object)) {
             if (combination->HasColor()) {
                 itemData->getColorInfo().red = combination->Red();
@@ -517,9 +544,9 @@ void ObjectTree::modifyObjectHandler(QString objectName) {
             }
         } else
             itemData->setIsDrawableFlag(true);
-        itemData->setIsAliveFlag(true);
     });
 
+    // If this is the last queued signal, call updateObjectTree
     if (--queuedSignals == 0)
         updateObjectTree();
 }
@@ -533,6 +560,7 @@ void ObjectTree::removeObjectHandler(QString objectName) {
     itemData->setIsDrawableFlag(false);
     itemData->getColorInfo() = {0, 0, 0, false};
 
+    // If this is the last queued signal, call updateObjectTree
     if (--queuedSignals == 0)
         updateObjectTree();
 }
