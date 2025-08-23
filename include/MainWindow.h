@@ -25,6 +25,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    Document* getActiveDocument();
+
     QStatusBar *getStatusBar() const {
         return statusBar;
     }

@@ -75,6 +75,9 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
 }
 
 void ObjectTreeWidget::build(const size_t objectId, QTreeWidgetItem* parent) {
+    if (objectId == 0)
+        clear();
+
     ObjectTreeItem *objTreeItem = document->getObjectTree()->getItems()[objectId];
 
 	QTreeWidgetItem* item;

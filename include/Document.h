@@ -96,6 +96,11 @@ public:
         this->filePath = new QString(filePath);
     }
 
+    void setModified()
+    {
+        this->modified = true;
+    }
+
     bool isModified();
     bool AddObject(const BRLCAD::Object& object, const bool isVisible);
     bool Save(const char* fileName);
