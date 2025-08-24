@@ -1,7 +1,7 @@
-/*                      O B J E C T S T R E E V I E W . H
+/*                     O B J E C T T R E E W I D G E T . H
  * BRL-CAD
  *
- * Copyright (c) 2018 United States Government as represented by
+ * Copyright (c) 2018-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,32 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/** @file ObjectTreeWidget.h
- *
- */
+/** @file ObjectTreeWidget.h */
 
 #ifndef OBJECTTREEWIDGET_H
 #define OBJECTTREEWIDGET_H
 
-#include <QTreeView>
-#include <qtreewidget.h>
-#include <QtWidgets/QStyledItemDelegate>
-#include "ObjectTree.h"
-#include <QApplication>
-#include <QMouseEvent>
-#include <QPainter>
+#include <QTreeWidget>
+
+
 class Document;
+
+
 class ObjectTreeWidget : public QTreeWidget {
     Q_OBJECT
 public:
-    explicit ObjectTreeWidget(Document *objectTree,   QWidget *parent = nullptr);
-    void refreshItemTextColors();
-    const QHash<size_t, QTreeWidgetItem *> &getObjectIdTreeWidgetItemMap() const;
+    explicit ObjectTreeWidget(Document *document, QWidget *parent = nullptr);
+
     void build(const size_t objectId, QTreeWidgetItem* parent = nullptr);
     void select(QString selected);
+    void refreshItemTextColors();
     void setTextColor();
+
+    // Getters
+    const QHash<size_t, QTreeWidgetItem *>& getObjectIdTreeWidgetItemMap() const {
+        return objectIdTreeWidgetItemMap;
+    }
+
 private:
     Document* document;
+
     QHash <size_t, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
 
     QColor colorFullVisible;
@@ -58,8 +61,6 @@ private:
 signals:
     void visibilityButtonClicked(size_t objectId);
     void selectionChanged(size_t objectId);
-
-
 };
 
 

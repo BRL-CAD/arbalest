@@ -23,6 +23,7 @@
  * SOFTWARE.
  */
 /** @file ObjectTree.h
+ * 
  *  Generates and stores the object tree of a database.
  *
  *  The ObjectTree is composed of:
