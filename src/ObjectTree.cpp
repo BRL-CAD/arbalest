@@ -74,7 +74,7 @@ QString ObjectTreeItem::getPath(void) {
 
 // Function given to BRLCAD::ConstDatabase::RegisterChangeSignalHandler
 void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType) {
-    if (objectName == nullptr)
+    if (objectName == nullptr && changeType != BRLCAD::ConstDatabase::ChangeType::References)
         return;
 
     // If no document is open, return
@@ -87,18 +87,24 @@ void ObjectTree::databaseChangeHandler(const char* objectName, BRLCAD::ConstData
     if (!currObjectTree->isCmdBeingExecuted())
         return;
 
-    QString name = objectName;
     switch (changeType) {
         case BRLCAD::ConstDatabase::ChangeType::Addition:
-            currObjectTree->queueAddObjectHandler(name);
+            currObjectTree->queueAddObjectHandler(QString(objectName));
+            currObjectTree->queueUpdateObjectTree();
             break;
 
         case BRLCAD::ConstDatabase::ChangeType::Modification:
-            currObjectTree->queueModifyObjectHandler(name);
+            currObjectTree->queueModifyObjectHandler(QString(objectName));
+            currObjectTree->queueUpdateObjectTree();
             break;
 
         case BRLCAD::ConstDatabase::ChangeType::Removal:
-            currObjectTree->queueRemoveObjectHandler(name);
+            currObjectTree->queueRemoveObjectHandler(QString(objectName));
+            currObjectTree->queueUpdateObjectTree();
+            break;
+
+        case BRLCAD::ConstDatabase::ChangeType::References:
+            currObjectTree->queueUpdateObjectTree();
             break;
 
         default:
@@ -347,6 +353,7 @@ void ObjectTree::updateObjectTree() {
 
     // Temporary solution to rebuild the objectTreeWidget
     Document* currDocument = Globals::mainWindow->getActiveDocument();
+    currDocument->setModified();
     currDocument->getObjectTreeWidget()->build(0);
     currDocument->getObjectTreeWidget()->refreshItemTextColors();
     currDocument->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
@@ -489,10 +496,12 @@ void ObjectTree::cmdExecutionEnded() {
 
     cmdBeingExecuted = false;
 
-    /* If there aren't any queued signals, this method should call updateObjectTree.
+    /* If there aren't any queued signals, this method should call updateObjectTree if necessary.
        Else, updateObjectTree will be called by the last queued signal */
-    if (queuedSignals == 0)
+    if (queuedSignals == 0 && isUpdateQueued) {
         updateObjectTree();
+        isUpdateQueued = false;
+    }
 }
 
 
@@ -547,8 +556,10 @@ void ObjectTree::modifyObjectHandler(QString objectName) {
     });
 
     // If this is the last queued signal, call updateObjectTree
-    if (--queuedSignals == 0)
+    if (--queuedSignals == 0 && isUpdateQueued) {
         updateObjectTree();
+        isUpdateQueued = false;
+    }
 }
 
 
@@ -560,7 +571,9 @@ void ObjectTree::removeObjectHandler(QString objectName) {
     itemData->setIsDrawableFlag(false);
     itemData->getColorInfo() = {0, 0, 0, false};
 
-    // If this is the last queued signal, call updateObjectTree
-    if (--queuedSignals == 0)
+    // If this is the last queued signal, call updateObjectTree if it is queued
+    if (--queuedSignals == 0 && isUpdateQueued) {
         updateObjectTree();
+        isUpdateQueued = false;
+    }
 }
