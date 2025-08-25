@@ -36,7 +36,7 @@ class Document;
 class ObjectTreeWidget : public QTreeWidget {
     Q_OBJECT
 public:
-    explicit ObjectTreeWidget(Document *document, QWidget *parent = nullptr);
+    explicit ObjectTreeWidget(Document* document, QWidget* parent = nullptr);
 
     void build(const size_t objectId, QTreeWidgetItem* parent = nullptr);
     void destroy(const size_t objectId);
@@ -47,7 +47,7 @@ public:
     void setTextColor();
 
     // Getters
-    const QHash<size_t, QTreeWidgetItem *>& getObjectIdTreeWidgetItemMap() const {
+    const QHash<size_t, QTreeWidgetItem*>& getObjectIdTreeWidgetItemMap() const {
         return objectIdTreeWidgetItemMap;
     }
 
