@@ -20,7 +20,7 @@ Document::Document(const int documentId, const QString *filePath) : documentId(d
 
     modified = false;
     objectTree = new ObjectTree(database, this);
-    properties = new Properties(*this);
+    properties = new Properties(this);
     console = new Console(this);
     geometryRenderer = new GeometryRenderer(this);
     objectTreeWidget = new ObjectTreeWidget(this);
