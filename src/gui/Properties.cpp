@@ -51,21 +51,35 @@ Properties::Properties(Document* document) : document(document), object(nullptr)
 
 
 void Properties::bindObject(const size_t objectId) {
+    if (object != nullptr) {
+        delete object;
+        object = nullptr;
+    }
+
+    if (current != nullptr) {
+        typeSpecificPropertiesArea->removeWidget(current);
+        delete current;
+        current = nullptr;
+    }
+
+    if (objectId == 0) {
+        nameWidget->clear();
+        fullPathWidget->clear();
+        return;
+    }
+
     ObjectTreeItem* item = document->getObjectTree()->getItems()[objectId];
 
-    name = item->getName();
     fullPath = item->getPath();
     fullPathWidget->setText(QString(fullPath).replace("/"," / "));
 
-    delete object;
     object = document->getDatabase()->Get(fullPath.toUtf8().data());
     QString objectType = object->Type();
 
-    delete current;
     current = new TypeSpecificProperties(document, object, objectId);
     typeSpecificPropertiesArea->addWidget(current);
 
-    QString nameType = "<font color='$Color-PropertiesObjectNameText'>" + name + "</font> ("
+    QString nameType = "<font color='$Color-PropertiesObjectNameText'>" + item->getName() + "</font> ("
                        "<font color='$Color-PropertiesObjectTypeText'>" + breakStringAtCaps(objectType) + "</font>)";
     nameWidget->setText(Globals::theme->process(nameType));
 }

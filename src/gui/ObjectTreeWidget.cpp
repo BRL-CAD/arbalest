@@ -44,6 +44,11 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
     setItemDelegateForColumn(0, visibilityButton);
 
     connect(this, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem* current, QTreeWidgetItem* previous) {
+        if (current == nullptr) {
+            selectionChanged(0);
+            return;
+        }
+
         selectionChanged((size_t)(current->data(0, Qt::UserRole).toLongLong()));
         // Qt changes foreground color for selected items. We don't want it changed
         setStyleSheet("ObjectTreeWidget::item:selected { color: " + current->foreground(0).color().name() + ";}");
@@ -107,22 +112,23 @@ void ObjectTreeWidget::destroy(const size_t objectId) {
         return;
 
     QTreeWidgetItem* item = it.value();
-    item->setSelected(false);
 
-    if (item == currentItem())
-        setCurrentItem(nullptr);
+    // Remove from objectIdTreeWidgetItemMap the children of the item to delete
+    traverseSubTree(item, true, [this](QTreeWidgetItem* item) {
+        // If item to delete is the current item, clear the current item
+        if (item == currentItem())
+            setCurrentItem(nullptr);
+        item->setSelected(false);
+
+        size_t id = (size_t)(item->data(0, Qt::UserRole).toLongLong());
+        this->objectIdTreeWidgetItemMap.remove(id);
+        return true;
+    });
 
     // If item is not top-level, remove itself from parent's children
     QTreeWidgetItem* parent = item->parent();
     if (parent)
         parent->removeChild(item);
-
-    // Remove from objectIdTreeWidgetItemMap the children of the item to delete
-    traverseSubTree(item, true, [this](QTreeWidgetItem* item) {
-        size_t id = (size_t)(item->data(0, Qt::UserRole).toLongLong());
-        this->objectIdTreeWidgetItemMap.remove(id);
-        return true;
-    });
 
     delete item;
 }

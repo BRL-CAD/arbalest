@@ -347,7 +347,7 @@ void ObjectTree::updateObjectTree() {
     }
 
     // Temporary solution to rebuild the objectTreeWidget
-    document->getObjectTreeWidget()->build(0);
+    document->getObjectTreeWidget()->update();
     document->getObjectTreeWidget()->refreshItemTextColors();
     document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
     document->getViewportGrid()->forceRerenderAllViewports();
@@ -559,6 +559,10 @@ void ObjectTree::removeObjectHandler(QString objectName) {
     itemData->setIsAliveFlag(false);
     itemData->setIsDrawableFlag(false);
     itemData->getColorInfo() = {0, 0, 0, false};
+
+    // Make the ObjectTreeItems of the itemData to delete Invisible
+    for (ObjectTreeItem* itemWithThisData : itemData->getItemsWithThisData())
+        changeVisibilityState(itemWithThisData->getObjectId(), false);
 
     // If this is the last queued signal, call updateObjectTree
     if (--queuedSignals == 0)
