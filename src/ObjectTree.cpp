@@ -1,7 +1,7 @@
 /*                        O B J E C T T R E E . C P P
  * BRL-CAD
  *
- * Copyright (c) 2018-2025 United States Government as represented by
+ * Copyright (c) 2020-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -293,17 +293,18 @@ void ObjectTree::updateObjectTree() {
     }
     ObjectTreeItem *rootItem = getRootItem();
     QVector<ObjectTreeItem *>& childrenOfRoot = rootItem->getChildren();
-    for (qsizetype i = 0; i != childrenOfRoot.size(); ++i) {
+    qsizetype i = 0;
+    while (i != childrenOfRoot.size()) {
         ObjectTreeItem* child = childrenOfRoot[i];
         childrenBufferPos = childrenBuffer.indexOf(child->getName());
-        // If the child already is a child of root, remove it from the childrenBuffer
-        if (childrenBufferPos != -1)
+        if (childrenBufferPos != -1) {
+            // If the child already is a child of root, remove it from the childrenBuffer
             childrenBuffer.remove(childrenBufferPos);
-        // Else, it means that the child should not be a child of root, so remove it
-        else {
+            ++i;
+        } else {
+            // Else, it means that the child should not be a child of root, so remove it
             childrenOfRoot.remove(i);
             deleteObjectTreeItem(child);
-            --i;
         }
     }
     // All the names that are that are still in childrenBuffer are new children of root, so add them
