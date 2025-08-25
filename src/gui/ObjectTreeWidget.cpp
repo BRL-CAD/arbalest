@@ -128,6 +128,61 @@ void ObjectTreeWidget::destroy(const size_t objectId) {
 }
 
 
+void ObjectTreeWidget::update() {
+    QHash<size_t, ObjectTreeItem*>& objTreeItems = document->getObjectTree()->getItems();
+
+    // Queue items that need to be destroyed
+    QVector<QTreeWidgetItem*> itemsToDelete = {};
+    int i = 0;
+    while (i < topLevelItemCount()) {
+        QTreeWidgetItem* topItem = topLevelItem(i);
+
+        size_t id = (size_t)(topItem->data(0, Qt::UserRole).toLongLong());
+        if (objTreeItems.find(id) == objTreeItems.end()) {
+            // If the top-level needs to be destroyed, queue it
+            itemsToDelete.append(topItem);
+        } else {
+            // Else, look if a child of the top-level item needs to be destroyed
+            traverseSubTree(topItem, false, [&itemsToDelete, &objTreeItems](QTreeWidgetItem* item) {
+                size_t id = (size_t)(item->data(0, Qt::UserRole).toLongLong());
+                if (objTreeItems.find(id) == objTreeItems.end()) {
+                    itemsToDelete.append(item);
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        ++i;
+    }
+
+    // Destroy queued items
+    for (QTreeWidgetItem* itemToDelete : itemsToDelete) {
+        size_t id = (size_t)(itemToDelete->data(0, Qt::UserRole).toLongLong());
+        destroy(id);
+    }
+
+    // Update the ObjectTreeWidget
+    document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* objTreeItem) {
+        size_t objTreeItemId = objTreeItem->getObjectId();
+
+        // If objTreeItem is new, build corresponding item
+        QHash<size_t, QTreeWidgetItem*>::iterator it = this->objectIdTreeWidgetItemMap.find(objTreeItemId);
+        if (it == this->objectIdTreeWidgetItemMap.end()) {
+            this->build(objTreeItemId);
+            // Return false, so that we don't got through the subtree of the new item (it will be handled by build)
+            return false;
+        }
+
+        // Else, update corresponding item
+        QTreeWidgetItem* item = this->objectIdTreeWidgetItemMap[objTreeItemId];
+        item->setDisabled(!objTreeItem->isAlive());
+
+        return true;
+    });
+}
+
+
 void ObjectTreeWidget::select(QString selected) {
     QStringList regionName = selected.split("/");
     QString path = "/" + regionName[1];

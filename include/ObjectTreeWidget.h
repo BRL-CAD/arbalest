@@ -40,6 +40,7 @@ public:
 
     void build(const size_t objectId, QTreeWidgetItem* parent = nullptr);
     void destroy(const size_t objectId);
+    void update();
     void select(QString selected);
     void traverseSubTree(QTreeWidgetItem *rootOfSubTree, bool traverseRoot, const std::function<bool(QTreeWidgetItem*)>& callback);
     void refreshItemTextColors();
