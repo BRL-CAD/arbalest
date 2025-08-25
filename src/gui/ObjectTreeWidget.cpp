@@ -1,7 +1,7 @@
 /*                   O B J E C T T R E E W I D G E T . C P P
  * BRL-CAD
  *
- * Copyright (c) 2018-2025 United States Government as represented by
+ * Copyright (c) 2020-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,8 +43,8 @@ ObjectTreeWidget::ObjectTreeWidget(Document* document, QWidget* parent) : docume
     ObjectTreeRowButtons *visibilityButton = new ObjectTreeRowButtons(document->getObjectTree(), this);
     setItemDelegateForColumn(0, visibilityButton);
 
-    connect(this, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem *current, QTreeWidgetItem *previous) {
-        selectionChanged(current->data(0, Qt::UserRole).toInt());
+    connect(this, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem* current, QTreeWidgetItem* previous) {
+        selectionChanged((size_t)(current->data(0, Qt::UserRole).toLongLong()));
         // Qt changes foreground color for selected items. We don't want it changed
         setStyleSheet("ObjectTreeWidget::item:selected { color: " + current->foreground(0).color().name() + ";}");
     });

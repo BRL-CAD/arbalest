@@ -51,7 +51,7 @@ public:
 private:
     Document* document;
 
-    QHash <size_t, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
+    QHash<size_t, QTreeWidgetItem*> objectIdTreeWidgetItemMap;
 
     QColor colorFullVisible;
     QColor colorSomeChildrenVisible;
