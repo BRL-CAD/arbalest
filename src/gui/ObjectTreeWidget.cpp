@@ -123,6 +123,18 @@ void ObjectTreeWidget::select(QString selected) {
 }
 
 
+void ObjectTreeWidget::traverseSubTree(QTreeWidgetItem *rootOfSubTree, bool traverseRoot, const std::function<bool(QTreeWidgetItem*)>& callback) {
+	if (traverseRoot) callback(rootOfSubTree);
+    int i = 0;
+	while (i < rootOfSubTree->childCount()) {
+        QTreeWidgetItem* item = rootOfSubTree->child(i);
+        ++i;
+		if (!callback(item)) continue;
+        if (!item->childCount() == 0) traverseSubTree(item, false, callback);
+	}
+}
+
+
 void ObjectTreeWidget::refreshItemTextColors() {
     document->getObjectTree()->traverseSubTree(document->getObjectTree()->getRootItem(), false, [this](ObjectTreeItem* item) {
         if (!item->isAlive()) {
