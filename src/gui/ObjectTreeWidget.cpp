@@ -184,6 +184,10 @@ void ObjectTreeWidget::update() {
         QTreeWidgetItem* item = this->objectIdTreeWidgetItemMap[objTreeItemId];
         item->setDisabled(!objTreeItem->isAlive());
 
+        // If current item is disabled, clear the current item
+        if (!objTreeItem->isAlive() && item == currentItem())
+            setCurrentItem(nullptr);
+
         return true;
     });
 }
