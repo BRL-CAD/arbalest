@@ -215,7 +215,7 @@ private:
 class ObjectTree : public QObject {
     Q_OBJECT
 public:
-    ObjectTree(BRLCAD::MemoryDatabase* database);
+    ObjectTree(BRLCAD::MemoryDatabase* database, Document* document);
     ~ObjectTree();
 
     size_t lastAllocatedId = 0;
@@ -266,6 +266,7 @@ public:
 	
 private:
     BRLCAD::MemoryDatabase* database;
+    Document* document;
 
     class BuildObjectTreeClbk {
     public:

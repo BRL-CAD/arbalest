@@ -251,7 +251,7 @@ void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination
 
 // ---------- OBJECT TREE ----------
 
-ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
+ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database, Document* document) : database(database), document(document) {
     // Create root item and root item data (parent = nullptr, empty name, objectId = 0)
     QString rootName = "";
     ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
@@ -347,11 +347,10 @@ void ObjectTree::updateObjectTree() {
     }
 
     // Temporary solution to rebuild the objectTreeWidget
-    Document* currDocument = Globals::mainWindow->getActiveDocument();
-    currDocument->getObjectTreeWidget()->build(0);
-    currDocument->getObjectTreeWidget()->refreshItemTextColors();
-    currDocument->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-    currDocument->getViewportGrid()->forceRerenderAllViewports();
+    document->getObjectTreeWidget()->build(0);
+    document->getObjectTreeWidget()->refreshItemTextColors();
+    document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    document->getViewportGrid()->forceRerenderAllViewports();
 }
 
 
