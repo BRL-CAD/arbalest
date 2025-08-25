@@ -101,6 +101,33 @@ void ObjectTreeWidget::build(const size_t objectId, QTreeWidgetItem* parent) {
 }
 
 
+void ObjectTreeWidget::destroy(const size_t objectId) {
+    QHash<size_t, QTreeWidgetItem*>::iterator it = objectIdTreeWidgetItemMap.find(objectId);
+    if (it == objectIdTreeWidgetItemMap.end())
+        return;
+
+    QTreeWidgetItem* item = it.value();
+    item->setSelected(false);
+
+    if (item == currentItem())
+        setCurrentItem(nullptr);
+
+    // If item is not top-level, remove itself from parent's children
+    QTreeWidgetItem* parent = item->parent();
+    if (parent)
+        parent->removeChild(item);
+
+    // Remove from objectIdTreeWidgetItemMap the children of the item to delete
+    traverseSubTree(item, true, [this](QTreeWidgetItem* item) {
+        size_t id = (size_t)(item->data(0, Qt::UserRole).toLongLong());
+        this->objectIdTreeWidgetItemMap.remove(id);
+        return true;
+    });
+
+    delete item;
+}
+
+
 void ObjectTreeWidget::select(QString selected) {
     QStringList regionName = selected.split("/");
     QString path = "/" + regionName[1];

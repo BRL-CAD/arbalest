@@ -39,6 +39,7 @@ public:
     explicit ObjectTreeWidget(Document *document, QWidget *parent = nullptr);
 
     void build(const size_t objectId, QTreeWidgetItem* parent = nullptr);
+    void destroy(const size_t objectId);
     void select(QString selected);
     void traverseSubTree(QTreeWidgetItem *rootOfSubTree, bool traverseRoot, const std::function<bool(QTreeWidgetItem*)>& callback);
     void refreshItemTextColors();
