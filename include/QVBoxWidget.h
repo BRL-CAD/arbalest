@@ -39,6 +39,7 @@ public:
     QVBoxWidget(QWidget* parent, QWidget* child);
     QVBoxLayout *getBoxLayout();
     void addWidget(QWidget* widget);
+    void removeWidget(QWidget* widget);
 
 private:
     QVBoxLayout* boxLayout;

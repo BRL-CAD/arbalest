@@ -53,3 +53,8 @@ QHBoxLayout *QHBoxWidget::getBoxLayout() {
 void QHBoxWidget::addWidget(QWidget* widget) {
     boxLayout->addWidget(widget);
 }
+
+
+void QHBoxWidget::removeWidget(QWidget* widget) {
+    boxLayout->removeWidget(widget);
+}

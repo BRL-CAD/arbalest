@@ -35,15 +35,27 @@ QVBoxWidget::QVBoxWidget(QWidget* parent, Qt::WindowFlags f) : QFrame(parent, f)
     setLayout(boxLayout);
 }
 
-QVBoxWidget::QVBoxWidget(QWidget* parent, QWidget* child) : QVBoxWidget(parent)
-{
+
+QVBoxWidget::~QVBoxWidget() {
+    delete boxLayout;
+}
+
+
+QVBoxWidget::QVBoxWidget(QWidget* parent, QWidget* child) : QVBoxWidget(parent) {
     addWidget(child);
 }
+
 
 QVBoxLayout *QVBoxWidget::getBoxLayout() {
     return boxLayout;
 }
 
+
 void QVBoxWidget::addWidget(QWidget* widget) {
     boxLayout->addWidget(widget);
+}
+
+
+void QVBoxWidget::removeWidget(QWidget* widget) {
+    boxLayout->removeWidget(widget);
 }
