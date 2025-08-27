@@ -235,6 +235,8 @@ public:
 
     static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
 
+    void buildColorMap(size_t rootObjectId);
+
     void cmdExecutionStarted();
     void cmdExecutionEnded();
 

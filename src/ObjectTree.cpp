@@ -167,6 +167,8 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
             ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
             newItem->setParent(currItem);
             currItem->addChild(newItem);
+            // Make it so that the newItem inherits its color from its parent
+            newItem->getData()->getColorInfo() = currItem->getData()->getColorInfo();
             // If the current item data is "not alive", it means the it is not fully created yet, so addOp
             if (!currItem->isAlive())
                 currItem->getData()->addOp(currOp);
@@ -331,7 +333,7 @@ void ObjectTree::updateObjectTree() {
             continue;
         }
 
-        // Get the object is not a solid, go through its children with UpdateObjectTreeClbk
+        // If the object is not a solid, go through its children with UpdateObjectTreeClbk
         if (!itemData->isDrawable()) {
             UpdateObjectTreeClbk callback(itemData, this);
             database->Get(itemData->getName().toUtf8().data(), callback);
@@ -345,6 +347,8 @@ void ObjectTree::updateObjectTree() {
             delete itemData;
         }
     }
+
+    buildColorMap(0);
 
     // Temporary solution to rebuild the objectTreeWidget
     document->getObjectTreeWidget()->update();
@@ -459,25 +463,25 @@ size_t ObjectTree::addTopObject(QString name) {
 }
 
 
-// This method comes from the old ObjectTree (before PR#66)
-/*void ObjectTree::buildColorMap(int rootObjectId) {
-	traverseSubTree(rootObjectId,true,[&](size_t objectId){
-		if (objectId == 0)return true;
-		const QString objectName = fullPathMap[objectId];
-		const QByteArray &name = objectName.toUtf8();
-		BRLCAD::Object *object = database->Get(name);
-		colorMap[objectId] = ColorInfo(colorMap[objectIdParentObjectIdMap[objectId]]);
-		if(const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(object)) {
+void ObjectTree::buildColorMap(size_t rootObjectId) {
+    ObjectTreeItem* rootItem = getItems()[rootObjectId];
+	traverseSubTree(rootItem, (rootItem != getRootItem()), [&](ObjectTreeItem* item) {
+		BRLCAD::Object* object = database->Get(item->getName().toUtf8().data());
+		if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(object)) {
 			if (combination->HasColor()) {
-				colorMap[objectId].red = combination->Red();
-				colorMap[objectId].green = combination->Green();
-				colorMap[objectId].blue = combination->Blue();
-				colorMap[objectId].hasColor = true;
+                // Make it so that the newItem inherits its color from its parent
+				item->getData()->getColorInfo().red = combination->Red();
+				item->getData()->getColorInfo().green = combination->Green();
+				item->getData()->getColorInfo().blue = combination->Blue();
+				item->getData()->getColorInfo().hasColor = true;
+		        return true;
 			}
 		}
-		return true;
+
+        item->getData()->getColorInfo() = item->getParent()->getColorInfo();
+            return true;
 	});
-}*/
+}
 
 
 void ObjectTree::cmdExecutionStarted() {
@@ -520,7 +524,7 @@ void ObjectTree::queueRemoveObjectHandler(QString objectName) {
 
 void ObjectTree::addObjectHandler(QString objectName) {
     // Create itemData if it doesn't exist
-    ObjectTreeItemData* newItemData;;
+    ObjectTreeItemData* newItemData;
     QHash<QString, ObjectTreeItemData*>::const_iterator it = getItemsData().find(objectName);
     if (it == getItemsData().end()) {
         newItemData = new ObjectTreeItemData(objectName);
