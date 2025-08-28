@@ -22,6 +22,7 @@
 #include "Viewport.h"
 
 #include <iostream>
+#include <QGuiApplication>
 #include <QScreen>
 #include <QWidget>
 #include <OrthographicCamera.h>

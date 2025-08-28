@@ -19,6 +19,7 @@
  */
 /** @file ViewportManager.cpp */
 
+#include <QGuiApplication>
 #include <QMatrix4x4>
 #include <QScreen>
 #include "ViewportManager.h"
