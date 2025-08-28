@@ -311,9 +311,13 @@ void ObjectTree::updateObjectTree() {
     }
     // All the names that are that are still in childrenBuffer are new children of root, so add them
     for (childrenBufferPos = 0; childrenBufferPos < childrenBuffer.size(); ++childrenBufferPos) {
-        ObjectTreeItem *newItem = addNewObjectTreeItem(childrenBuffer.at(childrenBufferPos));
+        QString name = childrenBuffer.at(childrenBufferPos);
+        ObjectTreeItem *newItem = addNewObjectTreeItem(name);
         newItem->setParent(rootItem);
         rootItem->addChild(newItem);
+        // Get top level object and loop through his children with callback
+        BuildObjectTreeClbk callback(this);
+        database->Get(name.toUtf8().data(), callback);
     }
 
     // Loop through all items
