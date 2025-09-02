@@ -265,6 +265,10 @@ public:
     bool isCmdBeingExecuted() {
         return cmdBeingExecuted;
     }
+
+    void queueUpdateObjectTree() {
+        isUpdateQueued = true;
+    }
 	
 private:
     BRLCAD::MemoryDatabase* database;
@@ -299,6 +303,8 @@ private:
     BRLCAD::ConstDatabase::ChangeSignalHandler databaseChangeHandlerVar = this->databaseChangeHandler;
 
     bool cmdBeingExecuted = false;
+
+    bool isUpdateQueued = false;
 
     size_t queuedSignals = 0;
 
