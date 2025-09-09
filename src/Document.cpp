@@ -1,4 +1,4 @@
-/*                          D O C U M E N T . H
+/*                        D O C U M E N T . C P P
  * BRL-CAD
  *
  * Copyright (c) 2020-2025 United States Government as represented by

@@ -1,4 +1,4 @@
-/*                      Q H B O X W I D G E T . H
+/*                      Q V B O X W I D G E T . H
  * BRL-CAD
  *
  * Copyright (c) 2020-2025 United States Government as represented by
