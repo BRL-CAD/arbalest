@@ -1,7 +1,7 @@
 /*                          O B J E C T T R E E . H
  * BRL-CAD
  *
- * Copyright (c) 2018-2025 United States Government as represented by
+ * Copyright (c) 2020-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,7 @@
  * SOFTWARE.
  */
 /** @file ObjectTree.h
+ * 
  *  Generates and stores the object tree of a database.
  *
  *  The ObjectTree is composed of:
@@ -214,7 +215,7 @@ private:
 class ObjectTree : public QObject {
     Q_OBJECT
 public:
-    ObjectTree(BRLCAD::MemoryDatabase* database);
+    ObjectTree(BRLCAD::MemoryDatabase* database, Document* document);
     ~ObjectTree();
 
     size_t lastAllocatedId = 0;
@@ -233,6 +234,8 @@ public:
     void updateObjectTree();
 
     static void databaseChangeHandler(const char* objectName, BRLCAD::ConstDatabase::ChangeType changeType);
+
+    void buildColorMap(size_t rootObjectId);
 
     void cmdExecutionStarted();
     void cmdExecutionEnded();
@@ -269,6 +272,7 @@ public:
 	
 private:
     BRLCAD::MemoryDatabase* database;
+    Document* document;
 
     class BuildObjectTreeClbk {
     public:

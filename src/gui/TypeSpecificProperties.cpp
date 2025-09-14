@@ -1,18 +1,34 @@
-
-#include <brlcad/Database/Cone.h>
-#include <brlcad/Database/Arb8.h>
-
+/*              T Y P E S P E C I F I C P R O P E R T I E S . C P P
+ * BRL-CAD
+ *
+ * Copyright (c) 2020-2025 United States Government as represented by
+ * the U.S. Army Research Laboratory.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/** @file TypeSpecificProperties.cpp */
 
 #include <QCheckBox>
-#include "TypeSpecificProperties.h"
-#include "QHBoxWidget.h"
-
-#include <QStyledItemDelegate>
-#include <include/QVBoxWidget.h>
-#include <include/DataRow.h>
-#include <include/ObjectDataField.h>
-#include <include/ObjectDataTable.h>
-#include <brlcad/Database/BagOfTriangles.h>
+#include <brlcad/Database/Arb8.h>
+#include <brlcad/Database/Combination.h>
+#include <brlcad/Database/Cone.h>
+#include <brlcad/Database/Ellipsoid.h>
 #include <brlcad/Database/EllipticalTorus.h>
 #include <brlcad/Database/Halfspace.h>
 #include <brlcad/Database/HyperbolicCylinder.h>
@@ -22,14 +38,18 @@
 #include <brlcad/Database/Particle.h>
 #include <brlcad/Database/Sphere.h>
 #include <brlcad/Database/Torus.h>
-#include <iostream>
+#include "CollapsibleWidget.h"
+#include "Document.h"
+#include "ObjectDataField.h"
+#include "QHBoxWidget.h"
+
+#include "TypeSpecificProperties.h"
+
 
 using namespace std;
 
 
-
-TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Object *object, const size_t objectId)
-        : document(document), object(object) {
+TypeSpecificProperties::TypeSpecificProperties(Document* document, BRLCAD::Object* object, const size_t objectId) : document(document), object(object) {
     setObjectName("properties-TypeSpecificProperties");
     l = getBoxLayout();
     l->setContentsMargins(0, 0, 0, 0);
@@ -37,65 +57,63 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
     const QStringList pointsIndices = {"P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"};
     const QStringList abcdIndices = {"A", "B", "C", "D", "E", "F"};
 
-    if(QString(object->Type()) == "Combination") {
-        BRLCAD::Combination *comb = dynamic_cast<BRLCAD::Combination*>(object);
+    QString objectType = object->Type();
 
-        CollapsibleWidget *childrenListCollapsible = new CollapsibleWidget();
+    if (objectType == "Combination") {
+        BRLCAD::Combination* comb = dynamic_cast<BRLCAD::Combination*>(object);
+
+        CollapsibleWidget* childrenListCollapsible = new CollapsibleWidget();
         l->addWidget(childrenListCollapsible);
-        QVBoxWidget * childrenList = new QVBoxWidget();
+        QVBoxWidget* childrenList = new QVBoxWidget();
         childrenListCollapsible->setTitle("Children");
         childrenListCollapsible->setWidget(childrenList);
 
-        ObjectTreeItem* item = document.getObjectTree()->getItems()[objectId];
-        for (ObjectTreeItem *child : item->getChildren()){
+        ObjectTreeItem* item = document->getObjectTree()->getItems()[objectId];
+        for (ObjectTreeItem *child : item->getChildren())
             childrenList->addWidget(new QLabel(child->getName()));
-        }
 
-        QCheckBox *hasColorCheck = new QCheckBox();
-        QHBoxWidget * colorHolder = new QHBoxWidget(this,hasColorCheck);
+        QCheckBox* hasColorCheck = new QCheckBox();
+        QHBoxWidget* colorHolder = new QHBoxWidget(this, hasColorCheck);
         l->addWidget(colorHolder);
         colorHolder->setStyleSheet("margin-top:11px;");
         hasColorCheck->setText("Has Color");
         hasColorCheck->setCheckState(comb->HasColor() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-        connect(hasColorCheck,&QCheckBox::stateChanged,[this,item](int newState){
-            this->document.getBRLCADObject(item->getPath(),[newState](BRLCAD::Object &object){
-                if(newState == Qt::CheckState::Checked){
+        connect(hasColorCheck, &QCheckBox::stateChanged, [this, item](int newState) {
+            this->document->getBRLCADObject(item->getPath(), [newState](BRLCAD::Object &object) {
+                if (newState == Qt::CheckState::Checked)
                     dynamic_cast<BRLCAD::Combination&>(object).SetHasColor(true);
-                }
-                else {
+                else
                     dynamic_cast<BRLCAD::Combination&>(object).SetHasColor(false);
-                }
             });
         });
 
         colorHolder->getBoxLayout()->addStretch();
 
-        QPushButton *colorButton = new QPushButton();
+        QPushButton* colorButton = new QPushButton();
         colorButton->setObjectName("colorButton");
-        colorButton->setStyleSheet("background-color:"+item->getColorInfo().toHexString());
+        colorButton->setStyleSheet("background-color:" + item->getColorInfo().toHexString());
         colorHolder->addWidget(colorButton);
         /*connect(colorButton, &QPushButton::clicked, this, [this,objectId](){
-            const QColor &initial = this->document.getObjectTree()->getColorMap()[objectId].toQColor();
+            const QColor &initial = this->document->getObjectTree()->getColorMap()[objectId].toQColor();
             QColor selectedColor = QColorDialog::getColor(initial);
 
-            getBRLCADObject(this->document.getDatabase(),this->document.getObjectTree()->getFullPathMap()[objectId],[this,selectedColor](BRLCAD::Object &object){
+            getBRLCADObject(this->document->getDatabase(),this->document->getObjectTree()->getFullPathMap()[objectId],[this,selectedColor](BRLCAD::Object &object){
                 BRLCAD::Combination editableComb =  dynamic_cast<BRLCAD::Combination&>(object);
                 editableComb.SetRed(selectedColor.redF());
                 editableComb.SetGreen(selectedColor.greenF());
                 editableComb.SetBlue(selectedColor.blueF());
                 std::cout<<selectedColor.redF()<<" "<<selectedColor.greenF()<<" "<<selectedColor.blueF()<<std::endl;
-                this->document.getDatabase()->Set(editableComb);
+                this->document->getDatabase()->Set(editableComb);
             });
-            this->document.getObjectTree()->buildColorMap(objectId);
-            this->document.modifyObjectNoSet(objectId);
-            this->document.getViewportGrid()->forceRerenderAllViewports();
+            this->document->getObjectTree()->buildColorMap(objectId);
+            this->document->modifyObjectNoSet(objectId);
+            this->document->getViewportGrid()->forceRerenderAllViewports();
         });*/
-    }
+    } else if (objectType == "Arb8") {
+        ObjectDataField<BRLCAD::Arb8>* property;
 
-    if(QString(object->Type()) == "Arb8") {
-        ObjectDataField<BRLCAD::Arb8> * property;
         property = new ObjectDataField<BRLCAD::Arb8>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Arb8::Point,
                 &BRLCAD::Arb8::SetPoint,
@@ -104,14 +122,11 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 pointsIndices,
                 "Points");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Cone") {
-        ObjectDataField<BRLCAD::Cone> * property;
+    } else if (objectType == "Cone") {
+        ObjectDataField<BRLCAD::Cone>* property;
 
         property = new ObjectDataField<BRLCAD::Cone>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Cone::BasePoint,
                 &BRLCAD::Cone::SetBasePoint,
@@ -119,7 +134,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Cone>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Cone::Height,
                 &BRLCAD::Cone::SetHeight,
@@ -127,7 +142,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Cone>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Cone::SemiPrincipalAxis,
                 &BRLCAD::Cone::SetSemiPrincipalAxis,
@@ -136,14 +151,11 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 abcdIndices,
                 "Semi Principal Axes");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Ellipsoid") {
-        ObjectDataField<BRLCAD::Ellipsoid> * property;
+    } else if (objectType == "Ellipsoid") {
+        ObjectDataField<BRLCAD::Ellipsoid>* property;
 
         property = new ObjectDataField<BRLCAD::Ellipsoid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Ellipsoid::Center,
                 &BRLCAD::Ellipsoid::SetCenter,
@@ -151,7 +163,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Ellipsoid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Ellipsoid::SemiPrincipalAxis,
                 &BRLCAD::Ellipsoid::SetSemiPrincipalAxis,
@@ -160,14 +172,11 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
                 abcdIndices,
                 "Semi Principal Axes");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "EllipticalTorus") {
-        ObjectDataField<BRLCAD::EllipticalTorus> * property;
+    } else if (objectType == "EllipticalTorus") {
+        ObjectDataField<BRLCAD::EllipticalTorus>* property;
 
         property = new ObjectDataField<BRLCAD::EllipticalTorus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::EllipticalTorus::Center,
                 &BRLCAD::EllipticalTorus::SetCenter,
@@ -175,7 +184,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::EllipticalTorus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::EllipticalTorus::Normal,
                 &BRLCAD::EllipticalTorus::SetNormal,
@@ -183,7 +192,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::EllipticalTorus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::EllipticalTorus::TubeCenterLineRadius,
                 &BRLCAD::EllipticalTorus::SetTubeCenterLineRadius,
@@ -191,7 +200,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::EllipticalTorus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::EllipticalTorus::TubeSemiMajorAxis,
                 &BRLCAD::EllipticalTorus::SetTubeSemiMajorAxis,
@@ -199,21 +208,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::EllipticalTorus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::EllipticalTorus::TubeSemiMinorAxis,
                 &BRLCAD::EllipticalTorus::SetTubeSemiMinorAxis,
                 "Tube Semi Minor Axes");
         l->addWidget(property);
-
-    }
-
-
-    if(QString(object->Type()) == "Halfspace") {
-        ObjectDataField<BRLCAD::Halfspace> * property;
+    } else if (objectType == "Halfspace") {
+        ObjectDataField<BRLCAD::Halfspace>* property;
 
         property = new ObjectDataField<BRLCAD::Halfspace>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Halfspace::Normal,
                 &BRLCAD::Halfspace::SetNormal,
@@ -221,21 +226,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Halfspace>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Halfspace::DistanceFromOrigin,
                 &BRLCAD::Halfspace::SetDistanceFromOrigin,
                 "Distance From Origin");
         l->addWidget(property);
-
-    }
-
-
-    if(QString(object->Type()) == "HyperbolicCylinder") {
-        ObjectDataField<BRLCAD::HyperbolicCylinder> * property;
+    } else if (objectType == "HyperbolicCylinder") {
+        ObjectDataField<BRLCAD::HyperbolicCylinder>* property;
 
         property = new ObjectDataField<BRLCAD::HyperbolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::HyperbolicCylinder::BasePoint,
                 &BRLCAD::HyperbolicCylinder::SetBasePoint,
@@ -243,7 +244,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::HyperbolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::HyperbolicCylinder::Height,
                 &BRLCAD::HyperbolicCylinder::SetHeight,
@@ -251,7 +252,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::HyperbolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::HyperbolicCylinder::Depth,
                 &BRLCAD::HyperbolicCylinder::SetDepth,
@@ -259,7 +260,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::HyperbolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::HyperbolicCylinder::HalfWidth,
                 &BRLCAD::HyperbolicCylinder::SetHalfWidth,
@@ -267,20 +268,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::HyperbolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::HyperbolicCylinder::ApexAsymptoteDistance,
                 &BRLCAD::HyperbolicCylinder::SetApexAsymptoteDistance,
                 "Apex Asymptote Distance");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Hyperboloid") {
-        ObjectDataField<BRLCAD::Hyperboloid> * property;
+    } else if (objectType == "Hyperboloid") {
+        ObjectDataField<BRLCAD::Hyperboloid>* property;
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::BasePoint,
                 &BRLCAD::Hyperboloid::SetBasePoint,
@@ -288,7 +286,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::Height,
                 &BRLCAD::Hyperboloid::SetHeight,
@@ -296,7 +294,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::SemiMajorAxis,
                 &BRLCAD::Hyperboloid::SetSemiMajorAxis,
@@ -304,7 +302,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::SemiMajorAxisDirection,
                 &BRLCAD::Hyperboloid::SetSemiMajorAxisDirection,
@@ -312,7 +310,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::SemiMajorAxisLength,
                 &BRLCAD::Hyperboloid::SetSemiMajorAxisLength,
@@ -320,7 +318,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::SemiMinorAxisLength,
                 &BRLCAD::Hyperboloid::SetSemiMinorAxisLength,
@@ -328,20 +326,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Hyperboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Hyperboloid::ApexAsymptoteDistance,
                 &BRLCAD::Hyperboloid::SetApexAsymptoteDistance,
                 "Apex Asymptote Distance");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "ParabolicCylinder") {
-        ObjectDataField<BRLCAD::ParabolicCylinder> * property;
+    } else if (objectType == "ParabolicCylinder") {
+        ObjectDataField<BRLCAD::ParabolicCylinder>* property;
 
         property = new ObjectDataField<BRLCAD::ParabolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::ParabolicCylinder::BasePoint,
                 &BRLCAD::ParabolicCylinder::SetBasePoint,
@@ -349,7 +344,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::ParabolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::ParabolicCylinder::Height,
                 &BRLCAD::ParabolicCylinder::SetHeight,
@@ -357,7 +352,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::ParabolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::ParabolicCylinder::Depth,
                 &BRLCAD::ParabolicCylinder::SetDepth,
@@ -365,20 +360,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::ParabolicCylinder>(
-                &document,
+                document,
                 object,
                 &BRLCAD::ParabolicCylinder::HalfWidth,
                 &BRLCAD::ParabolicCylinder::SetHalfWidth,
                 "Half Width");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Paraboloid") {
-        ObjectDataField<BRLCAD::Paraboloid> * property;
+    } else if (objectType == "Paraboloid") {
+        ObjectDataField<BRLCAD::Paraboloid>* property;
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::BasePoint,
                 &BRLCAD::Paraboloid::SetBasePoint,
@@ -386,7 +378,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::Height,
                 &BRLCAD::Paraboloid::SetHeight,
@@ -394,7 +386,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::SemiMajorAxis,
                 &BRLCAD::Paraboloid::SetSemiMajorAxis,
@@ -402,7 +394,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::SemiMajorAxisDirection,
                 &BRLCAD::Paraboloid::SetSemiMajorAxisDirection,
@@ -410,7 +402,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::SemiMajorAxisLength,
                 &BRLCAD::Paraboloid::SetSemiMajorAxisLength,
@@ -418,20 +410,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Paraboloid>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Paraboloid::SemiMinorAxisLength,
                 &BRLCAD::Paraboloid::SetSemiMinorAxisLength,
                 "Semi Minor Axis Length");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Particle") {
-        ObjectDataField<BRLCAD::Particle> * property;
+    } else if (objectType == "Particle") {
+        ObjectDataField<BRLCAD::Particle>* property;
 
         property = new ObjectDataField<BRLCAD::Particle>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Particle::BasePoint,
                 &BRLCAD::Particle::SetBasePoint,
@@ -439,7 +428,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Particle>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Particle::Height,
                 &BRLCAD::Particle::SetHeight,
@@ -447,7 +436,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Particle>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Particle::BaseRadius,
                 &BRLCAD::Particle::SetBaseRadius,
@@ -455,20 +444,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Particle>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Particle::TopRadius,
                 &BRLCAD::Particle::SetTopRadius,
                 "Top Radius");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Sphere") {
-        ObjectDataField<BRLCAD::Sphere> * property;
+    } else if (objectType == "Sphere") {
+        ObjectDataField<BRLCAD::Sphere>* property;
 
         property = new ObjectDataField<BRLCAD::Sphere>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Sphere::Center,
                 &BRLCAD::Sphere::SetCenter,
@@ -476,20 +462,17 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Sphere>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Sphere::Radius,
                 &BRLCAD::Sphere::SetRadius,
                 "Radius");
         l->addWidget(property);
-    }
-
-
-    if(QString(object->Type()) == "Torus") {
-        ObjectDataField<BRLCAD::Torus> * property;
+    } else if (objectType == "Torus") {
+        ObjectDataField<BRLCAD::Torus>* property;
 
         property = new ObjectDataField<BRLCAD::Torus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Torus::Center,
                 &BRLCAD::Torus::SetCenter,
@@ -497,7 +480,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Torus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Torus::Normal,
                 &BRLCAD::Torus::SetNormal,
@@ -505,7 +488,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Torus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Torus::TubeCenterLineRadius,
                 &BRLCAD::Torus::SetTubeCenterLineRadius,
@@ -513,7 +496,7 @@ TypeSpecificProperties::TypeSpecificProperties(Document &document, BRLCAD::Objec
         l->addWidget(property);
 
         property = new ObjectDataField<BRLCAD::Torus>(
-                &document,
+                document,
                 object,
                 &BRLCAD::Torus::TubeRadius,
                 &BRLCAD::Torus::SetTubeRadius,

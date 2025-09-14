@@ -1,7 +1,7 @@
 /*                        O B J E C T T R E E . C P P
  * BRL-CAD
  *
- * Copyright (c) 2018-2025 United States Government as represented by
+ * Copyright (c) 2020-2025 United States Government as represented by
  * the U.S. Army Research Laboratory.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -173,6 +173,8 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
             ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
             newItem->setParent(currItem);
             currItem->addChild(newItem);
+            // Make it so that the newItem inherits its color from its parent
+            newItem->getData()->getColorInfo() = currItem->getData()->getColorInfo();
             // If the current item data is "not alive", it means the it is not fully created yet, so addOp
             if (!currItem->isAlive())
                 currItem->getData()->addOp(currOp);
@@ -257,7 +259,7 @@ void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination
 
 // ---------- OBJECT TREE ----------
 
-ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database) : database(database) {
+ObjectTree::ObjectTree(BRLCAD::MemoryDatabase* database, Document* document) : database(database), document(document) {
     // Create root item and root item data (parent = nullptr, empty name, objectId = 0)
     QString rootName = "";
     ObjectTreeItemData *rootItemData = new ObjectTreeItemData(rootName);
@@ -299,24 +301,29 @@ void ObjectTree::updateObjectTree() {
     }
     ObjectTreeItem *rootItem = getRootItem();
     QVector<ObjectTreeItem *>& childrenOfRoot = rootItem->getChildren();
-    for (qsizetype i = 0; i != childrenOfRoot.size(); ++i) {
+    qsizetype i = 0;
+    while (i != childrenOfRoot.size()) {
         ObjectTreeItem* child = childrenOfRoot[i];
         childrenBufferPos = childrenBuffer.indexOf(child->getName());
-        // If the child already is a child of root, remove it from the childrenBuffer
-        if (childrenBufferPos != -1)
+        if (childrenBufferPos != -1) {
+            // If the child already is a child of root, remove it from the childrenBuffer
             childrenBuffer.remove(childrenBufferPos);
-        // Else, it means that the child should not be a child of root, so remove it
-        else {
+            ++i;
+        } else {
+            // Else, it means that the child should not be a child of root, so remove it
             childrenOfRoot.remove(i);
             deleteObjectTreeItem(child);
-            --i;
         }
     }
     // All the names that are that are still in childrenBuffer are new children of root, so add them
     for (childrenBufferPos = 0; childrenBufferPos < childrenBuffer.size(); ++childrenBufferPos) {
-        ObjectTreeItem *newItem = addNewObjectTreeItem(childrenBuffer.at(childrenBufferPos));
+        QString name = childrenBuffer.at(childrenBufferPos);
+        ObjectTreeItem *newItem = addNewObjectTreeItem(name);
         newItem->setParent(rootItem);
         rootItem->addChild(newItem);
+        // Get top level object and loop through his children with callback
+        BuildObjectTreeClbk callback(this);
+        database->Get(name.toUtf8().data(), callback);
     }
 
     // Loop through all items
@@ -336,7 +343,7 @@ void ObjectTree::updateObjectTree() {
             continue;
         }
 
-        // Get the object is not a solid, go through its children with UpdateObjectTreeClbk
+        // If the object is not a solid, go through its children with UpdateObjectTreeClbk
         if (!itemData->isDrawable()) {
             UpdateObjectTreeClbk callback(itemData, this);
             database->Get(itemData->getName().toUtf8().data(), callback);
@@ -351,13 +358,14 @@ void ObjectTree::updateObjectTree() {
         }
     }
 
+    buildColorMap(0);
+
     // Temporary solution to rebuild the objectTreeWidget
-    Document* currDocument = Globals::mainWindow->getActiveDocument();
-    currDocument->setModified();
-    currDocument->getObjectTreeWidget()->build(0);
-    currDocument->getObjectTreeWidget()->refreshItemTextColors();
-    currDocument->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
-    currDocument->getViewportGrid()->forceRerenderAllViewports();
+    document->setModified();
+    document->getObjectTreeWidget()->update();
+    document->getObjectTreeWidget()->refreshItemTextColors();
+    document->getGeometryRenderer()->refreshForVisibilityAndSolidChanges();
+    document->getViewportGrid()->forceRerenderAllViewports();
 }
 
 
@@ -410,8 +418,8 @@ void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
             parentItem->setVisibilityState(ObjectTreeItem::FullyVisible);
 
             // But if there is a not FullyVisible child it should be SomeChildrenVisible
-            for (ObjectTreeItem *parentItemChild : parentItem->getChildren()){
-                if (parentItemChild->getVisibilityState() != ObjectTreeItem::FullyVisible) {
+            for (ObjectTreeItem* parentItemChild : parentItem->getChildren()) {
+                if (parentItemChild->isAlive() && parentItemChild->getVisibilityState() != ObjectTreeItem::FullyVisible) {
                     parentItem->setVisibilityState(ObjectTreeItem::SomeChildrenVisible);
                     break;
                 }
@@ -420,22 +428,23 @@ void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
         }
 
         // Then we go down in the tree and make all children FullyVisible
-        traverseSubTree(item, false, [](ObjectTreeItem *item) {
-            item->setVisibilityState(ObjectTreeItem::FullyVisible);
+        traverseSubTree(item, false, [](ObjectTreeItem* item) {
+            if (item->isAlive())
+                item->setVisibilityState(ObjectTreeItem::FullyVisible);
             return true;
         });
     } else {
         item->setVisibilityState(ObjectTreeItem::Invisible);
 
         // First we go up in the tree and make the necessary changes
-        ObjectTreeItem *parentItem = item->getParent();
+        ObjectTreeItem* parentItem = item->getParent();
         while (!parentItem->isRoot()) {
             // If all children of the ancestor are Invisible after the change ancestor's visibility should be Invisible
             parentItem->setVisibilityState(ObjectTreeItem::Invisible);
 
             // But if there is a not Invisible child it should be SomeChildrenVisible
-            for (ObjectTreeItem *parentItemChild : parentItem->getChildren()){
-                if (parentItemChild->getVisibilityState() != ObjectTreeItem::Invisible) {
+            for (ObjectTreeItem* parentItemChild : parentItem->getChildren()) {
+                if (parentItemChild->isAlive() && parentItemChild->getVisibilityState() != ObjectTreeItem::Invisible) {
                     parentItem->setVisibilityState(ObjectTreeItem::SomeChildrenVisible);
                     break;
                 }
@@ -445,7 +454,8 @@ void ObjectTree::changeVisibilityState(size_t objectId, bool visible) {
 
         // Then we go down in the tree and make all children Invisible
         traverseSubTree(item, false, [](ObjectTreeItem *item) {
-            item->setVisibilityState(ObjectTreeItem::Invisible);
+            if (item->isAlive())
+                item->setVisibilityState(ObjectTreeItem::Invisible);
             return true;
         });
     }
@@ -464,25 +474,25 @@ size_t ObjectTree::addTopObject(QString name) {
 }
 
 
-// This method comes from the old ObjectTree (before PR#66)
-/*void ObjectTree::buildColorMap(int rootObjectId) {
-	traverseSubTree(rootObjectId,true,[&](size_t objectId){
-		if (objectId == 0)return true;
-		const QString objectName = fullPathMap[objectId];
-		const QByteArray &name = objectName.toUtf8();
-		BRLCAD::Object *object = database->Get(name);
-		colorMap[objectId] = ColorInfo(colorMap[objectIdParentObjectIdMap[objectId]]);
-		if(const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(object)) {
+void ObjectTree::buildColorMap(size_t rootObjectId) {
+    ObjectTreeItem* rootItem = getItems()[rootObjectId];
+	traverseSubTree(rootItem, (rootItem != getRootItem()), [&](ObjectTreeItem* item) {
+		BRLCAD::Object* object = database->Get(item->getName().toUtf8().data());
+		if (const BRLCAD::Combination* combination = dynamic_cast<const BRLCAD::Combination*>(object)) {
 			if (combination->HasColor()) {
-				colorMap[objectId].red = combination->Red();
-				colorMap[objectId].green = combination->Green();
-				colorMap[objectId].blue = combination->Blue();
-				colorMap[objectId].hasColor = true;
+                // Make it so that the newItem inherits its color from its parent
+				item->getData()->getColorInfo().red = combination->Red();
+				item->getData()->getColorInfo().green = combination->Green();
+				item->getData()->getColorInfo().blue = combination->Blue();
+				item->getData()->getColorInfo().hasColor = true;
+		        return true;
 			}
 		}
-		return true;
+
+        item->getData()->getColorInfo() = item->getParent()->getColorInfo();
+            return true;
 	});
-}*/
+}
 
 
 void ObjectTree::cmdExecutionStarted() {
@@ -527,7 +537,7 @@ void ObjectTree::queueRemoveObjectHandler(QString objectName) {
 
 void ObjectTree::addObjectHandler(QString objectName) {
     // Create itemData if it doesn't exist
-    ObjectTreeItemData* newItemData;;
+    ObjectTreeItemData* newItemData;
     QHash<QString, ObjectTreeItemData*>::const_iterator it = getItemsData().find(objectName);
     if (it == getItemsData().end()) {
         newItemData = new ObjectTreeItemData(objectName);
@@ -570,6 +580,10 @@ void ObjectTree::removeObjectHandler(QString objectName) {
     itemData->setIsAliveFlag(false);
     itemData->setIsDrawableFlag(false);
     itemData->getColorInfo() = {0, 0, 0, false};
+
+    // Make the ObjectTreeItems of the itemData to delete Invisible
+    for (ObjectTreeItem* itemWithThisData : itemData->getItemsWithThisData())
+        changeVisibilityState(itemWithThisData->getObjectId(), false);
 
     // If this is the last queued signal, call updateObjectTree if it is queued
     if (--queuedSignals == 0 && isUpdateQueued) {

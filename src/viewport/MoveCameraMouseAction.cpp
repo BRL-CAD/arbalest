@@ -19,6 +19,7 @@
  */
 /** @file MoveCameraMouseAction.cpp */
 
+#include <QApplication>
 #include "ViewportGrid.h"
 #include "MoveCameraMouseAction.h"
 
