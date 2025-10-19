@@ -283,7 +283,7 @@ private:
 
         ObjectTree* objectTree = nullptr;
         ObjectTreeItem* currItem = nullptr;
-        BRLCAD::Combination::ConstTreeNode::Operator currOp = BRLCAD::Combination::ConstTreeNode::Null;
+        BRLCAD::Combination::ConstTreeNode::Operator currOp = BRLCAD::Combination::ConstTreeNode::Operator::Null;
     };
 
     class UpdateObjectTreeClbk {

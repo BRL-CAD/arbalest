@@ -152,10 +152,10 @@ void ObjectTree::BuildObjectTreeClbk::operator()(const BRLCAD::Object& object) {
 void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
 	switch (node.Operation()) {
         // If Union/Intersection/Subtraction/ExclusiveOr, access children
-        case BRLCAD::Combination::ConstTreeNode::Union:
-        case BRLCAD::Combination::ConstTreeNode::Intersection:
-        case BRLCAD::Combination::ConstTreeNode::Subtraction:
-        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Union:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::Operator::ExclusiveOr:
             currOp = node.Operation();
             traverseSubTree(node.LeftOperand());
             currOp = node.Operation();
@@ -163,13 +163,13 @@ void ObjectTree::BuildObjectTreeClbk::traverseSubTree(const BRLCAD::Combination:
             break;
 
         // If Not, access child
-        case BRLCAD::Combination::ConstTreeNode::Not:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Not:
             currOp = node.Operation();
             traverseSubTree(node.Operand());
             break;
 
         // If Leaf, then create a new item
-        case BRLCAD::Combination::ConstTreeNode::Leaf:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Leaf:
             ObjectTreeItem *newItem = objectTree->addNewObjectTreeItem(QString(node.Name()));
             newItem->setParent(currItem);
             currItem->addChild(newItem);
@@ -234,10 +234,10 @@ void ObjectTree::UpdateObjectTreeClbk::operator()(const BRLCAD::Object& object) 
 void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination::ConstTreeNode& node) {
 	switch (node.Operation()) {
         // If Union/Intersection/Subtraction/ExclusiveOr, access children
-        case BRLCAD::Combination::ConstTreeNode::Union:
-        case BRLCAD::Combination::ConstTreeNode::Intersection:
-        case BRLCAD::Combination::ConstTreeNode::Subtraction:
-        case BRLCAD::Combination::ConstTreeNode::ExclusiveOr:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Union:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Intersection:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Subtraction:
+        case BRLCAD::Combination::ConstTreeNode::Operator::ExclusiveOr:
             childrenOpBuffer.append(node.Operation());
             traverseSubTree(node.LeftOperand());
             childrenOpBuffer.append(node.Operation());
@@ -245,13 +245,13 @@ void ObjectTree::UpdateObjectTreeClbk::traverseSubTree(const BRLCAD::Combination
             break;
 
         // If Not, access child
-        case BRLCAD::Combination::ConstTreeNode::Not:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Not:
             childrenOpBuffer.append(node.Operation());
             traverseSubTree(node.Operand());
             break;
 
         // If Leaf, then create a new item
-        case BRLCAD::Combination::ConstTreeNode::Leaf:
+        case BRLCAD::Combination::ConstTreeNode::Operator::Leaf:
             childrenBuffer.append(QString(node.Name()));
 	}
 }
