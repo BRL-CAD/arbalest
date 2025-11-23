@@ -267,7 +267,7 @@ void Console::executeCommand(void) {
     getActiveDocument()->getObjectTree()->cmdExecutionStarted();
 
     // Execute command
-    BRLCAD::CommandString::State parserState = parser->Parse(argv);
+    BRLCAD::CommandString::State parserState = parser->Parse(argv.size(), argv.data());
 
     // Signal the ObjectTree that the GED command execution has ended
     getActiveDocument()->getObjectTree()->cmdExecutionEnded();
